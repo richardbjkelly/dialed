@@ -1,0 +1,1585 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>dialed</title>
+<link rel="manifest" href="/manifest.json">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="dialed">
+<meta name="theme-color" content="#2a1510">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=DM+Mono:wght@300;400;500&family=DM+Sans:wght@300;400;500&family=Lora:ital,wght@0,400;0,700;1,400&family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,700;1,9..144,400&family=Inter:wght@300;400;500&family=Space+Grotesk:wght@300;400;500&family=Space+Mono:wght@400;700&family=Josefin+Sans:wght@300;400;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --espresso: #2a1510;
+    --crema: #c0593a;
+    --crema-light: #d97a5a;
+    --milk: #faf0eb;
+    --foam: #fdf6f3;
+    --roast: #6b2a1a;
+    --green: #2d5016;
+    --green-light: #4a7a28;
+    --red: #8b1a1a;
+    --blue: #2a5080;
+    --text: #2a1510;
+    --text-muted: #7a4a3a;
+    --border: rgba(100,40,25,0.15);
+    --card: rgba(255,255,255,0.7);
+    --radius: 16px;
+    --radius-sm: 10px;
+    /* dark mode palette */
+    --dm-bg: #111111;
+    --dm-surface: #1e1e1e;
+    --dm-card: #242424;
+    --dm-input: #2a2a2a;
+    --dm-input-focus: #323232;
+    --dm-text: #f0ece8;
+    --dm-text-muted: #888888;
+    --dm-border: rgba(255,255,255,0.1);
+    --dm-pill: rgba(255,255,255,0.06);
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'DM Sans', sans-serif; background: var(--foam); color: var(--text); min-height: 100vh; overflow-x: hidden; }
+  body::before { content: ''; position: fixed; inset: 0; background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.03'/%3E%3C/svg%3E"); pointer-events: none; z-index: 0; opacity: 0.4; }
+
+  .app-header { background: var(--espresso); color: var(--milk); padding: 20px 20px 0; position: sticky; top: 0; z-index: 100; box-shadow: 0 4px 20px rgba(26,15,10,0.3); }
+  .header-top { display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px; }
+  .app-title { font-family: 'Playfair Display', serif; font-size: 26px; letter-spacing: -0.5px; color: var(--crema); }
+  .app-subtitle { font-size: 11px; color: rgba(245,237,227,0.5); font-family: 'DM Mono', monospace; letter-spacing: 2px; text-transform: uppercase; }
+  .nav-tabs { display: flex; gap: 0; overflow-x: auto; -webkit-overflow-scrolling: touch; scrollbar-width: none; }
+  .nav-tabs::-webkit-scrollbar { display: none; }
+  .nav-tab { flex: 0 0 auto; padding: 12px 14px; background: none; border: none; color: rgba(245,237,227,0.45); font-family: 'DM Mono', monospace; font-size: 10px; letter-spacing: 1.5px; text-transform: uppercase; cursor: pointer; border-bottom: 2px solid transparent; transition: all 0.2s; white-space: nowrap; }
+  .nav-tab.active { color: var(--crema-light); border-bottom-color: var(--crema); }
+
+  .view { display: none; padding: 20px; position: relative; z-index: 1; padding-bottom: 100px; }
+  .view.active { display: block; }
+  .section-title { font-family: 'Playfair Display', serif; font-size: 20px; color: var(--espresso); margin-bottom: 4px; }
+  .section-subtitle { font-size: 12px; color: var(--text-muted); font-family: 'DM Mono', monospace; margin-bottom: 20px; }
+  .card { background: var(--card); border: 1px solid var(--border); border-radius: var(--radius); padding: 20px; margin-bottom: 16px; backdrop-filter: blur(8px); box-shadow: 0 2px 12px rgba(26,15,10,0.06); }
+  .form-group { margin-bottom: 14px; }
+  .form-label { display: block; font-family: 'DM Mono', monospace; font-size: 10px; letter-spacing: 1.5px; text-transform: uppercase; color: var(--text-muted); margin-bottom: 6px; }
+  .form-input, .form-select, .form-textarea { width: 100%; padding: 11px 14px; background: var(--foam); border: 1.5px solid var(--border); border-radius: var(--radius-sm); font-family: 'DM Sans', sans-serif; font-size: 14px; color: var(--text); outline: none; transition: border-color 0.2s; -webkit-appearance: none; }
+  .form-input:focus, .form-select:focus, .form-textarea:focus { border-color: var(--crema); background: white; }
+  .form-textarea { resize: none; height: 80px; line-height: 1.5; }
+  .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+  .extraction-picker { display: flex; gap: 8px; margin-top: 4px; }
+  .extraction-btn { flex: 1; padding: 10px 6px; border: 1.5px solid var(--border); border-radius: var(--radius-sm); background: var(--foam); font-family: 'DM Mono', monospace; font-size: 10px; letter-spacing: 1px; text-transform: uppercase; cursor: pointer; transition: all 0.2s; text-align: center; color: var(--text-muted); }
+  .extraction-btn.under { --btn-color: #4a7ad0; }
+  .extraction-btn.good { --btn-color: var(--green-light); }
+  .extraction-btn.over { --btn-color: var(--red); }
+  .extraction-btn.selected { background: var(--btn-color); border-color: var(--btn-color); color: white; }
+  .rating-row { display: flex; gap: 6px; margin-top: 4px; }
+  .star-btn { font-size: 24px; background: none; border: none; cursor: pointer; opacity: 0.25; transition: opacity 0.15s, transform 0.15s; padding: 2px; line-height: 1; color: var(--crema); }
+  .star-btn.active { opacity: 1; color: var(--crema); }
+  .btn-primary { width: 100%; padding: 14px; background: var(--espresso); color: var(--crema-light); border: none; border-radius: var(--radius-sm); font-family: 'DM Mono', monospace; font-size: 12px; letter-spacing: 2px; text-transform: uppercase; cursor: pointer; transition: background 0.2s, transform 0.1s; margin-top: 8px; }
+  .btn-primary:active { transform: scale(0.98); }
+  .btn-secondary { background: none; border: 1.5px solid var(--border); color: var(--text-muted); padding: 10px 16px; border-radius: var(--radius-sm); font-family: 'DM Mono', monospace; font-size: 10px; letter-spacing: 1.5px; text-transform: uppercase; cursor: pointer; transition: all 0.2s; }
+  .coffee-card { background: var(--card); border: 1px solid var(--border); border-radius: var(--radius); overflow: hidden; margin-bottom: 14px; box-shadow: 0 2px 12px rgba(26,15,10,0.06); cursor: pointer; transition: all 0.2s; }
+  .coffee-card-header { background: var(--espresso); padding: 14px 18px; display: flex; align-items: center; justify-content: space-between; }
+  .coffee-card-name { font-family: 'Playfair Display', serif; font-size: 16px; color: var(--milk); }
+  .coffee-card-roaster { font-family: 'DM Mono', monospace; font-size: 10px; color: rgba(245,237,227,0.55); letter-spacing: 1px; margin-top: 2px; }
+  .coffee-card-body { padding: 14px 18px; }
+  .coffee-meta { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 12px; }
+  .meta-pill { font-family: 'DM Mono', monospace; font-size: 10px; padding: 3px 8px; background: rgba(200,135,58,0.1); border: 1px solid rgba(200,135,58,0.2); border-radius: 20px; color: var(--roast); }
+  .recipe-count { font-family: 'DM Mono', monospace; font-size: 11px; color: var(--text-muted); }
+  .recipe-entry { background: white; border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 14px; margin-bottom: 10px; }
+  .recipe-entry-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 10px; }
+  .extraction-tag { font-family: 'DM Mono', monospace; font-size: 10px; padding: 2px 8px; border-radius: 20px; letter-spacing: 1px; text-transform: uppercase; white-space: nowrap; }
+  .tag-under { background: rgba(74,122,208,0.1); color: #4a7ad0; border: 1px solid rgba(74,122,208,0.25); }
+  .tag-good { background: rgba(74,122,40,0.1); color: var(--green-light); border: 1px solid rgba(74,122,40,0.25); }
+  .tag-over { background: rgba(139,26,26,0.1); color: var(--red); border: 1px solid rgba(139,26,26,0.25); }
+  .recipe-params { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-bottom: 10px; }
+  .param-block { text-align: center; background: var(--foam); border-radius: 8px; padding: 8px 4px; }
+  .param-value { font-family: 'Playfair Display', serif; font-size: 18px; color: var(--espresso); line-height: 1; }
+  .param-label { font-family: 'DM Mono', monospace; font-size: 9px; letter-spacing: 1px; color: var(--text-muted); text-transform: uppercase; margin-top: 3px; }
+  .recipe-notes { font-size: 13px; color: var(--text-muted); line-height: 1.5; font-style: italic; border-top: 1px solid var(--border); padding-top: 10px; margin-top: 4px; }
+  .btn-delete { background: none; border: none; color: rgba(139,26,26,0.4); cursor: pointer; font-size: 16px; padding: 4px; }
+  .empty-state { text-align: center; padding: 48px 20px; color: var(--text-muted); }
+  .empty-icon { font-size: 48px; margin-bottom: 12px; opacity: 0.5; }
+  .empty-title { font-family: 'Playfair Display', serif; font-size: 18px; color: var(--text-muted); margin-bottom: 6px; }
+  .empty-desc { font-size: 13px; line-height: 1.6; }
+  .fab { position: fixed; bottom: 28px; right: 24px; width: 56px; height: 56px; border-radius: 50%; background: var(--crema); color: var(--espresso); border: none; font-size: 26px; cursor: pointer; box-shadow: 0 4px 20px rgba(200,135,58,0.5); display: flex; align-items: center; justify-content: center; transition: all 0.15s; z-index: 200; }
+  .modal-overlay { position: fixed; inset: 0; background: rgba(26,15,10,0.6); z-index: 300; display: none; align-items: flex-end; backdrop-filter: blur(2px); }
+  .modal-overlay.open { display: flex; }
+  .modal { background: var(--foam); border-radius: 24px 24px 0 0; width: 100%; max-height: 92vh; overflow-y: auto; padding: 0 20px 40px; animation: slideUp 0.3s cubic-bezier(0.16,1,0.3,1); }
+  @keyframes slideUp { from { transform: translateY(100%); } to { transform: translateY(0); } }
+  .modal-handle { width: 36px; height: 4px; background: rgba(26,15,10,0.2); border-radius: 2px; margin: 14px auto 20px; }
+  .modal-title { font-family: 'Playfair Display', serif; font-size: 22px; color: var(--espresso); margin-bottom: 4px; }
+  .modal-subtitle { font-family: 'DM Mono', monospace; font-size: 10px; letter-spacing: 1.5px; text-transform: uppercase; color: var(--text-muted); margin-bottom: 24px; }
+  .divider { font-family: 'DM Mono', monospace; font-size: 9px; letter-spacing: 2px; text-transform: uppercase; color: var(--crema); margin: 20px 0 14px; display: flex; align-items: center; gap: 8px; }
+  .divider::after { content: ''; flex: 1; height: 1px; background: rgba(200,135,58,0.25); }
+  .toast { position: fixed; bottom: 100px; left: 50%; transform: translateX(-50%) translateY(20px); background: var(--espresso); color: var(--crema-light); padding: 10px 20px; border-radius: 20px; font-family: 'DM Mono', monospace; font-size: 11px; letter-spacing: 1px; opacity: 0; transition: all 0.3s; z-index: 500; white-space: nowrap; }
+  .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+  .stats-bar { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-bottom: 20px; }
+  .stat-block { background: var(--card); border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 14px 10px; text-align: center; }
+  .stat-value { font-family: 'Playfair Display', serif; font-size: 24px; color: var(--espresso); }
+  .stat-label { font-family: 'DM Mono', monospace; font-size: 9px; letter-spacing: 1.5px; text-transform: uppercase; color: var(--text-muted); margin-top: 3px; }
+  .coffee-selector { display: flex; flex-direction: column; gap: 8px; margin-bottom: 4px; max-height: 180px; overflow-y: auto; }
+  .coffee-selector-item { padding: 10px 14px; border: 1.5px solid var(--border); border-radius: var(--radius-sm); cursor: pointer; transition: all 0.15s; background: var(--foam); }
+  .coffee-selector-item.selected { border-color: var(--crema); background: rgba(200,135,58,0.08); }
+  .cs-name { font-family: 'Playfair Display', serif; font-size: 15px; }
+  .cs-sub { font-family: 'DM Mono', monospace; font-size: 10px; color: var(--text-muted); margin-top: 2px; }
+  .method-tabs { display: flex; gap: 6px; flex-wrap: wrap; margin-top: 4px; }
+  .method-tab { padding: 7px 12px; border: 1.5px solid var(--border); border-radius: 20px; font-family: 'DM Mono', monospace; font-size: 10px; letter-spacing: 1px; text-transform: uppercase; cursor: pointer; background: var(--foam); color: var(--text-muted); transition: all 0.15s; }
+  .method-tab.selected { background: var(--espresso); border-color: var(--espresso); color: var(--crema-light); }
+  .detail-back { display: flex; align-items: center; gap: 8px; background: none; border: none; font-family: 'DM Mono', monospace; font-size: 11px; letter-spacing: 1px; color: var(--text-muted); cursor: pointer; padding: 0; margin-bottom: 20px; text-transform: uppercase; }
+  .detail-hero { background: var(--espresso); border-radius: var(--radius); padding: 22px; margin-bottom: 20px; }
+
+
+  /* Label image upload */
+  .label-upload-btn { width:100%; padding:14px; background:var(--foam); border:1.5px dashed rgba(200,135,58,0.4); border-radius:var(--radius-sm); display:flex; flex-direction:column; align-items:center; justify-content:center; gap:6px; cursor:pointer; transition:all 0.2s; }
+  .label-upload-btn:hover { border-color:var(--crema); background:rgba(200,135,58,0.04); }
+  .label-upload-btn span { font-family:'DM Mono',monospace; font-size:10px; letter-spacing:1.5px; text-transform:uppercase; color:var(--text-muted); }
+  .label-preview { width:100%; border-radius:var(--radius-sm); overflow:hidden; position:relative; margin-top:4px; }
+  .label-preview img { width:100%; max-height:200px; object-fit:cover; border-radius:var(--radius-sm); display:block; }
+  .label-preview-remove { position:absolute; top:6px; right:6px; background:rgba(26,15,10,0.7); color:white; border:none; border-radius:50%; width:24px; height:24px; font-size:14px; cursor:pointer; display:flex; align-items:center; justify-content:center; line-height:1; }
+  /* Thumbnail in brew cards */
+  .coffee-rating-row { display:flex; gap:6px; margin-top:4px; flex-wrap:wrap; }
+  .coffee-rating-btn { background:none; border:none; cursor:pointer; opacity:0.2; transition:opacity 0.15s; padding:1px; color:var(--crema); }
+  .coffee-rating-btn.active { opacity:1; }
+  .brew-label-thumb { width:48px; height:48px; border-radius:8px; object-fit:cover; flex-shrink:0; border:1px solid var(--border); }
+
+  /* GRINDER STYLES */
+  .grinder-type-toggle { display: flex; background: rgba(26,15,10,0.06); border-radius: 10px; padding: 3px; margin-bottom: 20px; }
+  .type-btn { flex: 1; padding: 9px 12px; border: none; border-radius: 8px; font-family: 'DM Mono', monospace; font-size: 10px; letter-spacing: 1px; text-transform: uppercase; cursor: pointer; background: none; color: var(--text-muted); transition: all 0.2s; }
+  .type-btn.active { background: var(--espresso); color: var(--crema-light); }
+  .grinder-search { position: relative; margin-bottom: 16px; }
+  .grinder-search input { width: 100%; padding: 11px 14px 11px 38px; background: white; border: 1.5px solid var(--border); border-radius: var(--radius-sm); font-family: 'DM Sans', sans-serif; font-size: 14px; color: var(--text); outline: none; }
+  .grinder-search input:focus { border-color: var(--crema); }
+  .grinder-search-icon { position: absolute; left: 12px; top: 50%; transform: translateY(-50%); font-size: 16px; opacity: 0.4; pointer-events: none; }
+  .grinder-card { background: var(--card); border: 1px solid var(--border); border-radius: var(--radius); padding: 14px 16px; margin-bottom: 10px; display: flex; align-items: center; justify-content: space-between; cursor: pointer; transition: all 0.15s; }
+  .grinder-card.in-compare { border-color: var(--crema); background: rgba(200,135,58,0.05); }
+  .grinder-brand { font-family: 'DM Mono', monospace; font-size: 10px; letter-spacing: 1px; color: var(--text-muted); text-transform: uppercase; }
+  .grinder-model { font-family: 'Playfair Display', serif; font-size: 16px; color: var(--espresso); margin-top: 2px; }
+  .grinder-type-badge { font-family: 'DM Mono', monospace; font-size: 9px; padding: 2px 8px; border-radius: 20px; letter-spacing: 1px; text-transform: uppercase; display: block; margin-bottom: 4px; }
+  .badge-manual { background: rgba(42,80,128,0.1); color: var(--blue); border: 1px solid rgba(42,80,128,0.2); }
+  .badge-electric { background: rgba(92,45,14,0.1); color: var(--roast); border: 1px solid rgba(92,45,14,0.2); }
+  .compare-toggle-btn { background: none; border: none; cursor: pointer; font-size: 20px; padding: 4px 6px; line-height: 1; transition: transform 0.15s; }
+  .compare-toggle-btn:active { transform: scale(1.3); }
+
+  /* Compare floating bar */
+  .compare-bar { position: fixed; bottom: 90px; left: 16px; right: 16px; background: var(--espresso); border-radius: var(--radius); padding: 12px 16px; display: flex; align-items: center; justify-content: space-between; z-index: 150; box-shadow: 0 8px 30px rgba(26,15,10,0.4); transform: translateY(200px); transition: transform 0.3s cubic-bezier(0.16,1,0.3,1); }
+  .compare-bar.visible { transform: translateY(0); }
+  .compare-bar-text { font-family: 'DM Mono', monospace; font-size: 11px; color: var(--crema-light); letter-spacing: 1px; }
+  .compare-bar-btn { background: var(--crema); color: var(--espresso); border: none; padding: 8px 16px; border-radius: 8px; font-family: 'DM Mono', monospace; font-size: 10px; letter-spacing: 1px; text-transform: uppercase; cursor: pointer; font-weight: 500; }
+
+  /* Chart styles */
+  .grinder-bar-row { display: flex; align-items: center; gap: 10px; margin-bottom: 6px; }
+  .grinder-bar-name { font-family: 'DM Mono', monospace; font-size: 9px; width: 100px; flex-shrink: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .grinder-bar-track { flex: 1; height: 26px; position: relative; background: rgba(26,15,10,0.04); border-radius: 6px; }
+  .grinder-bar-fill { position: absolute; top: 3px; height: 20px; border-radius: 4px; display: flex; align-items: center; justify-content: center; font-family: 'DM Mono', monospace; font-size: 8px; color: white; padding: 0 4px; overflow: hidden; white-space: nowrap; }
+  .grind-axis { display: flex; justify-content: space-between; margin-top: 6px; }
+  .grind-axis-label { font-family: 'DM Mono', monospace; font-size: 8px; color: var(--text-muted); }
+  .step-row { display:flex; gap:8px; align-items:flex-start; }
+  .step-row textarea { flex:1; min-height:52px; resize:none; font-size:13px; line-height:1.5; padding:8px 12px; background:var(--foam); border:1.5px solid var(--border); border-radius:var(--radius-sm); font-family:'DM Sans',sans-serif; color:var(--text); outline:none; }
+  .step-row textarea:focus { border-color:var(--crema); background:white; }
+  .step-row-num { font-family:'DM Mono',monospace; font-size:11px; color:var(--text-muted); padding-top:10px; min-width:18px; }
+  .step-remove { background:none; border:none; color:rgba(139,26,26,0.4); cursor:pointer; font-size:18px; padding:6px 2px; line-height:1; flex-shrink:0; }
+  .step-remove:hover { color:var(--red); }
+  /* Custom recipe cards */
+  .custom-recipe-card { background:var(--card); border:1px solid var(--border); border-radius:var(--radius); overflow:hidden; margin-bottom:14px; box-shadow:0 2px 12px rgba(26,15,10,0.06); }
+  .custom-recipe-card-header { background:var(--espresso); padding:14px 18px; display:flex; justify-content:space-between; align-items:flex-start; }
+
+  /* ── Dark mode toggle button ── */
+  .dark-toggle { background:rgba(255,255,255,0.1); border:none; border-radius:8px; width:34px; height:34px; display:flex; align-items:center; justify-content:center; cursor:pointer; color:rgba(245,237,227,.8); font-size:16px; transition:all .2s; flex-shrink:0; }
+  .dark-toggle:hover { background:rgba(255,255,255,0.2); }
+  /* ── Dark mode overrides ── */
+  body.dark-mode { background: var(--dm-bg) !important; color: var(--dm-text) !important; }
+  body.dark-mode .app-header { background: var(--dm-surface) !important; }
+  body.dark-mode .view { background: var(--dm-bg); }
+  body.dark-mode .modal { background: var(--dm-surface) !important; }
+  body.dark-mode .modal-overlay { background: rgba(0,0,0,0.7) !important; }
+  body.dark-mode .coffee-card, body.dark-mode .recipe-entry, body.dark-mode .custom-recipe-card { background: var(--dm-card) !important; border-color: var(--dm-border) !important; }
+  body.dark-mode .coffee-card-header, body.dark-mode .custom-recipe-card-header { background: var(--dm-surface) !important; }
+  body.dark-mode .form-input, body.dark-mode .form-select, body.dark-mode .form-textarea { background: var(--dm-input) !important; border-color: var(--dm-border) !important; color: var(--dm-text) !important; }
+  body.dark-mode .form-input:focus, body.dark-mode .form-select:focus, body.dark-mode .form-textarea:focus { background: var(--dm-input-focus) !important; }
+  body.dark-mode .btn-secondary { background: var(--dm-card) !important; border-color: var(--dm-border) !important; color: var(--dm-text) !important; }
+  body.dark-mode .nav-tab { color: rgba(255,255,255,0.5) !important; }
+  body.dark-mode .nav-tab.active { color: var(--crema-light) !important; border-color: var(--crema-light) !important; }
+  body.dark-mode .section-title, body.dark-mode .modal-title { color: var(--dm-text) !important; }
+  body.dark-mode .section-subtitle, body.dark-mode .modal-subtitle, body.dark-mode .text-muted { color: var(--dm-text-muted) !important; }
+  body.dark-mode .divider { color: var(--dm-text-muted) !important; border-color: var(--dm-border) !important; }
+  body.dark-mode .meta-pill { background: var(--dm-pill) !important; color: var(--dm-text-muted) !important; border-color: var(--dm-border) !important; }
+  body.dark-mode .stats-bar { background: var(--dm-card) !important; border-color: var(--dm-border) !important; }
+  body.dark-mode .stat-value { color: var(--crema-light) !important; }
+  body.dark-mode .step-row textarea { background: var(--dm-input) !important; border-color: var(--dm-border) !important; color: var(--dm-text) !important; }
+  body.dark-mode .font-option, body.dark-mode .label-upload-btn { background: var(--dm-input) !important; border-color: var(--dm-border) !important; }
+  body.dark-mode .grinder-card { background: var(--dm-card) !important; border-color: var(--dm-border) !important; }
+  body.dark-mode .grinder-card-header { background: var(--dm-surface) !important; }
+  body.dark-mode .compare-bar { background: var(--dm-surface) !important; }
+  body.dark-mode .detail-hero { background: var(--dm-surface) !important; }
+  body.dark-mode .param-block { background: var(--dm-card) !important; }
+  body.dark-mode .recipe-params { background: var(--dm-card) !important; }
+  body.dark-mode .toast { background: var(--dm-surface) !important; }
+
+  .grinder-detail-card { background: var(--espresso); border-radius: var(--radius); padding: 20px; margin-bottom: 16px; }
+  .grinder-specs-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 14px; }
+  .grinder-spec-block { background: rgba(255,255,255,0.07); border-radius: 10px; padding: 12px; }
+  .grinder-spec-value { font-family: 'Playfair Display', serif; font-size: 18px; color: var(--crema-light); }
+  .grinder-spec-label { font-family: 'DM Mono', monospace; font-size: 9px; letter-spacing: 1px; color: rgba(245,237,227,0.4); text-transform: uppercase; margin-top: 2px; }
+</style>
+</head>
+<body>
+
+<header class="app-header">
+  <div class="header-top">
+    <div>
+      <div class="app-title">dialed</div>
+      <div class="app-subtitle">Specialty Coffee Tracker</div>
+    </div>
+    <div style="display:flex;align-items:center;gap:10px">
+    <button class="dark-toggle" id="dark-toggle-btn" onclick="toggleDarkMode()" title="Toggle dark mode"><svg xmlns="http://www.w3.org/2000/svg" viewBox="-0.5 -0.5 16 16" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" width="18" height="18"><path d="M13.125 7.9937499999999995A5.625 5.625 0 1 1 7.0062500000000005 1.875 4.375 4.375 0 0 0 13.125 7.9937499999999995z" stroke-width="1"></path></svg></button>
+    <div style="width:32px;height:32px;flex-shrink:0">
+      <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 14 14" width="32" height="32">
+        <g>
+          <path stroke="#d97a5a" stroke-linecap="round" stroke-linejoin="round" d="M2 4h8.5v5c0 0.53043 -0.2107 1.0391 -0.58579 1.4142C9.53914 10.7893 9.03043 11 8.5 11h-5c-0.53043 0 -1.03914 -0.2107 -1.41421 -0.5858C1.71071 10.0391 1.5 9.53043 1.5 9V4.5c0 -0.13261 0.05268 -0.25979 0.14645 -0.35355C1.74021 4.05268 1.86739 4 2 4Z" stroke-width="1"></path>
+          <path stroke="#d97a5a" stroke-linecap="round" stroke-linejoin="round" d="M0.5 13.5h13" stroke-width="1"></path>
+          <path stroke="#d97a5a" stroke-linecap="round" stroke-linejoin="round" d="M10.5 4h1c0.5304 0 1.0391 0.21071 1.4142 0.58579 0.3751 0.37507 0.5858 0.88378 0.5858 1.41421s-0.2107 1.03914 -0.5858 1.41421C12.5391 7.78929 12.0304 8 11.5 8h-1" stroke-width="1"></path>
+          <path stroke="#d97a5a" stroke-linecap="round" stroke-linejoin="round" d="M3 0.5v1" stroke-width="1"></path>
+          <path stroke="#d97a5a" stroke-linecap="round" stroke-linejoin="round" d="M8 0.5v1" stroke-width="1"></path>
+          <path stroke="#d97a5a" stroke-linecap="round" stroke-linejoin="round" d="M5.5 0.5v1" stroke-width="1"></path>
+        </g>
+      </svg>
+    </div>
+    </div>
+  </div>
+  <nav class="nav-tabs">
+    <button class="nav-tab active" onclick="showView('dashboard')">Overview</button>
+    <button class="nav-tab" onclick="showView('coffees')">Coffees</button>
+    <button class="nav-tab" onclick="showView('recipes')">Recipes</button>
+    <button class="nav-tab" onclick="showView('grinders')">Grinders</button>
+    <button class="nav-tab" onclick="showView('compare')">Compare</button>
+    <button class="nav-tab" onclick="showView('myrecipes')">My Recipes</button>
+  </nav>
+</header>
+
+<!-- DASHBOARD -->
+<div id="view-dashboard" class="view active">
+  <div style="height:20px"></div>
+  <div class="section-title">Good morning ☀</div>
+  <div class="section-subtitle">How's the extraction today?</div>
+  <div class="stats-bar">
+    <div class="stat-block"><div class="stat-value" id="stat-coffees">0</div><div class="stat-label">Coffees</div></div>
+    <div class="stat-block"><div class="stat-value" id="stat-recipes">0</div><div class="stat-label">Brews</div></div>
+    <div class="stat-block"><div class="stat-value" id="stat-good">—</div><div class="stat-label">Dialled In</div></div>
+  </div>
+  <div id="dashboard-fav-grinder"></div>
+  <div class="divider">Recent brews</div>
+  <div id="recent-brews"></div>
+</div>
+
+<!-- COFFEES -->
+<div id="view-coffees" class="view">
+  <div style="height:20px"></div>
+  <div class="section-title">Coffee Library</div>
+  <div class="section-subtitle">Your beans & roasters</div>
+  <div id="coffees-list"></div>
+</div>
+
+<!-- RECIPES -->
+<div id="view-recipes" class="view">
+  <div style="height:20px"></div>
+  <div class="section-title">Brew Log</div>
+  <div class="section-subtitle">All your recipe attempts</div>
+  <div id="recipes-list"></div>
+</div>
+
+<!-- GRINDERS -->
+<div id="view-grinders" class="view">
+  <div style="height:20px"></div>
+  <div class="section-title">Grinder Library</div>
+  <div class="section-subtitle">Browse 50+ manual & electric grinders</div>
+  <div class="grinder-type-toggle">
+    <button class="type-btn active" onclick="filterGrinders('all',this)">All</button>
+    <button class="type-btn" onclick="filterGrinders('manual',this)">✋ Manual</button>
+    <button class="type-btn" onclick="filterGrinders('electric',this)">⚡ Electric</button>
+  </div>
+  <div class="grinder-search">
+    <span class="grinder-search-icon">🔍</span>
+    <input type="text" id="grinder-search-input" placeholder="Search brand or model…" oninput="renderGrinders()">
+  </div>
+  <div id="grinders-list"></div>
+</div>
+
+<!-- COMPARE -->
+<div id="view-compare" class="view">
+  <div style="height:20px"></div>
+  <div class="section-title">Grinder Compare</div>
+  <div class="section-subtitle">Grind ranges & brew method compatibility</div>
+  <div id="compare-content"></div>
+</div>
+
+<!-- MY RECIPES -->
+<div id="view-myrecipes" class="view">
+  <div style="height:20px"></div>
+  <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:4px">
+    <div class="section-title">My Recipes</div>
+    <button class="btn-secondary" onclick="openNewCustomRecipe()" style="margin-top:4px">+ New Recipe</button>
+  </div>
+  <div class="section-subtitle">Your custom brew recipes</div>
+  <div id="myrecipes-list"></div>
+</div>
+
+<!-- Compare floating bar -->
+<div class="compare-bar" id="compare-bar">
+  <div class="compare-bar-text" id="compare-bar-text">0 grinders selected</div>
+  <button class="compare-bar-btn" onclick="showView('compare')">Compare →</button>
+</div>
+
+<!-- FAB -->
+<button class="fab" onclick="openFab()">+</button>
+
+<!-- MODAL: Add Coffee -->
+<div class="modal-overlay" id="modal-coffee">
+  <div class="modal">
+    <div class="modal-handle"></div>
+    <div class="modal-title">Add Coffee</div>
+    <div class="modal-subtitle">Bean details & origin</div>
+    <div class="form-group"><label class="form-label">Coffee Name</label><input type="text" class="form-input" id="c-name" placeholder="e.g. Washed Yirgacheffe"></div>
+    <div class="form-group"><label class="form-label">Roaster</label><input type="text" class="form-input" id="c-roaster" placeholder="e.g. Square Mile Coffee"></div>
+    <div class="form-row">
+      <div class="form-group"><label class="form-label">Country</label><input type="text" class="form-input" id="c-country" placeholder="e.g. Ethiopia"></div>
+      <div class="form-group"><label class="form-label">Region</label><input type="text" class="form-input" id="c-region" placeholder="e.g. Guji"></div>
+    </div>
+    <div class="form-row">
+      <div class="form-group"><label class="form-label">Varietal</label><input type="text" class="form-input" id="c-varietal" placeholder="e.g. Heirloom"></div>
+      <div class="form-group"><label class="form-label">Process</label>
+        <select class="form-select" id="c-process"><option value="">Select…</option><option>Washed</option><option>Natural</option><option>Honey</option><option>Anaerobic</option><option>Wet Hulled</option><option>Other</option></select>
+      </div>
+    </div>
+    <div class="form-row">
+      <div class="form-group"><label class="form-label">Altitude (masl)</label><input type="number" class="form-input" id="c-masl" placeholder="e.g. 1800" min="0" max="4500"></div>
+      <div class="form-group"><label class="form-label">Roast Level</label>
+        <select class="form-select" id="c-roast"><option value="">Select…</option><option>Light</option><option>Light-Medium</option><option>Medium</option><option>Medium-Dark</option><option>Dark</option></select>
+      </div>
+    </div>
+    <div class="form-row">
+      <div class="form-group"><label class="form-label">Roast Date</label><input type="date" class="form-input" id="c-roastdate"></div>
+    </div>
+    <div class="form-group"><label class="form-label">Tasting Notes (from bag)</label><input type="text" class="form-input" id="c-notes" placeholder="e.g. Blueberry, jasmine, dark chocolate"></div>
+    <div class="form-group">
+      <label class="form-label">Overall Rating</label>
+      <div class="coffee-rating-row" id="c-rating-row">
+        <button class="coffee-rating-btn" data-val="1" onclick="setCoffeeRating(1)"><svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 14 14" width="14" height="14"><g><path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" d="M2 4h8.5v5c0 0.53043 -0.2107 1.0391 -0.58579 1.4142C9.53914 10.7893 9.03043 11 8.5 11h-5c-0.53043 0 -1.03914 -0.2107 -1.41421 -0.5858C1.71071 10.0391 1.5 9.53043 1.5 9V4.5c0 -0.13261 0.05268 -0.25979 0.14645 -0.35355C1.74021 4.05268 1.86739 4 2 4Z" stroke-width="1"></path><path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" d="M0.5 13.5h13" stroke-width="1"></path><path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" d="M10.5 4h1c0.5304 0 1.0391 0.21071 1.4142 0.58579 0.3751 0.37507 0.5858 0.88378 0.5858 1.41421s-0.2107 1.03914 -0.5858 1.41421C12.5391 7.78929 12.0304 8 11.5 8h-1" stroke-width="1"></path><path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" d="M3 0.5v1" stroke-width="1"></path><path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" d="M8 0.5v1" stroke-width="1"></path><path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" d="M5.5 0.5v1" stroke-width="1"></path></g></svg></button><button class="coffee-rating-btn" data-val="2" onclick="setCoffeeRating(2)"><svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 14 14" width="14" height="14"><g><path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" d="M2 4h8.5v5c0 0.53043 -0.2107 1.0391 -0.58579 1.4142C9.53914 10.7893 9.03043 11 8.5 11h-5c-0.53043 0 -1.03914 -0.2107 -1.41421 -0.5858C1.71071 10.0391 1.5 9.53043 1.5 9V4.5c0 -0.13261 0.05268 -0.25979 0.14645 -0.35355C1.74021 4.05268 1.86739 4 2 4Z" stroke-width="1"></path><path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" d="M0.5 13.5h13" stroke-width="1"></path><path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" d="M10.5 4h1c0.5304 0 1.0391 0.21071 1.4142 0.58579 0.3751 0.37507 0.5858 0.88378 0.5858 1.41421s-0.2107 1.03914 -0.5858 1.41421C12.5391 7.78929 12.0304 8 11.5 8h-1" stroke-width="1"></path><path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" d="M3 0.5v1" stroke-width="1"></path><path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" d="M8 0.5v1" stroke-width="1"></path><path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" d="M5.5 0.5v1" stroke-width="1"></path></g></svg></button><button class="coffee-rating-btn" data-val="3" onclick="setCoffeeRating(3)"><svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 14 14" width="14" height="14"><g><path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" d="M2 4h8.5v5c0 0.53043 -0.2107 1.0391 -0.58579 1.4142C9.53914 10.7893 9.03043 11 8.5 11h-5c-0.53043 0 -1.03914 -0.2107 -1.41421 -0.5858C1.71071 10.0391 1.5 9.53043 1.5 9V4.5c0 -0.13261 0.05268 -0.25979 0.14645 -0.35355C1.74021 4.05268 1.86739 4 2 4Z" stroke-width="1"></path><path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" d="M0.5 13.5h13" stroke-width="1"></path><path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" d="M10.5 4h1c0.5304 0 1.0391 0.21071 1.4142 0.58579 0.3751 0.37507 0.5858 0.88378 0.5858 1.41421s-0.2107 1.03914 -0.5858 1.41421C12.5391 7.78929 12.0304 8 11.5 8h-1" stroke-width="1"></path><path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" d="M3 0.5v1" stroke-width="1"></path><path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" d="M8 0.5v1" stroke-width="1"></path><path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" d="M5.5 0.5v1" stroke-width="1"></path></g></svg></button><button class="coffee-rating-btn" data-val="4" onclick="setCoffeeRating(4)"><svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 14 14" width="14" height="14"><g><path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" d="M2 4h8.5v5c0 0.53043 -0.2107 1.0391 -0.58579 1.4142C9.53914 10.7893 9.03043 11 8.5 11h-5c-0.53043 0 -1.03914 -0.2107 -1.41421 -0.5858C1.71071 10.0391 1.5 9.53043 1.5 9V4.5c0 -0.13261 0.05268 -0.25979 0.14645 -0.35355C1.74021 4.05268 1.86739 4 2 4Z" stroke-width="1"></path><path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" d="M0.5 13.5h13" stroke-width="1"></path><path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" d="M10.5 4h1c0.5304 0 1.0391 0.21071 1.4142 0.58579 0.3751 0.37507 0.5858 0.88378 0.5858 1.41421s-0.2107 1.03914 -0.5858 1.41421C12.5391 7.78929 12.0304 8 11.5 8h-1" stroke-width="1"></path><path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" d="M3 0.5v1" stroke-width="1"></path><path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" d="M8 0.5v1" stroke-width="1"></path><path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" d="M5.5 0.5v1" stroke-width="1"></path></g></svg></button><button class="coffee-rating-btn" data-val="5" onclick="setCoffeeRating(5)"><svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 14 14" width="14" height="14"><g><path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" d="M2 4h8.5v5c0 0.53043 -0.2107 1.0391 -0.58579 1.4142C9.53914 10.7893 9.03043 11 8.5 11h-5c-0.53043 0 -1.03914 -0.2107 -1.41421 -0.5858C1.71071 10.0391 1.5 9.53043 1.5 9V4.5c0 -0.13261 0.05268 -0.25979 0.14645 -0.35355C1.74021 4.05268 1.86739 4 2 4Z" stroke-width="1"></path><path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" d="M0.5 13.5h13" stroke-width="1"></path><path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" d="M10.5 4h1c0.5304 0 1.0391 0.21071 1.4142 0.58579 0.3751 0.37507 0.5858 0.88378 0.5858 1.41421s-0.2107 1.03914 -0.5858 1.41421C12.5391 7.78929 12.0304 8 11.5 8h-1" stroke-width="1"></path><path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" d="M3 0.5v1" stroke-width="1"></path><path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" d="M8 0.5v1" stroke-width="1"></path><path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" d="M5.5 0.5v1" stroke-width="1"></path></g></svg></button><button class="coffee-rating-btn" data-val="6" onclick="setCoffeeRating(6)"><svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 14 14" width="14" height="14"><g><path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" d="M2 4h8.5v5c0 0.53043 -0.2107 1.0391 -0.58579 1.4142C9.53914 10.7893 9.03043 11 8.5 11h-5c-0.53043 0 -1.03914 -0.2107 -1.41421 -0.5858C1.71071 10.0391 1.5 9.53043 1.5 9V4.5c0 -0.13261 0.05268 -0.25979 0.14645 -0.35355C1.74021 4.05268 1.86739 4 2 4Z" stroke-width="1"></path><path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" d="M0.5 13.5h13" stroke-width="1"></path><path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" d="M10.5 4h1c0.5304 0 1.0391 0.21071 1.4142 0.58579 0.3751 0.37507 0.5858 0.88378 0.5858 1.41421s-0.2107 1.03914 -0.5858 1.41421C12.5391 7.78929 12.0304 8 11.5 8h-1" stroke-width="1"></path><path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" d="M3 0.5v1" stroke-width="1"></path><path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" d="M8 0.5v1" stroke-width="1"></path><path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" d="M5.5 0.5v1" stroke-width="1"></path></g></svg></button><button class="coffee-rating-btn" data-val="7" onclick="setCoffeeRating(7)"><svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 14 14" width="14" height="14"><g><path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" d="M2 4h8.5v5c0 0.53043 -0.2107 1.0391 -0.58579 1.4142C9.53914 10.7893 9.03043 11 8.5 11h-5c-0.53043 0 -1.03914 -0.2107 -1.41421 -0.5858C1.71071 10.0391 1.5 9.53043 1.5 9V4.5c0 -0.13261 0.05268 -0.25979 0.14645 -0.35355C1.74021 4.05268 1.86739 4 2 4Z" stroke-width="1"></path><path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" d="M0.5 13.5h13" stroke-width="1"></path><path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" d="M10.5 4h1c0.5304 0 1.0391 0.21071 1.4142 0.58579 0.3751 0.37507 0.5858 0.88378 0.5858 1.41421s-0.2107 1.03914 -0.5858 1.41421C12.5391 7.78929 12.0304 8 11.5 8h-1" stroke-width="1"></path><path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" d="M3 0.5v1" stroke-width="1"></path><path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" d="M8 0.5v1" stroke-width="1"></path><path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" d="M5.5 0.5v1" stroke-width="1"></path></g></svg></button><button class="coffee-rating-btn" data-val="8" onclick="setCoffeeRating(8)"><svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 14 14" width="14" height="14"><g><path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" d="M2 4h8.5v5c0 0.53043 -0.2107 1.0391 -0.58579 1.4142C9.53914 10.7893 9.03043 11 8.5 11h-5c-0.53043 0 -1.03914 -0.2107 -1.41421 -0.5858C1.71071 10.0391 1.5 9.53043 1.5 9V4.5c0 -0.13261 0.05268 -0.25979 0.14645 -0.35355C1.74021 4.05268 1.86739 4 2 4Z" stroke-width="1"></path><path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" d="M0.5 13.5h13" stroke-width="1"></path><path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" d="M10.5 4h1c0.5304 0 1.0391 0.21071 1.4142 0.58579 0.3751 0.37507 0.5858 0.88378 0.5858 1.41421s-0.2107 1.03914 -0.5858 1.41421C12.5391 7.78929 12.0304 8 11.5 8h-1" stroke-width="1"></path><path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" d="M3 0.5v1" stroke-width="1"></path><path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" d="M8 0.5v1" stroke-width="1"></path><path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" d="M5.5 0.5v1" stroke-width="1"></path></g></svg></button><button class="coffee-rating-btn" data-val="9" onclick="setCoffeeRating(9)"><svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 14 14" width="14" height="14"><g><path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" d="M2 4h8.5v5c0 0.53043 -0.2107 1.0391 -0.58579 1.4142C9.53914 10.7893 9.03043 11 8.5 11h-5c-0.53043 0 -1.03914 -0.2107 -1.41421 -0.5858C1.71071 10.0391 1.5 9.53043 1.5 9V4.5c0 -0.13261 0.05268 -0.25979 0.14645 -0.35355C1.74021 4.05268 1.86739 4 2 4Z" stroke-width="1"></path><path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" d="M0.5 13.5h13" stroke-width="1"></path><path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" d="M10.5 4h1c0.5304 0 1.0391 0.21071 1.4142 0.58579 0.3751 0.37507 0.5858 0.88378 0.5858 1.41421s-0.2107 1.03914 -0.5858 1.41421C12.5391 7.78929 12.0304 8 11.5 8h-1" stroke-width="1"></path><path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" d="M3 0.5v1" stroke-width="1"></path><path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" d="M8 0.5v1" stroke-width="1"></path><path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" d="M5.5 0.5v1" stroke-width="1"></path></g></svg></button><button class="coffee-rating-btn" data-val="10" onclick="setCoffeeRating(10)"><svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 14 14" width="14" height="14"><g><path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" d="M2 4h8.5v5c0 0.53043 -0.2107 1.0391 -0.58579 1.4142C9.53914 10.7893 9.03043 11 8.5 11h-5c-0.53043 0 -1.03914 -0.2107 -1.41421 -0.5858C1.71071 10.0391 1.5 9.53043 1.5 9V4.5c0 -0.13261 0.05268 -0.25979 0.14645 -0.35355C1.74021 4.05268 1.86739 4 2 4Z" stroke-width="1"></path><path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" d="M0.5 13.5h13" stroke-width="1"></path><path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" d="M10.5 4h1c0.5304 0 1.0391 0.21071 1.4142 0.58579 0.3751 0.37507 0.5858 0.88378 0.5858 1.41421s-0.2107 1.03914 -0.5858 1.41421C12.5391 7.78929 12.0304 8 11.5 8h-1" stroke-width="1"></path><path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" d="M3 0.5v1" stroke-width="1"></path><path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" d="M8 0.5v1" stroke-width="1"></path><path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" d="M5.5 0.5v1" stroke-width="1"></path></g></svg></button>
+      </div>
+      <input type="hidden" id="c-rating" value="0">
+      <div style="font-family:'DM Mono',monospace;font-size:9px;color:var(--text-muted);margin-top:4px;letter-spacing:1px" id="c-rating-label">Not rated</div>
+    </div>
+    <div class="form-group">
+      <label class="form-label">Bag Label Photo</label>
+      <input type="file" id="c-label-input" accept="image/*" capture="environment" style="display:none" onchange="handleLabelPhoto(this)">
+      <div id="c-label-preview-wrap">
+        <div class="label-upload-btn" onclick="document.getElementById('c-label-input').click()">
+          <span style="font-size:28px">📷</span>
+          <span>Tap to take photo or upload</span>
+        </div>
+      </div>
+    </div>
+    <button class="btn-primary" onclick="saveCoffee()">Save Coffee</button>
+    <div style="height:12px"></div>
+    <button class="btn-secondary" style="width:100%" onclick="closeModal('modal-coffee')">Cancel</button>
+  </div>
+</div>
+
+<!-- MODAL: Log Brew -->
+<div class="modal-overlay" id="modal-recipe">
+  <div class="modal">
+    <div class="modal-handle"></div>
+    <div class="modal-title">Log Brew</div>
+    <div class="modal-subtitle">Dialling in a recipe</div>
+    <div class="form-group"><label class="form-label">Coffee</label><div class="coffee-selector" id="coffee-selector"></div></div>
+    <div class="form-group"><label class="form-label">Grinder Used</label><div class="coffee-selector" id="grinder-selector" style="max-height:150px"></div></div>
+    <div class="form-group">
+      <label class="form-label">Brew Method</label>
+      <div class="method-tabs" id="method-tabs">
+        <div class="method-tab selected" onclick="selectMethod(this,'Espresso')">Espresso</div>
+        <div class="method-tab" onclick="selectMethod(this,'V60')">V60</div>
+        <div class="method-tab" onclick="selectMethod(this,'AeroPress')">AeroPress</div>
+        <div class="method-tab" onclick="selectMethod(this,'Chemex')">Chemex</div>
+        <div class="method-tab" onclick="selectMethod(this,'Moka Pot')">Moka Pot</div>
+        <div class="method-tab" onclick="selectMethod(this,'Cold Brew')">Cold Brew</div>
+        <div class="method-tab" onclick="selectMethod(this,'French Press')">French Press</div>
+        <div class="method-tab" onclick="selectMethod(this,'Steep & Release')">Steep & Release</div>
+        <div class="method-tab" onclick="selectMethod(this,'Other')">Other</div>
+      </div>
+      <input type="hidden" id="r-method" value="Espresso">
+    </div>
+    <div id="r-recipe-wrap" style="display:none">
+      <div class="form-group">
+        <label class="form-label">Recipe</label>
+        <select class="form-select" id="r-recipe-select" onchange="onRecipeChange(this)">
+          <option value="">— No recipe / custom —</option>
+        </select>
+      </div>
+      <div id="r-recipe-card"></div>
+    </div>
+    <div class="divider">Grind & Dose</div>
+    <div class="form-row">
+      <div class="form-group"><label class="form-label">Grind Setting</label><input type="number" class="form-input" id="r-grind" placeholder="e.g. 8" step="0.5"></div>
+      <div class="form-group"><label class="form-label">Dose (g)</label><input type="number" class="form-input" id="r-dose" placeholder="e.g. 18" step="0.1"></div>
+    </div>
+    <div class="form-row">
+      <div class="form-group"><label class="form-label" id="r-yield-label">Yield (g)</label><input type="number" class="form-input" id="r-yield" placeholder="e.g. 36" step="0.1"></div>
+      <div class="form-group"><label class="form-label">Time (sec)</label><input type="number" class="form-input" id="r-time" placeholder="e.g. 28"></div>
+    </div>
+    <div class="form-group"><label class="form-label">Water Temp (°C)</label><input type="number" class="form-input" id="r-temp" placeholder="e.g. 93" style="width:50%"></div>
+    <div class="divider">Extraction</div>
+    <div class="form-group">
+      <label class="form-label">Extraction Result</label>
+      <div class="extraction-picker">
+        <div class="extraction-btn under" onclick="selectExtraction('under')">Under</div>
+        <div class="extraction-btn good" onclick="selectExtraction('good')">✓ Good</div>
+        <div class="extraction-btn over" onclick="selectExtraction('over')">Over</div>
+      </div>
+      <input type="hidden" id="r-extraction" value="">
+    </div>
+    <div class="form-group">
+      <label class="form-label">Rating</label>
+      <div class="rating-row">
+        <button class="star-btn" onclick="setRating(1)"><svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 14 14" width="22" height="22"><g><path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" d="M2 4h8.5v5c0 0.53043 -0.2107 1.0391 -0.58579 1.4142C9.53914 10.7893 9.03043 11 8.5 11h-5c-0.53043 0 -1.03914 -0.2107 -1.41421 -0.5858C1.71071 10.0391 1.5 9.53043 1.5 9V4.5c0 -0.13261 0.05268 -0.25979 0.14645 -0.35355C1.74021 4.05268 1.86739 4 2 4Z" stroke-width="1"></path><path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" d="M0.5 13.5h13" stroke-width="1"></path><path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" d="M10.5 4h1c0.5304 0 1.0391 0.21071 1.4142 0.58579 0.3751 0.37507 0.5858 0.88378 0.5858 1.41421s-0.2107 1.03914 -0.5858 1.41421C12.5391 7.78929 12.0304 8 11.5 8h-1" stroke-width="1"></path><path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" d="M3 0.5v1" stroke-width="1"></path><path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" d="M8 0.5v1" stroke-width="1"></path><path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" d="M5.5 0.5v1" stroke-width="1"></path></g></svg></button>
+        <button class="star-btn" onclick="setRating(2)"><svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 14 14" width="22" height="22"><g><path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" d="M2 4h8.5v5c0 0.53043 -0.2107 1.0391 -0.58579 1.4142C9.53914 10.7893 9.03043 11 8.5 11h-5c-0.53043 0 -1.03914 -0.2107 -1.41421 -0.5858C1.71071 10.0391 1.5 9.53043 1.5 9V4.5c0 -0.13261 0.05268 -0.25979 0.14645 -0.35355C1.74021 4.05268 1.86739 4 2 4Z" stroke-width="1"></path><path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" d="M0.5 13.5h13" stroke-width="1"></path><path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" d="M10.5 4h1c0.5304 0 1.0391 0.21071 1.4142 0.58579 0.3751 0.37507 0.5858 0.88378 0.5858 1.41421s-0.2107 1.03914 -0.5858 1.41421C12.5391 7.78929 12.0304 8 11.5 8h-1" stroke-width="1"></path><path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" d="M3 0.5v1" stroke-width="1"></path><path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" d="M8 0.5v1" stroke-width="1"></path><path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" d="M5.5 0.5v1" stroke-width="1"></path></g></svg></button>
+        <button class="star-btn" onclick="setRating(3)"><svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 14 14" width="22" height="22"><g><path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" d="M2 4h8.5v5c0 0.53043 -0.2107 1.0391 -0.58579 1.4142C9.53914 10.7893 9.03043 11 8.5 11h-5c-0.53043 0 -1.03914 -0.2107 -1.41421 -0.5858C1.71071 10.0391 1.5 9.53043 1.5 9V4.5c0 -0.13261 0.05268 -0.25979 0.14645 -0.35355C1.74021 4.05268 1.86739 4 2 4Z" stroke-width="1"></path><path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" d="M0.5 13.5h13" stroke-width="1"></path><path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" d="M10.5 4h1c0.5304 0 1.0391 0.21071 1.4142 0.58579 0.3751 0.37507 0.5858 0.88378 0.5858 1.41421s-0.2107 1.03914 -0.5858 1.41421C12.5391 7.78929 12.0304 8 11.5 8h-1" stroke-width="1"></path><path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" d="M3 0.5v1" stroke-width="1"></path><path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" d="M8 0.5v1" stroke-width="1"></path><path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" d="M5.5 0.5v1" stroke-width="1"></path></g></svg></button>
+        <button class="star-btn" onclick="setRating(4)"><svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 14 14" width="22" height="22"><g><path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" d="M2 4h8.5v5c0 0.53043 -0.2107 1.0391 -0.58579 1.4142C9.53914 10.7893 9.03043 11 8.5 11h-5c-0.53043 0 -1.03914 -0.2107 -1.41421 -0.5858C1.71071 10.0391 1.5 9.53043 1.5 9V4.5c0 -0.13261 0.05268 -0.25979 0.14645 -0.35355C1.74021 4.05268 1.86739 4 2 4Z" stroke-width="1"></path><path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" d="M0.5 13.5h13" stroke-width="1"></path><path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" d="M10.5 4h1c0.5304 0 1.0391 0.21071 1.4142 0.58579 0.3751 0.37507 0.5858 0.88378 0.5858 1.41421s-0.2107 1.03914 -0.5858 1.41421C12.5391 7.78929 12.0304 8 11.5 8h-1" stroke-width="1"></path><path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" d="M3 0.5v1" stroke-width="1"></path><path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" d="M8 0.5v1" stroke-width="1"></path><path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" d="M5.5 0.5v1" stroke-width="1"></path></g></svg></button>
+        <button class="star-btn" onclick="setRating(5)"><svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 14 14" width="22" height="22"><g><path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" d="M2 4h8.5v5c0 0.53043 -0.2107 1.0391 -0.58579 1.4142C9.53914 10.7893 9.03043 11 8.5 11h-5c-0.53043 0 -1.03914 -0.2107 -1.41421 -0.5858C1.71071 10.0391 1.5 9.53043 1.5 9V4.5c0 -0.13261 0.05268 -0.25979 0.14645 -0.35355C1.74021 4.05268 1.86739 4 2 4Z" stroke-width="1"></path><path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" d="M0.5 13.5h13" stroke-width="1"></path><path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" d="M10.5 4h1c0.5304 0 1.0391 0.21071 1.4142 0.58579 0.3751 0.37507 0.5858 0.88378 0.5858 1.41421s-0.2107 1.03914 -0.5858 1.41421C12.5391 7.78929 12.0304 8 11.5 8h-1" stroke-width="1"></path><path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" d="M3 0.5v1" stroke-width="1"></path><path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" d="M8 0.5v1" stroke-width="1"></path><path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" d="M5.5 0.5v1" stroke-width="1"></path></g></svg></button>
+      </div>
+      <input type="hidden" id="r-rating" value="0">
+    </div>
+    <div class="form-group"><label class="form-label">Tasting Notes & Adjustments</label><textarea class="form-textarea" id="r-notes" placeholder="e.g. Sour with grassy finish — grind finer next time."></textarea></div>
+    <button class="btn-primary" onclick="saveRecipe()">Log Brew</button>
+    <div style="height:12px"></div>
+    <button class="btn-secondary" style="width:100%" onclick="closeModal('modal-recipe')">Cancel</button>
+  </div>
+</div>
+
+<!-- MODAL: FAB chooser -->
+<div class="modal-overlay" id="modal-fab">
+  <div class="modal" style="padding-bottom:30px">
+    <div class="modal-handle"></div>
+    <div class="modal-title" style="margin-bottom:20px">What would you like to add?</div>
+    <div style="display:flex;gap:12px">
+      <button class="btn-primary" style="flex:1;padding:18px 10px" onclick="closeModal('modal-fab');openModal('modal-coffee')">📦 New Coffee</button>
+      <button class="btn-primary" style="flex:1;padding:18px 10px;background:var(--crema);color:var(--espresso)" onclick="closeModal('modal-fab');openRecipeModal()">☕ Log Brew</button>
+    </div>
+    <div style="height:12px"></div>
+    <button class="btn-primary" style="width:100%;background:rgba(255,255,255,0.08);color:var(--milk);border:1px solid rgba(255,255,255,0.1)" onclick="closeModal('modal-fab');openNewCustomRecipe()">📋 New Custom Recipe</button>
+    <div style="height:12px"></div>
+    <button class="btn-secondary" style="width:100%" onclick="closeModal('modal-fab')">Cancel</button>
+  </div>
+</div>
+
+<!-- MODAL: Custom Recipe -->
+<div class="modal-overlay" id="modal-custom-recipe">
+  <div class="modal">
+    <div class="modal-handle"></div>
+    <div class="modal-title" id="custom-recipe-modal-title">New Recipe</div>
+    <div class="modal-subtitle">Create your own brew recipe</div>
+    <input type="hidden" id="cr-edit-id" value="">
+
+    <div class="form-group">
+      <label class="form-label">Recipe Name</label>
+      <input type="text" class="form-input" id="cr-name" placeholder="e.g. James Hoffmann AeroPress">
+    </div>
+    <div class="form-group">
+      <label class="form-label">Author / Source</label>
+      <input type="text" class="form-input" id="cr-author" placeholder="e.g. James Hoffmann">
+    </div>
+    <div class="form-group">
+      <label class="form-label">Brew Method</label>
+      <select class="form-select" id="cr-method">
+        <option value="V60">V60</option>
+        <option value="AeroPress">AeroPress</option>
+        <option value="Chemex">Chemex</option>
+        <option value="French Press">French Press</option>
+        <option value="Moka Pot">Moka Pot</option>
+        <option value="Cold Brew">Cold Brew</option>
+        <option value="Steep & Release">Steep & Release</option>
+        <option value="Other">Other</option>
+      </select>
+    </div>
+    <div class="form-row">
+      <div class="form-group"><label class="form-label">Dose (g)</label><input type="number" class="form-input" id="cr-dose" placeholder="e.g. 15" step="0.1"></div>
+      <div class="form-group"><label class="form-label">Water (ml)</label><input type="number" class="form-input" id="cr-water" placeholder="e.g. 250" step="1"></div>
+    </div>
+    <div class="form-row">
+      <div class="form-group"><label class="form-label">Temp (°C)</label><input type="number" class="form-input" id="cr-temp" placeholder="e.g. 100"></div>
+      <div class="form-group"><label class="form-label">Grind Hint</label><input type="text" class="form-input" id="cr-grind" placeholder="e.g. Medium-fine"></div>
+    </div>
+
+    <div class="divider">Steps</div>
+    <div style="font-family:'DM Mono',monospace;font-size:9px;color:var(--text-muted);letter-spacing:1px;margin-bottom:10px">Add each step on its own line</div>
+    <div id="cr-steps-list" style="display:flex;flex-direction:column;gap:8px;margin-bottom:10px"></div>
+    <button class="btn-secondary" style="width:100%" onclick="addRecipeStep()">+ Add Step</button>
+
+    <button class="btn-primary" onclick="saveCustomRecipe()" style="margin-top:16px">Save Recipe</button>
+    <div style="height:12px"></div>
+    <button class="btn-secondary" style="width:100%" onclick="closeModal('modal-custom-recipe')">Cancel</button>
+    <div style="height:10px"></div>
+  </div>
+</div>
+
+<!-- MODAL: Grinder Detail -->
+<div class="modal-overlay" id="modal-grinder-detail">
+  <div class="modal">
+    <div class="modal-handle"></div>
+    <div id="grinder-detail-content"></div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+
+// ==================== RECIPE DATABASE ====================
+// Sources: James Hoffmann YouTube / honestcoffeeguide.com / timer.coffee
+const RECIPES = {
+  'V60': [
+    {
+      id: 'v60-hoffmann',
+      name: "James Hoffmann — Ultimate V60",
+      author: "James Hoffmann",
+      dose: 30, water: 500, temp: 100, ratio: '1:16.7',
+      grindHint: 'Medium-fine',
+      steps: [
+        "Rinse paper filter with hot water. Add 30g coffee, make a small well in the centre.",
+        "0:00 — Pour 60g water (2× dose) to bloom. Swirl to saturate all grounds.",
+        "0:45 — Spiral pour to 300g total. Aim to finish by 1:15.",
+        "1:15 — Continue slowly pouring to 500g total. Finish by 1:45.",
+        "1:45 — Stir once clockwise, once anti-clockwise to knock grounds off the sides.",
+        "~2:00 — Once drained slightly, give the V60 a gentle swirl to flatten the bed.",
+        "Aim for full drawdown by 3:30. Adjust grind if faster or slower."
+      ]
+    },
+    {
+      id: 'v60-simple',
+      name: "Simple 1-Cup V60",
+      author: "Classic",
+      dose: 15, water: 250, temp: 93, ratio: '1:16.7',
+      grindHint: 'Medium-fine',
+      steps: [
+        "Rinse paper filter. Add 15g coffee.",
+        "0:00 — Pour 30g water to bloom. Wait 30 seconds.",
+        "0:30 — Pour to 150g total in a slow spiral.",
+        "1:00 — Pour to 250g total. Finish pouring by 1:30.",
+        "Allow to drawdown. Target total time ~2:30."
+      ]
+    }
+  ],
+  'AeroPress': [
+    {
+      id: 'aeropress-hoffmann',
+      name: "James Hoffmann — Ultimate AeroPress",
+      author: "James Hoffmann",
+      dose: 11, water: 200, temp: 100, ratio: '1:18',
+      grindHint: 'Medium-fine (finer end)',
+      steps: [
+        "Set AeroPress in standard position on mug. Do NOT rinse or preheat — it makes no difference.",
+        "Add 11g coffee. Place on scales.",
+        "0:00 — Pour 200g boiling water, aiming to wet all grounds during the pour.",
+        "0:10 — Immediately place plunger ~1cm in to create a vacuum seal.",
+        "2:00 — Holding brewer and plunger, gently swirl.",
+        "2:30 — Press slowly and gently all the way down (~30 seconds).",
+        "Drink and enjoy!"
+      ]
+    },
+    {
+      id: 'aeropress-inverted',
+      name: "Inverted AeroPress",
+      author: "Classic Competition Style",
+      dose: 14, water: 200, temp: 95, ratio: '1:14',
+      grindHint: 'Medium',
+      steps: [
+        "Invert AeroPress. Add 14g coffee.",
+        "0:00 — Pour 200g water at 95°C.",
+        "0:15 — Stir 3 times.",
+        "1:00 — Stir 3 more times.",
+        "1:15 — Place filter cap (rinsed). Carefully flip onto mug.",
+        "1:30 — Press slowly over 30 seconds.",
+        "Stop pressing before the hiss for cleaner cup."
+      ]
+    }
+  ],
+  'Chemex': [
+    {
+      id: 'chemex-classic',
+      name: "Chemex Classic",
+      author: "Classic",
+      dose: 42, water: 700, temp: 94, ratio: '1:16.7',
+      grindHint: 'Medium-coarse',
+      steps: [
+        "Rinse Chemex filter with hot water. Discard rinse water.",
+        "Add 42g coffee. Place on scales.",
+        "0:00 — Pour 80g water to bloom. Swirl gently.",
+        "0:45 — Pour to 350g in slow spirals.",
+        "1:30 — Pour to 700g total. Keep liquid level topped up.",
+        "Allow full drawdown. Target total time ~4:00–4:30."
+      ]
+    },
+    {
+      id: 'chemex-hoffmann',
+      name: "Hoffmann-Style Chemex",
+      author: "James Hoffmann",
+      dose: 30, water: 500, temp: 94, ratio: '1:16.7',
+      grindHint: 'Medium-coarse',
+      steps: [
+        "Rinse filter. Add 30g coffee.",
+        "0:00 — Bloom with 60g water. Swirl. Wait 45 seconds.",
+        "0:45 — Pour to 300g in spiral motion by 1:15.",
+        "1:15 — Slow pour to 500g by 1:45.",
+        "1:45 — Stir once each direction. Swirl after brief drain.",
+        "Full drawdown ~3:30–4:00."
+      ]
+    }
+  ],
+  'French Press': [
+    {
+      id: 'french-hoffmann',
+      name: "James Hoffmann — Ultimate French Press",
+      author: "James Hoffmann",
+      dose: 30, water: 500, temp: 100, ratio: '1:16.7',
+      grindHint: 'Medium-coarse',
+      steps: [
+        "Add 30g coffee to French press. Pour 500g boiling water immediately. Do NOT stir.",
+        "4:00 — Gently break the crust on top with a spoon. Give 2–3 slow stirs to sink grounds.",
+        "4:30 — Scoop off foam and floating grounds with 2 spoons. This is key for a clean cup.",
+        "Place lid on press (do not plunge yet). Wait 5–8 more minutes for grounds to settle.",
+        "9:30+ — Slowly push plunger down only to the surface of the liquid. Do NOT push to the bottom.",
+        "Pour slowly. Do not empty the press — leave the last bit to avoid stirring up sediment."
+      ]
+    },
+    {
+      id: 'french-classic',
+      name: "Classic French Press",
+      author: "Classic",
+      dose: 30, water: 500, temp: 95, ratio: '1:16.7',
+      grindHint: 'Coarse',
+      steps: [
+        "Add 30g coarsely ground coffee.",
+        "0:00 — Pour 500g water at 95°C. Stir briefly.",
+        "4:00 — Place lid on, plunge slowly all the way down.",
+        "Pour immediately. Enjoy."
+      ]
+    }
+  ],
+  'Moka Pot': [
+    {
+      id: 'moka-classic',
+      name: "Classic Moka Pot",
+      author: "Classic",
+      dose: 20, water: 300, temp: 100, ratio: '1:15',
+      grindHint: 'Medium-fine (not espresso fine)',
+      steps: [
+        "Fill lower chamber with hot water up to the pressure valve — do NOT overfill.",
+        "Add 20g coffee to the basket. Level off, do not tamp.",
+        "Assemble and place on medium-low heat. Leave lid open.",
+        "When coffee starts flowing, reduce to lowest heat.",
+        "Remove from heat as soon as gurgling begins — do not wait for sputter.",
+        "Run base under cold water to stop extraction. Pour immediately."
+      ]
+    },
+    {
+      id: 'moka-hoffmann',
+      name: "Hoffmann-Style Moka",
+      author: "James Hoffmann",
+      dose: 20, water: 300, temp: 100, ratio: '1:15',
+      grindHint: 'Medium (coarser than espresso)',
+      steps: [
+        "Pre-boil your water — pour directly into the lower chamber hot. Do not heat cold water in the pot.",
+        "Add 20g coffee (medium grind, not espresso fine — Moka pot is NOT an espresso machine).",
+        "Assemble tightly. Medium heat. Leave lid open.",
+        "Watch for coffee to flow — reduce heat to minimum as soon as it appears.",
+        "Close lid. Remove at first sign of spluttering.",
+        "Pour into a small cup. Optional: add hot water to taste."
+      ]
+    }
+  ],
+  'Cold Brew': [
+    {
+      id: 'cold-brew-classic',
+      name: "Classic Cold Brew Concentrate",
+      author: "Classic",
+      dose: 100, water: 800, temp: 20, ratio: '1:8',
+      grindHint: 'Extra-coarse',
+      steps: [
+        "Add 100g very coarsely ground coffee to a jar or container.",
+        "Pour 800g cold or room-temperature water over the grounds.",
+        "Stir gently to saturate all grounds.",
+        "Cover and refrigerate for 12–24 hours.",
+        "Filter through a fine mesh strainer, then through a paper filter.",
+        "Dilute concentrate 1:1 with water or milk to serve. Keeps refrigerated for up to 2 weeks."
+      ]
+    }
+  ],
+  'Steep & Release': [
+    {
+      id: 'clever-hoffmann',
+      name: "James Hoffmann — Clever Dripper",
+      author: "James Hoffmann",
+      dose: 15, water: 250, temp: 100, ratio: '1:16.7',
+      grindHint: 'Medium-fine',
+      steps: [
+        "Rinse paper filter with hot water. Keep valve closed.",
+        "Pour 250g boiling water into Clever Dripper FIRST (water before coffee).",
+        "Quickly add 15g coffee. Stir briefly to wet all grounds.",
+        "0:00 — Steep for 2 minutes.",
+        "2:00 — Break the crust with a stir or gentle shake.",
+        "2:30 — Place Clever Dripper on your mug to release. Drawdown ~45–60 seconds.",
+        "Tip: if too bitter, grind coarser or shorten steep. If weak/hollow, grind finer."
+      ]
+    },
+    {
+      id: 'clever-classic',
+      name: "Classic Steep & Release",
+      author: "Classic",
+      dose: 18, water: 300, temp: 94, ratio: '1:16.7',
+      grindHint: 'Medium',
+      steps: [
+        "Rinse filter. Add 18g coffee to dripper.",
+        "Pour 300g water at 94°C. Stir once.",
+        "Steep 3 minutes.",
+        "Place on mug — release and drawdown.",
+        "Adjust steep time to taste."
+      ]
+    }
+  ],
+  'Other': []
+};
+
+// ==================== GRINDER DATABASE ====================
+// Grind ranges based on data from honestcoffeeguide.com
+const GRINDERS = [
+  // MANUAL
+  {id:'m01',brand:'1Zpresso',model:'JX-Pro',type:'manual',settings:90,min:80,max:1200,notes:'Excellent espresso-to-filter range. Magnetic catch cup. Highly recommended.'},
+  {id:'m02',brand:'1Zpresso',model:'J-Max',type:'manual',settings:100,min:60,max:900,notes:'Ultra fine range for espresso enthusiasts. Precise 10-step per rotation.'},
+  {id:'m03',brand:'1Zpresso',model:'K-Max',type:'manual',settings:90,min:100,max:1300,notes:'Wide range leaning toward filter. Excellent build quality.'},
+  {id:'m04',brand:'1Zpresso',model:'K-Ultra',type:'manual',settings:90,min:80,max:1300,notes:'Titanium burrs. K series flagship.'},
+  {id:'m05',brand:'1Zpresso',model:'Q2 S',type:'manual',settings:60,min:100,max:900,notes:'Compact and portable. Great travel grinder.'},
+  {id:'m06',brand:'1Zpresso',model:'ZP6 Special',type:'manual',settings:90,min:60,max:800,notes:'Titanium burrs. Premium build for espresso specialists.'},
+  {id:'m07',brand:'Comandante',model:'C40 MK4',type:'manual',settings:45,min:100,max:1100,notes:'Iconic German design. High-nitro blade steel. Industry standard.'},
+  {id:'m08',brand:'Comandante',model:'C40 MK4 Red Clix',type:'manual',settings:90,min:100,max:1100,notes:'Red Clix upgrade doubles click resolution to 90 per rotation.'},
+  {id:'m09',brand:'Comandante',model:'C60 Baracuda',type:'manual',settings:50,min:100,max:1200,notes:'Larger 60mm burr set. Faster grind than C40.'},
+  {id:'m10',brand:'Hario',model:'Skerton PRO',type:'manual',settings:20,min:200,max:1300,notes:'Classic Japanese manual. Good value entry point.'},
+  {id:'m11',brand:'Hario',model:'Mini Mill PLUS',type:'manual',settings:16,min:300,max:1200,notes:'Compact, lightweight and ultra-portable.'},
+  {id:'m12',brand:'Hario',model:'Mini Mill Slim PRO',type:'manual',settings:16,min:300,max:1200,notes:'Slim profile, good for backpacking.'},
+  {id:'m13',brand:'KINGrinder',model:'K6',type:'manual',settings:72,min:100,max:1100,notes:'Great value for money. Titanium-coated burrs.'},
+  {id:'m14',brand:'KINGrinder',model:'K4',type:'manual',settings:72,min:120,max:1000,notes:'Versatile mid-range manual with adjustable crank.'},
+  {id:'m15',brand:'KINGrinder',model:'K2',type:'manual',settings:72,min:150,max:1000,notes:'Budget-friendly KINGrinder entry. Solid performer.'},
+  {id:'m16',brand:'Timemore',model:'Chestnut C3',type:'manual',settings:36,min:150,max:1100,notes:'Popular budget option. S2C burrs. Reliable.'},
+  {id:'m17',brand:'Timemore',model:'Chestnut G1',type:'manual',settings:36,min:100,max:1000,notes:'Fold-flat titanium-coated burrs. Travel friendly.'},
+  {id:'m18',brand:'Timemore',model:'Slim Plus',type:'manual',settings:36,min:150,max:1000,notes:'Slim stainless steel profile.'},
+  {id:'m19',brand:'Knock',model:'Feldgrind 2',type:'manual',settings:39,min:100,max:900,notes:'Precision espresso capability. All stainless steel.'},
+  {id:'m20',brand:'Knock',model:'Aergrind',type:'manual',settings:24,min:150,max:900,notes:'Slim to fit inside AeroPress. Perfect travel setup.'},
+  {id:'m21',brand:'Kinu',model:'M47 Classic',type:'manual',settings:50,min:100,max:900,notes:'German-engineered. Exceptional precision and build quality.'},
+  {id:'m22',brand:'Kinu',model:'M47 Phoenix',type:'manual',settings:50,min:100,max:900,notes:'Entry Kinu. Stainless body with polymer base.'},
+  {id:'m23',brand:'Goat Story',model:'Arco',type:'manual',settings:60,min:100,max:1100,notes:'Dual burr system switches between espresso and filter modes.'},
+  {id:'m24',brand:'Helor',model:'101',type:'manual',settings:48,min:150,max:1100,notes:'Korean-made. Precise adjustment, strong ergonomic handle.'},
+  {id:'m25',brand:'Porlex',model:'Mini II',type:'manual',settings:16,min:200,max:1200,notes:'Japanese ceramic burrs. Compact travel grinder.'},
+  {id:'m26',brand:'JavaPresse',model:'Manual Grinder',type:'manual',settings:18,min:200,max:1200,notes:'Budget entry level. Good for beginners exploring coffee.'},
+  {id:'m27',brand:'Lido',model:'ET',type:'manual',settings:30,min:200,max:1400,notes:'Excellent for pour-over and French press. Side-handle design.'},
+  {id:'m28',brand:'Orphan Espresso',model:'Lido 3',type:'manual',settings:30,min:200,max:1400,notes:'Strong, consistent coarser grind. Popular with filter lovers.'},
+
+  // ELECTRIC
+  {id:'e01',brand:'Baratza',model:'Encore',type:'electric',settings:40,min:250,max:1100,notes:'The classic beginner electric. 40 stepped settings. Easy to use.'},
+  {id:'e02',brand:'Baratza',model:'Encore ESP',type:'electric',settings:40,min:180,max:1100,notes:'Encore with espresso-capable burrs. Great all-rounder entry.'},
+  {id:'e03',brand:'Baratza',model:'Virtuoso+',type:'electric',settings:40,min:220,max:1100,notes:'Digital timer. Quality hardened steel burrs. Quiet.'},
+  {id:'e04',brand:'Baratza',model:'Vario W+',type:'electric',settings:230,min:150,max:1200,notes:'Weight-based dosing. Wide range covers all methods.'},
+  {id:'e05',brand:'Baratza',model:'Sette 270',type:'electric',settings:270,min:150,max:1300,notes:'Conical burr with micro-step adjustment. Espresso focused.'},
+  {id:'e06',brand:'Fellow',model:'Ode Brew Gen 2',type:'electric',settings:90,min:350,max:1200,notes:'Filter-focused flat burr. Anti-static. Quiet motor. Beautiful design.'},
+  {id:'e07',brand:'Fellow',model:'Opus',type:'electric',settings:41,min:200,max:1300,notes:'All-purpose conical. Espresso to cold brew. Compact.'},
+  {id:'e08',brand:'Breville',model:'Smart Grinder Pro',type:'electric',settings:60,min:200,max:1300,notes:'60 grind settings. Digital display. Popular mid-range choice.'},
+  {id:'e09',brand:'Breville',model:'Dose Control Pro',type:'electric',settings:25,min:200,max:1100,notes:'Dose by weight or time. Compact footprint.'},
+  {id:'e10',brand:'Eureka',model:'Mignon Specialità',type:'electric',settings:350,min:100,max:900,notes:'Stepless adjustment. Flat burr. Very quiet. Italian-made.'},
+  {id:'e11',brand:'Eureka',model:'Mignon Silenzio',type:'electric',settings:350,min:100,max:900,notes:'Sound-dampened body. Espresso focused stepless.'},
+  {id:'e12',brand:'Eureka',model:'Mignon Classico',type:'electric',settings:350,min:100,max:900,notes:'Entry-level Mignon. Stepless. Italian craftsmanship.'},
+  {id:'e13',brand:'Niche',model:'Zero',type:'electric',settings:360,min:100,max:1000,notes:'Single dose, near-zero retention. Stepless conical. Cult favourite.'},
+  {id:'e14',brand:'Niche',model:'Duo',type:'electric',settings:360,min:100,max:1300,notes:'Dual burr stack. Handles espresso and filter simultaneously.'},
+  {id:'e15',brand:'Wilfa',model:'Svart Aroma',type:'electric',settings:17,min:250,max:1100,notes:'Scandinavian design. Popular budget electric option.'},
+  {id:'e16',brand:'Mahlkönig',model:'X54',type:'electric',settings:220,min:150,max:1200,notes:'Home flat burr. Professional quality for all brew methods.'},
+  {id:'e17',brand:'Mahlkönig',model:'E65S GbW',type:'electric',settings:250,min:100,max:700,notes:'Professional espresso grinder. Gravimetric dosing. Café standard.'},
+  {id:'e18',brand:'Lelit',model:'William PL72',type:'electric',settings:340,min:120,max:900,notes:'Italian flat burr. Espresso-focused. Stepless micrometric.'},
+  {id:'e19',brand:'DF64',model:'Gen 2',type:'electric',settings:200,min:100,max:1200,notes:'Single dose. 64mm flat burr. Highly regarded enthusiast choice.'},
+  {id:'e20',brand:'Capresso',model:'Infinity Plus',type:'electric',settings:16,min:250,max:1200,notes:'Slow-speed burr. Quiet. Good home value.'},
+  {id:'e21',brand:'Oxo',model:'Brew Burr Grinder',type:'electric',settings:38,min:250,max:1200,notes:'One-touch timer. User-friendly design.'},
+  {id:'e22',brand:'Rocket',model:'Faustino',type:'electric',settings:300,min:100,max:900,notes:'Italian espresso-focused. Stepless micrometric adjustment.'},
+  {id:'e23',brand:'Compak',model:'K3 Touch',type:'electric',settings:100,min:100,max:900,notes:'Commercial-grade home grinder. Touchscreen interface.'},
+  {id:'e24',brand:'Flair Espresso',model:'Royal Grinder',type:'electric',settings:80,min:100,max:600,notes:'Espresso-only. Pairs perfectly with Flair manual presses.'},
+  {id:'e25',brand:'Timemore',model:'Sculptor 064S',type:'electric',settings:200,min:100,max:1000,notes:'Single dose flat burr. Stepless. Beautiful aesthetics.'},
+  {id:'e26',brand:'Comandante',model:'MC6 Goat',type:'electric',settings:90,min:100,max:1100,notes:'Electric version of legendary C40 with same burr geometry.'},
+  {id:'e27',brand:'Cuisinart',model:'DBM-8',type:'electric',settings:18,min:250,max:1300,notes:'Budget electric. Good entry-level starting point.'},
+  {id:'e28',brand:'De\'Longhi',model:'KG89',type:'electric',settings:14,min:280,max:1300,notes:'Affordable home grinder. Auto-dosing. Beginner-friendly.'},
+  {id:'e29',brand:'Timemore',model:'Sculptor 078S',type:'electric',settings:36,min:235,max:1235,notes:'78mm flat burrs. Espresso to filter. Rotary knocker for near-zero retention. Variable RPM 800–1400. Settings 0–2.6 for espresso, 3–8.3 for V60.'},
+  {id:'e30',brand:'Timemore',model:'Sculptor 078',type:'electric',settings:36,min:400,max:1300,notes:'78mm Turbo (ghost) burrs optimised for filter only — cannot reach espresso grind. Exceptional clarity for pour-over and cold brew.'},
+];
+
+// Brew method grind ranges (microns) — data from honestcoffeeguide.com
+const BREW_METHODS = [
+  {name:'Turkish',    min:40,   max:220,  color:'#8b3a3a'},
+  {name:'Espresso',   min:180,  max:380,  color:'#c8873a'},
+  {name:'Moka Pot',   min:360,  max:660,  color:'#9a6020'},
+  {name:'AeroPress',  min:320,  max:960,  color:'#2a7a6a'},
+  {name:'V60',        min:400,  max:700,  color:'#4a7a28'},
+  {name:'Siphon',     min:375,  max:800,  color:'#5a6a2a'},
+  {name:'Pour Over',  min:410,  max:930,  color:'#3a8a4a'},
+  {name:'Filter Drip',min:300,  max:900,  color:'#6a7a3a'},
+  {name:'Cupping',    min:460,  max:850,  color:'#7a5a2a'},
+  {name:'French Press',min:690, max:1300, color:'#2a5080'},
+  {name:'Cold Drip',  min:820,  max:1270, color:'#4a2a8a'},
+  {name:'Cold Brew',  min:800,  max:1400, color:'#3a3a8a'},
+];
+
+const CHART_MIN = 0, CHART_MAX = 1500;
+const COMPARE_COLORS = ['#c8873a','#2a5080','#4a7a28','#8b1a1a','#5c2d8e'];
+
+// ==================== STATE ====================
+let state = {
+  coffees: [], recipes: [],
+  selectedCoffeeId: null, selectedGrinderId: null,
+  selectedMethod: 'Espresso', selectedExtraction: '', selectedRating: 0,
+  currentView: 'dashboard', compareIds: [], favouriteGrinderId: null, selectedRecipeId: null, customRecipes: [],
+};
+let currentGrinderFilter = 'all';
+
+function save() { try { localStorage.setItem('dialin_v2', JSON.stringify(state)); } catch(e){} }
+function load() { try { const s = localStorage.getItem('dialin_v2'); if(s) { const p = JSON.parse(s); state = {...state, ...p}; } } catch(e){} }
+
+// ==================== NAVIGATION ====================
+function showView(name) {
+  document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
+  document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active'));
+  document.getElementById('view-' + name).classList.add('active');
+  const idx = ['dashboard','coffees','recipes','grinders','compare','myrecipes'].indexOf(name);
+  document.querySelectorAll('.nav-tab')[idx]?.classList.add('active');
+  state.currentView = name;
+  if(name==='dashboard') renderDashboard();
+  if(name==='coffees') renderCoffeesView();
+  if(name==='recipes') renderRecipes();
+  if(name==='grinders') renderGrinders();
+  if(name==='compare') renderCompare();
+  if(name==='myrecipes') renderMyRecipes();
+}
+
+function openModal(id) { document.getElementById(id).classList.add('open'); }
+function closeModal(id) { document.getElementById(id).classList.remove('open'); }
+function openFab() { openModal('modal-fab'); }
+
+function openRecipeModal() {
+  if (!state.coffees.length) { showToast('Add a coffee first!'); return; }
+  // Coffee selector
+  const cs = document.getElementById('coffee-selector');
+  cs.innerHTML = '';
+  state.coffees.forEach(c => {
+    const d = document.createElement('div');
+    d.className = 'coffee-selector-item' + (state.selectedCoffeeId===c.id?' selected':'');
+    d.innerHTML = `<div class="cs-name">${c.name}</div><div class="cs-sub">${c.roaster||''}</div>`;
+    d.onclick = () => { state.selectedCoffeeId=c.id; cs.querySelectorAll('.coffee-selector-item').forEach(x=>x.classList.remove('selected')); d.classList.add('selected'); };
+    cs.appendChild(d);
+  });
+  if (!state.selectedCoffeeId) { state.selectedCoffeeId=state.coffees[0].id; cs.children[0].classList.add('selected'); }
+  // Default grinder to favourite if none previously selected
+  if (!state.selectedGrinderId && state.favouriteGrinderId) { state.selectedGrinderId = state.favouriteGrinderId; }
+  // Grinder selector
+  const gs = document.getElementById('grinder-selector');
+  gs.innerHTML = '';
+  const none = document.createElement('div');
+  none.className = 'coffee-selector-item' + (!state.selectedGrinderId?' selected':'');
+  none.innerHTML = '<div class="cs-name" style="font-size:13px;font-family:\'DM Sans\'">No grinder / unspecified</div>';
+  none.onclick = () => { state.selectedGrinderId=null; gs.querySelectorAll('.coffee-selector-item').forEach(x=>x.classList.remove('selected')); none.classList.add('selected'); };
+  gs.appendChild(none);
+  function makeGrinderItem(g) {
+    const d = document.createElement('div');
+    d.className = 'coffee-selector-item' + (state.selectedGrinderId===g.id?' selected':'');
+    const isFav = state.favouriteGrinderId === g.id;
+    d.innerHTML = `<div class="cs-name" style="font-size:14px">${isFav?'⭐ ':''}${g.model}</div><div class="cs-sub">${g.brand} · ${g.type==='manual'?'✋ Manual':'⚡ Electric'}${isFav?' · Default':''}</div>`;
+    d.onclick = () => { state.selectedGrinderId=g.id; gs.querySelectorAll('.coffee-selector-item').forEach(x=>x.classList.remove('selected')); d.classList.add('selected'); };
+    return d;
+  }
+  // Favourites first
+  const favGrinders = GRINDERS.filter(g => g.id === state.favouriteGrinderId);
+  const otherGrinders = GRINDERS.filter(g => g.id !== state.favouriteGrinderId);
+  if (favGrinders.length) {
+    const hdr = document.createElement('div');
+    hdr.style.cssText = "font-family:'DM Mono',monospace;font-size:9px;letter-spacing:1.5px;text-transform:uppercase;color:var(--crema);padding:6px 2px 4px;";
+    hdr.textContent = '⭐ Favourite';
+    gs.appendChild(hdr);
+    favGrinders.forEach(g => gs.appendChild(makeGrinderItem(g)));
+    const sep = document.createElement('div');
+    sep.style.cssText = "font-family:'DM Mono',monospace;font-size:9px;letter-spacing:1.5px;text-transform:uppercase;color:var(--text-muted);padding:8px 2px 4px;border-top:1px solid var(--border);margin-top:4px;";
+    sep.textContent = 'All Grinders';
+    gs.appendChild(sep);
+  }
+  otherGrinders.forEach(g => gs.appendChild(makeGrinderItem(g)));
+  // Set correct yield/water label for current method on open
+  const lbl2 = document.getElementById('r-yield-label');
+  const inp2 = document.getElementById('r-yield');
+  if (lbl2 && inp2) {
+    if (isEspressoMethod(state.selectedMethod)) {
+      lbl2.textContent = 'Yield (g)'; inp2.placeholder = 'e.g. 36';
+    } else {
+      lbl2.textContent = 'Water (ml)'; inp2.placeholder = 'e.g. 250';
+    }
+  }
+  // Init recipe dropdown
+  updateRecipeDropdown(state.selectedMethod);
+  openModal('modal-recipe');
+}
+
+// ==================== FORM CONTROLS ====================
+function selectExtraction(val) {
+  state.selectedExtraction = val;
+  document.querySelectorAll('.extraction-btn').forEach(b => b.classList.remove('selected'));
+  document.querySelector('.extraction-btn.'+val)?.classList.add('selected');
+}
+function setRating(n) {
+  state.selectedRating = n;
+  document.querySelectorAll('.star-btn').forEach((b,i) => b.classList.toggle('active', i<n));
+}
+const ESPRESSO_METHODS = ['Espresso'];
+function isEspressoMethod(m) { return ESPRESSO_METHODS.includes(m); }
+
+function selectMethod(el, val) {
+  state.selectedMethod = val;
+  document.querySelectorAll('.method-tab').forEach(t => t.classList.remove('selected'));
+  el.classList.add('selected');
+  // Swap yield ↔ water volume label depending on method
+  const lbl = document.getElementById('r-yield-label');
+  const inp = document.getElementById('r-yield');
+  if (lbl && inp) {
+    if (isEspressoMethod(val)) {
+      lbl.textContent = 'Yield (g)'; inp.placeholder = 'e.g. 36';
+    } else {
+      lbl.textContent = 'Water (ml)'; inp.placeholder = 'e.g. 250';
+    }
+  }
+  // Update recipe dropdown
+  updateRecipeDropdown(val);
+}
+
+function updateRecipeDropdown(method) {
+  const wrap = document.getElementById('r-recipe-wrap');
+  const sel = document.getElementById('r-recipe-select');
+  if (!wrap || !sel) return;
+  if (isEspressoMethod(method)) {
+    wrap.style.display = 'none';
+    state.selectedRecipeId = null;
+    return;
+  }
+  wrap.style.display = 'block';
+  const options = getAllRecipesForMethod(method);
+  sel.innerHTML = '<option value="">— No recipe / custom —</option>' +
+    options.map(r => `<option value="${r.id}">${r.custom?'★ ':''}${r.name} · ${r.dose}g / ${r.water}ml</option>`).join('');
+  // Restore previously selected recipe if same method
+  if (state.selectedRecipeId) {
+    const still = options.find(r => r.id === state.selectedRecipeId);
+    if (still) sel.value = state.selectedRecipeId;
+    else { sel.value = ''; state.selectedRecipeId = null; }
+  }
+  renderRecipeCard(method, sel.value);
+}
+
+function onRecipeChange(sel) {
+  state.selectedRecipeId = sel.value || null;
+  renderRecipeCard(state.selectedMethod, sel.value);
+  // Auto-fill dose and water if a recipe is selected
+  const method = state.selectedMethod;
+  const options = getAllRecipesForMethod(method);
+  const recipe = options.find(r => r.id === sel.value);
+  if (recipe) {
+    document.getElementById('r-dose').value = recipe.dose;
+    document.getElementById('r-yield').value = recipe.water;
+    document.getElementById('r-temp').value = recipe.temp;
+  }
+}
+
+// ==================== CUSTOM RECIPES ====================
+
+function getAllRecipesForMethod(method) {
+  const builtin = RECIPES[method] || [];
+  const custom = (state.customRecipes || []).filter(r => r.method === method);
+  return [...builtin, ...custom];
+}
+
+function addRecipeStep(text='') {
+  const list = document.getElementById('cr-steps-list');
+  const idx = list.children.length + 1;
+  const row = document.createElement('div');
+  row.className = 'step-row';
+  row.innerHTML = `
+    <span class="step-row-num">${idx}.</span>
+    <textarea placeholder="Describe this step…">${text}</textarea>
+    <button class="step-remove" onclick="this.closest('.step-row').remove();renumberSteps()">✕</button>`;
+  list.appendChild(row);
+}
+
+function renumberSteps() {
+  document.querySelectorAll('.step-row-num').forEach((el,i) => el.textContent = (i+1)+'.');
+}
+
+function openEditCustomRecipe(id) {
+  const r = (state.customRecipes||[]).find(x=>x.id===id);
+  if (!r) return;
+  document.getElementById('custom-recipe-modal-title').textContent = 'Edit Recipe';
+  document.getElementById('cr-edit-id').value = id;
+  document.getElementById('cr-name').value = r.name;
+  document.getElementById('cr-author').value = r.author||'';
+  document.getElementById('cr-method').value = r.method;
+  document.getElementById('cr-dose').value = r.dose||'';
+  document.getElementById('cr-water').value = r.water||'';
+  document.getElementById('cr-temp').value = r.temp||'';
+  document.getElementById('cr-grind').value = r.grindHint||'';
+  const list = document.getElementById('cr-steps-list');
+  list.innerHTML = '';
+  (r.steps||[]).forEach(s => addRecipeStep(s));
+  openModal('modal-custom-recipe');
+}
+
+function openNewCustomRecipe() {
+  document.getElementById('custom-recipe-modal-title').textContent = 'New Recipe';
+  document.getElementById('cr-edit-id').value = '';
+  ['cr-name','cr-author','cr-dose','cr-water','cr-temp','cr-grind'].forEach(id=>document.getElementById(id).value='');
+  document.getElementById('cr-method').value = 'V60';
+  document.getElementById('cr-steps-list').innerHTML = '';
+  addRecipeStep();
+  openModal('modal-custom-recipe');
+}
+
+function saveCustomRecipe() {
+  const name = document.getElementById('cr-name').value.trim();
+  if (!name) { showToast('Enter a recipe name'); return; }
+  const stepEls = document.querySelectorAll('#cr-steps-list textarea');
+  const steps = [...stepEls].map(t=>t.value.trim()).filter(Boolean);
+  if (!steps.length) { showToast('Add at least one step'); return; }
+  const dose = parseFloat(document.getElementById('cr-dose').value)||0;
+  const water = parseFloat(document.getElementById('cr-water').value)||0;
+  const ratio = (dose&&water) ? '1:'+((water/dose).toFixed(1)) : '';
+  const editId = document.getElementById('cr-edit-id').value;
+  const recipe = {
+    id: editId || ('custom-'+Date.now()),
+    name,
+    author: document.getElementById('cr-author').value.trim(),
+    method: document.getElementById('cr-method').value,
+    dose, water,
+    temp: parseFloat(document.getElementById('cr-temp').value)||null,
+    ratio,
+    grindHint: document.getElementById('cr-grind').value.trim(),
+    steps,
+    custom: true
+  };
+  if (!state.customRecipes) state.customRecipes = [];
+  if (editId) {
+    const idx = state.customRecipes.findIndex(r=>r.id===editId);
+    if (idx>=0) state.customRecipes[idx] = recipe;
+  } else {
+    state.customRecipes.unshift(recipe);
+  }
+  save();
+  closeModal('modal-custom-recipe');
+  showToast(editId ? 'Recipe updated ✓' : 'Recipe saved ✓');
+  if (state.currentView==='myrecipes') renderMyRecipes();
+}
+
+function deleteCustomRecipe(id) {
+  state.customRecipes = (state.customRecipes||[]).filter(r=>r.id!==id);
+  save(); showToast('Recipe deleted'); renderMyRecipes();
+}
+
+function renderMyRecipes() {
+  const el = document.getElementById('myrecipes-list');
+  if (!el) return;
+  const recipes = state.customRecipes||[];
+  if (!recipes.length) {
+    el.innerHTML = `<div class="empty-state"><div class="empty-icon">📋</div><div class="empty-title">No custom recipes yet</div><div class="empty-desc">Tap + to create your own brew recipe with custom steps.</div></div>`;
+    return;
+  }
+  el.innerHTML = recipes.map(r => `
+    <div class="custom-recipe-card">
+      <div class="custom-recipe-card-header">
+        <div>
+          <div style="font-family:'Playfair Display',serif;font-size:16px;color:var(--crema-light)">${r.name}</div>
+          <div style="font-family:'DM Mono',monospace;font-size:10px;color:rgba(245,237,227,.45);letter-spacing:1px;margin-top:2px">${r.author?r.author+' · ':''}${r.method}</div>
+        </div>
+        <div style="display:flex;gap:8px;align-items:center">
+          <button class="btn-secondary" style="padding:5px 10px;font-size:9px" onclick="openEditCustomRecipe('${r.id}')">Edit</button>
+          <button class="btn-delete" onclick="deleteCustomRecipe('${r.id}')">✕</button>
+        </div>
+      </div>
+      <div style="padding:14px 18px">
+        <div style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:12px">
+          ${r.dose?`<span class="meta-pill">${r.dose}g dose</span>`:''}
+          ${r.water?`<span class="meta-pill">${r.water}ml water</span>`:''}
+          ${r.temp?`<span class="meta-pill">${r.temp}°C</span>`:''}
+          ${r.ratio?`<span class="meta-pill">${r.ratio}</span>`:''}
+          ${r.grindHint?`<span class="meta-pill">${r.grindHint}</span>`:''}
+        </div>
+        <ol style="padding-left:18px;margin:0">
+          ${r.steps.map(s=>`<li style="font-size:13px;color:var(--text-muted);line-height:1.6;margin-bottom:4px">${s}</li>`).join('')}
+        </ol>
+      </div>
+    </div>`).join('');
+}
+
+function renderRecipeCard(method, recipeId) {
+  const card = document.getElementById('r-recipe-card');
+  if (!card) return;
+  const options = getAllRecipesForMethod(method);
+  const recipe = options.find(r => r.id === recipeId);
+  if (!recipe) { card.innerHTML = ''; card.style.display = 'none'; return; }
+  card.style.display = 'block';
+  card.innerHTML = `
+    <div style="background:var(--espresso);border-radius:var(--radius-sm);padding:14px;margin-top:10px">
+      <div style="font-family:'Playfair Display',serif;font-size:15px;color:var(--crema-light);margin-bottom:2px">${recipe.name}</div>
+      <div style="font-family:'DM Mono',monospace;font-size:9px;color:rgba(245,237,227,.45);letter-spacing:1px;margin-bottom:12px">${recipe.dose}g · ${recipe.water}ml · ${recipe.temp}°C · ${recipe.ratio} · ${recipe.grindHint}</div>
+      <ol style="padding-left:16px;margin:0">
+        ${recipe.steps.map(s => `<li style="font-size:12px;color:rgba(245,237,227,.75);line-height:1.5;margin-bottom:5px">${s}</li>`).join('')}
+      </ol>
+    </div>`;
+}
+
+// ==================== LABEL PHOTO ====================
+let pendingLabelDataUrl = null;
+
+function handleLabelPhoto(input) {
+  const file = input.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = e => {
+    pendingLabelDataUrl = e.target.result;
+    const wrap = document.getElementById('c-label-preview-wrap');
+    wrap.innerHTML = `
+      <div class="label-preview">
+        <img src="${pendingLabelDataUrl}" alt="Bag label">
+        <button class="label-preview-remove" onclick="removeLabelPhoto()">✕</button>
+      </div>`;
+  };
+  reader.readAsDataURL(file);
+}
+
+function removeLabelPhoto() {
+  pendingLabelDataUrl = null;
+  document.getElementById('c-label-input').value = '';
+  document.getElementById('c-label-preview-wrap').innerHTML = `
+    <div class="label-upload-btn" onclick="document.getElementById('c-label-input').click()">
+      <span style="font-size:28px">📷</span>
+      <span>Tap to take photo or upload</span>
+    </div>`;
+}
+
+// ==================== COFFEE RATING ====================
+let pendingCoffeeRating = 0;
+
+function setCoffeeRating(n) {
+  pendingCoffeeRating = n;
+  document.getElementById('c-rating').value = n;
+  document.querySelectorAll('.coffee-rating-btn').forEach((b,i) => b.classList.toggle('active', i < n));
+  const labels = ['','Terrible','Poor','Below average','Average','OK','Decent','Good','Very good','Excellent','Outstanding'];
+  document.getElementById('c-rating-label').textContent = n > 0 ? `${n}/10 — ${labels[n]}` : 'Not rated';
+}
+
+// ==================== SAVE COFFEE ====================
+function saveCoffee() {
+  const name = document.getElementById('c-name').value.trim();
+  if (!name) { showToast('Enter a coffee name'); return; }
+  state.coffees.unshift({id:Date.now().toString(), name, roaster:document.getElementById('c-roaster').value.trim(), country:document.getElementById('c-country').value.trim(), region:document.getElementById('c-region').value.trim(), varietal:document.getElementById('c-varietal').value.trim(), masl:document.getElementById('c-masl').value||null, process:document.getElementById('c-process').value, roastLevel:document.getElementById('c-roast').value, roastDate:document.getElementById('c-roastdate').value, notes:document.getElementById('c-notes').value.trim(), labelPhoto:pendingLabelDataUrl||null, rating:pendingCoffeeRating||0, createdAt:new Date().toISOString()});
+  save(); closeModal('modal-coffee');
+  ['c-name','c-roaster','c-country','c-region','c-varietal','c-notes','c-roastdate','c-masl'].forEach(id=>document.getElementById(id).value='');
+  document.getElementById('c-process').value=''; document.getElementById('c-roast').value='';
+  pendingCoffeeRating=0; document.getElementById('c-rating').value=0; document.querySelectorAll('.coffee-rating-btn').forEach(b=>b.classList.remove('active')); document.getElementById('c-rating-label').textContent='Not rated';
+  pendingLabelDataUrl=null; document.getElementById('c-label-input').value=''; document.getElementById('c-label-preview-wrap').innerHTML='<div class="label-upload-btn" onclick="document.getElementById(\'c-label-input\').click()"><span style="font-size:28px">📷</span><span>Tap to take photo or upload</span></div>';
+  showToast('Coffee added ✓'); renderDashboard(); if(state.currentView==='coffees') renderCoffeesView();
+}
+
+// ==================== SAVE RECIPE ====================
+function saveRecipe() {
+  if (!state.selectedCoffeeId) { showToast('Select a coffee'); return; }
+  state.recipes.unshift({id:Date.now().toString(), coffeeId:state.selectedCoffeeId, grinderId:state.selectedGrinderId||null, recipeId:state.selectedRecipeId||null, method:state.selectedMethod||'Espresso', grind:document.getElementById('r-grind').value, dose:document.getElementById('r-dose').value, yield:document.getElementById('r-yield').value, time:document.getElementById('r-time').value, temp:document.getElementById('r-temp').value, extraction:state.selectedExtraction, rating:state.selectedRating, notes:document.getElementById('r-notes').value.trim(), createdAt:new Date().toISOString()});
+  save(); closeModal('modal-recipe');
+  ['r-grind','r-dose','r-yield','r-time','r-temp','r-notes'].forEach(id=>document.getElementById(id).value='');
+  state.selectedExtraction=''; state.selectedRating=0;
+  document.querySelectorAll('.extraction-btn').forEach(b=>b.classList.remove('selected'));
+  document.querySelectorAll('.star-btn').forEach(b=>b.classList.remove('active'));
+  showToast('Brew logged ✓'); renderDashboard(); if(state.currentView==='recipes') renderRecipes();
+}
+
+// ==================== DASHBOARD ====================
+function renderDashboard() {
+  document.getElementById('stat-coffees').textContent = state.coffees.length;
+  document.getElementById('stat-recipes').textContent = state.recipes.length;
+  const good = state.recipes.filter(r=>r.extraction==='good').length;
+  document.getElementById('stat-good').textContent = state.recipes.length ? Math.round(good/state.recipes.length*100)+'%' : '—';
+  // Show favourite grinder chip on dashboard
+  const favG = state.favouriteGrinderId ? GRINDERS.find(g=>g.id===state.favouriteGrinderId) : null;
+  const favEl = document.getElementById('dashboard-fav-grinder');
+  if (favEl) favEl.innerHTML = favG
+    ? `<div style="display:flex;align-items:center;gap:8px;background:rgba(200,135,58,0.08);border:1px solid rgba(200,135,58,0.2);border-radius:10px;padding:10px 14px;margin-bottom:20px;cursor:pointer" onclick="showView('grinders')">
+        <span style="font-size:20px">⭐</span>
+        <div><div style="font-family:'Playfair Display',serif;font-size:14px">${favG.brand} ${favG.model}</div><div style="font-family:'DM Mono',monospace;font-size:9px;color:var(--text-muted);letter-spacing:1px;margin-top:2px">${favG.type==='manual'?'✋ Manual':'⚡ Electric'} · DEFAULT GRINDER</div></div>
+      </div>`
+    : `<div style="font-family:'DM Mono',monospace;font-size:10px;color:var(--text-muted);margin-bottom:16px;letter-spacing:.5px">No default grinder set — <span style="color:var(--crema);cursor:pointer" onclick="showView('grinders')">Browse grinders →</span></div>`;
+  const el = document.getElementById('recent-brews');
+  const recent = state.recipes.slice(0,5);
+  el.innerHTML = recent.length ? recent.map(r=>recipeCard(r,false)).join('') : `<div class="empty-state"><div class="empty-icon">🫘</div><div class="empty-title">Nothing brewed yet</div><div class="empty-desc">Tap + to log your first coffee.</div></div>`;
+}
+
+// ==================== COFFEES ====================
+function renderCoffeesView() {
+  const el = document.getElementById('coffees-list');
+  if (!state.coffees.length) { el.innerHTML=`<div class="empty-state"><div class="empty-icon">📦</div><div class="empty-title">No coffees yet</div><div class="empty-desc">Tap + to add your first coffee.</div></div>`; return; }
+  el.innerHTML = state.coffees.map(c => {
+    const rc = state.recipes.filter(r=>r.coffeeId===c.id).length;
+    const maslPill = c.masl ? `<span class="meta-pill">${c.masl}m</span>` : ''; const pills = [c.country,c.process,c.roastLevel,c.varietal].filter(Boolean).map(p=>`<span class="meta-pill">${p}</span>`).join('') + maslPill;
+    const headerImg = c.labelPhoto ? `<img src="${c.labelPhoto}" style="width:52px;height:52px;border-radius:8px;object-fit:cover;flex-shrink:0;border:1px solid rgba(255,255,255,0.15)" alt="label">` : '';
+    const cardRating = c.rating > 0 ? `<div style="display:inline-flex;gap:1px;color:var(--crema);margin-top:4px">${Array(c.rating).fill('<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 14 14" width="14" height="14"><g><path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" d="M2 4h8.5v5c0 0.53043 -0.2107 1.0391 -0.58579 1.4142C9.53914 10.7893 9.03043 11 8.5 11h-5c-0.53043 0 -1.03914 -0.2107 -1.41421 -0.5858C1.71071 10.0391 1.5 9.53043 1.5 9V4.5c0 -0.13261 0.05268 -0.25979 0.14645 -0.35355C1.74021 4.05268 1.86739 4 2 4Z" stroke-width="1"></path><path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" d="M0.5 13.5h13" stroke-width="1"></path><path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" d="M10.5 4h1c0.5304 0 1.0391 0.21071 1.4142 0.58579 0.3751 0.37507 0.5858 0.88378 0.5858 1.41421s-0.2107 1.03914 -0.5858 1.41421C12.5391 7.78929 12.0304 8 11.5 8h-1" stroke-width="1"></path><path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" d="M3 0.5v1" stroke-width="1"></path><path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" d="M8 0.5v1" stroke-width="1"></path><path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" d="M5.5 0.5v1" stroke-width="1"></path></g></svg>').join('')}</div><span style="font-family:'DM Mono',monospace;font-size:9px;color:var(--text-muted);margin-left:4px">${c.rating}/10</span>` : '';
+    return `<div class="coffee-card" onclick="showCoffeeDetail('${c.id}')"><div class="coffee-card-header"><div><div class="coffee-card-name">${c.name}</div><div class="coffee-card-roaster">${c.roaster||'Unknown Roaster'}</div>${cardRating}</div>${headerImg}</div><div class="coffee-card-body">${pills?`<div class="coffee-meta">${pills}</div>`:''}  <div class="recipe-count">${rc} brew${rc!==1?'s':''} logged</div></div></div>`;
+  }).join('');
+}
+
+function showCoffeeDetail(id) {
+  const c = state.coffees.find(x=>x.id===id); if(!c) return;
+  const recs = state.recipes.filter(r=>r.coffeeId===id);
+  const maslPill2 = c.masl ? `<span class="meta-pill">⛰ ${c.masl} masl</span>` : ''; const pills = [c.country,c.region,c.varietal,c.process,c.roastLevel].filter(Boolean).map(p=>`<span class="meta-pill">${p}</span>`).join('') + maslPill2;
+  document.getElementById('view-coffees').innerHTML = `
+    <div style="height:20px"></div>
+    <button class="detail-back" onclick="showView('coffees')">← Back</button>
+    <div class="detail-hero">
+      <div style="display:flex;gap:14px;align-items:flex-start">
+        ${c.labelPhoto?`<img src="${c.labelPhoto}" style="width:72px;height:90px;object-fit:cover;border-radius:10px;flex-shrink:0;border:1px solid rgba(255,255,255,0.15)" alt="bag label">`:''}
+        <div style="flex:1">
+          <div style="font-family:'Playfair Display',serif;font-size:24px;color:var(--crema-light)">${c.name}</div>
+          <div style="font-family:'DM Mono',monospace;font-size:11px;color:rgba(245,237,227,.5);letter-spacing:1px;margin-bottom:14px">${c.roaster||'Unknown Roaster'}</div>
+          <div class="coffee-meta">${pills||'<span style="opacity:.5;font-size:12px">No details added</span>'}</div>
+          ${c.roastDate?`<div style="font-family:'DM Mono',monospace;font-size:10px;color:rgba(245,237,227,.4);margin-top:10px">${formatDate(c.roastDate)}</div>`:''}
+          ${c.rating>0?`<div style="display:inline-flex;align-items:center;gap:2px;color:var(--crema-light);margin-top:10px">${Array(c.rating).fill('<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 14 14" width="14" height="14"><g><path stroke="#d97a5a" stroke-linecap="round" stroke-linejoin="round" d="M2 4h8.5v5c0 0.53043 -0.2107 1.0391 -0.58579 1.4142C9.53914 10.7893 9.03043 11 8.5 11h-5c-0.53043 0 -1.03914 -0.2107 -1.41421 -0.5858C1.71071 10.0391 1.5 9.53043 1.5 9V4.5c0 -0.13261 0.05268 -0.25979 0.14645 -0.35355C1.74021 4.05268 1.86739 4 2 4Z" stroke-width="1"></path><path stroke="#d97a5a" stroke-linecap="round" stroke-linejoin="round" d="M0.5 13.5h13" stroke-width="1"></path><path stroke="#d97a5a" stroke-linecap="round" stroke-linejoin="round" d="M10.5 4h1c0.5304 0 1.0391 0.21071 1.4142 0.58579 0.3751 0.37507 0.5858 0.88378 0.5858 1.41421s-0.2107 1.03914 -0.5858 1.41421C12.5391 7.78929 12.0304 8 11.5 8h-1" stroke-width="1"></path><path stroke="#d97a5a" stroke-linecap="round" stroke-linejoin="round" d="M3 0.5v1" stroke-width="1"></path><path stroke="#d97a5a" stroke-linecap="round" stroke-linejoin="round" d="M8 0.5v1" stroke-width="1"></path><path stroke="#d97a5a" stroke-linecap="round" stroke-linejoin="round" d="M5.5 0.5v1" stroke-width="1"></path></g></svg>').join('')}<span style="font-family:'DM Mono',monospace;font-size:10px;color:rgba(245,237,227,.5);margin-left:6px">${c.rating}/10</span></div>`:''}
+          ${c.notes?`<div style="font-size:13px;color:rgba(245,237,227,.65);margin-top:12px;font-style:italic">"${c.notes}"</div>`:''}
+        </div>
+      </div>
+    </div>
+    <div class="section-title" style="margin-bottom:4px">Brew Log</div>
+    <div class="section-subtitle">${recs.length} attempt${recs.length!==1?'s':''}</div>
+    ${recs.length?recs.map(r=>recipeCard(r,true)).join(''):`<div class="empty-state"><div class="empty-icon">📋</div><div class="empty-title">No brews yet</div></div>`}
+    <div style="height:80px"></div>`;
+}
+
+// ==================== RECIPES ====================
+function renderRecipes() {
+  const el = document.getElementById('recipes-list');
+  el.innerHTML = state.recipes.length ? state.recipes.map(r=>recipeCard(r,true)).join('') : `<div class="empty-state"><div class="empty-icon">📋</div><div class="empty-title">No brews logged yet</div></div>`;
+}
+
+function recipeCard(r, showDel=false) {
+  const coffee = state.coffees.find(c=>c.id===r.coffeeId);
+  const grinder = r.grinderId ? GRINDERS.find(g=>g.id===r.grinderId) : null;
+  const date = new Date(r.createdAt).toLocaleDateString('en-GB',{day:'numeric',month:'short',year:'numeric'});
+  const exTag = r.extraction ? `<span class="extraction-tag tag-${r.extraction}">${r.extraction==='good'?'✓ Good':r.extraction}</span>` : '';
+  const stars = r.rating>0 ? `<span style="display:inline-flex;gap:2px;opacity:0.9;color:var(--crema)">$<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 14 14" width="14" height="14"><g><path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" d="M2 4h8.5v5c0 0.53043 -0.2107 1.0391 -0.58579 1.4142C9.53914 10.7893 9.03043 11 8.5 11h-5c-0.53043 0 -1.03914 -0.2107 -1.41421 -0.5858C1.71071 10.0391 1.5 9.53043 1.5 9V4.5c0 -0.13261 0.05268 -0.25979 0.14645 -0.35355C1.74021 4.05268 1.86739 4 2 4Z" stroke-width="1"></path><path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" d="M0.5 13.5h13" stroke-width="1"></path><path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" d="M10.5 4h1c0.5304 0 1.0391 0.21071 1.4142 0.58579 0.3751 0.37507 0.5858 0.88378 0.5858 1.41421s-0.2107 1.03914 -0.5858 1.41421C12.5391 7.78929 12.0304 8 11.5 8h-1" stroke-width="1"></path><path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" d="M3 0.5v1" stroke-width="1"></path><path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" d="M8 0.5v1" stroke-width="1"></path><path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" d="M5.5 0.5v1" stroke-width="1"></path></g></svg>`.replace(/(<svg[^>]*>.*?<\/svg>)/,'$1'.repeat(r.rating)).replace(/<svg/g,'<svg').split('</svg>').filter((_,i,a)=>i<r.rating).map(()=>`<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 14 14" width="14" height="14"><g><path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" d="M2 4h8.5v5c0 0.53043 -0.2107 1.0391 -0.58579 1.4142C9.53914 10.7893 9.03043 11 8.5 11h-5c-0.53043 0 -1.03914 -0.2107 -1.41421 -0.5858C1.71071 10.0391 1.5 9.53043 1.5 9V4.5c0 -0.13261 0.05268 -0.25979 0.14645 -0.35355C1.74021 4.05268 1.86739 4 2 4Z" stroke-width="1"></path><path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" d="M0.5 13.5h13" stroke-width="1"></path><path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" d="M10.5 4h1c0.5304 0 1.0391 0.21071 1.4142 0.58579 0.3751 0.37507 0.5858 0.88378 0.5858 1.41421s-0.2107 1.03914 -0.5858 1.41421C12.5391 7.78929 12.0304 8 11.5 8h-1" stroke-width="1"></path><path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" d="M3 0.5v1" stroke-width="1"></path><path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" d="M8 0.5v1" stroke-width="1"></path><path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" d="M5.5 0.5v1" stroke-width="1"></path></g></svg>`).join('')+'</span>' : '';
+  const isEsp = isEspressoMethod(r.method||'Espresso');
+  const ratio = (r.dose&&r.yield) ? (parseFloat(r.yield)/parseFloat(r.dose)).toFixed(1)+':1' : '—';
+  const yieldLabel = isEsp ? 'Yield' : 'Water';
+  const yieldUnit = isEsp ? 'g' : 'ml';
+  const grinderBadge = grinder ? `<span style="display:inline-block;margin-top:4px;font-family:'DM Mono',monospace;font-size:9px;background:rgba(42,80,128,0.07);border:1px solid rgba(42,80,128,0.15);color:var(--blue);border-radius:20px;padding:2px 8px;letter-spacing:.5px">${grinder.type==='manual'?'✋':'⚡'} ${grinder.brand} ${grinder.model}</span>` : '';
+  const recipeObj = r.recipeId ? Object.values(RECIPES).flat().find(x=>x.id===r.recipeId) : null;
+  const recipeBadge = recipeObj ? `<span style="display:inline-block;margin-top:4px;margin-left:4px;font-family:'DM Mono',monospace;font-size:9px;background:rgba(92,45,14,0.07);border:1px solid rgba(92,45,14,0.15);color:var(--roast);border-radius:20px;padding:2px 8px;letter-spacing:.5px">📋 ${recipeObj.name.split('—')[0].trim()}</span>` : '';
+  const thumbHtml = coffee?.labelPhoto ? `<img src="${coffee.labelPhoto}" class="brew-label-thumb" alt="label">` : '';
+  return `<div class="recipe-entry">
+    <div class="recipe-entry-header">
+      <div style="display:flex;gap:10px;align-items:flex-start;flex:1">
+        ${thumbHtml}
+        <div style="flex:1;min-width:0">
+          <div style="font-family:'Playfair Display',serif;font-size:14px">${coffee?.name||'Unknown Coffee'}</div>
+          <div style="font-family:'DM Mono',monospace;font-size:10px;color:var(--text-muted)">${coffee?.roaster||''}${coffee?.roaster&&r.method?' · ':''}${r.method||''}</div>
+          ${grinderBadge}
+        </div>
+      </div>
+      <div style="display:flex;align-items:center;gap:6px;flex-shrink:0">${exTag}${showDel?`<button class="btn-delete" onclick="deleteRecipe('${r.id}')">✕</button>`:''}</div>
+    </div>
+    <div class="recipe-params">
+      <div class="param-block"><div class="param-value">${r.grind||'—'}</div><div class="param-label">Grind</div></div>
+      <div class="param-block"><div class="param-value">${r.dose?r.dose+'g':'—'}</div><div class="param-label">Dose</div></div>
+      <div class="param-block"><div class="param-value">${r.time?r.time+'s':'—'}</div><div class="param-label">Time</div></div>
+    </div>
+    <div style="display:flex;justify-content:space-between;align-items:center">
+      <div style="font-family:'DM Mono',monospace;font-size:10px;color:var(--text-muted)">${date}${r.yield?' · '+r.yield+yieldUnit+' '+yieldLabel.toLowerCase():''}${r.temp?' · '+r.temp+'°C':''} · ${ratio}</div>
+      ${stars}
+    </div>
+    ${r.notes?`<div class="recipe-notes">${r.notes}</div>`:''}
+  </div>`;
+}
+
+function deleteRecipe(id) {
+  state.recipes = state.recipes.filter(r=>r.id!==id);
+  save(); showToast('Brew deleted'); renderDashboard(); if(state.currentView==='recipes') renderRecipes();
+}
+
+// ==================== GRINDERS ====================
+function renderGrinders() {
+  const search = document.getElementById('grinder-search-input')?.value.toLowerCase()||'';
+  const el = document.getElementById('grinders-list');
+  const filtered = GRINDERS.filter(g => {
+    const matchType = currentGrinderFilter==='all' || g.type===currentGrinderFilter;
+    const matchSearch = !search || (g.brand+' '+g.model).toLowerCase().includes(search);
+    return matchType && matchSearch;
+  });
+  if (!filtered.length) { el.innerHTML=`<div class="empty-state"><div class="empty-icon">🔍</div><div class="empty-title">No grinders found</div></div>`; return; }
+  el.innerHTML = filtered.map(g => {
+    const inCmp = state.compareIds.includes(g.id);
+    const isFav = state.favouriteGrinderId === g.id;
+    return `<div class="grinder-card ${inCmp?'in-compare':''}" style="${isFav?'border-color:var(--crema);background:rgba(200,135,58,0.04);':''}" onclick="showGrinderDetail('${g.id}')">
+      <div style="flex:1">
+        <div class="grinder-brand">${g.brand}${isFav?' <span style="font-size:9px;color:var(--crema);font-family:DM Mono,monospace;letter-spacing:1px;text-transform:uppercase">★ Default</span>':''}</div>
+        <div class="grinder-model">${g.model}</div>
+        <div style="font-family:'DM Mono',monospace;font-size:9px;color:var(--text-muted);margin-top:4px">${g.min}–${g.max}µm · ${g.settings} settings</div>
+      </div>
+      <div style="display:flex;flex-direction:column;align-items:flex-end;gap:6px">
+        <span class="grinder-type-badge badge-${g.type}">${g.type==='manual'?'✋ Manual':'⚡ Electric'}</span>
+        <div style="display:flex;gap:2px">
+          <button class="compare-toggle-btn" onclick="event.stopPropagation();toggleFavourite('${g.id}')" title="${isFav?'Remove favourite':'Set as favourite'}" style="font-size:18px">${isFav?'⭐':'☆'}</button>
+          <button class="compare-toggle-btn" onclick="event.stopPropagation();toggleCompare('${g.id}')" title="Add to compare">${inCmp?'✅':'⊕'}</button>
+        </div>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function filterGrinders(type, btn) {
+  currentGrinderFilter = type;
+  if (btn) { document.querySelectorAll('.type-btn').forEach(b=>b.classList.remove('active')); btn.classList.add('active'); }
+  renderGrinders();
+}
+
+function toggleCompare(gid) {
+  if (state.compareIds.includes(gid)) {
+    state.compareIds = state.compareIds.filter(id=>id!==gid);
+  } else {
+    if (state.compareIds.length>=5) { showToast('Max 5 grinders'); return; }
+    state.compareIds.push(gid);
+  }
+  save(); updateCompareBar(); if(state.currentView==='grinders') renderGrinders();
+}
+
+function toggleFavourite(gid) {
+  state.favouriteGrinderId = state.favouriteGrinderId === gid ? null : gid;
+  // Also set as the recipe default
+  if (state.favouriteGrinderId) state.selectedGrinderId = gid;
+  save();
+  if(state.currentView==='grinders') renderGrinders();
+}
+
+function updateCompareBar() {
+  const n = state.compareIds.length;
+  document.getElementById('compare-bar-text').textContent = `${n} grinder${n!==1?'s':''} selected`;
+  document.getElementById('compare-bar').classList.toggle('visible', n>0);
+}
+
+function showGrinderDetail(gid) {
+  const g = GRINDERS.find(x=>x.id===gid); if(!g) return;
+  const inCmp = state.compareIds.includes(gid);
+  const isFav = state.favouriteGrinderId === gid;
+  const pct = v => Math.max(0,Math.min(100,((v-CHART_MIN)/(CHART_MAX-CHART_MIN))*100));
+  const covered = BREW_METHODS.filter(m=>g.min<=m.max && g.max>=m.min);
+
+  // Build method compatibility chart
+  const rowHeight = 16;
+  const chartH = BREW_METHODS.length * (rowHeight+3) + 10;
+  const methodRows = BREW_METHODS.map((m,i) => {
+    const left=pct(m.min), width=pct(m.max)-left;
+    const compat = g.min<=m.max && g.max>=m.min;
+    return `<div style="position:absolute;top:${i*(rowHeight+3)}px;left:${left}%;width:${width}%;height:${rowHeight}px;background:${m.color};border-radius:3px;opacity:${compat?0.85:0.15};display:flex;align-items:center;padding:0 4px">
+      <span style="font-family:'DM Mono',monospace;font-size:7px;color:white;white-space:nowrap;overflow:hidden">${m.name}</span></div>`;
+  }).join('');
+
+  // Grinder range overlay
+  const gLeft=pct(g.min), gWidth=pct(g.max)-gLeft;
+
+  document.getElementById('grinder-detail-content').innerHTML = `
+    <div class="grinder-detail-card">
+      <div style="font-family:'Playfair Display',serif;font-size:22px;color:var(--crema-light)">${g.model}</div>
+      <div style="display:flex;align-items:center;gap:8px;margin-bottom:14px">
+        <span style="font-family:'DM Mono',monospace;font-size:11px;color:rgba(245,237,227,.5);letter-spacing:1px">${g.brand} · ${g.type==='manual'?'✋ Manual':'⚡ Electric'}</span>
+        ${isFav?'<span style="font-family:\'DM Mono\',monospace;font-size:9px;background:rgba(200,135,58,0.25);color:var(--crema-light);border-radius:20px;padding:2px 8px;letter-spacing:1px">★ DEFAULT GRINDER</span>':''}
+      </div>
+      <div class="grinder-specs-grid">
+        <div class="grinder-spec-block"><div class="grinder-spec-value">${g.settings}</div><div class="grinder-spec-label">Settings</div></div>
+        <div class="grinder-spec-block"><div class="grinder-spec-value" style="font-size:14px">${g.min}–${g.max}µm</div><div class="grinder-spec-label">Grind Range</div></div>
+      </div>
+      ${g.notes?`<div style="font-size:13px;color:rgba(245,237,227,.65);margin-top:14px;line-height:1.5;font-style:italic">"${g.notes}"</div>`:''}
+    </div>
+
+    <div style="margin-bottom:6px;font-family:'Playfair Display',serif;font-size:16px">Compatible Brew Methods</div>
+    <div style="display:flex;flex-wrap:wrap;margin-bottom:20px">
+      ${covered.map(m=>`<span style="display:inline-flex;align-items:center;gap:4px;padding:4px 10px;border-radius:20px;font-family:'DM Mono',monospace;font-size:9px;letter-spacing:1px;text-transform:uppercase;margin:3px;background:${m.color}18;border:1px solid ${m.color}40;color:${m.color}">${m.name}</span>`).join('')}
+      ${covered.length===0?'<span style="font-size:13px;color:var(--text-muted)">Highly specialised grinder</span>':''}
+    </div>
+
+    <div style="margin-bottom:8px;font-family:'Playfair Display',serif;font-size:16px">Grind Range vs Brew Methods</div>
+    <div style="font-family:'DM Mono',monospace;font-size:10px;color:var(--text-muted);margin-bottom:12px">Highlighted = compatible. Amber overlay = this grinder's range.</div>
+    <div style="background:white;border-radius:var(--radius);padding:16px;border:1px solid var(--border);margin-bottom:20px">
+      <div style="position:relative;height:${chartH}px;margin-bottom:8px">
+        ${methodRows}
+        <div style="position:absolute;top:0;bottom:0;left:${gLeft}%;width:${gWidth}%;background:rgba(200,135,58,0.22);border:2px solid var(--crema);border-radius:4px;z-index:10"></div>
+      </div>
+      <div class="grind-axis">
+        <span class="grind-axis-label">0µm</span><span class="grind-axis-label">375</span>
+        <span class="grind-axis-label">750</span><span class="grind-axis-label">1125</span><span class="grind-axis-label">1500µm</span>
+      </div>
+      <div style="display:flex;align-items:center;gap:6px;margin-top:8px">
+        <div style="width:16px;height:10px;background:rgba(200,135,58,0.22);border:1.5px solid var(--crema);border-radius:2px"></div>
+        <span style="font-family:'DM Mono',monospace;font-size:9px;color:var(--text-muted)">This grinder's range</span>
+      </div>
+    </div>
+
+    <button class="btn-primary" style="background:${isFav?'#8b1a1a':'var(--espresso)'}" onclick="toggleFavourite('${g.id}');showGrinderDetail('${g.id}');showToast('${isFav?'Removed as default':'Set as default grinder ⭐'}')">
+      ${isFav?'✕ Remove as Default Grinder':'⭐ Set as Default Grinder'}
+    </button>
+    <div style="height:10px"></div>
+    <button class="btn-primary" style="background:${inCmp?'#8b1a1a':'var(--crema)'};color:${inCmp?'white':'var(--espresso)'}" onclick="toggleCompare('${g.id}');renderGrinders();closeModal('modal-grinder-detail');showToast('${inCmp?'Removed from':'Added to'} compare')">
+      ${inCmp?'✕ Remove from Compare':'⊕ Add to Compare'}
+    </button>
+    <div style="height:12px"></div>
+    <button class="btn-secondary" style="width:100%" onclick="closeModal('modal-grinder-detail')">Close</button>
+    <div style="height:20px"></div>`;
+  openModal('modal-grinder-detail');
+}
+
+// ==================== COMPARE ====================
+function renderCompare() {
+  const el = document.getElementById('compare-content');
+  if (!state.compareIds.length) {
+    el.innerHTML=`<div class="empty-state"><div class="empty-icon">⚖️</div><div class="empty-title">No grinders selected</div><div class="empty-desc">Go to Grinders and tap ⊕ to add up to 5 grinders to compare.</div></div>`;
+    return;
+  }
+  const grinders = state.compareIds.map(id=>GRINDERS.find(g=>g.id===id)).filter(Boolean);
+  const pct = v => Math.max(0,Math.min(100,((v-CHART_MIN)/(CHART_MAX-CHART_MIN))*100));
+
+  // Grinder range bars
+  const rangeHTML = grinders.map((g,i)=>{
+    const left=pct(g.min), width=pct(g.max)-left;
+    const label = `${g.brand} ${g.model}`;
+    return `<div class="grinder-bar-row">
+      <div class="grinder-bar-name" style="color:${COMPARE_COLORS[i]}">${label}</div>
+      <div class="grinder-bar-track">
+        <div class="grinder-bar-fill" style="left:${left}%;width:${width}%;background:${COMPARE_COLORS[i]}">${g.min}–${g.max}µm</div>
+      </div>
+    </div>`;
+  }).join('');
+
+  // Brew method compatibility matrix
+  const matrixHTML = BREW_METHODS.map(m=>{
+    const dots = grinders.map((g,i)=>{
+      const ok = g.min<=m.max && g.max>=m.min;
+      return `<span style="display:inline-block;width:12px;height:12px;border-radius:50%;background:${ok?COMPARE_COLORS[i]:'rgba(0,0,0,0.07)'};border:1px solid ${ok?COMPARE_COLORS[i]:'rgba(0,0,0,0.1)'};margin-right:4px"></span>`;
+    }).join('');
+    return `<div style="display:flex;align-items:center;justify-content:space-between;padding:10px 14px;border-bottom:1px solid var(--border)">
+      <div>
+        <div style="font-family:'DM Mono',monospace;font-size:11px;letter-spacing:.5px">${m.name}</div>
+        <div style="font-family:'DM Mono',monospace;font-size:9px;color:var(--text-muted)">${m.min}–${m.max}µm</div>
+      </div>
+      <div style="display:flex;align-items:center">${dots}</div>
+    </div>`;
+  }).join('');
+
+  // Specs cards
+  const specsHTML = grinders.map((g,i)=>`
+    <div style="padding:12px;border:1px solid ${COMPARE_COLORS[i]}30;border-left:3px solid ${COMPARE_COLORS[i]};border-radius:10px;margin-bottom:8px">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
+        <div>
+          <div style="font-family:'Playfair Display',serif;font-size:15px">${g.model}</div>
+          <div style="font-family:'DM Mono',monospace;font-size:9px;color:var(--text-muted);letter-spacing:.5px">${g.brand}</div>
+        </div>
+        <span class="grinder-type-badge badge-${g.type}">${g.type==='manual'?'✋ Manual':'⚡ Electric'}</span>
+      </div>
+      <div style="display:flex;gap:8px;margin-bottom:8px">
+        <div class="param-block" style="flex:1"><div class="param-value" style="font-size:16px">${g.settings}</div><div class="param-label">Settings</div></div>
+        <div class="param-block" style="flex:2"><div class="param-value" style="font-size:12px">${g.min}–${g.max}µm</div><div class="param-label">Grind Range</div></div>
+      </div>
+      ${g.notes?`<div style="font-size:11px;color:var(--text-muted);font-style:italic;line-height:1.5">${g.notes}</div>`:''}
+      <button style="margin-top:8px;background:none;border:1px solid rgba(139,26,26,0.2);color:var(--red);border-radius:8px;padding:4px 12px;font-family:'DM Mono',monospace;font-size:9px;letter-spacing:1px;cursor:pointer" onclick="toggleCompare('${g.id}');renderCompare()">✕ Remove</button>
+    </div>`).join('');
+
+  el.innerHTML = `
+    <div class="card" style="padding:16px 18px">
+      <div class="divider" style="margin-top:4px">Grind Ranges</div>
+      ${rangeHTML}
+      <div class="grind-axis">
+        <span class="grind-axis-label">0µm</span><span class="grind-axis-label">375</span>
+        <span class="grind-axis-label">750</span><span class="grind-axis-label">1125</span><span class="grind-axis-label">1500µm</span>
+      </div>
+      <div style="margin-top:12px">
+        ${grinders.map((g,i)=>`<div style="display:flex;align-items:center;gap:6px;margin-bottom:3px"><span style="display:inline-block;width:12px;height:8px;border-radius:2px;background:${COMPARE_COLORS[i]}"></span><span style="font-family:'DM Mono',monospace;font-size:9px;color:var(--text-muted)">${g.brand} ${g.model}</span></div>`).join('')}
+      </div>
+    </div>
+
+    <div class="card" style="padding:0;overflow:hidden">
+      <div style="padding:14px 16px 12px;background:var(--espresso)">
+        <div style="font-family:'Playfair Display',serif;font-size:16px;color:var(--crema-light)">Brew Compatibility Matrix</div>
+        <div style="font-family:'DM Mono',monospace;font-size:9px;color:rgba(245,237,227,.4);letter-spacing:1px;margin-top:4px;text-transform:uppercase">Filled dot = grinder can reach this method</div>
+      </div>
+      <div style="background:white;padding:6px 0">
+        <div style="display:flex;padding:8px 14px 6px">
+          ${grinders.map((g,i)=>`<div style="display:flex;align-items:center;gap:4px;margin-right:12px"><span style="display:inline-block;width:10px;height:10px;border-radius:50%;background:${COMPARE_COLORS[i]}"></span><span style="font-family:'DM Mono',monospace;font-size:9px;color:var(--text-muted)">${g.model}</span></div>`).join('')}
+        </div>
+        ${matrixHTML}
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="divider" style="margin-top:4px">Specs</div>
+      ${specsHTML}
+    </div>
+
+    <div style="text-align:center;padding-bottom:10px">
+      <button class="btn-secondary" onclick="state.compareIds=[];save();updateCompareBar();renderCompare()">Clear all</button>
+    </div>`;
+}
+
+// ==================== UTILS ====================
+function formatDate(d) { if(!d) return ''; return new Date(d+'T00:00:00').toLocaleDateString('en-GB',{day:'numeric',month:'short',year:'numeric'}).toUpperCase(); }
+function showToast(msg) { const t=document.getElementById('toast'); t.textContent=msg; t.classList.add('show'); setTimeout(()=>t.classList.remove('show'),2200); }
+
+document.querySelectorAll('.modal-overlay').forEach(o => o.addEventListener('click', e => { if(e.target===o) o.classList.remove('open'); }));
+
+// ==================== INIT ====================
+load();
+renderDashboard();
+updateCompareBar();
+
+let appSettings = { paletteId: 'terracotta', displayFontId: 'inter', monoFontId: 'inter', darkMode: false };
+
+function loadSettings() {
+  try {
+    const s = localStorage.getItem('dialin_settings');
+    if (s) appSettings = { ...appSettings, ...JSON.parse(s) };
+  } catch(e) {}
+  applySettings();
+  applyDarkMode();
+}
+
+function saveSettings() {
+  try { localStorage.setItem('dialin_settings', JSON.stringify(appSettings)); } catch(e) {}
+}
+
+function applySettings() {
+  // Apply Inter font globally
+  let dynStyle = document.getElementById('dyn-font-style');
+  if (!dynStyle) { dynStyle = document.createElement('style'); dynStyle.id = 'dyn-font-style'; document.head.appendChild(dynStyle); }
+  dynStyle.textContent = `* { font-family: 'Inter', sans-serif !important; } .app-title { font-weight:600 !important; letter-spacing:-0.5px !important; }`;
+  applyDarkMode();
+}
+
+function toggleDarkMode() {
+  appSettings.darkMode = !appSettings.darkMode;
+  applyDarkMode();
+  saveSettings();
+}
+
+function applyDarkMode() {
+  const isDark = appSettings.darkMode;
+  document.body.classList.toggle('dark-mode', isDark);
+  const btn = document.getElementById('dark-toggle-btn');
+  if (btn) btn.innerHTML = isDark ? `<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="-0.5 -0.5 16 16" stroke-linecap="round" stroke-linejoin="round" stroke="currentColor" width="18" height="18"><path d="M5 7.5a2.5 2.5 0 1 0 5 0 2.5 2.5 0 1 0 -5 0" stroke-width="1"></path><path d="M7.5 1.875v1.25m0 8.7525v1.25M3.125 7.5H1.875m11.25 0h-1.25m0 -4.375 -1.25 1.25M3.125 3.125l1.25 1.25m0 6.25 -1.25 1.25m8.75 0 -1.25 -1.25" stroke-width="1"></path></svg>` : `<svg xmlns="http://www.w3.org/2000/svg" viewBox="-0.5 -0.5 16 16" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" width="18" height="18"><path d="M13.125 7.9937499999999995A5.625 5.625 0 1 1 7.0062500000000005 1.875 4.375 4.375 0 0 0 13.125 7.9937499999999995z" stroke-width="1"></path></svg>`;
+}
+
+</script>
+
+
+
+</body>
+</html>
