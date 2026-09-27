@@ -84,7 +84,7 @@
   .coffee-meta { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 12px; }
   .meta-pill { font-family: 'DM Mono', monospace; font-size: 10px; padding: 3px 8px; background: rgba(200,135,58,0.1); border: 1px solid rgba(200,135,58,0.2); border-radius: 20px; color: var(--roast); }
   .recipe-count { font-family: 'DM Mono', monospace; font-size: 11px; color: var(--text-muted); }
-  .recipe-entry { background: white; border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 14px; margin-bottom: 10px; }
+  .recipe-entry { background: var(--card); border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 14px; margin-bottom: 10px; }
   .recipe-entry-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 10px; }
   .extraction-tag { font-family: 'DM Mono', monospace; font-size: 10px; padding: 2px 8px; border-radius: 20px; letter-spacing: 1px; text-transform: uppercase; white-space: nowrap; }
   .tag-under { background: rgba(74,122,208,0.1); color: #4a7ad0; border: 1px solid rgba(74,122,208,0.25); }
@@ -141,6 +141,17 @@
   .coffee-rating-btn.active { opacity:1; }
   .brew-label-thumb { width:48px; height:48px; border-radius:8px; object-fit:cover; flex-shrink:0; border:1px solid var(--border); }
 
+
+  /* Long-press edit overlay */
+  .card-wrap { position:relative; }
+  .card-edit-overlay { position:absolute; inset:0; background:rgba(18,60,39,0.93); border-radius:var(--radius); display:flex; align-items:center; justify-content:center; gap:10px; opacity:0; pointer-events:none; transition:opacity .15s; z-index:10; flex-wrap:wrap; padding:12px; }
+  .card-edit-overlay.visible { opacity:1; pointer-events:all; }
+  .edit-overlay-btn { background:rgba(255,255,255,0.12); border:1px solid rgba(255,255,255,0.3); color:#FAFAF7; font-size:11px; padding:9px 14px; border-radius:8px; cursor:pointer; font-family:'Space Mono',monospace; }
+  .edit-overlay-btn:hover { background:rgba(255,255,255,0.22); }
+  /* Time inputs */
+  .time-row { display:flex; gap:6px; align-items:center; }
+  /* Trend charts */
+  .trend-chart-wrap { background:var(--card); border:1px solid var(--border); border-radius:var(--radius); padding:14px; margin-bottom:10px; }
   /* GRINDER STYLES */
   .grinder-type-toggle { display: flex; background: rgba(26,15,10,0.06); border-radius: 10px; padding: 3px; margin-bottom: 20px; }
   .type-btn { flex: 1; padding: 9px 12px; border: none; border-radius: 8px; font-family: 'DM Mono', monospace; font-size: 10px; letter-spacing: 1px; text-transform: uppercase; cursor: pointer; background: none; color: var(--text-muted); transition: all 0.2s; }
@@ -216,7 +227,7 @@
   body.dark-mode .section-subtitle, body.dark-mode .modal-subtitle, body.dark-mode .text-muted { color: var(--dm-text-muted) !important; }
   body.dark-mode .divider { color: var(--dm-text-muted) !important; border-color: var(--dm-border) !important; }
   body.dark-mode .meta-pill { background: var(--dm-pill) !important; color: var(--dm-text-muted) !important; border-color: var(--dm-border) !important; }
-  body.dark-mode .stats-bar { background: var(--dm-card) !important; border-color: var(--dm-border) !important; }
+  body.dark-mode .stats-bar { background: transparent !important; }
   body.dark-mode .stat-value { color: var(--crema-light) !important; }
   body.dark-mode .step-row textarea { background: var(--dm-input) !important; border-color: var(--dm-border) !important; color: var(--dm-text) !important; }
   body.dark-mode .font-option, body.dark-mode .label-upload-btn { background: var(--dm-input) !important; border-color: var(--dm-border) !important; }
@@ -227,6 +238,46 @@
   body.dark-mode .param-block { background: var(--dm-card) !important; }
   body.dark-mode .recipe-params { background: var(--dm-card) !important; }
   body.dark-mode .toast { background: var(--dm-surface) !important; }
+  /* Additional dark mode fixes */
+  body.dark-mode { background: var(--dm-bg) !important; }
+  body.dark-mode .view { background: var(--dm-bg); }
+  body.dark-mode .recipe-entry { background: var(--dm-card) !important; border-color: var(--dm-border) !important; }
+  body.dark-mode .recipe-lib-card { background: var(--dm-card) !important; border-color: var(--dm-border) !important; }
+  body.dark-mode .recipe-lib-header { background: var(--dm-surface) !important; }
+  body.dark-mode .recipe-lib-steps li { color: var(--dm-text-muted) !important; }
+  body.dark-mode .stat-block { background: var(--dm-card) !important; border-color: var(--dm-border) !important; }
+  body.dark-mode .stat-value { color: var(--dm-text) !important; }
+  body.dark-mode .stat-label { color: var(--dm-text-muted) !important; }
+  body.dark-mode .section-title { color: var(--dm-text) !important; }
+  body.dark-mode .section-subtitle { color: var(--dm-text-muted) !important; }
+  body.dark-mode .param-value { color: var(--dm-text) !important; }
+  body.dark-mode .param-label { color: var(--dm-text-muted) !important; }
+  body.dark-mode .param-block { background: var(--dm-input) !important; }
+  body.dark-mode .recipe-notes { color: var(--dm-text-muted) !important; border-color: var(--dm-border) !important; }
+  body.dark-mode .empty-title { color: var(--dm-text-muted) !important; }
+  body.dark-mode .empty-desc { color: var(--dm-text-muted) !important; }
+  body.dark-mode .meta-pill { background: var(--dm-pill) !important; border-color: var(--dm-border) !important; color: var(--dm-text-muted) !important; }
+  body.dark-mode .coffee-card-body { background: var(--dm-card) !important; }
+  body.dark-mode .coffee-card-roaster { color: var(--dm-text-muted) !important; }
+  body.dark-mode .recipe-count { color: var(--dm-text-muted) !important; }
+  body.dark-mode .grinder-brand { color: var(--dm-text-muted) !important; }
+  body.dark-mode .grinder-model { color: var(--dm-text) !important; }
+  body.dark-mode .grinder-card { background: var(--dm-card) !important; border-color: var(--dm-border) !important; }
+  body.dark-mode .type-btn { color: var(--dm-text-muted) !important; }
+  body.dark-mode .type-btn.active { background: var(--espresso) !important; color: var(--crema-light) !important; }
+  body.dark-mode .grinder-type-toggle { background: rgba(255,255,255,0.05) !important; }
+  body.dark-mode .grinder-search input { background: var(--dm-input) !important; border-color: var(--dm-border) !important; color: var(--dm-text) !important; }
+  body.dark-mode .divider { color: var(--crema) !important; }
+  body.dark-mode .custom-recipe-card { background: var(--dm-card) !important; border-color: var(--dm-border) !important; }
+  body.dark-mode .trend-chart-wrap { background: var(--dm-card) !important; border-color: var(--dm-border) !important; }
+  body.dark-mode .label-upload-btn { background: var(--dm-input) !important; border-color: var(--dm-border) !important; }
+  body.dark-mode .coffee-selector-item { background: var(--dm-input) !important; border-color: var(--dm-border) !important; color: var(--dm-text) !important; }
+  body.dark-mode .coffee-selector-item.selected { border-color: var(--crema) !important; background: rgba(82,121,111,0.2) !important; }
+  body.dark-mode .method-tab { background: var(--dm-input) !important; border-color: var(--dm-border) !important; color: var(--dm-text-muted) !important; }
+  body.dark-mode .method-tab.selected { background: var(--espresso) !important; border-color: var(--espresso) !important; color: var(--crema-light) !important; }
+  body.dark-mode .extraction-btn { background: var(--dm-input) !important; border-color: var(--dm-border) !important; color: var(--dm-text-muted) !important; }
+  body.dark-mode .recipe-entry-header div[style] { color: var(--dm-text) !important; }
+  body.dark-mode .card-edit-overlay { background: rgba(10,31,20,0.96) !important; }
 
   .grinder-detail-card { background: var(--espresso); border-radius: var(--radius); padding: 20px; margin-bottom: 16px; }
   .grinder-specs-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 14px; }
@@ -270,8 +321,6 @@
 <!-- DASHBOARD -->
 <div id="view-dashboard" class="view active">
   <div style="height:20px"></div>
-  <div class="section-title">Good morning ☀</div>
-  <div class="section-subtitle">How's the extraction today?</div>
   <div class="stats-bar">
     <div class="stat-block"><div class="stat-value" id="stat-coffees">0</div><div class="stat-label">Coffees</div></div>
     <div class="stat-block"><div class="stat-value" id="stat-recipes">0</div><div class="stat-label">Brews</div></div>
@@ -443,7 +492,8 @@
 <div class="modal-overlay" id="modal-recipe">
   <div class="modal">
     <div class="modal-handle"></div>
-    <div class="modal-title">Log Brew</div>
+    <div class="modal-title" id="r-modal-title">Log Brew</div>
+    <input type="hidden" id="r-edit-id" value="">
     <div class="modal-subtitle">Dialling in a recipe</div>
     <div class="form-group"><label class="form-label">Coffee</label><div class="coffee-selector" id="coffee-selector"></div></div>
     <div class="form-group"><label class="form-label">Grinder Used</label><div class="coffee-selector" id="grinder-selector" style="max-height:150px"></div></div>
@@ -478,7 +528,19 @@
     </div>
     <div class="form-row">
       <div class="form-group"><label class="form-label" id="r-yield-label">Yield (g)</label><input type="number" class="form-input" id="r-yield" placeholder="e.g. 36" step="0.1"></div>
-      <div class="form-group"><label class="form-label">Time (sec)</label><input type="number" class="form-input" id="r-time" placeholder="e.g. 28"></div>
+      <div class="form-group">
+        <label class="form-label">Time</label>
+        <div class="time-row" id="r-time-esp">
+          <input type="number" class="form-input" id="r-time" placeholder="28" min="0" style="width:80px">
+          <span style="color:var(--text-muted);font-size:12px">sec</span>
+        </div>
+        <div class="time-row" id="r-time-filter" style="display:none">
+          <input type="number" class="form-input" id="r-time-mins" placeholder="3" min="0" style="width:60px">
+          <span style="font-size:16px;font-weight:700;color:var(--text-muted)">:</span>
+          <input type="number" class="form-input" id="r-time-secs" placeholder="30" min="0" max="59" style="width:60px">
+          <span style="font-size:11px;color:var(--text-muted)">m : s</span>
+        </div>
+      </div>
     </div>
     <div class="form-group"><label class="form-label">Water Temp (°C)</label><input type="number" class="form-input" id="r-temp" placeholder="e.g. 93" style="width:50%"></div>
     <div class="divider">Extraction</div>
@@ -493,12 +555,17 @@
     </div>
     <div class="form-group">
       <label class="form-label">Rating</label>
-      <div class="rating-row">
-        <button class="star-btn" onclick="setRating(1)"><svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 14 14" width="22" height="22"><g><path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" d="M2 4h8.5v5c0 0.53043 -0.2107 1.0391 -0.58579 1.4142C9.53914 10.7893 9.03043 11 8.5 11h-5c-0.53043 0 -1.03914 -0.2107 -1.41421 -0.5858C1.71071 10.0391 1.5 9.53043 1.5 9V4.5c0 -0.13261 0.05268 -0.25979 0.14645 -0.35355C1.74021 4.05268 1.86739 4 2 4Z" stroke-width="1"></path><path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" d="M0.5 13.5h13" stroke-width="1"></path><path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" d="M10.5 4h1c0.5304 0 1.0391 0.21071 1.4142 0.58579 0.3751 0.37507 0.5858 0.88378 0.5858 1.41421s-0.2107 1.03914 -0.5858 1.41421C12.5391 7.78929 12.0304 8 11.5 8h-1" stroke-width="1"></path><path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" d="M3 0.5v1" stroke-width="1"></path><path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" d="M8 0.5v1" stroke-width="1"></path><path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" d="M5.5 0.5v1" stroke-width="1"></path></g></svg></button>
-        <button class="star-btn" onclick="setRating(2)"><svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 14 14" width="22" height="22"><g><path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" d="M2 4h8.5v5c0 0.53043 -0.2107 1.0391 -0.58579 1.4142C9.53914 10.7893 9.03043 11 8.5 11h-5c-0.53043 0 -1.03914 -0.2107 -1.41421 -0.5858C1.71071 10.0391 1.5 9.53043 1.5 9V4.5c0 -0.13261 0.05268 -0.25979 0.14645 -0.35355C1.74021 4.05268 1.86739 4 2 4Z" stroke-width="1"></path><path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" d="M0.5 13.5h13" stroke-width="1"></path><path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" d="M10.5 4h1c0.5304 0 1.0391 0.21071 1.4142 0.58579 0.3751 0.37507 0.5858 0.88378 0.5858 1.41421s-0.2107 1.03914 -0.5858 1.41421C12.5391 7.78929 12.0304 8 11.5 8h-1" stroke-width="1"></path><path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" d="M3 0.5v1" stroke-width="1"></path><path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" d="M8 0.5v1" stroke-width="1"></path><path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" d="M5.5 0.5v1" stroke-width="1"></path></g></svg></button>
-        <button class="star-btn" onclick="setRating(3)"><svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 14 14" width="22" height="22"><g><path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" d="M2 4h8.5v5c0 0.53043 -0.2107 1.0391 -0.58579 1.4142C9.53914 10.7893 9.03043 11 8.5 11h-5c-0.53043 0 -1.03914 -0.2107 -1.41421 -0.5858C1.71071 10.0391 1.5 9.53043 1.5 9V4.5c0 -0.13261 0.05268 -0.25979 0.14645 -0.35355C1.74021 4.05268 1.86739 4 2 4Z" stroke-width="1"></path><path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" d="M0.5 13.5h13" stroke-width="1"></path><path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" d="M10.5 4h1c0.5304 0 1.0391 0.21071 1.4142 0.58579 0.3751 0.37507 0.5858 0.88378 0.5858 1.41421s-0.2107 1.03914 -0.5858 1.41421C12.5391 7.78929 12.0304 8 11.5 8h-1" stroke-width="1"></path><path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" d="M3 0.5v1" stroke-width="1"></path><path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" d="M8 0.5v1" stroke-width="1"></path><path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" d="M5.5 0.5v1" stroke-width="1"></path></g></svg></button>
-        <button class="star-btn" onclick="setRating(4)"><svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 14 14" width="22" height="22"><g><path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" d="M2 4h8.5v5c0 0.53043 -0.2107 1.0391 -0.58579 1.4142C9.53914 10.7893 9.03043 11 8.5 11h-5c-0.53043 0 -1.03914 -0.2107 -1.41421 -0.5858C1.71071 10.0391 1.5 9.53043 1.5 9V4.5c0 -0.13261 0.05268 -0.25979 0.14645 -0.35355C1.74021 4.05268 1.86739 4 2 4Z" stroke-width="1"></path><path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" d="M0.5 13.5h13" stroke-width="1"></path><path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" d="M10.5 4h1c0.5304 0 1.0391 0.21071 1.4142 0.58579 0.3751 0.37507 0.5858 0.88378 0.5858 1.41421s-0.2107 1.03914 -0.5858 1.41421C12.5391 7.78929 12.0304 8 11.5 8h-1" stroke-width="1"></path><path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" d="M3 0.5v1" stroke-width="1"></path><path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" d="M8 0.5v1" stroke-width="1"></path><path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" d="M5.5 0.5v1" stroke-width="1"></path></g></svg></button>
-        <button class="star-btn" onclick="setRating(5)"><svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 14 14" width="22" height="22"><g><path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" d="M2 4h8.5v5c0 0.53043 -0.2107 1.0391 -0.58579 1.4142C9.53914 10.7893 9.03043 11 8.5 11h-5c-0.53043 0 -1.03914 -0.2107 -1.41421 -0.5858C1.71071 10.0391 1.5 9.53043 1.5 9V4.5c0 -0.13261 0.05268 -0.25979 0.14645 -0.35355C1.74021 4.05268 1.86739 4 2 4Z" stroke-width="1"></path><path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" d="M0.5 13.5h13" stroke-width="1"></path><path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" d="M10.5 4h1c0.5304 0 1.0391 0.21071 1.4142 0.58579 0.3751 0.37507 0.5858 0.88378 0.5858 1.41421s-0.2107 1.03914 -0.5858 1.41421C12.5391 7.78929 12.0304 8 11.5 8h-1" stroke-width="1"></path><path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" d="M3 0.5v1" stroke-width="1"></path><path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" d="M8 0.5v1" stroke-width="1"></path><path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" d="M5.5 0.5v1" stroke-width="1"></path></g></svg></button>
+      <div class="rating-row" style="flex-wrap:wrap;gap:4px">
+        <button class="star-btn" onclick="setRating(1)"><svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 14 14" width="19" height="19"><g><path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" d="M2 4h8.5v5c0 0.53043 -0.2107 1.0391 -0.58579 1.4142C9.53914 10.7893 9.03043 11 8.5 11h-5c-0.53043 0 -1.03914 -0.2107 -1.41421 -0.5858C1.71071 10.0391 1.5 9.53043 1.5 9V4.5c0 -0.13261 0.05268 -0.25979 0.14645 -0.35355C1.74021 4.05268 1.86739 4 2 4Z" stroke-width="1"></path><path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" d="M0.5 13.5h13" stroke-width="1"></path><path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" d="M10.5 4h1c0.5304 0 1.0391 0.21071 1.4142 0.58579 0.3751 0.37507 0.5858 0.88378 0.5858 1.41421s-0.2107 1.03914 -0.5858 1.41421C12.5391 7.78929 12.0304 8 11.5 8h-1" stroke-width="1"></path><path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" d="M3 0.5v1" stroke-width="1"></path><path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" d="M8 0.5v1" stroke-width="1"></path><path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" d="M5.5 0.5v1" stroke-width="1"></path></g></svg></button>
+        <button class="star-btn" onclick="setRating(2)"><svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 14 14" width="19" height="19"><g><path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" d="M2 4h8.5v5c0 0.53043 -0.2107 1.0391 -0.58579 1.4142C9.53914 10.7893 9.03043 11 8.5 11h-5c-0.53043 0 -1.03914 -0.2107 -1.41421 -0.5858C1.71071 10.0391 1.5 9.53043 1.5 9V4.5c0 -0.13261 0.05268 -0.25979 0.14645 -0.35355C1.74021 4.05268 1.86739 4 2 4Z" stroke-width="1"></path><path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" d="M0.5 13.5h13" stroke-width="1"></path><path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" d="M10.5 4h1c0.5304 0 1.0391 0.21071 1.4142 0.58579 0.3751 0.37507 0.5858 0.88378 0.5858 1.41421s-0.2107 1.03914 -0.5858 1.41421C12.5391 7.78929 12.0304 8 11.5 8h-1" stroke-width="1"></path><path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" d="M3 0.5v1" stroke-width="1"></path><path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" d="M8 0.5v1" stroke-width="1"></path><path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" d="M5.5 0.5v1" stroke-width="1"></path></g></svg></button>
+        <button class="star-btn" onclick="setRating(3)"><svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 14 14" width="19" height="19"><g><path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" d="M2 4h8.5v5c0 0.53043 -0.2107 1.0391 -0.58579 1.4142C9.53914 10.7893 9.03043 11 8.5 11h-5c-0.53043 0 -1.03914 -0.2107 -1.41421 -0.5858C1.71071 10.0391 1.5 9.53043 1.5 9V4.5c0 -0.13261 0.05268 -0.25979 0.14645 -0.35355C1.74021 4.05268 1.86739 4 2 4Z" stroke-width="1"></path><path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" d="M0.5 13.5h13" stroke-width="1"></path><path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" d="M10.5 4h1c0.5304 0 1.0391 0.21071 1.4142 0.58579 0.3751 0.37507 0.5858 0.88378 0.5858 1.41421s-0.2107 1.03914 -0.5858 1.41421C12.5391 7.78929 12.0304 8 11.5 8h-1" stroke-width="1"></path><path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" d="M3 0.5v1" stroke-width="1"></path><path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" d="M8 0.5v1" stroke-width="1"></path><path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" d="M5.5 0.5v1" stroke-width="1"></path></g></svg></button>
+        <button class="star-btn" onclick="setRating(4)"><svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 14 14" width="19" height="19"><g><path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" d="M2 4h8.5v5c0 0.53043 -0.2107 1.0391 -0.58579 1.4142C9.53914 10.7893 9.03043 11 8.5 11h-5c-0.53043 0 -1.03914 -0.2107 -1.41421 -0.5858C1.71071 10.0391 1.5 9.53043 1.5 9V4.5c0 -0.13261 0.05268 -0.25979 0.14645 -0.35355C1.74021 4.05268 1.86739 4 2 4Z" stroke-width="1"></path><path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" d="M0.5 13.5h13" stroke-width="1"></path><path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" d="M10.5 4h1c0.5304 0 1.0391 0.21071 1.4142 0.58579 0.3751 0.37507 0.5858 0.88378 0.5858 1.41421s-0.2107 1.03914 -0.5858 1.41421C12.5391 7.78929 12.0304 8 11.5 8h-1" stroke-width="1"></path><path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" d="M3 0.5v1" stroke-width="1"></path><path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" d="M8 0.5v1" stroke-width="1"></path><path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" d="M5.5 0.5v1" stroke-width="1"></path></g></svg></button>
+        <button class="star-btn" onclick="setRating(5)"><svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 14 14" width="19" height="19"><g><path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" d="M2 4h8.5v5c0 0.53043 -0.2107 1.0391 -0.58579 1.4142C9.53914 10.7893 9.03043 11 8.5 11h-5c-0.53043 0 -1.03914 -0.2107 -1.41421 -0.5858C1.71071 10.0391 1.5 9.53043 1.5 9V4.5c0 -0.13261 0.05268 -0.25979 0.14645 -0.35355C1.74021 4.05268 1.86739 4 2 4Z" stroke-width="1"></path><path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" d="M0.5 13.5h13" stroke-width="1"></path><path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" d="M10.5 4h1c0.5304 0 1.0391 0.21071 1.4142 0.58579 0.3751 0.37507 0.5858 0.88378 0.5858 1.41421s-0.2107 1.03914 -0.5858 1.41421C12.5391 7.78929 12.0304 8 11.5 8h-1" stroke-width="1"></path><path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" d="M3 0.5v1" stroke-width="1"></path><path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" d="M8 0.5v1" stroke-width="1"></path><path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" d="M5.5 0.5v1" stroke-width="1"></path></g></svg></button>
+        <button class="star-btn" onclick="setRating(6)"><svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 14 14" width="19" height="19"><g><path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" d="M2 4h8.5v5c0 0.53043 -0.2107 1.0391 -0.58579 1.4142C9.53914 10.7893 9.03043 11 8.5 11h-5c-0.53043 0 -1.03914 -0.2107 -1.41421 -0.5858C1.71071 10.0391 1.5 9.53043 1.5 9V4.5c0 -0.13261 0.05268 -0.25979 0.14645 -0.35355C1.74021 4.05268 1.86739 4 2 4Z" stroke-width="1"></path><path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" d="M0.5 13.5h13" stroke-width="1"></path><path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" d="M10.5 4h1c0.5304 0 1.0391 0.21071 1.4142 0.58579 0.3751 0.37507 0.5858 0.88378 0.5858 1.41421s-0.2107 1.03914 -0.5858 1.41421C12.5391 7.78929 12.0304 8 11.5 8h-1" stroke-width="1"></path><path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" d="M3 0.5v1" stroke-width="1"></path><path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" d="M8 0.5v1" stroke-width="1"></path><path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" d="M5.5 0.5v1" stroke-width="1"></path></g></svg></button>
+        <button class="star-btn" onclick="setRating(7)"><svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 14 14" width="19" height="19"><g><path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" d="M2 4h8.5v5c0 0.53043 -0.2107 1.0391 -0.58579 1.4142C9.53914 10.7893 9.03043 11 8.5 11h-5c-0.53043 0 -1.03914 -0.2107 -1.41421 -0.5858C1.71071 10.0391 1.5 9.53043 1.5 9V4.5c0 -0.13261 0.05268 -0.25979 0.14645 -0.35355C1.74021 4.05268 1.86739 4 2 4Z" stroke-width="1"></path><path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" d="M0.5 13.5h13" stroke-width="1"></path><path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" d="M10.5 4h1c0.5304 0 1.0391 0.21071 1.4142 0.58579 0.3751 0.37507 0.5858 0.88378 0.5858 1.41421s-0.2107 1.03914 -0.5858 1.41421C12.5391 7.78929 12.0304 8 11.5 8h-1" stroke-width="1"></path><path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" d="M3 0.5v1" stroke-width="1"></path><path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" d="M8 0.5v1" stroke-width="1"></path><path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" d="M5.5 0.5v1" stroke-width="1"></path></g></svg></button>
+        <button class="star-btn" onclick="setRating(8)"><svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 14 14" width="19" height="19"><g><path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" d="M2 4h8.5v5c0 0.53043 -0.2107 1.0391 -0.58579 1.4142C9.53914 10.7893 9.03043 11 8.5 11h-5c-0.53043 0 -1.03914 -0.2107 -1.41421 -0.5858C1.71071 10.0391 1.5 9.53043 1.5 9V4.5c0 -0.13261 0.05268 -0.25979 0.14645 -0.35355C1.74021 4.05268 1.86739 4 2 4Z" stroke-width="1"></path><path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" d="M0.5 13.5h13" stroke-width="1"></path><path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" d="M10.5 4h1c0.5304 0 1.0391 0.21071 1.4142 0.58579 0.3751 0.37507 0.5858 0.88378 0.5858 1.41421s-0.2107 1.03914 -0.5858 1.41421C12.5391 7.78929 12.0304 8 11.5 8h-1" stroke-width="1"></path><path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" d="M3 0.5v1" stroke-width="1"></path><path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" d="M8 0.5v1" stroke-width="1"></path><path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" d="M5.5 0.5v1" stroke-width="1"></path></g></svg></button>
+        <button class="star-btn" onclick="setRating(9)"><svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 14 14" width="19" height="19"><g><path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" d="M2 4h8.5v5c0 0.53043 -0.2107 1.0391 -0.58579 1.4142C9.53914 10.7893 9.03043 11 8.5 11h-5c-0.53043 0 -1.03914 -0.2107 -1.41421 -0.5858C1.71071 10.0391 1.5 9.53043 1.5 9V4.5c0 -0.13261 0.05268 -0.25979 0.14645 -0.35355C1.74021 4.05268 1.86739 4 2 4Z" stroke-width="1"></path><path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" d="M0.5 13.5h13" stroke-width="1"></path><path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" d="M10.5 4h1c0.5304 0 1.0391 0.21071 1.4142 0.58579 0.3751 0.37507 0.5858 0.88378 0.5858 1.41421s-0.2107 1.03914 -0.5858 1.41421C12.5391 7.78929 12.0304 8 11.5 8h-1" stroke-width="1"></path><path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" d="M3 0.5v1" stroke-width="1"></path><path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" d="M8 0.5v1" stroke-width="1"></path><path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" d="M5.5 0.5v1" stroke-width="1"></path></g></svg></button>
+        <button class="star-btn" onclick="setRating(10)"><svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 14 14" width="19" height="19"><g><path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" d="M2 4h8.5v5c0 0.53043 -0.2107 1.0391 -0.58579 1.4142C9.53914 10.7893 9.03043 11 8.5 11h-5c-0.53043 0 -1.03914 -0.2107 -1.41421 -0.5858C1.71071 10.0391 1.5 9.53043 1.5 9V4.5c0 -0.13261 0.05268 -0.25979 0.14645 -0.35355C1.74021 4.05268 1.86739 4 2 4Z" stroke-width="1"></path><path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" d="M0.5 13.5h13" stroke-width="1"></path><path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" d="M10.5 4h1c0.5304 0 1.0391 0.21071 1.4142 0.58579 0.3751 0.37507 0.5858 0.88378 0.5858 1.41421s-0.2107 1.03914 -0.5858 1.41421C12.5391 7.78929 12.0304 8 11.5 8h-1" stroke-width="1"></path><path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" d="M3 0.5v1" stroke-width="1"></path><path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" d="M8 0.5v1" stroke-width="1"></path><path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" d="M5.5 0.5v1" stroke-width="1"></path></g></svg></button>
       </div>
       <input type="hidden" id="r-rating" value="0">
     </div>
@@ -1106,1118 +1173,4 @@ const GRINDERS = [
   {id:'e02',brand:'Baratza',model:'Encore ESP',type:'electric',settings:40,min:180,max:1100,notes:'Encore with espresso-capable burrs. Great all-rounder entry.'},
   {id:'e03',brand:'Baratza',model:'Virtuoso+',type:'electric',settings:40,min:220,max:1100,notes:'Digital timer. Quality hardened steel burrs. Quiet.'},
   {id:'e04',brand:'Baratza',model:'Vario W+',type:'electric',settings:230,min:150,max:1200,notes:'Weight-based dosing. Wide range covers all methods.'},
-  {id:'e05',brand:'Baratza',model:'Sette 270',type:'electric',settings:270,min:150,max:1300,notes:'Conical burr with micro-step adjustment. Espresso focused.'},
-  {id:'e06',brand:'Fellow',model:'Ode Brew Gen 2',type:'electric',settings:90,min:350,max:1200,notes:'Filter-focused flat burr. Anti-static. Quiet motor. Beautiful design.'},
-  {id:'e07',brand:'Fellow',model:'Opus',type:'electric',settings:41,min:200,max:1300,notes:'All-purpose conical. Espresso to cold brew. Compact.'},
-  {id:'e08',brand:'Breville',model:'Smart Grinder Pro',type:'electric',settings:60,min:200,max:1300,notes:'60 grind settings. Digital display. Popular mid-range choice.'},
-  {id:'e09',brand:'Breville',model:'Dose Control Pro',type:'electric',settings:25,min:200,max:1100,notes:'Dose by weight or time. Compact footprint.'},
-  {id:'e10',brand:'Eureka',model:'Mignon Specialità',type:'electric',settings:350,min:100,max:900,notes:'Stepless adjustment. Flat burr. Very quiet. Italian-made.'},
-  {id:'e11',brand:'Eureka',model:'Mignon Silenzio',type:'electric',settings:350,min:100,max:900,notes:'Sound-dampened body. Espresso focused stepless.'},
-  {id:'e12',brand:'Eureka',model:'Mignon Classico',type:'electric',settings:350,min:100,max:900,notes:'Entry-level Mignon. Stepless. Italian craftsmanship.'},
-  {id:'e13',brand:'Niche',model:'Zero',type:'electric',settings:360,min:100,max:1000,notes:'Single dose, near-zero retention. Stepless conical. Cult favourite.'},
-  {id:'e14',brand:'Niche',model:'Duo',type:'electric',settings:360,min:100,max:1300,notes:'Dual burr stack. Handles espresso and filter simultaneously.'},
-  {id:'e15',brand:'Wilfa',model:'Svart Aroma',type:'electric',settings:17,min:250,max:1100,notes:'Scandinavian design. Popular budget electric option.'},
-  {id:'e16',brand:'Mahlkönig',model:'X54',type:'electric',settings:220,min:150,max:1200,notes:'Home flat burr. Professional quality for all brew methods.'},
-  {id:'e17',brand:'Mahlkönig',model:'E65S GbW',type:'electric',settings:250,min:100,max:700,notes:'Professional espresso grinder. Gravimetric dosing. Café standard.'},
-  {id:'e18',brand:'Lelit',model:'William PL72',type:'electric',settings:340,min:120,max:900,notes:'Italian flat burr. Espresso-focused. Stepless micrometric.'},
-  {id:'e19',brand:'DF64',model:'Gen 2',type:'electric',settings:200,min:100,max:1200,notes:'Single dose. 64mm flat burr. Highly regarded enthusiast choice.'},
-  {id:'e20',brand:'Capresso',model:'Infinity Plus',type:'electric',settings:16,min:250,max:1200,notes:'Slow-speed burr. Quiet. Good home value.'},
-  {id:'e21',brand:'Oxo',model:'Brew Burr Grinder',type:'electric',settings:38,min:250,max:1200,notes:'One-touch timer. User-friendly design.'},
-  {id:'e22',brand:'Rocket',model:'Faustino',type:'electric',settings:300,min:100,max:900,notes:'Italian espresso-focused. Stepless micrometric adjustment.'},
-  {id:'e23',brand:'Compak',model:'K3 Touch',type:'electric',settings:100,min:100,max:900,notes:'Commercial-grade home grinder. Touchscreen interface.'},
-  {id:'e24',brand:'Flair Espresso',model:'Royal Grinder',type:'electric',settings:80,min:100,max:600,notes:'Espresso-only. Pairs perfectly with Flair manual presses.'},
-  {id:'e25',brand:'Timemore',model:'Sculptor 064S',type:'electric',settings:200,min:100,max:1000,notes:'Single dose flat burr. Stepless. Beautiful aesthetics.'},
-  {id:'e26',brand:'Comandante',model:'MC6 Goat',type:'electric',settings:90,min:100,max:1100,notes:'Electric version of legendary C40 with same burr geometry.'},
-  {id:'e27',brand:'Cuisinart',model:'DBM-8',type:'electric',settings:18,min:250,max:1300,notes:'Budget electric. Good entry-level starting point.'},
-  {id:'e28',brand:'De\'Longhi',model:'KG89',type:'electric',settings:14,min:280,max:1300,notes:'Affordable home grinder. Auto-dosing. Beginner-friendly.'},
-  {id:'e29',brand:'Timemore',model:'Sculptor 078S',type:'electric',settings:36,min:235,max:1235,clickMin:0,clickMax:18,umPerClick:25,notes:'~25µm/click. Espresso: clicks 0–6, V60: clicks 7–12, French Press: 14+. Dual-purpose flat burrs.'},
-  {id:'e30',brand:'Timemore',model:'Sculptor 078',type:'electric',settings:36,min:370,max:1270,clickMin:0,clickMax:18,umPerClick:25,notes:'~25µm/click. Filter only (Turbo burrs). V60: clicks 7–12, French Press: 12+. Exceptional clarity for pour-over and cold brew.'},
-];
-
-// Brew method grind ranges (microns) — data from honestcoffeeguide.com
-const BREW_METHODS = [
-  {name:'Turkish',    min:40,   max:220,  color:'#8b3a3a'},
-  {name:'Espresso',   min:180,  max:380,  color:'#c8873a'},
-  {name:'Moka Pot',   min:360,  max:660,  color:'#9a6020'},
-  {name:'AeroPress',  min:320,  max:960,  color:'#2a7a6a'},
-  {name:'Pourover',   min:400,  max:700,  color:'#4a7a28'},
-  {name:'Siphon',     min:375,  max:800,  color:'#5a6a2a'},
-  {name:'Pour Over',  min:410,  max:930,  color:'#3a8a4a'},
-  {name:'Filter Drip',min:300,  max:900,  color:'#6a7a3a'},
-  {name:'Cupping',    min:460,  max:850,  color:'#7a5a2a'},
-  {name:'French Press',min:690, max:1300, color:'#2a5080'},
-  {name:'Cold Drip',  min:820,  max:1270, color:'#4a2a8a'},
-  {name:'Cold Brew',  min:800,  max:1400, color:'#3a3a8a'},
-];
-
-const CHART_MIN = 0, CHART_MAX = 1500;
-const COMPARE_COLORS = ['#c8873a','#2a5080','#4a7a28','#8b1a1a','#5c2d8e'];
-
-// ==================== STATE ====================
-let state = {
-  coffees: [], recipes: [],
-  selectedCoffeeId: null, selectedGrinderId: null,
-  selectedMethod: 'Espresso', selectedExtraction: '', selectedRating: 0,
-  currentView: 'dashboard', compareIds: [], favouriteGrinderId: null, selectedRecipeId: null, customRecipes: [],
-};
-let currentGrinderFilter = 'all';
-
-function save() { try { localStorage.setItem('dialin_v2', JSON.stringify(state)); } catch(e){} }
-function load() { try { const s = localStorage.getItem('dialin_v2'); if(s) { const p = JSON.parse(s); state = {...state, ...p}; } } catch(e){} }
-
-// ==================== NAVIGATION ====================
-function showView(name, pushState=true) {
-  document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
-  document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active'));
-  document.getElementById('view-' + name).classList.add('active');
-  const idx = ['dashboard','coffees','recipes','grinders'].indexOf(name);
-  document.querySelectorAll('.nav-tab')[idx]?.classList.add('active');
-  state.currentView = name;
-  if(name==='dashboard') renderDashboard();
-  if(name==='coffees') renderCoffeesView();
-  if(name==='recipes') renderRecipes();
-  if(name==='grinders') renderGrinders();
-  if(name==='compare') renderCompare();
-  if(pushState) history.pushState({view:name}, '', '');
-}
-
-// Android back gesture + double-back to exit
-let lastBackTime = 0;
-window.addEventListener('popstate', function(e) {
-  const openModal = document.querySelector('.modal-overlay.open');
-  if (openModal) { openModal.classList.remove('open'); history.pushState({view:state.currentView},'',''); return; }
-  const settingsOpen = document.getElementById('settings-drawer')?.classList.contains('open');
-  if (settingsOpen) { closeSettings && closeSettings(); history.pushState({view:state.currentView},'',''); return; }
-  if (state.currentView !== 'dashboard') {
-    showView('dashboard', false);
-    history.pushState({view:'dashboard'}, '', '');
-  } else {
-    const now = Date.now();
-    if (now - lastBackTime < 2000) { /* second back — allow exit */ }
-    else { lastBackTime = now; showToast('Press back again to exit'); history.pushState({view:'dashboard'},'',''); }
-  }
-});
-
-function openModal(id) { document.getElementById(id).classList.add('open'); }
-function closeModal(id) { document.getElementById(id).classList.remove('open'); }
-function openFab() { openModal('modal-fab'); }
-
-function openRecipeModal() {
-  if (!state.coffees.length) { showToast('Add a coffee first!'); return; }
-  // Coffee selector
-  const cs = document.getElementById('coffee-selector');
-  cs.innerHTML = '';
-  state.coffees.filter(c=>!c.finishedBag).forEach(c => {
-    const d = document.createElement('div');
-    d.className = 'coffee-selector-item' + (state.selectedCoffeeId===c.id?' selected':'');
-    d.innerHTML = `<div class="cs-name">${c.name}</div><div class="cs-sub">${c.roaster||''}</div>`;
-    d.onclick = () => { state.selectedCoffeeId=c.id; cs.querySelectorAll('.coffee-selector-item').forEach(x=>x.classList.remove('selected')); d.classList.add('selected'); };
-    cs.appendChild(d);
-  });
-  const activeCoffees = state.coffees.filter(c=>!c.finishedBag);
-  if (!state.selectedCoffeeId || !activeCoffees.find(c=>c.id===state.selectedCoffeeId)) { if(activeCoffees.length){state.selectedCoffeeId=activeCoffees[0].id; cs.children[0]?.classList.add('selected');} }
-  // Default grinder to favourite if none previously selected
-  if (!state.selectedGrinderId && state.favouriteGrinderId) { state.selectedGrinderId = state.favouriteGrinderId; }
-  // Grinder selector
-  const gs = document.getElementById('grinder-selector');
-  gs.innerHTML = '';
-  const none = document.createElement('div');
-  none.className = 'coffee-selector-item' + (!state.selectedGrinderId?' selected':'');
-  none.innerHTML = '<div class="cs-name" style="font-size:13px;font-family:\'DM Sans\'">No grinder / unspecified</div>';
-  none.onclick = () => { state.selectedGrinderId=null; gs.querySelectorAll('.coffee-selector-item').forEach(x=>x.classList.remove('selected')); none.classList.add('selected'); };
-  gs.appendChild(none);
-  function makeGrinderItem(g) {
-    const d = document.createElement('div');
-    d.className = 'coffee-selector-item' + (state.selectedGrinderId===g.id?' selected':'');
-    const isFav = state.favouriteGrinderId === g.id;
-    d.innerHTML = `<div class="cs-name" style="font-size:14px">${isFav?'⭐ ':''}${g.model}</div><div class="cs-sub">${g.brand} · ${g.type==='manual'?'✋ Manual':'⚡ Electric'}${isFav?' · Default':''}</div>`;
-    d.onclick = () => { state.selectedGrinderId=g.id; gs.querySelectorAll('.coffee-selector-item').forEach(x=>x.classList.remove('selected')); d.classList.add('selected'); };
-    return d;
-  }
-  // Favourites first
-  const favGrinders = GRINDERS.filter(g => g.id === state.favouriteGrinderId);
-  const otherGrinders = GRINDERS.filter(g => g.id !== state.favouriteGrinderId);
-  if (favGrinders.length) {
-    const hdr = document.createElement('div');
-    hdr.style.cssText = "font-family:'DM Mono',monospace;font-size:9px;letter-spacing:1.5px;text-transform:uppercase;color:var(--crema);padding:6px 2px 4px;";
-    hdr.textContent = '⭐ Favourite';
-    gs.appendChild(hdr);
-    favGrinders.forEach(g => gs.appendChild(makeGrinderItem(g)));
-    const sep = document.createElement('div');
-    sep.style.cssText = "font-family:'DM Mono',monospace;font-size:9px;letter-spacing:1.5px;text-transform:uppercase;color:var(--text-muted);padding:8px 2px 4px;border-top:1px solid var(--border);margin-top:4px;";
-    sep.textContent = 'All Grinders';
-    gs.appendChild(sep);
-  }
-  otherGrinders.forEach(g => gs.appendChild(makeGrinderItem(g)));
-  // Set correct yield/water label for current method on open
-  const lbl2 = document.getElementById('r-yield-label');
-  const inp2 = document.getElementById('r-yield');
-  if (lbl2 && inp2) {
-    if (isEspressoMethod(state.selectedMethod)) {
-      lbl2.textContent = 'Yield (g)'; inp2.placeholder = 'e.g. 36';
-    } else {
-      lbl2.textContent = 'Water (ml)'; inp2.placeholder = 'e.g. 250';
-    }
-  }
-  // Init recipe dropdown
-  updateRecipeDropdown(state.selectedMethod);
-  openModal('modal-recipe');
-}
-
-// ==================== FORM CONTROLS ====================
-function selectExtraction(val) {
-  state.selectedExtraction = val;
-  document.querySelectorAll('.extraction-btn').forEach(b => b.classList.remove('selected'));
-  document.querySelector('.extraction-btn.'+val)?.classList.add('selected');
-}
-function setRating(n) {
-  state.selectedRating = n;
-  document.querySelectorAll('.star-btn').forEach((b,i) => b.classList.toggle('active', i<n));
-}
-const ESPRESSO_METHODS = ['Espresso'];
-function isEspressoMethod(m) { return ESPRESSO_METHODS.includes(m); }
-
-function selectMethod(el, val) {
-  state.selectedMethod = val;
-  document.querySelectorAll('.method-tab').forEach(t => t.classList.remove('selected'));
-  el.classList.add('selected');
-  // Swap yield ↔ water volume label depending on method
-  const lbl = document.getElementById('r-yield-label');
-  const inp = document.getElementById('r-yield');
-  if (lbl && inp) {
-    if (isEspressoMethod(val)) {
-      lbl.textContent = 'Yield (g)'; inp.placeholder = 'e.g. 36';
-    } else {
-      lbl.textContent = 'Water (ml)'; inp.placeholder = 'e.g. 250';
-    }
-  }
-  // Update recipe dropdown
-  updateRecipeDropdown(val);
-}
-
-function updateRecipeDropdown(method) {
-  const wrap = document.getElementById('r-recipe-wrap');
-  const sel = document.getElementById('r-recipe-select');
-  if (!wrap || !sel) return;
-  if (isEspressoMethod(method)) {
-    wrap.style.display = 'none';
-    state.selectedRecipeId = null;
-    return;
-  }
-  wrap.style.display = 'block';
-  const options = getAllRecipesForMethod(method);
-  sel.innerHTML = '<option value="">— No recipe / custom —</option>' +
-    options.map(r => `<option value="${r.id}">${r.custom?'★ ':''}${r.name} · ${r.dose}g / ${r.water}ml</option>`).join('');
-  // Restore previously selected recipe if same method
-  if (state.selectedRecipeId) {
-    const still = options.find(r => r.id === state.selectedRecipeId);
-    if (still) sel.value = state.selectedRecipeId;
-    else { sel.value = ''; state.selectedRecipeId = null; }
-  }
-  renderRecipeCard(method, sel.value);
-}
-
-function onRecipeChange(sel) {
-  state.selectedRecipeId = sel.value || null;
-  renderRecipeCard(state.selectedMethod, sel.value);
-  // Auto-fill dose and water if a recipe is selected
-  const method = state.selectedMethod;
-  const options = getAllRecipesForMethod(method);
-  const recipe = options.find(r => r.id === sel.value);
-  if (recipe) {
-    document.getElementById('r-dose').value = recipe.dose;
-    document.getElementById('r-yield').value = recipe.water;
-    document.getElementById('r-temp').value = recipe.temp;
-  }
-}
-
-// ==================== RECIPE LIBRARY ====================
-let activeRecipeMethod = 'all';
-
-function switchRecipeTab(tab, btn) {
-  document.getElementById('recipe-panel-builtin').style.display = tab==='builtin' ? 'block' : 'none';
-  document.getElementById('recipe-panel-custom').style.display  = tab==='custom'  ? 'block' : 'none';
-  document.querySelectorAll('#recipe-tab-bar .type-btn').forEach(b => b.classList.remove('active'));
-  if (btn) btn.classList.add('active');
-  if (tab==='builtin') renderBuiltinRecipes();
-  if (tab==='custom')  renderMyRecipes();
-}
-
-function filterRecipeMethod(method, btn) {
-  activeRecipeMethod = method;
-  document.querySelectorAll('#recipe-method-filter .type-btn').forEach(b => b.classList.remove('active'));
-  if (btn) btn.classList.add('active');
-  renderBuiltinRecipes();
-}
-
-function renderBuiltinRecipes() {
-  const el = document.getElementById('builtin-recipes-list');
-  if (!el) return;
-  const methods = activeRecipeMethod === 'all'
-    ? Object.keys(RECIPES)
-    : [activeRecipeMethod];
-  let html = '';
-  methods.forEach(method => {
-    const list = RECIPES[method] || [];
-    if (!list.length) return;
-    if (activeRecipeMethod === 'all') {
-      html += `<div style="font-family:'DM Mono',monospace;font-size:9px;letter-spacing:2px;text-transform:uppercase;color:var(--text-muted);margin:16px 0 8px;padding-bottom:6px;border-bottom:1px solid var(--border)">${method}</div>`;
-    }
-    list.forEach(r => {
-      const pourMeta = r.pours ? `${r.pours} pour${r.pours>1?'s':''}${r.bloomRatio&&r.bloomRatio!=='N/A'?' · bloom '+r.bloomRatio:''}${r.totalTime?' · '+r.totalTime:''}` : '';
-      html += `<div class="recipe-lib-card">
-        <div class="recipe-lib-header">
-          <div style="flex:1">
-            <div class="recipe-lib-title">${r.name}</div>
-            <div class="recipe-lib-author">${r.author||''}${r.grindHint?' · '+r.grindHint:''}</div>
-          </div>
-          <span class="meta-pill" style="flex-shrink:0">${method}</span>
-        </div>
-        <div class="recipe-lib-body">
-          <div class="recipe-lib-meta">
-            ${r.dose?`<span class="meta-pill">${r.dose}g</span>`:''}
-            ${r.water?`<span class="meta-pill">${r.water}ml</span>`:''}
-            ${r.temp?`<span class="meta-pill">${r.temp}°C</span>`:''}
-            ${r.ratio?`<span class="meta-pill">${r.ratio}</span>`:''}
-            ${pourMeta?`<span class="meta-pill">${pourMeta}</span>`:''}
-          </div>
-          <ol class="recipe-lib-steps">
-            ${r.steps.map(s=>`<li>${s}</li>`).join('')}
-          </ol>
-        </div>
-        <div class="recipe-lib-actions">
-          <button class="btn-secondary" style="flex:1;font-size:10px;padding:8px" onclick="duplicateRecipe('${r.id}','${method}')">⧉ Duplicate &amp; Edit</button>
-        </div>
-      </div>`;
-    });
-  });
-  el.innerHTML = html || `<div class="empty-state"><div class="empty-icon">📋</div><div class="empty-title">No recipes for this method</div></div>`;
-}
-
-function duplicateRecipe(recipeId, method) {
-  const all = RECIPES[method] || [];
-  const src = all.find(r => r.id === recipeId);
-  if (!src) return;
-  if (!state.customRecipes) state.customRecipes = [];
-  const copy = {
-    id: 'custom-' + Date.now(),
-    name: src.name + ' (copy)',
-    author: src.author || '',
-    method: method,
-    dose: src.dose || 0,
-    water: src.water || 0,
-    temp: src.temp || null,
-    ratio: src.ratio || '',
-    grindHint: src.grindHint || '',
-    steps: [...src.steps],
-    custom: true
-  };
-  state.customRecipes.unshift(copy);
-  save();
-  showToast('Duplicated — now editing copy');
-  // Switch to My Recipes tab and open editor
-  const customBtn = document.querySelector('#recipe-tab-bar .type-btn:last-child');
-  switchRecipeTab('custom', customBtn);
-  openEditCustomRecipe(copy.id);
-}
-
-function renderRecipes() {
-  if (!document.getElementById('builtin-recipes-list')) return;
-  renderBuiltinRecipes();
-  if (document.getElementById('recipe-panel-custom')?.style.display !== 'none') {
-    renderMyRecipes();
-  }
-}
-
-// ==================== CUSTOM RECIPES ====================
-
-function getAllRecipesForMethod(method) {
-  const builtin = RECIPES[method] || [];
-  const custom = (state.customRecipes || []).filter(r => r.method === method);
-  return [...builtin, ...custom];
-}
-
-function addRecipeStep(text='') {
-  const list = document.getElementById('cr-steps-list');
-  const idx = list.children.length + 1;
-  const row = document.createElement('div');
-  row.className = 'step-row';
-  row.innerHTML = `
-    <span class="step-row-num">${idx}.</span>
-    <textarea placeholder="Describe this step…">${text}</textarea>
-    <button class="step-remove" onclick="this.closest('.step-row').remove();renumberSteps()">✕</button>`;
-  list.appendChild(row);
-}
-
-function renumberSteps() {
-  document.querySelectorAll('.step-row-num').forEach((el,i) => el.textContent = (i+1)+'.');
-}
-
-function openEditCustomRecipe(id) {
-  const r = (state.customRecipes||[]).find(x=>x.id===id);
-  if (!r) return;
-  document.getElementById('custom-recipe-modal-title').textContent = 'Edit Recipe';
-  document.getElementById('cr-edit-id').value = id;
-  document.getElementById('cr-name').value = r.name;
-  document.getElementById('cr-author').value = r.author||'';
-  document.getElementById('cr-method').value = r.method;
-  document.getElementById('cr-dose').value = r.dose||'';
-  document.getElementById('cr-water').value = r.water||'';
-  document.getElementById('cr-temp').value = r.temp||'';
-  document.getElementById('cr-grind').value = r.grindHint||'';
-  const list = document.getElementById('cr-steps-list');
-  list.innerHTML = '';
-  (r.steps||[]).forEach(s => addRecipeStep(s));
-  openModal('modal-custom-recipe');
-}
-
-function openNewCustomRecipe() {
-  document.getElementById('custom-recipe-modal-title').textContent = 'New Recipe';
-  document.getElementById('cr-edit-id').value = '';
-  ['cr-name','cr-author','cr-dose','cr-water','cr-temp','cr-grind'].forEach(id=>document.getElementById(id).value='');
-  document.getElementById('cr-method').value = 'Pourover';
-  document.getElementById('cr-steps-list').innerHTML = '';
-  addRecipeStep();
-  openModal('modal-custom-recipe');
-}
-
-function saveCustomRecipe() {
-  const name = document.getElementById('cr-name').value.trim();
-  if (!name) { showToast('Enter a recipe name'); return; }
-  const stepEls = document.querySelectorAll('#cr-steps-list textarea');
-  const steps = [...stepEls].map(t=>t.value.trim()).filter(Boolean);
-  if (!steps.length) { showToast('Add at least one step'); return; }
-  const dose = parseFloat(document.getElementById('cr-dose').value)||0;
-  const water = parseFloat(document.getElementById('cr-water').value)||0;
-  const ratio = (dose&&water) ? '1:'+((water/dose).toFixed(1)) : '';
-  const editId = document.getElementById('cr-edit-id').value;
-  const recipe = {
-    id: editId || ('custom-'+Date.now()),
-    name,
-    author: document.getElementById('cr-author').value.trim(),
-    method: document.getElementById('cr-method').value,
-    dose, water,
-    temp: parseFloat(document.getElementById('cr-temp').value)||null,
-    ratio,
-    grindHint: document.getElementById('cr-grind').value.trim(),
-    steps,
-    custom: true
-  };
-  if (!state.customRecipes) state.customRecipes = [];
-  if (editId) {
-    const idx = state.customRecipes.findIndex(r=>r.id===editId);
-    if (idx>=0) state.customRecipes[idx] = recipe;
-  } else {
-    state.customRecipes.unshift(recipe);
-  }
-  save();
-  closeModal('modal-custom-recipe');
-  showToast(editId ? 'Recipe updated ✓' : 'Recipe saved ✓');
-  if (state.currentView==='recipes') renderMyRecipes();
-}
-
-function deleteCustomRecipe(id) {
-  state.customRecipes = (state.customRecipes||[]).filter(r=>r.id!==id);
-  save(); showToast('Recipe deleted'); if(state.currentView==='recipes') renderMyRecipes();
-}
-
-function renderMyRecipes() {
-  const el = document.getElementById('myrecipes-list');
-  if (!el) return;
-  if (!el) return;
-  const recipes = state.customRecipes||[];
-  if (!recipes.length) {
-    el.innerHTML = `<div class="empty-state"><div class="empty-icon">📋</div><div class="empty-title">No custom recipes yet</div><div class="empty-desc">Tap + New Recipe, or duplicate a built-in recipe from the Built-in tab to start customising.</div></div>`;
-    return;
-  }
-  el.innerHTML = recipes.map(r => `
-    <div class="custom-recipe-card">
-      <div class="custom-recipe-card-header">
-        <div>
-          <div style="font-family:'Playfair Display',serif;font-size:16px;color:var(--crema-light)">${r.name}</div>
-          <div style="font-family:'DM Mono',monospace;font-size:10px;color:rgba(245,237,227,.6);letter-spacing:1px;margin-top:2px">${r.author?r.author+' · ':''}${r.method}</div>
-        </div>
-        <div style="display:flex;gap:8px;align-items:center">
-          <button class="btn-secondary" style="padding:5px 10px;font-size:9px" onclick="openEditCustomRecipe('${r.id}')">Edit</button>
-          <button class="btn-delete" onclick="deleteCustomRecipe('${r.id}')">✕</button>
-        </div>
-      </div>
-      <div style="padding:14px 18px">
-        <div style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:12px">
-          ${r.dose?`<span class="meta-pill">${r.dose}g dose</span>`:''}
-          ${r.water?`<span class="meta-pill">${r.water}ml water</span>`:''}
-          ${r.temp?`<span class="meta-pill">${r.temp}°C</span>`:''}
-          ${r.ratio?`<span class="meta-pill">${r.ratio}</span>`:''}
-          ${r.grindHint?`<span class="meta-pill">${r.grindHint}</span>`:''}
-        </div>
-        <ol style="padding-left:18px;margin:0">
-          ${r.steps.map(s=>`<li style="font-size:13px;color:var(--text);line-height:1.6;margin-bottom:4px">${s}</li>`).join('')}
-        </ol>
-      </div>
-    </div>`).join('');
-}
-
-function renderRecipeCard(method, recipeId) {
-  const card = document.getElementById('r-recipe-card');
-  if (!card) return;
-  const options = getAllRecipesForMethod(method);
-  const recipe = options.find(r => r.id === recipeId);
-  if (!recipe) { card.innerHTML = ''; card.style.display = 'none'; return; }
-  card.style.display = 'block';
-  card.innerHTML = `
-    <div style="background:var(--espresso);border-radius:var(--radius-sm);padding:14px;margin-top:10px">
-      <div style="font-family:'Playfair Display',serif;font-size:15px;color:var(--crema-light);margin-bottom:2px">${recipe.name}</div>
-      <div style="font-family:'DM Mono',monospace;font-size:9px;color:rgba(245,237,227,.45);letter-spacing:1px;margin-bottom:12px">${recipe.dose}g · ${recipe.water}ml · ${recipe.temp}°C · ${recipe.ratio}${recipe.grindHint?' · '+recipe.grindHint:''}${recipe.pours?' · '+recipe.pours+' pours':''}${recipe.totalTime?' · '+recipe.totalTime:''}</div>
-      <ol style="padding-left:16px;margin:0">
-        ${recipe.steps.map(s => `<li style="font-size:12px;color:rgba(245,237,227,.75);line-height:1.5;margin-bottom:5px">${s}</li>`).join('')}
-      </ol>
-    </div>`;
-}
-
-// ==================== LABEL PHOTO ====================
-let pendingLabelDataUrl = null;
-
-function handleLabelPhoto(input) {
-  const file = input.files[0];
-  if (!file) return;
-  const reader = new FileReader();
-  reader.onload = e => {
-    pendingLabelDataUrl = e.target.result;
-    const wrap = document.getElementById('c-label-preview-wrap');
-    wrap.innerHTML = `
-      <div class="label-preview">
-        <img src="${pendingLabelDataUrl}" alt="Bag label">
-        <button class="label-preview-remove" onclick="removeLabelPhoto()">✕</button>
-      </div>`;
-  };
-  reader.readAsDataURL(file);
-}
-
-function removeLabelPhoto() {
-  pendingLabelDataUrl = null;
-  document.getElementById('c-label-input').value = '';
-  document.getElementById('c-label-preview-wrap').innerHTML = `
-    <div class="label-upload-btn" onclick="document.getElementById('c-label-input').click()">
-      <span style="font-size:28px">📷</span>
-      <span>Tap to take photo or upload</span>
-    </div>`;
-}
-
-// ==================== COFFEE RATING ====================
-let pendingCoffeeRating = 0;
-
-function setCoffeeRating(n) {
-  pendingCoffeeRating = n;
-  document.getElementById('c-rating').value = n;
-  document.querySelectorAll('.coffee-rating-btn').forEach((b,i) => b.classList.toggle('active', i < n));
-  const labels = ['','Terrible','Poor','Below average','Average','OK','Decent','Good','Very good','Excellent','Outstanding'];
-  document.getElementById('c-rating-label').textContent = n > 0 ? `${n}/10 — ${labels[n]}` : 'Not rated';
-}
-
-// ==================== SAVE COFFEE ====================
-function toggleCustomProcess(sel) {
-  const custom = document.getElementById('c-process-custom');
-  custom.style.display = sel.value === 'Other…' ? 'block' : 'none';
-}
-
-function getProcessValue() {
-  const sel = document.getElementById('c-process');
-  if (sel.value === 'Other…') return document.getElementById('c-process-custom').value.trim() || 'Other';
-  return sel.value;
-}
-
-function resetCoffeeModal() {
-  document.getElementById('c-modal-title').textContent = 'Add Coffee';
-  document.getElementById('c-edit-id').value = '';
-  ['c-name','c-roaster','c-roaster-city','c-roaster-country','c-producer','c-farm',
-   'c-country','c-region','c-varietal','c-notes','c-roastdate','c-masl','c-process-custom']
-    .forEach(id => { const el = document.getElementById(id); if(el) el.value=''; });
-  document.getElementById('c-process').value='';
-  document.getElementById('c-process-custom').style.display='none';
-  document.getElementById('c-roast').value='';
-  pendingCoffeeRating=0;
-  document.getElementById('c-rating').value=0;
-  document.querySelectorAll('.coffee-rating-btn').forEach(b=>b.classList.remove('active'));
-  document.getElementById('c-rating-label').textContent='Not rated';
-  pendingLabelDataUrl=null;
-  document.getElementById('c-label-input').value='';
-  document.getElementById('c-label-preview-wrap').innerHTML='<div class="label-upload-btn" onclick="document.getElementById(\'c-label-input\').click()"><span style="font-size:28px">📷</span><span>Tap to take photo or upload</span></div>';
-}
-
-function openEditCoffee(id) {
-  const coffee = state.coffees.find(x=>x.id===id);
-  if (!coffee) return;
-  resetCoffeeModal();
-  document.getElementById('c-modal-title').textContent = 'Edit Coffee';
-  document.getElementById('c-edit-id').value = id;
-  document.getElementById('c-name').value = coffee.name || '';
-  document.getElementById('c-roaster').value = coffee.roaster || '';
-  document.getElementById('c-roaster-city').value = coffee.roasterCity || '';
-  document.getElementById('c-roaster-country').value = coffee.roasterCountry || '';
-  document.getElementById('c-producer').value = coffee.producer || '';
-  document.getElementById('c-farm').value = coffee.farm || '';
-  document.getElementById('c-country').value = coffee.country || '';
-  document.getElementById('c-region').value = coffee.region || '';
-  document.getElementById('c-varietal').value = coffee.varietal || '';
-  document.getElementById('c-masl').value = coffee.masl || '';
-  document.getElementById('c-roast').value = coffee.roastLevel || '';
-  document.getElementById('c-roastdate').value = coffee.roastDate || '';
-  document.getElementById('c-notes').value = coffee.notes || '';
-  // Process
-  const knownProcesses = ['Washed','Natural','Honey','Anaerobic','Wet Hulled','Carbonic Maceration','Extended Fermentation'];
-  if (knownProcesses.includes(coffee.process)) {
-    document.getElementById('c-process').value = coffee.process;
-  } else if (coffee.process) {
-    document.getElementById('c-process').value = 'Other…';
-    document.getElementById('c-process-custom').value = coffee.process;
-    document.getElementById('c-process-custom').style.display = 'block';
-  }
-  // Rating
-  if (coffee.rating) { setCoffeeRating(coffee.rating); }
-  // Photo
-  if (coffee.labelPhoto) {
-    pendingLabelDataUrl = coffee.labelPhoto;
-    document.getElementById('c-label-preview-wrap').innerHTML = `<div class="label-preview"><img src="${coffee.labelPhoto}" alt="Bag label"><button class="label-preview-remove" onclick="removeLabelPhoto()">✕</button></div>`;
-  }
-  openModal('modal-coffee');
-}
-
-function saveCoffee() {
-  const name = document.getElementById('c-name').value.trim();
-  if (!name) { showToast('Enter a coffee name'); return; }
-  const editId = document.getElementById('c-edit-id').value;
-  const coffeeData = {
-    name,
-    roaster: document.getElementById('c-roaster').value.trim(),
-    roasterCity: document.getElementById('c-roaster-city').value.trim(),
-    roasterCountry: document.getElementById('c-roaster-country').value.trim(),
-    producer: document.getElementById('c-producer').value.trim(),
-    farm: document.getElementById('c-farm').value.trim(),
-    country: document.getElementById('c-country').value.trim(),
-    region: document.getElementById('c-region').value.trim(),
-    varietal: document.getElementById('c-varietal').value.trim(),
-    masl: document.getElementById('c-masl').value || null,
-    process: getProcessValue(),
-    roastLevel: document.getElementById('c-roast').value,
-    roastDate: document.getElementById('c-roastdate').value,
-    notes: document.getElementById('c-notes').value.trim(),
-    labelPhoto: pendingLabelDataUrl || null,
-    rating: pendingCoffeeRating || 0,
-  };
-  if (editId) {
-    const idx = state.coffees.findIndex(x=>x.id===editId);
-    if (idx >= 0) state.coffees[idx] = { ...state.coffees[idx], ...coffeeData };
-    showToast('Coffee updated ✓');
-  } else {
-    state.coffees.unshift({ id: Date.now().toString(), createdAt: new Date().toISOString(), ...coffeeData });
-    showToast('Coffee added ✓');
-  }
-  save(); closeModal('modal-coffee');
-  resetCoffeeModal();
-  renderDashboard();
-  if (state.currentView==='coffees') renderCoffeesView();
-  if (editId) showCoffeeDetail(editId);
-}
-
-// ==================== SAVE RECIPE ====================
-function saveRecipe() {
-  if (!state.selectedCoffeeId) { showToast('Select a coffee'); return; }
-  state.recipes.unshift({id:Date.now().toString(), coffeeId:state.selectedCoffeeId, grinderId:state.selectedGrinderId||null, recipeId:state.selectedRecipeId||null, method:state.selectedMethod||'Espresso', grind:document.getElementById('r-grind').value, dose:document.getElementById('r-dose').value, yield:document.getElementById('r-yield').value, time:document.getElementById('r-time').value, temp:document.getElementById('r-temp').value, extraction:state.selectedExtraction, rating:state.selectedRating, notes:document.getElementById('r-notes').value.trim(), createdAt:new Date().toISOString()});
-  save(); closeModal('modal-recipe');
-  ['r-grind','r-dose','r-yield','r-time','r-temp','r-notes'].forEach(id=>document.getElementById(id).value='');
-  state.selectedExtraction=''; state.selectedRating=0;
-  document.querySelectorAll('.extraction-btn').forEach(b=>b.classList.remove('selected'));
-  document.querySelectorAll('.star-btn').forEach(b=>b.classList.remove('active'));
-  showToast('Brew logged ✓'); renderDashboard(); if(state.currentView==='recipes') renderRecipes();
-}
-
-// ==================== DASHBOARD ====================
-function getGreeting() {
-  const h = new Date().getHours();
-  if (h < 5)  return 'burning the midnight oil ☽';
-  if (h < 9)  return 'good morning ☀';
-  if (h < 12) return 'morning brew time ☕';
-  if (h < 14) return 'midday refuel ☕';
-  if (h < 17) return 'afternoon pick-me-up ☕';
-  if (h < 20) return 'evening cup ☕';
-  return 'winding down ☽';
-}
-
-function showAllBrews() {
-  showView('recipes');
-}
-
-function renderDashboard() {
-  const sub = document.getElementById('app-subtitle');
-  if (sub) sub.textContent = getGreeting();
-  document.getElementById('stat-coffees').textContent = state.coffees.length;
-  document.getElementById('stat-recipes').textContent = state.recipes.length;
-  const good = state.recipes.filter(r=>r.extraction==='good').length;
-  document.getElementById('stat-good').textContent = state.recipes.length ? Math.round(good/state.recipes.length*100)+'%' : '—';
-  // Show favourite grinder chip on dashboard
-  const favG = state.favouriteGrinderId ? GRINDERS.find(g=>g.id===state.favouriteGrinderId) : null;
-  const favEl = document.getElementById('dashboard-fav-grinder');
-  if (favEl) favEl.innerHTML = favG
-    ? `<div style="display:flex;align-items:center;gap:8px;background:rgba(200,135,58,0.08);border:1px solid rgba(200,135,58,0.2);border-radius:10px;padding:10px 14px;margin-bottom:20px;cursor:pointer" onclick="showView('grinders')">
-        <span style="font-size:20px">⭐</span>
-        <div><div style="font-family:'Playfair Display',serif;font-size:14px">${favG.brand} ${favG.model}</div><div style="font-family:'DM Mono',monospace;font-size:9px;color:var(--text-muted);letter-spacing:1px;margin-top:2px">${favG.type==='manual'?'✋ Manual':'⚡ Electric'} · DEFAULT GRINDER</div></div>
-      </div>`
-    : `<div style="font-family:'DM Mono',monospace;font-size:10px;color:var(--text-muted);margin-bottom:16px;letter-spacing:.5px">No default grinder set — <span style="color:var(--crema);cursor:pointer" onclick="showView('grinders')">Browse grinders →</span></div>`;
-  const el = document.getElementById('recent-brews');
-  const recent = state.recipes.slice(0,10);
-  const hasMore = state.recipes.length > 10;
-  const divEl = el.previousElementSibling;
-  if (divEl && divEl.classList.contains('divider')) {
-    divEl.innerHTML = `<span>Recent brews</span>${hasMore?`<button onclick="showAllBrews()" style="background:none;border:none;font-family:'DM Mono',monospace;font-size:9px;color:var(--crema);cursor:pointer;letter-spacing:1px;text-transform:uppercase;margin-left:8px">View all (${state.recipes.length}) →</button>`:''}`;
-  }
-  const backupBtns = `<div style="display:flex;gap:8px;margin-top:16px;padding-bottom:20px"><button class="btn-secondary" style="flex:1;font-size:9px;padding:8px" onclick="backupData()">⬆ Export Backup</button><button class="btn-secondary" style="flex:1;font-size:9px;padding:8px" onclick="document.getElementById('restore-input').click()">⬇ Import Backup</button></div><input type="file" id="restore-input" accept=".json" style="display:none" onchange="restoreData(this)">`;
-  el.innerHTML = recent.length ? recent.map(r=>recipeCard(r,false)).join('') + backupBtns : `<div class="empty-state"><div class="empty-icon">🫘</div><div class="empty-title">Nothing brewed yet</div><div class="empty-desc">Tap + to log your first coffee.</div></div>` + backupBtns;
-}
-
-// ==================== COFFEES ====================
-function renderCoffeesView() {
-  const el = document.getElementById('coffees-list');
-  if (!state.coffees.length) { el.innerHTML=`<div class="empty-state"><div class="empty-icon">📦</div><div class="empty-title">No coffees yet</div><div class="empty-desc">Tap + to add your first coffee.</div></div>`; return; }
-  el.innerHTML = state.coffees.map(c => {
-    const rc = state.recipes.filter(r=>r.coffeeId===c.id).length;
-    const maslPill = c.masl ? `<span class="meta-pill">${c.masl}m</span>` : ''; const pills = [c.country,c.process,c.roastLevel,c.varietal].filter(Boolean).map(p=>`<span class="meta-pill">${p}</span>`).join('') + maslPill;
-    const headerImg = c.labelPhoto ? `<img src="${c.labelPhoto}" style="width:52px;height:52px;border-radius:8px;object-fit:cover;flex-shrink:0;border:1px solid rgba(255,255,255,0.15)" alt="label">` : '';
-    const cardRating = c.rating > 0 ? `<div style="display:inline-flex;gap:1px;color:var(--crema);margin-top:4px">${Array(c.rating).fill('<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 14 14" width="14" height="14"><g><path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" d="M2 4h8.5v5c0 0.53043 -0.2107 1.0391 -0.58579 1.4142C9.53914 10.7893 9.03043 11 8.5 11h-5c-0.53043 0 -1.03914 -0.2107 -1.41421 -0.5858C1.71071 10.0391 1.5 9.53043 1.5 9V4.5c0 -0.13261 0.05268 -0.25979 0.14645 -0.35355C1.74021 4.05268 1.86739 4 2 4Z" stroke-width="1"></path><path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" d="M0.5 13.5h13" stroke-width="1"></path><path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" d="M10.5 4h1c0.5304 0 1.0391 0.21071 1.4142 0.58579 0.3751 0.37507 0.5858 0.88378 0.5858 1.41421s-0.2107 1.03914 -0.5858 1.41421C12.5391 7.78929 12.0304 8 11.5 8h-1" stroke-width="1"></path><path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" d="M3 0.5v1" stroke-width="1"></path><path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" d="M8 0.5v1" stroke-width="1"></path><path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" d="M5.5 0.5v1" stroke-width="1"></path></g></svg>').join('')}</div><span style="font-family:'DM Mono',monospace;font-size:9px;color:var(--text-muted);margin-left:4px">${c.rating}/10</span>` : '';
-    const finishedStyle = c.finishedBag ? 'opacity:0.45;filter:grayscale(0.4);' : '';
-    return `<div class="coffee-card" onclick="showCoffeeDetail('${c.id}')" style="${finishedStyle}"><div class="coffee-card-header"><div><div class="coffee-card-name">${c.name}${c.finishedBag?'<span style="margin-left:6px;font-family:\'DM Mono\',monospace;font-size:8px;background:rgba(139,26,26,0.15);color:#8b1a1a;border-radius:10px;padding:2px 6px;letter-spacing:1px">FINISHED</span>':''}</div><div class="coffee-card-roaster">${c.roaster||'Unknown Roaster'}</div>${cardRating}</div>${headerImg}</div><div class="coffee-card-body">${pills?`<div class="coffee-meta">${pills}</div>`:''}  <div class="recipe-count">${rc} brew${rc!==1?'s':''} logged</div></div></div>`;
-  }).join('');
-}
-
-function toggleFinishedBag(id) {
-  const coffee = state.coffees.find(x=>x.id===id);
-  if (!coffee) return;
-  coffee.finishedBag = !coffee.finishedBag;
-  save();
-  showToast(coffee.finishedBag ? 'Bag marked as finished' : 'Bag marked as active');
-  showCoffeeDetail(id);
-}
-
-function goBackToCoffees() {
-  document.getElementById('view-coffees').innerHTML = `
-    <div style="height:20px"></div>
-    <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:4px">
-      <div class="section-title">Coffee Library</div>
-      <button class="btn-secondary" onclick="resetCoffeeModal();openModal('modal-coffee')" style="margin-top:4px">+ Add Coffee</button>
-    </div>
-    <div class="section-subtitle">Your collection</div>
-    <div id="coffees-list"></div>`;
-  renderCoffeesView();
-  history.pushState({view:'coffees'}, '', '');
-}
-
-function showCoffeeDetail(id) {
-  const c = state.coffees.find(x=>x.id===id); if(!c) return;
-  const recs = state.recipes.filter(r=>r.coffeeId===id);
-  const maslPill2 = c.masl ? `<span class="meta-pill">⛰ ${c.masl} masl</span>` : ''; const pills = [c.country,c.region,c.varietal,c.process,c.roastLevel].filter(Boolean).map(p=>`<span class="meta-pill">${p}</span>`).join('') + maslPill2;
-  document.getElementById('view-coffees').innerHTML = `
-    <div style="height:20px"></div>
-    <button class="detail-back" onclick="goBackToCoffees()">← Back</button>
-    <div class="detail-hero">
-      <div style="display:flex;gap:14px;align-items:flex-start">
-        ${c.labelPhoto?`<img src="${c.labelPhoto}" style="width:72px;height:90px;object-fit:cover;border-radius:10px;flex-shrink:0;border:1px solid rgba(255,255,255,0.15)" alt="bag label">`:''}
-        <div style="flex:1">
-          <div style="font-family:'Playfair Display',serif;font-size:24px;color:var(--crema-light)">${c.name}</div>
-          <div style="font-family:'DM Mono',monospace;font-size:11px;color:rgba(245,237,227,.75);letter-spacing:1px;margin-bottom:14px">${c.roaster||'Unknown Roaster'}</div>
-          <div class="coffee-meta">${pills||'<span style="opacity:.5;font-size:12px">No details added</span>'}</div>
-          ${c.roastDate?`<div style="font-family:'DM Mono',monospace;font-size:10px;color:rgba(245,237,227,.7);margin-top:10px">${formatDate(c.roastDate)}</div>`:''}
-          ${c.rating>0?`<div style="display:inline-flex;align-items:center;gap:2px;color:var(--crema-light);margin-top:10px">${Array(c.rating).fill('<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 14 14" width="14" height="14"><g><path stroke="#6fa89d" stroke-linecap="round" stroke-linejoin="round" d="M2 4h8.5v5c0 0.53043 -0.2107 1.0391 -0.58579 1.4142C9.53914 10.7893 9.03043 11 8.5 11h-5c-0.53043 0 -1.03914 -0.2107 -1.41421 -0.5858C1.71071 10.0391 1.5 9.53043 1.5 9V4.5c0 -0.13261 0.05268 -0.25979 0.14645 -0.35355C1.74021 4.05268 1.86739 4 2 4Z" stroke-width="1"></path><path stroke="#6fa89d" stroke-linecap="round" stroke-linejoin="round" d="M0.5 13.5h13" stroke-width="1"></path><path stroke="#6fa89d" stroke-linecap="round" stroke-linejoin="round" d="M10.5 4h1c0.5304 0 1.0391 0.21071 1.4142 0.58579 0.3751 0.37507 0.5858 0.88378 0.5858 1.41421s-0.2107 1.03914 -0.5858 1.41421C12.5391 7.78929 12.0304 8 11.5 8h-1" stroke-width="1"></path><path stroke="#6fa89d" stroke-linecap="round" stroke-linejoin="round" d="M3 0.5v1" stroke-width="1"></path><path stroke="#6fa89d" stroke-linecap="round" stroke-linejoin="round" d="M8 0.5v1" stroke-width="1"></path><path stroke="#6fa89d" stroke-linecap="round" stroke-linejoin="round" d="M5.5 0.5v1" stroke-width="1"></path></g></svg>').join('')}<span style="font-family:'DM Mono',monospace;font-size:10px;color:rgba(245,237,227,.5);margin-left:6px">${c.rating}/10</span></div>`:''}
-          ${locationStr?`<div style="font-family:'DM Mono',monospace;font-size:10px;color:rgba(245,237,227,.6);margin-top:8px">📍 ${locationStr}</div>`:''}
-          ${producerStr?`<div style="font-family:'DM Mono',monospace;font-size:10px;color:rgba(245,237,227,.6);margin-top:4px">${producerStr}</div>`:''}
-          ${c.notes?`<div style="font-size:13px;color:rgba(245,237,227,.9);margin-top:12px;font-style:italic">"${c.notes}"</div>`:''}
-        </div>
-      </div>
-    </div>
-    <div style="display:flex;gap:8px;margin-bottom:20px">
-      <button class="btn-secondary" style="flex:1" onclick="openEditCoffee('${c.id}')">✏ Edit</button>
-      <button class="btn-secondary" style="flex:1" onclick="toggleFinishedBag('${c.id}')">${c.finishedBag?'✓ Finished':'Mark Finished'}</button>
-    </div>
-    <div class="section-title" style="margin-bottom:4px">Brew Log</div>
-    <div class="section-subtitle">${recs.length} attempt${recs.length!==1?'s':''}</div>
-    ${recs.length?recs.map(r=>recipeCard(r,true)).join(''):`<div class="empty-state"><div class="empty-icon">📋</div><div class="empty-title">No brews yet</div></div>`}
-    <div style="height:80px"></div>`;
-}
-
-// ==================== RECIPES ====================
-function recipeCard(r, showDel=false) {
-  const coffee = state.coffees.find(c=>c.id===r.coffeeId);
-  const grinder = r.grinderId ? GRINDERS.find(g=>g.id===r.grinderId) : null;
-  const date = new Date(r.createdAt).toLocaleDateString('en-GB',{day:'numeric',month:'short',year:'numeric'});
-  const exTag = r.extraction ? `<span class="extraction-tag tag-${r.extraction}">${r.extraction==='good'?'✓ Good':r.extraction}</span>` : '';
-  const stars = r.rating>0 ? `<span style="display:inline-flex;gap:2px;opacity:0.9;color:var(--crema)">$<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 14 14" width="14" height="14"><g><path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" d="M2 4h8.5v5c0 0.53043 -0.2107 1.0391 -0.58579 1.4142C9.53914 10.7893 9.03043 11 8.5 11h-5c-0.53043 0 -1.03914 -0.2107 -1.41421 -0.5858C1.71071 10.0391 1.5 9.53043 1.5 9V4.5c0 -0.13261 0.05268 -0.25979 0.14645 -0.35355C1.74021 4.05268 1.86739 4 2 4Z" stroke-width="1"></path><path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" d="M0.5 13.5h13" stroke-width="1"></path><path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" d="M10.5 4h1c0.5304 0 1.0391 0.21071 1.4142 0.58579 0.3751 0.37507 0.5858 0.88378 0.5858 1.41421s-0.2107 1.03914 -0.5858 1.41421C12.5391 7.78929 12.0304 8 11.5 8h-1" stroke-width="1"></path><path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" d="M3 0.5v1" stroke-width="1"></path><path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" d="M8 0.5v1" stroke-width="1"></path><path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" d="M5.5 0.5v1" stroke-width="1"></path></g></svg>`.replace(/(<svg[^>]*>.*?<\/svg>)/,'$1'.repeat(r.rating)).replace(/<svg/g,'<svg').split('</svg>').filter((_,i,a)=>i<r.rating).map(()=>`<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 14 14" width="14" height="14"><g><path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" d="M2 4h8.5v5c0 0.53043 -0.2107 1.0391 -0.58579 1.4142C9.53914 10.7893 9.03043 11 8.5 11h-5c-0.53043 0 -1.03914 -0.2107 -1.41421 -0.5858C1.71071 10.0391 1.5 9.53043 1.5 9V4.5c0 -0.13261 0.05268 -0.25979 0.14645 -0.35355C1.74021 4.05268 1.86739 4 2 4Z" stroke-width="1"></path><path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" d="M0.5 13.5h13" stroke-width="1"></path><path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" d="M10.5 4h1c0.5304 0 1.0391 0.21071 1.4142 0.58579 0.3751 0.37507 0.5858 0.88378 0.5858 1.41421s-0.2107 1.03914 -0.5858 1.41421C12.5391 7.78929 12.0304 8 11.5 8h-1" stroke-width="1"></path><path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" d="M3 0.5v1" stroke-width="1"></path><path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" d="M8 0.5v1" stroke-width="1"></path><path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" d="M5.5 0.5v1" stroke-width="1"></path></g></svg>`).join('')+'</span>' : '';
-  const isEsp = isEspressoMethod(r.method||'Espresso');
-  const ratio = (r.dose&&r.yield) ? (parseFloat(r.yield)/parseFloat(r.dose)).toFixed(1)+':1' : '—';
-  const yieldLabel = isEsp ? 'Yield' : 'Water';
-  const yieldUnit = isEsp ? 'g' : 'ml';
-  const grinderBadge = grinder ? `<span style="display:inline-block;margin-top:4px;font-family:'DM Mono',monospace;font-size:9px;background:rgba(82,121,111,0.1);border:1px solid rgba(82,121,111,0.25);color:var(--crema);border-radius:20px;padding:2px 8px;letter-spacing:.5px">${grinder.type==='manual'?'✋':'⚡'} ${grinder.brand} ${grinder.model}</span>` : '';
-  const recipeObj = r.recipeId ? Object.values(RECIPES).flat().find(x=>x.id===r.recipeId) : null;
-  const recipeBadge = recipeObj ? `<span style="display:inline-block;margin-top:4px;margin-left:4px;font-family:'DM Mono',monospace;font-size:9px;background:rgba(18,60,39,0.08);border:1px solid rgba(18,60,39,0.15);color:var(--espresso);border-radius:20px;padding:2px 8px;letter-spacing:.5px">📋 ${recipeObj.name.split('—')[0].trim()}</span>` : '';
-  const thumbHtml = coffee?.labelPhoto ? `<img src="${coffee.labelPhoto}" class="brew-label-thumb" alt="label">` : '';
-  return `<div class="recipe-entry">
-    <div class="recipe-entry-header">
-      <div style="display:flex;gap:10px;align-items:flex-start;flex:1">
-        ${thumbHtml}
-        <div style="flex:1;min-width:0">
-          <div style="font-family:'Playfair Display',serif;font-size:14px">${coffee?.name||'Unknown Coffee'}</div>
-          <div style="font-family:'DM Mono',monospace;font-size:10px;color:var(--text-muted)">${coffee?.roaster||''}${coffee?.roaster&&r.method?' · ':''}${r.method||''}</div>
-          ${grinderBadge}
-        </div>
-      </div>
-      <div style="display:flex;align-items:center;gap:6px;flex-shrink:0">${exTag}${showDel?`<button class="btn-delete" onclick="deleteRecipe('${r.id}')">✕</button>`:''}</div>
-    </div>
-    <div class="recipe-params">
-      <div class="param-block"><div class="param-value">${r.grind||'—'}</div><div class="param-label">Grind</div></div>
-      <div class="param-block"><div class="param-value">${r.dose?r.dose+'g':'—'}</div><div class="param-label">Dose</div></div>
-      <div class="param-block"><div class="param-value">${r.time?r.time+'s':'—'}</div><div class="param-label">Time</div></div>
-    </div>
-    <div style="display:flex;justify-content:space-between;align-items:center">
-      <div style="font-family:'DM Mono',monospace;font-size:10px;color:var(--text-muted)">${date}${r.yield?' · '+r.yield+yieldUnit+' '+yieldLabel.toLowerCase():''}${r.temp?' · '+r.temp+'°C':''} · ${ratio}</div>
-      ${stars}
-    </div>
-    ${r.notes?`<div class="recipe-notes">${r.notes}</div>`:''}
-  </div>`;
-}
-
-function deleteRecipe(id) {
-  state.recipes = state.recipes.filter(r=>r.id!==id);
-  save(); showToast('Brew deleted'); renderDashboard(); if(state.currentView==='recipes') renderRecipes();
-}
-
-// ==================== GRINDERS ====================
-function renderGrinders() {
-  const search = document.getElementById('grinder-search-input')?.value.toLowerCase()||'';
-  const el = document.getElementById('grinders-list');
-  const filtered = GRINDERS.filter(g => {
-    const matchType = currentGrinderFilter==='all' || g.type===currentGrinderFilter;
-    const matchSearch = !search || (g.brand+' '+g.model).toLowerCase().includes(search);
-    return matchType && matchSearch;
-  });
-  if (!filtered.length) { el.innerHTML=`<div class="empty-state"><div class="empty-icon">🔍</div><div class="empty-title">No grinders found</div></div>`; return; }
-  // Favourite grinder always first
-  const favFirst = [...filtered].sort((a,b) => {
-    if (a.id === state.favouriteGrinderId) return -1;
-    if (b.id === state.favouriteGrinderId) return 1;
-    return 0;
-  });
-  el.innerHTML = favFirst.map(g => {
-    const inCmp = state.compareIds.includes(g.id);
-    const isFav = state.favouriteGrinderId === g.id;
-    return `<div class="grinder-card ${inCmp?'in-compare':''}" style="${isFav?'border-color:var(--crema);background:rgba(200,135,58,0.04);':''}" onclick="showGrinderDetail('${g.id}')">
-      <div style="flex:1">
-        <div class="grinder-brand">${g.brand}${isFav?' <span style="font-size:9px;color:var(--crema);font-family:DM Mono,monospace;letter-spacing:1px;text-transform:uppercase">★ Default</span>':''}</div>
-        <div class="grinder-model">${g.model}</div>
-        <div style="font-family:'DM Mono',monospace;font-size:9px;color:var(--text-muted);margin-top:4px">${g.min}–${g.max}µm${g.clickMin!==undefined?' · '+g.clickMin+'–'+g.clickMax+' clicks':' · '+g.settings+' settings'}</div>
-      </div>
-      <div style="display:flex;flex-direction:column;align-items:flex-end;gap:6px">
-        <span class="grinder-type-badge badge-${g.type}">${g.type==='manual'?'✋ Manual':'⚡ Electric'}</span>
-        <div style="display:flex;gap:2px">
-          <button class="compare-toggle-btn" onclick="event.stopPropagation();toggleFavourite('${g.id}')" title="${isFav?'Remove favourite':'Set as favourite'}" style="font-size:18px">${isFav?'⭐':'☆'}</button>
-          <button class="compare-toggle-btn" onclick="event.stopPropagation();toggleCompare('${g.id}')" title="Add to compare">${inCmp?'✅':'⊕'}</button>
-        </div>
-      </div>
-    </div>`;
-  }).join('');
-}
-
-function filterGrinders(type, btn) {
-  currentGrinderFilter = type;
-  if (btn) { document.querySelectorAll('.type-btn').forEach(b=>b.classList.remove('active')); btn.classList.add('active'); }
-  renderGrinders();
-}
-
-function toggleCompare(gid) {
-  if (state.compareIds.includes(gid)) {
-    state.compareIds = state.compareIds.filter(id=>id!==gid);
-  } else {
-    if (state.compareIds.length>=5) { showToast('Max 5 grinders'); return; }
-    state.compareIds.push(gid);
-  }
-  save(); updateCompareBar(); if(state.currentView==='grinders') renderGrinders();
-}
-
-function toggleFavourite(gid) {
-  state.favouriteGrinderId = state.favouriteGrinderId === gid ? null : gid;
-  // Also set as the recipe default
-  if (state.favouriteGrinderId) state.selectedGrinderId = gid;
-  save();
-  if(state.currentView==='grinders') renderGrinders();
-}
-
-function showInlineCompare() {
-  showView('grinders');
-  const sec = document.getElementById('grinder-compare-section');
-  if (!sec) return;
-  sec.style.display = 'block';
-  renderCompare('grinder-compare-inner');
-  sec.scrollIntoView({behavior:'smooth'});
-}
-
-function updateCompareBar() {
-  const n = state.compareIds.length;
-  document.getElementById('compare-bar-text').textContent = `${n} grinder${n!==1?'s':''} — tap to compare`;
-  document.getElementById('compare-bar').classList.toggle('visible', n>0);
-  if(n===0 && document.getElementById('grinder-compare-section')) { document.getElementById('grinder-compare-section').style.display='none'; }
-}
-
-function showGrinderDetail(gid) {
-  const g = GRINDERS.find(x=>x.id===gid); if(!g) return;
-  const inCmp = state.compareIds.includes(gid);
-  const isFav = state.favouriteGrinderId === gid;
-  const pct = v => Math.max(0,Math.min(100,((v-CHART_MIN)/(CHART_MAX-CHART_MIN))*100));
-  const covered = BREW_METHODS.filter(m=>g.min<=m.max && g.max>=m.min);
-
-  // Build method compatibility chart
-  const rowHeight = 16;
-  const chartH = BREW_METHODS.length * (rowHeight+3) + 10;
-  const methodRows = BREW_METHODS.map((m,i) => {
-    const left=pct(m.min), width=pct(m.max)-left;
-    const compat = g.min<=m.max && g.max>=m.min;
-    return `<div style="position:absolute;top:${i*(rowHeight+3)}px;left:${left}%;width:${width}%;height:${rowHeight}px;background:${m.color};border-radius:3px;opacity:${compat?0.85:0.15};display:flex;align-items:center;padding:0 4px">
-      <span style="font-family:'DM Mono',monospace;font-size:7px;color:white;white-space:nowrap;overflow:hidden">${m.name}</span></div>`;
-  }).join('');
-
-  // Grinder range overlay
-  const gLeft=pct(g.min), gWidth=pct(g.max)-gLeft;
-
-  document.getElementById('grinder-detail-content').innerHTML = `
-    <div class="grinder-detail-card">
-      <div style="font-family:'Playfair Display',serif;font-size:22px;color:var(--crema-light)">${g.model}</div>
-      <div style="display:flex;align-items:center;gap:8px;margin-bottom:14px">
-        <span style="font-family:'DM Mono',monospace;font-size:11px;color:rgba(245,237,227,.5);letter-spacing:1px">${g.brand} · ${g.type==='manual'?'✋ Manual':'⚡ Electric'}</span>
-        ${isFav?'<span style="font-family:\'DM Mono\',monospace;font-size:9px;background:rgba(200,135,58,0.25);color:var(--crema-light);border-radius:20px;padding:2px 8px;letter-spacing:1px">★ DEFAULT GRINDER</span>':''}
-      </div>
-      <div class="grinder-specs-grid">
-        <div class="grinder-spec-block"><div class="grinder-spec-value">${g.clickMin!==undefined?g.clickMin+'–'+g.clickMax:g.settings}</div><div class="grinder-spec-label">${g.clickMin!==undefined?'Click Range':'Settings'}</div></div>
-        <div class="grinder-spec-block"><div class="grinder-spec-value" style="font-size:13px">${g.min}–${g.max}µm</div><div class="grinder-spec-label">Grind Range</div></div>
-        ${g.umPerClick?`<div class="grinder-spec-block"><div class="grinder-spec-value">~${g.umPerClick}</div><div class="grinder-spec-label">µm/click</div></div>`:''}
-      </div>
-      ${g.notes?`<div style="font-size:13px;color:rgba(245,237,227,.65);margin-top:14px;line-height:1.5;font-style:italic">"${g.notes}"</div>`:''}
-    </div>
-
-    <div style="margin-bottom:6px;font-family:'Playfair Display',serif;font-size:16px">Compatible Brew Methods</div>
-    <div style="display:flex;flex-wrap:wrap;margin-bottom:20px">
-      ${covered.map(m=>`<span style="display:inline-flex;align-items:center;gap:4px;padding:4px 10px;border-radius:20px;font-family:'DM Mono',monospace;font-size:9px;letter-spacing:1px;text-transform:uppercase;margin:3px;background:${m.color}18;border:1px solid ${m.color}40;color:${m.color}">${m.name}</span>`).join('')}
-      ${covered.length===0?'<span style="font-size:13px;color:var(--text-muted)">Highly specialised grinder</span>':''}
-    </div>
-
-    <div style="margin-bottom:8px;font-family:'Playfair Display',serif;font-size:16px">Grind Range vs Brew Methods</div>
-    <div style="font-family:'DM Mono',monospace;font-size:10px;color:var(--text-muted);margin-bottom:12px">Highlighted = compatible. Amber overlay = this grinder's range.</div>
-    <div style="background:white;border-radius:var(--radius);padding:16px;border:1px solid var(--border);margin-bottom:20px">
-      <div style="position:relative;height:${chartH}px;margin-bottom:8px">
-        ${methodRows}
-        <div style="position:absolute;top:0;bottom:0;left:${gLeft}%;width:${gWidth}%;background:rgba(200,135,58,0.22);border:2px solid var(--crema);border-radius:4px;z-index:10"></div>
-      </div>
-      <div class="grind-axis">
-        <span class="grind-axis-label">0µm</span><span class="grind-axis-label">375</span>
-        <span class="grind-axis-label">750</span><span class="grind-axis-label">1125</span><span class="grind-axis-label">1500µm</span>
-      </div>
-      <div style="display:flex;align-items:center;gap:6px;margin-top:8px">
-        <div style="width:16px;height:10px;background:rgba(200,135,58,0.22);border:1.5px solid var(--crema);border-radius:2px"></div>
-        <span style="font-family:'DM Mono',monospace;font-size:9px;color:var(--text-muted)">This grinder's range</span>
-      </div>
-    </div>
-
-    <button class="btn-primary" style="background:${isFav?'#8b1a1a':'var(--espresso)'}" onclick="toggleFavourite('${g.id}');showGrinderDetail('${g.id}');showToast('${isFav?'Removed as default':'Set as default grinder ⭐'}')">
-      ${isFav?'✕ Remove as Default Grinder':'⭐ Set as Default Grinder'}
-    </button>
-    <div style="height:10px"></div>
-    <button class="btn-primary" style="background:${inCmp?'#8b1a1a':'var(--crema)'};color:${inCmp?'white':'var(--espresso)'}" onclick="toggleCompare('${g.id}');renderGrinders();closeModal('modal-grinder-detail');showToast('${inCmp?'Removed from':'Added to'} compare')">
-      ${inCmp?'✕ Remove from Compare':'⊕ Add to Compare'}
-    </button>
-    <div style="height:12px"></div>
-    <button class="btn-secondary" style="width:100%" onclick="closeModal('modal-grinder-detail')">Close</button>
-    <div style="height:20px"></div>`;
-  openModal('modal-grinder-detail');
-}
-
-// ==================== COMPARE ====================
-function renderCompare(containerId='view-compare') {
-  const el = document.getElementById('compare-content');
-  if (!state.compareIds.length) {
-    el.innerHTML=`<div class="empty-state"><div class="empty-icon">⚖️</div><div class="empty-title">No grinders selected</div><div class="empty-desc">Go to Grinders and tap ⊕ to add up to 5 grinders to compare.</div></div>`;
-    return;
-  }
-  const grinders = state.compareIds.map(id=>GRINDERS.find(g=>g.id===id)).filter(Boolean);
-  const pct = v => Math.max(0,Math.min(100,((v-CHART_MIN)/(CHART_MAX-CHART_MIN))*100));
-
-  // Grinder range bars
-  const rangeHTML = grinders.map((g,i)=>{
-    const left=pct(g.min), width=pct(g.max)-left;
-    const label = `${g.brand} ${g.model}`;
-    return `<div class="grinder-bar-row">
-      <div class="grinder-bar-name" style="color:${COMPARE_COLORS[i]}">${label}</div>
-      <div class="grinder-bar-track">
-        <div class="grinder-bar-fill" style="left:${left}%;width:${width}%;background:${COMPARE_COLORS[i]}">${g.min}–${g.max}µm</div>
-      </div>
-    </div>`;
-  }).join('');
-
-  // Brew method compatibility matrix
-  const matrixHTML = BREW_METHODS.map(m=>{
-    const dots = grinders.map((g,i)=>{
-      const ok = g.min<=m.max && g.max>=m.min;
-      return `<span style="display:inline-block;width:12px;height:12px;border-radius:50%;background:${ok?COMPARE_COLORS[i]:'rgba(0,0,0,0.07)'};border:1px solid ${ok?COMPARE_COLORS[i]:'rgba(0,0,0,0.1)'};margin-right:4px"></span>`;
-    }).join('');
-    return `<div style="display:flex;align-items:center;justify-content:space-between;padding:10px 14px;border-bottom:1px solid var(--border)">
-      <div>
-        <div style="font-family:'DM Mono',monospace;font-size:11px;letter-spacing:.5px">${m.name}</div>
-        <div style="font-family:'DM Mono',monospace;font-size:9px;color:var(--text-muted)">${m.min}–${m.max}µm</div>
-      </div>
-      <div style="display:flex;align-items:center">${dots}</div>
-    </div>`;
-  }).join('');
-
-  // Specs cards
-  const specsHTML = grinders.map((g,i)=>`
-    <div style="padding:12px;border:1px solid ${COMPARE_COLORS[i]}30;border-left:3px solid ${COMPARE_COLORS[i]};border-radius:10px;margin-bottom:8px">
-      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
-        <div>
-          <div style="font-family:'Playfair Display',serif;font-size:15px">${g.model}</div>
-          <div style="font-family:'DM Mono',monospace;font-size:9px;color:var(--text-muted);letter-spacing:.5px">${g.brand}</div>
-        </div>
-        <span class="grinder-type-badge badge-${g.type}">${g.type==='manual'?'✋ Manual':'⚡ Electric'}</span>
-      </div>
-      <div style="display:flex;gap:8px;margin-bottom:8px">
-        <div class="param-block" style="flex:1"><div class="param-value" style="font-size:16px">${g.settings}</div><div class="param-label">Settings</div></div>
-        <div class="param-block" style="flex:2"><div class="param-value" style="font-size:12px">${g.min}–${g.max}µm</div><div class="param-label">Grind Range</div></div>
-      </div>
-      ${g.notes?`<div style="font-size:11px;color:var(--text-muted);font-style:italic;line-height:1.5">${g.notes}</div>`:''}
-      <button style="margin-top:8px;background:none;border:1px solid rgba(139,26,26,0.2);color:var(--red);border-radius:8px;padding:4px 12px;font-family:'DM Mono',monospace;font-size:9px;letter-spacing:1px;cursor:pointer" onclick="toggleCompare('${g.id}');renderCompare()">✕ Remove</button>
-    </div>`).join('');
-
-  el.innerHTML = `
-    <div class="card" style="padding:16px 18px">
-      <div class="divider" style="margin-top:4px">Grind Ranges</div>
-      ${rangeHTML}
-      <div class="grind-axis">
-        <span class="grind-axis-label">0µm</span><span class="grind-axis-label">375</span>
-        <span class="grind-axis-label">750</span><span class="grind-axis-label">1125</span><span class="grind-axis-label">1500µm</span>
-      </div>
-      <div style="margin-top:12px">
-        ${grinders.map((g,i)=>`<div style="display:flex;align-items:center;gap:6px;margin-bottom:3px"><span style="display:inline-block;width:12px;height:8px;border-radius:2px;background:${COMPARE_COLORS[i]}"></span><span style="font-family:'DM Mono',monospace;font-size:9px;color:var(--text-muted)">${g.brand} ${g.model}</span></div>`).join('')}
-      </div>
-    </div>
-
-    <div class="card" style="padding:0;overflow:hidden">
-      <div style="padding:14px 16px 12px;background:var(--espresso)">
-        <div style="font-family:'Playfair Display',serif;font-size:16px;color:var(--crema-light)">Brew Compatibility Matrix</div>
-        <div style="font-family:'DM Mono',monospace;font-size:9px;color:rgba(245,237,227,.4);letter-spacing:1px;margin-top:4px;text-transform:uppercase">Filled dot = grinder can reach this method</div>
-      </div>
-      <div style="background:white;padding:6px 0">
-        <div style="display:flex;padding:8px 14px 6px">
-          ${grinders.map((g,i)=>`<div style="display:flex;align-items:center;gap:4px;margin-right:12px"><span style="display:inline-block;width:10px;height:10px;border-radius:50%;background:${COMPARE_COLORS[i]}"></span><span style="font-family:'DM Mono',monospace;font-size:9px;color:var(--text-muted)">${g.model}</span></div>`).join('')}
-        </div>
-        ${matrixHTML}
-      </div>
-    </div>
-
-    <div class="card">
-      <div class="divider" style="margin-top:4px">Specs</div>
-      ${specsHTML}
-    </div>
-
-    <div style="text-align:center;padding-bottom:10px">
-      <button class="btn-secondary" onclick="state.compareIds=[];save();updateCompareBar();renderCompare()">Clear all</button>
-    </div>`;
-}
-
-// ==================== UTILS ====================
-function formatDate(d) { if(!d) return ''; return new Date(d+'T00:00:00').toLocaleDateString('en-GB',{day:'numeric',month:'short',year:'numeric'}).toUpperCase(); }
-function showToast(msg) { const t=document.getElementById('toast'); t.textContent=msg; t.classList.add('show'); setTimeout(()=>t.classList.remove('show'),2200); }
-
-document.querySelectorAll('.modal-overlay').forEach(o => o.addEventListener('click', e => { if(e.target===o) o.classList.remove('open'); }));
-
-// ==================== INIT ====================
-load();
-renderDashboard();
-updateCompareBar();
-
-let appSettings = { paletteId: 'terracotta', displayFontId: 'inter', monoFontId: 'inter', darkMode: false };
-
-function loadSettings() {
-  try {
-    const s = localStorage.getItem('dialin_settings');
-    if (s) appSettings = { ...appSettings, ...JSON.parse(s) };
-  } catch(e) {}
-  applySettings();
-  applyDarkMode();
-}
-
-function saveSettings() {
-  try { localStorage.setItem('dialin_settings', JSON.stringify(appSettings)); } catch(e) {}
-}
-
-function applySettings() {
-  // Apply Inter font globally
-  let dynStyle = document.getElementById('dyn-font-style');
-  if (!dynStyle) { dynStyle = document.createElement('style'); dynStyle.id = 'dyn-font-style'; document.head.appendChild(dynStyle); }
-  dynStyle.textContent = `
-    * { font-family: 'Space Mono', monospace !important; }
-    .app-title,
-    .modal-title,
-    .section-title,
-    .coffee-card-name,
-    .recipe-lib-title,
-    .custom-recipe-card-header .recipe-lib-title,
-    .detail-hero [style*="Playfair"],
-    .detail-hero [style*="font-size:24px"],
-    .detail-hero [style*="font-size:20px"],
-    .grinder-detail-name,
-    h1, h2, h3 {
-      font-family: 'Space Grotesk', sans-serif !important;
-      letter-spacing: -0.3px !important;
-    }
-    .app-title { font-weight: 700 !important; letter-spacing: -1px !important; }
-  `;
-  applyDarkMode();
-}
-
-// ==================== BACKUP / RESTORE ====================
-function backupData() {
-  const data = { state, customRecipes: state.customRecipes||[], exportedAt: new Date().toISOString(), version: 'dialin_v2' };
-  const blob = new Blob([JSON.stringify(data, null, 2)], {type:'application/json'});
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement('a');
-  a.href = url; a.download = `dialed-backup-${new Date().toISOString().slice(0,10)}.json`;
-  a.click(); URL.revokeObjectURL(url);
-  showToast('Backup exported ✓');
-}
-
-function restoreData(input) {
-  const file = input.files[0]; if(!file) return;
-  const reader = new FileReader();
-  reader.onload = e => {
-    try {
-      const data = JSON.parse(e.target.result);
-      if (!data.state) { showToast('Invalid backup file'); return; }
-      state = { ...state, ...data.state };
-      save(); renderDashboard(); showToast('Backup restored ✓');
-    } catch(err) { showToast('Could not read file'); }
-  };
-  reader.readAsText(file);
-  input.value = '';
-}
-
-function toggleDarkMode() {
-  appSettings.darkMode = !appSettings.darkMode;
-  applyDarkMode();
-  saveSettings();
-}
-
-function applyDarkMode() {
-  const isDark = appSettings.darkMode;
-  document.body.classList.toggle('dark-mode', isDark);
-  const btn = document.getElementById('dark-toggle-btn');
-  if (btn) btn.innerHTML = isDark ? `<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="-0.5 -0.5 16 16" stroke-linecap="round" stroke-linejoin="round" stroke="currentColor" width="18" height="18"><path d="M5 7.5a2.5 2.5 0 1 0 5 0 2.5 2.5 0 1 0 -5 0" stroke-width="1"></path><path d="M7.5 1.875v1.25m0 8.7525v1.25M3.125 7.5H1.875m11.25 0h-1.25m0 -4.375 -1.25 1.25M3.125 3.125l1.25 1.25m0 6.25 -1.25 1.25m8.75 0 -1.25 -1.25" stroke-width="1"></path></svg>` : `<svg xmlns="http://www.w3.org/2000/svg" viewBox="-0.5 -0.5 16 16" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" width="18" height="18"><path d="M13.125 7.9937499999999995A5.625 5.625 0 1 1 7.0062500000000005 1.875 4.375 4.375 0 0 0 13.125 7.9937499999999995z" stroke-width="1"></path></svg>`;
-}
-
-</script>
-
-
-
-</body>
-</html>
+  {id:'e05',brand:'Baratza',model:'Sette 270',type:'electric',settings:270,min
