@@ -1390,14 +1390,24 @@ function updateRecipeDropdown(method) {
 function onRecipeChange(sel) {
   state.selectedRecipeId = sel.value || null;
   renderRecipeCard(state.selectedMethod, sel.value);
-  // Auto-fill dose and water if a recipe is selected
   const method = state.selectedMethod;
   const options = getAllRecipesForMethod(method);
   const recipe = options.find(r => r.id === sel.value);
   if (recipe) {
-    document.getElementById('r-dose').value = recipe.dose;
-    document.getElementById('r-yield').value = recipe.water;
-    document.getElementById('r-temp').value = recipe.temp;
+    // Only fill if value is non-null and non-zero
+    if (recipe.dose) document.getElementById('r-dose').value = recipe.dose;
+    if (recipe.water) document.getElementById('r-yield').value = recipe.water;
+    if (recipe.temp) document.getElementById('r-temp').value = recipe.temp;
+    // Set grind hint in notes if field is empty and hint exists
+    const grindEl = document.getElementById('r-grind');
+    if (grindEl && !grindEl.value && recipe.grindHint) {
+      // Don't autofill grind — it's machine-specific
+    }
+  } else {
+    // No recipe selected — clear autofilled fields
+    document.getElementById('r-dose').value = '';
+    document.getElementById('r-yield').value = '';
+    document.getElementById('r-temp').value = '';
   }
 }
 
@@ -1717,6 +1727,9 @@ function resetCoffeeModal() {
 function openEditCoffee(id) {
   const coffee = state.coffees.find(x=>x.id===id);
   if (!coffee) return;
+  // Always close any open modal first, then reset, to avoid stale state
+  closeModal('modal-coffee');
+  setTimeout(() => {
   resetCoffeeModal();
   document.getElementById('c-modal-title').textContent = 'Edit Coffee';
   document.getElementById('c-edit-id').value = id;
@@ -1750,6 +1763,7 @@ function openEditCoffee(id) {
     document.getElementById('c-label-preview-wrap').innerHTML = `<div class="label-preview"><img src="${coffee.labelPhoto}" alt="Bag label"><button class="label-preview-remove" onclick="removeLabelPhoto()">✕</button></div>`;
   }
   openModal('modal-coffee');
+  }, 50);
 }
 
 function saveCoffee() {
