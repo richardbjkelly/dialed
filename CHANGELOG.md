@@ -584,6 +584,7 @@ Specialty coffee dialling-in tracker · Single-file PWA / Android APK
 - Drag-to-reorder in Up next corrected for the scaling
 
 ### Coffee Library
+- Grid tiles are all the same size: equal height across the library, fixed header area (name up to 2 lines, roaster on 1 line with "…"), brew count and DECAF pinned to the bottom
 - Decaf coffees show a small DECAF label at the bottom right of the tile (grid and list)
 
 ---

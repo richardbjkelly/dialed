@@ -169,7 +169,14 @@
   .layout-toggle button.active { background:var(--espresso); color:#FAFAF7; }
   body.dark-mode .layout-toggle { border-color:var(--dm-border); }
   body.dark-mode .layout-toggle button.active { background:var(--dm-input); color:var(--dm-green-text); }
-  #coffees-list.grid { display:grid; grid-template-columns:repeat(2, minmax(0,1fr)); gap:12px; align-items:start; }
+  #coffees-list.grid { display:grid; grid-template-columns:repeat(2, minmax(0,1fr)); gap:12px; align-items:stretch; grid-auto-rows:1fr; }
+  #coffees-list.grid .card-wrap { height:100%; }
+  #coffees-list.grid .coffee-card { height:100%; display:flex; flex-direction:column; }
+  #coffees-list.grid .coffee-card-body { flex:1; display:flex; flex-direction:column; }
+  #coffees-list.grid .card-foot { margin-top:auto; }
+  #coffees-list.grid .coffee-card-header { min-height:72px; box-sizing:border-box; }
+  #coffees-list.grid .coffee-card-name { display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden; }
+  #coffees-list.grid .coffee-card-roaster { white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
   #coffees-list.grid .coffee-card { margin-bottom:0; }
   #coffees-list.grid .coffee-card-header { padding:11px 12px; align-items:flex-start; }
   #coffees-list.grid .coffee-card-name { font-size:14px; line-height:1.25; overflow-wrap:anywhere; }
