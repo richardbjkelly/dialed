@@ -1,0 +1,415 @@
+# dialed — Change Notes
+
+Specialty coffee dialling-in tracker · Single-file PWA / Android APK
+
+---
+
+## v1.0 — Initial Build
+*Session started 8 March 2026*
+
+### Core app
+- Single self-contained HTML/CSS/JS file, no framework dependencies
+- localStorage persistence (`dialin_v2` key)
+- 5-tab navigation: Overview, Coffees, Recipes, Grinders, Compare
+- Floating action button (FAB) for quick actions
+- Google Fonts: Playfair Display, DM Mono, DM Sans
+- Grain texture overlay, espresso/crema colour palette
+
+### Coffee Library
+- Add coffees with: name, roaster, country, region, varietal, process (Washed / Natural / Honey / Anaerobic / Wet Hulled / Other), roast level, roast date, tasting notes, altitude (masl)
+- Coffee detail view with all origin metadata
+- Brew log linked per coffee
+
+### Brew Log
+- Log brews with: coffee selector, grinder selector, brew method, grind setting, dose (g), water/yield (ml/g), time (sec), water temp (°C), extraction result (under/good/over), rating (1–5), tasting notes
+- Yield vs Water label swaps automatically based on method (espresso = yield, all others = water)
+- Brew methods: Espresso, V60, AeroPress, Chemex, Moka Pot, Cold Brew, French Press, Steep & Release, Other
+
+### Grinder Database
+- 58 grinders: 28 manual (m01–m28), 30 electric (e01–e30)
+- Each entry: brand, model, type, settings, min/max µm range, notes
+- Browse, search, set favourite grinder
+- Favourite grinder shown on Overview dashboard
+- Favourite pre-selected in Log Brew grinder selector
+
+### Grinder Compare
+- Select up to 5 grinders via ⊕ button
+- Floating compare bar
+- Side-by-side range bars (colour-coded), brew method compatibility matrix, spec cards
+
+---
+
+## v1.1
+*Session 8 March 2026 (continued)*
+
+### Recipes
+- Added recipe database (RECIPES object) with built-in recipes per brew method
+- Recipe dropdown in Log Brew modal (non-espresso methods only)
+- Auto-fills dose, water, temp when recipe selected
+- Step-by-step recipe card shown inline in Log Brew modal
+- Built-in recipes:
+  - **V60**: James Hoffmann Ultimate, Simple 1-Cup
+  - **AeroPress**: James Hoffmann Ultimate, Classic Inverted
+  - **Chemex**: Classic, Hoffmann-style
+  - **French Press**: James Hoffmann Ultimate, Classic
+  - **Moka Pot**: Classic, Hoffmann-style
+  - **Cold Brew**: Classic Concentrate
+  - **Steep & Release**: James Hoffmann Clever Dripper, Classic
+- Recipe badge shown on saved brew log entries
+
+### Custom Recipes
+- New **My Recipes** tab
+- Create recipes with: name, author, brew method, dose, water, temp, grind hint, unlimited steps
+- Edit and delete custom recipes
+- Custom recipes appear in Log Brew dropdown (marked with ★)
+- Custom recipes accessible from FAB menu
+
+---
+
+## v1.2
+*Session 8 March 2026 (continued)*
+
+### Bag Label Photos
+- Camera/gallery photo capture in Add Coffee form
+- Label photo shown as thumbnail on coffee library cards
+- Portrait thumbnail in coffee detail hero
+- 48×48px thumbnail on all brew log cards (Recent Brews + Brew Log tab)
+
+---
+
+## v1.3
+*Session 8 March 2026 (continued)*
+
+### Icon & Branding
+- Replaced ☕ emoji header logo with custom tea cup SVG (Streamline Feather)
+- SVG coloured in crema accent colour
+
+---
+
+## v1.4
+*Session 8 March 2026 (continued)*
+
+### Appearance Settings (later removed)
+- In-app settings panel (gear icon → slide-in drawer)
+- 18 colour palette options across 4 moods: Warm & earthy, Cool & fresh, Dark/moody, Light/airy
+- Display font picker (5 options: Playfair Display, Lora, Fraunces, Josefin Sans, Inter)
+- Mono/UI font picker (4 options: DM Mono, Space Mono, Inter, Space Grotesk)
+- Settings persisted to localStorage
+
+---
+
+## v1.5
+*Session 8 March 2026 (continued)*
+
+### Branding & Defaults
+- App renamed from "Dial In" to **dialed** (all lowercase)
+- Default palette changed to **Terracotta**
+- Default font changed to **Inter** (both display and mono)
+- Appearance settings panel removed (simplified to dark mode toggle only)
+- **Dark mode** added: 🌙/☀ toggle button in header
+  - Full dark mode CSS override system using `body.dark-mode` class
+  - Deep near-black palette (`#111111` bg, `#1e1e1e` surfaces)
+  - Preference saved to localStorage
+
+---
+
+## v1.6
+*Session 8 March 2026 (continued)*
+
+### Icons & Dark Mode
+- Dark/light mode toggle icons replaced with custom SVGs (Streamline Feather moon, Streamline Mynaui sun)
+- Brew log rating icons replaced with cup SVG (replacing ☕ emoji)
+  - Rating buttons in Log Brew modal now use cup SVG
+  - Rating display on brew cards uses small cup SVGs
+- **Coffee rating out of 10** added to Add Coffee form
+  - 10-cup icon rating row
+  - Word descriptor label (e.g. "8/10 — Very good")
+  - Rating shown on coffee library cards and detail hero
+
+---
+
+## v1.7
+*Session 9 March 2026*
+
+### PWA / APK Packaging
+- Added `<link rel="manifest">` and PWA meta tags to HTML
+- Created `manifest.json` with name, theme colour, display mode
+- Generated 4 icon files:
+  - `icon-any-192.png` — rounded square, 192×192
+  - `icon-any-512.png` — rounded square, 512×512
+  - `icon-maskable-192.png` — full-bleed, 192×192
+  - `icon-maskable-512.png` — full-bleed, 512×512
+- Icons use deep espresso background with cup illustration in crema accent
+- Hosted on GitHub Pages: `https://richardbjkelly.github.io/dialed/`
+- APK generated via PWABuilder
+
+---
+
+## v1.8
+*Session 9 March 2026 (continued)*
+
+### Grind Range Improvements
+- Grinder cards and detail view now show **click range** (e.g. 0–18 clicks) where known, alongside µm range
+- Added µm/click data for Timemore Sculptor 078S: ~25µm/click, 0–18 click range
+  - Espresso: clicks 0–6 · V60/Pourover: clicks 7–12 · French Press: 14+
+- Added µm/click data for Timemore Sculptor 078 (Turbo): ~25µm/click, 0–18 click range
+  - Filter only — V60: clicks 7–12 · French Press: 12+
+- Detail view shows dedicated µm/click spec block
+
+### Navigation & UX
+- **Default grinder pinned to top** of grinder library list
+- **Android back gesture**: hardware back button intercepted via History API
+  - Back from any tab → Overview
+  - Double-back on Overview → "Press back again to exit" toast
+  - Back closes open modals first
+- **Time-of-day greeting** on Overview subtitle:
+  - Before 5am: "burning the midnight oil ☽"
+  - 5–9am: "good morning ☀"
+  - 9–12pm: "morning brew time ☕"
+  - 12–2pm: "midday refuel ☕"
+  - 2–5pm: "afternoon pick-me-up ☕"
+  - 5–8pm: "evening cup ☕"
+  - After 8pm: "winding down ☽"
+
+### Coffee Library
+- **Finished bag** feature: mark a coffee as finished from its detail view
+  - Greyed out (opacity + grayscale filter) in coffee library
+  - FINISHED pill shown on card
+  - Excluded from brew log coffee selector
+  - Brew history fully retained
+  - Toggle back to active at any time
+
+### Grinder Compare
+- **Compare tab removed** from navigation
+- Comparison integrated inline into Grinders tab
+  - Floating compare bar "Compare" button expands an inline panel above the grinder list
+  - Panel shows range bars and compatibility matrix
+  - "✕ Close" to collapse
+
+### Recipes
+- **Brew log moved to Overview** (Recent Brews section, last 10 shown)
+  - "View all (n) →" link jumps to full Brew Log tab
+- **Recipes tab** renamed to "Brew Recipes" (later "Recipes") — now shows recipe library
+- Two-panel layout: **Built-in** / **My Recipes** sub-tabs
+- **Method filter bar** (All, Pourover, AeroPress, etc.) in Built-in panel
+- **Expanded V60 / Pourover recipes** (12 total, from Harmony Coffee guide):
+  - James Hoffmann Ultimate V60
+  - Carly Green (Q-Grader, Cherry Love)
+  - Junchao Huang (UK Brewers Cup, Calico Coffee)
+  - Alexa Elizabeth Lee (UK Cup Tasters Champion 2024, Orea)
+  - Natdanai Denham (3rd English AeroPress 2023, Jan Lek)
+  - Ted Longden (3rd UK Barista 2023, WatchHouse) — Clever Dripper All-In
+  - Alan Jarrar (Jokes Aside Coffee) — Kalita 185
+  - Sharon Ip (2nd English AeroPress 2024, TABxTAB) — FLO/Orea
+  - Cleo Tsai (Canadian Brewers Cup Finalist 2024)
+  - Gage Quinn (Northern Filter Champion 2023) — Orea V3
+  - Kish (Team Harmony) — 5-Pour V60
+  - Ben (Team Harmony, Head of Coffee) — Orea V4 Fast
+- **Expanded AeroPress recipes** (10 total, from WAC + aeroprecipe.com):
+  - James Hoffmann Ultimate AeroPress
+  - Némo Pop — WAC Champion 2025
+  - George Stanica — WAC 1st 2024
+  - Sophan Nugraha — WAC 2nd 2024
+  - Jibbi Little — WAC Champion 2022
+  - Tuomas Merikanto — WAC Champion 2021
+  - Natdanai Denham — 3rd English AeroPress 2023
+  - Sharon Ip — 2nd English AeroPress 2024
+  - Classic Inverted
+  - Tim Wendelboe — Filter Style
+- V60/Pourover recipes include: pours count, bloom ratio, target total time (shown in dropdown card)
+- **⧉ Duplicate & Edit**: any built-in recipe can be duplicated to My Recipes for customisation
+- Built-in recipes are read-only (no edit button)
+
+### Backup / Restore
+- **Export Backup** button at bottom of Overview: downloads dated JSON file (`dialed-backup-YYYY-MM-DD.json`)
+- **Import Backup** button: reads JSON file, restores all coffees, brews, custom recipes and settings
+
+### Bug Fixes
+- Coffee detail back button now works correctly (restores full library view)
+- Coffee detail text contrast improved (roaster, date, tasting notes)
+
+---
+
+## v1.9
+*Session 9 March 2026 (continued)*
+
+### Recipes
+- V60 renamed to **Pourover** throughout (method selector, filter bar, grinder compatibility matrix, custom recipe dropdown)
+- Built-in recipe names retain "V60" in title where accurate (e.g. "Ultimate V60")
+
+---
+
+## v2.0
+*Session 9 March 2026 (continued)*
+
+### Coffee Library Overhaul
+- **New fields** added to Add/Edit Coffee form:
+  - Producer (person who grew/processed the coffee)
+  - Farm name
+  - Roaster City
+  - Roaster Country
+- **Edit Coffee**: ✏ Edit button in coffee detail view opens pre-filled modal
+  - All fields editable including photo and rating
+  - Saves back to existing coffee record, returns to detail view
+- **Custom process entry**: Process dropdown now includes:
+  - Carbonic Maceration
+  - Extended Fermentation
+  - "Other…" → reveals free-text input for any custom process
+- Producer, farm, and roaster location shown in coffee detail hero with icons
+
+### UI / Contrast Fixes
+- Form labels: use `var(--text)` at 75% opacity (was `var(--text-muted)`)
+- Meta pills: stronger border and text colour
+- Coffee card roaster name: improved contrast
+- Recipe count on cards: improved contrast
+- Custom recipe step text in My Recipes: full text colour (was muted)
+- Custom recipe card header subtitle: improved opacity
+
+### App Icon
+- Header icon reduced from 32px to 24px (was appearing too large/zoomed)
+
+---
+
+## v2.1
+*Session 9 March 2026 (continued)*
+
+### Design System
+- **Fonts changed**:
+  - Headers / titles: **Space Grotesk** (app title, modal titles, section titles, coffee names, recipe titles, grinder names)
+  - Body / labels / UI: **Space Mono** (all other text, metadata, stats, form inputs, brew log)
+- **Colour palette replaced** with forest green scheme:
+  - `#123C27` — deep forest green (header, nav bar, hero backgrounds, primary buttons)
+  - `#FAFAF7` — warm off-white (page background)
+  - `#FFFFFF` — pure white (cards, modals)
+  - `#52796F` — sage green (accent, active states, meta pills, muted text)
+  - `#E5E7EB` — light grey (borders)
+- **Dark mode** updated to deep forest green scheme:
+  - `#0a1f14` background
+  - `#112b1c` surfaces
+  - `#163624` cards
+  - `#7aaa96` muted text
+- Inline badge colours (grinder, recipe) updated to complement new palette
+- Extraction tag colours updated to green palette
+
+---
+
+## v2.2 – v2.5
+*Session 30 September 2026*
+
+### Features
+- Long-press on coffees and brews for Edit / Trends / Delete overlay
+- Brew editing; brew rating now out of 10; mins:secs brew time for non-espresso methods
+- Combined trend chart per coffee (taste score area line, extraction-coloured points, temp °C and grind values, brew time sub-chart), opened via 📈 Trends
+- Coffee stats on Overview with period filter (year / 6m / 3m / month / all) and single stacked bar per category
+- Overview category picker in Settings (origin, process, roaster, roaster country, varietal, roast level)
+- Tracker tab: full brew list with coffee / method / result filters and sorting
+- Settings panel (Recipes, Grinders, dark mode, overview options, backup/restore)
+- Bottom navigation with outline icons; centred header
+- Decaf checkbox on coffees
+- Label photo lightbox (tap any label photo)
+- Confirm-delete dialog for brews and custom recipes; inline ✕ removed from brew cards
+
+### Fixes
+- New brews overwriting previous brews (stale edit ID)
+- Editing always opening the same coffee
+- Recipe selection not autofilling dose / water / temp
+- Long-press Cancel re-opening the coffee (tap loop)
+- Dark mode toggle not applying; white panels and invisible text in dark mode
+- New Recipe button invisible in light mode
+- Full debug run: three script errors that stopped the whole app responding (escaped template literals in stats, leftover backup reference on Overview, undefined variables in coffee detail) — verified in a headless browser with real taps
+
+---
+
+## v2.6
+*30 September 2026*
+
+### Fixes
+- Coffee cards were nested inside each other (missing closing tag), causing: every coffee opening the first one, the long-press menu appearing on the wrong card, and the Cancel loop that blocked Settings and Log Brew
+- Long-press now cancels when you scroll, and lifting your finger no longer triggers whatever sits under it
+- "New Custom Recipe" in the + menu was white-on-white
+- Dark mode toggle in Settings was nearly invisible in light mode
+- Tested on an emulated Android phone with real touch input
+
+---
+
+## v2.7
+*30 September 2026*
+
+### Fixes
+- App crashed on launch whenever it had saved data (Overview drew before settings existed), hiding stats and breaking taps
+- Saved settings (dark mode, fonts) never loaded on launch
+- Dark mode: base palette now swaps, so no panels stay white (e.g. Overview Stats in Settings)
+- Older coffees without a creation date now count in stats (via first brew date; always in All Time)
+
+### Deployment
+- Changes now pushed straight to GitHub (richardbjkelly/dialed) instead of copy/paste
+
+---
+
+## v2.8
+*30 September 2026*
+
+### Features
+- Coffee price, currency (15 options) and bag weight; converted to £ at the day's ECB rate and shown as £/100g
+- Avg price per 100g and total spent on Insights
+
+### Fixes
+- Decaf checkbox stayed ticked for a new coffee
+- Pills on dark headers unreadable
+
+---
+
+## v2.9
+*30 September 2026*
+
+### Features
+- Brew timer in Log Brew: fills the time on Stop, accurate through screen lock, keeps screen awake
+- Plan next brew after logging: grind finer/coarser and hotter/cooler pre-selected from the extraction result, with steppers
+- Up next list on Overview with Brew now (pre-fills Log Brew); Plan next on any brew's menu
+
+### Fixes
+- Editing a brew didn't highlight its coffee, grinder, method or result
+- Toasts moved to the top so they don't cover open sheets
+
+---
+
+## v3.0
+*30 September 2026*
+
+### Data protection
+- Label photos compressed on upload (~4MB → ~150KB) and stored in IndexedDB instead of the ~5MB localStorage; existing photos migrated automatically
+- Save failures show a clear warning instead of failing silently
+- Monthly backup reminder; storage use and last backup date in Settings
+
+### Offline
+- Service worker: app opens and works without signal; updates show on the next open
+
+### Dialling in
+- Grams left per bag, low/empty warnings, prompt to mark finished
+- Cost per cup (on brews, coffee page, and live while logging)
+- Days off roast on brews and coffees; taste-by-roast-age chart in Trends
+- Brew ratio as 1:x, live in Log Brew
+- Best brew per coffee with one-tap Repeat
+- Guided recipe steps on the timer (current step, countdown, buzz on change)
+- Optional taste profile sliders (sweetness, acidity, body, bitterness)
+
+### UI
+- Visible ⋯ button on coffee and brew cards
+- Stats moved to a new Insights tab (was Tracker); Overview shows Up next + 5 recent brews
+- Only Space Grotesk and Space Mono loaded, applied from the stylesheet
+
+### Fixes
+- Picking a recipe in Log Brew threw an error
+
+---
+
+## Pending / Roadmap
+- Rebuild the APK once to pick up the green app icon
+- Grind/temp suggestions by process, varietal and origin (on hold)
+- Google Drive sync (deferred — manual backup/restore and reminder in place)
+- Screenshot showcase for PWABuilder
+- Play Store listing
+
+---
+
+*Document maintained automatically. Last updated: v3.0*
