@@ -2499,6 +2499,17 @@ function renderDashboard() {
 }
 
 // ==================== COFFEES ====================
+// Library order: most recently brewed first; never-brewed coffees next (newest added first); finished bags last
+function libraryOrder() {
+  const last = {};
+  state.recipes.forEach(r => { const t = r.createdAt ? Date.parse(r.createdAt) : 0; if (t && (!last[r.coffeeId] || t > last[r.coffeeId])) last[r.coffeeId] = t; });
+  const added = c => c.createdAt ? Date.parse(c.createdAt) : 0;
+  return state.coffees.map((c, i) => ({ c, i })).sort((a, b) =>
+    (!!a.c.finishedBag - !!b.c.finishedBag) ||
+    ((last[b.c.id] || 0) - (last[a.c.id] || 0)) ||
+    (added(b.c) - added(a.c)) || (a.i - b.i)
+  ).map(x => x.c);
+}
 function setCoffeeLayout(v) {
   appSettings.coffeeLayout = v; saveSettings(); renderCoffeesView();
 }
@@ -2509,7 +2520,7 @@ function renderCoffeesView() {
   el.classList.toggle('grid', layout === 'grid' && state.coffees.length > 0);
   document.querySelectorAll('.layout-toggle button').forEach(b => { const on = b.dataset.layout === layout; b.classList.toggle('active', on); b.setAttribute('aria-pressed', on); });
   if (!state.coffees.length) { el.innerHTML=`<div class="empty-state"><div class="empty-icon">📦</div><div class="empty-title">No coffees yet</div><div class="empty-desc">Tap + to add your first coffee.</div></div>`; return; }
-  el.innerHTML = state.coffees.map(c => {
+  el.innerHTML = libraryOrder().map(c => {
     const rc = state.recipes.filter(r=>r.coffeeId===c.id).length;
     const maslPill = (c.masl ? `<span class="meta-pill">${c.masl}m</span>` : '') + (per100g(c)!=null ? `<span class="meta-pill">£${per100g(c).toFixed(2)}/100g</span>` : '') + (gramsLeft(c)!=null && !c.finishedBag ? `<span class="meta-pill">${Math.round(gramsLeft(c))}g left</span>` : '') + (roastAgeToday(c)!=null && !c.finishedBag ? `<span class="meta-pill">${roastAgeToday(c)}d off roast</span>` : ''); const isGrid = appSettings.coffeeLayout === 'grid';
     // Grid: several varietals collapse to the first one plus a count, e.g. "Castillo +2"

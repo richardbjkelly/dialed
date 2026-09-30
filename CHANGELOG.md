@@ -589,6 +589,15 @@ Specialty coffee dialling-in tracker · Single-file PWA / Android APK
 
 ---
 
+## v3.15
+*30 September 2026*
+
+### Coffee Library order
+- Coffees sorted by most recently brewed first
+- Coffees with no brews yet come next (newest added first); finished bags sit at the bottom
+
+---
+
 ## Pending / Roadmap
 - Rebuild the APK once to pick up the new cup icon
 - Remaining transitions: press feedback, charts drawing in, + rotation, timer step pulse
@@ -599,4 +608,4 @@ Specialty coffee dialling-in tracker · Single-file PWA / Android APK
 
 ---
 
-*Document maintained automatically. Last updated: v3.14*
+*Document maintained automatically. Last updated: v3.15*
