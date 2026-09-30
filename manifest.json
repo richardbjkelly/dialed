@@ -8,8 +8,8 @@
   "display": "standalone",
   "orientation": "any",
   "dir": "ltr",
-  "background_color": "#2a1510",
-  "theme_color": "#2a1510",
+  "background_color": "#123C27",
+  "theme_color": "#123C27",
   "icons": [
     {
       "src": "https://richardbjkelly.github.io/dialed/icon-any-192.png",
