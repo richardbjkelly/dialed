@@ -2698,7 +2698,7 @@ function getPeriodCoffees() {
   return { coffees, brews, from };
 }
 
-function topN(arr, key, n=5) {
+function topN(arr, key, n=Infinity) {   // all values, most common first; the bar groups the tail into Other
   const counts = {};
   arr.forEach(item => {
     const val = item[key];
@@ -2708,26 +2708,39 @@ function topN(arr, key, n=5) {
 }
 
 // Stacked bar colours (up to 8 segments)
-const STACK_COLORS = ['#52796F','#84A98C','#2F6B57','#B7CDB9','#6FA89D','#3E5C54','#9CB8AE','#D3DED6'];
+// "Roastery" palette: terracotta, slate blue, ochre, plum, sky, rose, violet (+ neutral grey for Other).
+// Checked for colour-blind separation; dark mode has its own steps for the dark surface.
+const STACK_COLORS_LIGHT = ['#C95A37','#3D73B6','#DB9E2E','#92417A','#49ABD6','#D77787','#6F57AB'];
+const STACK_COLORS_DARK  = ['#D66643','#4E85CA','#BF881E','#9F4685','#34A1C6','#C05B6B','#7358B3'];
+const STACK_OTHER = { light:'#9AA09C', dark:'#7D857F' };
+function stackColor(i, label) {
+  const dark = document.body.classList.contains('dark-mode');
+  if (label === 'Other') return dark ? STACK_OTHER.dark : STACK_OTHER.light;
+  const pal = dark ? STACK_COLORS_DARK : STACK_COLORS_LIGHT;
+  return pal[i % pal.length];
+}
 
 function renderStackedBar(items, total) {
   if (!items.length) return '<div style="font-size:11px;color:var(--text-muted);padding:4px 0">No data</div>';
-  const shown = items.slice(0, 7);
-  const otherCount = items.slice(7).reduce((s,[,n]) => s+n, 0);
-  if (otherCount > 0) shown.push(['Other', otherCount]);
+  // Up to 7 named segments; beyond that, the top 6 by name plus one grey "Other" for the rest
+  const MAX_SEGMENTS = 7;
+  const shown = items.length <= MAX_SEGMENTS ? items.slice() : items.slice(0, MAX_SEGMENTS - 1);
+  const rest = items.slice(shown.length);
+  const otherCount = rest.reduce((s,[,n]) => s+n, 0);
+  if (otherCount > 0) shown.push(['Other', otherCount, rest.length]);
   const grandTotal = shown.reduce((s,[,n]) => s+n, 0);
   const segments = shown.map(([label, count], i) => {
     const pct = (count / grandTotal * 100).toFixed(1);
-    return `<div title="${label}: ${count}" style="width:${pct}%;background:${STACK_COLORS[i]};height:100%;transition:width .4s"></div>`;
+    return `<div title="${label}: ${count}" style="width:${pct}%;background:${stackColor(i, label)};height:100%;transition:width .4s"></div>`;
   }).join('');
-  const legend = shown.map(([label, count], i) => `
+  const legend = shown.map(([label, count, extra], i) => `
     <div style="display:flex;align-items:center;gap:6px;margin-bottom:3px">
-      <div style="width:10px;height:10px;border-radius:2px;background:${STACK_COLORS[i]};flex-shrink:0"></div>
-      <span class="stack-legend-label" style="font-size:11px;flex:1">${label}</span>
+      <div style="width:10px;height:10px;border-radius:2px;background:${stackColor(i, label)};flex-shrink:0"></div>
+      <span class="stack-legend-label" style="font-size:11px;flex:1">${label}${label === 'Other' && extra ? ` <span style="color:var(--text-muted)">· ${extra} more</span>` : ''}</span>
       <span style="font-size:10px;color:var(--text-muted)">${count}</span>
     </div>`).join('');
   return `
-    <div style="height:16px;border-radius:6px;overflow:hidden;display:flex;margin-bottom:10px">${segments}</div>
+    <div style="height:16px;border-radius:6px;overflow:hidden;display:flex;gap:2px;margin-bottom:10px">${segments}</div>
     <div>${legend}</div>`;
 }
 
@@ -3263,6 +3276,7 @@ function toggleDarkMode() {
   appSettings.darkMode = !appSettings.darkMode;
   applyDarkMode();
   saveSettings();
+  try { renderStatsDashboard(); } catch(e) {}   // chart colours have separate dark-mode steps
 }
 
 function applyDarkMode() {

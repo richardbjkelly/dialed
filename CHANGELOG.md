@@ -598,6 +598,17 @@ Specialty coffee dialling-in tracker · Single-file PWA / Android APK
 
 ---
 
+## v3.16
+*30 September 2026*
+
+### Insights bars
+- New "Roastery" palette replaces the greens: terracotta, slate blue, ochre, plum, sky, rose, violet; neutral grey for Other
+- Validated for colour-blind separation and lightness in both modes; dark mode uses its own steps and redraws when toggled
+- 2px gaps between segments
+- Fix: charts silently dropped everything past the top 5 (so shares were wrong). Now up to 7 named segments; beyond that, top 6 plus a grey "Other · N more" covering the rest
+
+---
+
 ## Pending / Roadmap
 - Rebuild the APK once to pick up the new cup icon
 - Remaining transitions: press feedback, charts drawing in, + rotation, timer step pulse
@@ -608,4 +619,4 @@ Specialty coffee dialling-in tracker · Single-file PWA / Android APK
 
 ---
 
-*Document maintained automatically. Last updated: v3.15*
+*Document maintained automatically. Last updated: v3.16*
