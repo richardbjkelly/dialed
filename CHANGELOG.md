@@ -497,6 +497,16 @@ Specialty coffee dialling-in tracker · Single-file PWA / Android APK
 
 ---
 
+## v3.7
+*30 September 2026*
+
+### Header
+- Title and subtitle left-aligned; small cup line icon removed
+- The app-icon cup now bleeds off the right edge of the banner (decorative, ignored by screen readers)
+- Subtitle shortened to "Coffee Tracker"; dark-mode button sits left of the cup
+
+---
+
 ## Pending / Roadmap
 - Rebuild the APK once to pick up the new cup icon
 - Remaining transitions: press feedback, charts drawing in, + rotation, timer step pulse
@@ -507,4 +517,4 @@ Specialty coffee dialling-in tracker · Single-file PWA / Android APK
 
 ---
 
-*Document maintained automatically. Last updated: v3.6*
+*Document maintained automatically. Last updated: v3.7*
