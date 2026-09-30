@@ -282,6 +282,17 @@
   .upnext-title, .settings-panel-title, .empty-title, .cs-name, h1, h2, h3,
   [style*="Playfair"] { font-family: 'Space Grotesk', system-ui, sans-serif !important; letter-spacing: -0.3px !important; }
   .app-title { font-weight: 700 !important; letter-spacing: -1px !important; }
+  .suggest-card { background:rgba(82,121,111,0.1); border:1.5px dashed var(--crema); border-radius:var(--radius-sm); padding:12px 14px; margin:4px 0 6px; }
+  .suggest-label { flex:1; font-size:10px; letter-spacing:1px; text-transform:uppercase; color:var(--text-muted); }
+  .suggest-apply { background:#123C27; color:#FAFAF7; border:none; border-radius:8px; padding:7px 14px; font-size:10px; letter-spacing:1px; text-transform:uppercase; cursor:pointer; }
+  body.dark-mode .suggest-apply { background:var(--crema); }
+  .suggest-main { font-size:13px; color:var(--text); line-height:1.5; }
+  .suggest-main b { font-weight:700; }
+  .suggest-sub { font-size:11px; color:var(--text-muted); margin-top:2px; }
+  .suggest-why { margin-top:8px; font-size:11px; color:var(--text-muted); }
+  .suggest-why summary { cursor:pointer; color:var(--text); }
+  .suggest-why ul { padding-left:16px; margin-top:6px; }
+  .suggest-why li { margin-bottom:3px; line-height:1.4; }
   /* GRINDER STYLES */
   .grinder-type-toggle { display: flex; background: rgba(26,15,10,0.06); border-radius: 10px; padding: 3px; margin-bottom: 20px; }
   .type-btn { flex: 1; padding: 9px 12px; border: none; border-radius: 8px; font-family: 'DM Mono', monospace; font-size: 10px; letter-spacing: 1px; text-transform: uppercase; cursor: pointer; background: none; color: var(--text-muted); transition: all 0.2s; }
@@ -722,11 +733,13 @@
       </div>
       <div id="r-recipe-card"></div>
     </div>
+    <div id="brew-suggestion"></div>
     <div class="divider">Grind & Dose</div>
     <div class="form-row">
-      <div class="form-group"><label class="form-label">Grind Setting</label><input type="number" class="form-input" id="r-grind" placeholder="e.g. 8" step="0.5"></div>
+      <div class="form-group"><label class="form-label">Grind Setting</label><input type="number" class="form-input" id="r-grind" placeholder="e.g. 8" step="any" inputmode="decimal" oninput="updateGrindMicrons()"></div>
       <div class="form-group"><label class="form-label">Dose (g)</label><input type="number" class="form-input" id="r-dose" placeholder="e.g. 18" step="0.1" oninput="updateBrewLive()"></div>
     </div>
+    <div id="r-grind-um" class="brew-live" style="margin-top:-8px"></div>
     <div class="brew-timer">
       <div class="brew-timer-display" id="brew-timer-display">0:00</div>
       <button type="button" class="brew-timer-btn reset" id="brew-timer-reset" onclick="resetBrewTimer()" style="display:none">Reset</button>
@@ -1486,8 +1499,8 @@ const GRINDERS = [
   {id:'e26',brand:'Comandante',model:'MC6 Goat',type:'electric',settings:90,min:100,max:1100,notes:'Electric version of legendary C40 with same burr geometry.'},
   {id:'e27',brand:'Cuisinart',model:'DBM-8',type:'electric',settings:18,min:250,max:1300,notes:'Budget electric. Good entry-level starting point.'},
   {id:'e28',brand:'De\'Longhi',model:'KG89',type:'electric',settings:14,min:280,max:1300,notes:'Affordable home grinder. Auto-dosing. Beginner-friendly.'},
-  {id:'e29',brand:'Timemore',model:'Sculptor 078S',type:'electric',settings:36,min:235,max:1235,clickMin:0,clickMax:18,umPerClick:25,notes:'~25µm/click. Espresso: clicks 0–6, V60: clicks 7–12, French Press: 14+. Dual-purpose flat burrs.'},
-  {id:'e30',brand:'Timemore',model:'Sculptor 078',type:'electric',settings:36,min:370,max:1270,clickMin:0,clickMax:18,umPerClick:25,notes:'~25µm/click. Filter only (Turbo burrs). V60: clicks 7–12, French Press: 12+. Exceptional clarity for pour-over and cold brew.'},
+  {id:'e29',brand:'Timemore',model:'Sculptor 078S',type:'electric',settings:36,min:235,max:1235,clickMin:0,clickMax:18,step:0.1,notes:'Dial 0–18 with fine adjustment, about 55µm per number. Espresso ≈0–2.6, pourover ≈3–8.3, French press ≈8.2–18 (Honest Coffee Guide).'},
+  {id:'e30',brand:'Timemore',model:'Sculptor 078',type:'electric',settings:36,min:370,max:1270,clickMin:0,clickMax:18,step:0.1,notes:'Filter-only Turbo burrs, about 50µm per number. Approximate: pourover ≈0.6–6.6, French press ≈6.4–18.'},
 ];
 
 // Brew method grind ranges (microns) — data from honestcoffeeguide.com
@@ -1727,6 +1740,7 @@ function openRecipeModal() {
   renderBrewTimer();
   resetTaste();
   updateBrewLive();
+  suggestionSuppressed = false; renderBrewSuggestion(); updateGrindMicrons();
   openModal('modal-recipe');
 }
 
@@ -1762,6 +1776,7 @@ function selectMethod(el, val) {
   // Toggle time format
   const espT=document.getElementById('r-time-esp'), filT=document.getElementById('r-time-filter');
   if(espT&&filT){ espT.style.display=isEspressoMethod(val)?'flex':'none'; filT.style.display=isEspressoMethod(val)?'none':'flex'; }
+  renderBrewSuggestion(); updateGrindMicrons();
 }
 
 function updateRecipeDropdown(method) {
@@ -2280,7 +2295,7 @@ function saveRecipe() {
   if (!state.selectedCoffeeId) { showToast('Select a coffee'); return; }
   if (brewTimer.startedAt) stopBrewTimer();
   const editBrewId = document.getElementById('r-edit-id')?.value||'';
-  const brewData = {coffeeId:state.selectedCoffeeId, grinderId:state.selectedGrinderId||null, recipeId:state.selectedRecipeId||null, method:state.selectedMethod||'Espresso', grind:document.getElementById('r-grind').value, dose:document.getElementById('r-dose').value, yield:document.getElementById('r-yield').value, time:getBrewTimeSecs(), temp:document.getElementById('r-temp').value, extraction:state.selectedExtraction, rating:state.selectedRating, notes:document.getElementById('r-notes').value.trim(), taste:readTaste()};
+  const brewData = {coffeeId:state.selectedCoffeeId, grinderId:state.selectedGrinderId||null, recipeId:state.selectedRecipeId||null, method:state.selectedMethod||'Espresso', grind:document.getElementById('r-grind').value, dose:document.getElementById('r-dose').value, yield:document.getElementById('r-yield').value, time:getBrewTimeSecs(), temp:document.getElementById('r-temp').value, extraction:state.selectedExtraction, rating:state.selectedRating, notes:document.getElementById('r-notes').value.trim(), taste:readTaste(), grindUm: settingToMicrons(selectedGrinder(), document.getElementById('r-grind').value)};
   if (editBrewId) {
     const idx = state.recipes.findIndex(x=>x.id===editBrewId);
     if(idx>=0) state.recipes[idx]={...state.recipes[idx],...brewData};
@@ -2454,7 +2469,7 @@ function recipeCard(r, showDel=false) {
       <div style="display:flex;align-items:center;gap:6px;flex-shrink:0">${exTag}<button class="card-more" aria-label="More options" onclick="event.stopPropagation();showEditOverlay('brew-${r.id}')">⋯</button></div>
     </div>
     <div class="recipe-params">
-      <div class="param-block"><div class="param-value">${r.grind||'—'}</div><div class="param-label">Grind</div></div>
+      <div class="param-block"><div class="param-value">${r.grind||'—'}</div><div class="param-label">Grind${brewMicrons(r)?' · <span style="text-transform:none">'+brewMicrons(r)+'µm</span>':''}</div></div>
       <div class="param-block"><div class="param-value">${r.dose?r.dose+'g':'—'}</div><div class="param-label">Dose</div></div>
       <div class="param-block"><div class="param-value">${formatBrewTime(r.time,r.method)}</div><div class="param-label">Time</div></div>
     </div>
@@ -2856,6 +2871,14 @@ function showGrinderDetail(gid) {
       ${g.notes?`<div style="font-size:13px;color:rgba(245,237,227,.65);margin-top:14px;line-height:1.5;font-style:italic">"${g.notes}"</div>`:''}
     </div>
 
+    <div class="card" style="padding:14px 16px">
+      <div style="font-size:13px;font-weight:600;color:var(--text);margin-bottom:8px">Setting → particle size</div>
+      <input type="number" step="any" inputmode="decimal" class="form-input" id="conv-setting" placeholder="Enter a setting, e.g. ${micronsToSetting(g, 560) ?? ''}" oninput="updateGrinderConverter('${g.id}')">
+      <div id="conv-out" class="brew-live" style="margin:8px 0 0"></div>
+      ${methodSettingsGuide(g)}
+      <div style="font-size:10px;color:var(--text-muted);margin-top:8px">Approximate — based on published ranges; individual grinders vary.</div>
+    </div>
+
     <div style="margin-bottom:6px;font-family:'Playfair Display',serif;font-size:16px">Compatible Brew Methods</div>
     <div style="display:flex;flex-wrap:wrap;margin-bottom:20px">
       ${covered.map(m=>`<span style="display:inline-flex;align-items:center;gap:4px;padding:4px 10px;border-radius:20px;font-family:'DM Mono',monospace;font-size:9px;letter-spacing:1px;text-transform:uppercase;margin:3px;background:${m.color}18;border:1px solid ${m.color}40;color:${m.color}">${m.name}</span>`).join('')}
@@ -3154,6 +3177,7 @@ function fillBrewModal(r, opts={}) {
   state.selectedRecipeId = r.recipeId || null;
   if (!opts.keepResult) resetBrewTimer();
   openRecipeModal();
+  suggestionSuppressed = true; renderBrewSuggestion();
   if (opts.editId) document.getElementById('r-edit-id').value = opts.editId;
   if (opts.planId) document.getElementById('r-plan-id').value = opts.planId;
   document.getElementById('r-modal-title').textContent = opts.title || 'Log Brew';
@@ -3172,7 +3196,7 @@ function fillBrewModal(r, opts={}) {
     state.selectedExtraction=''; document.querySelectorAll('.extraction-btn').forEach(b=>b.classList.remove('selected'));
     setRating(0);
   }
-  updateBrewLive();
+  updateBrewLive(); updateGrindMicrons();
 }
 
 
@@ -3326,7 +3350,235 @@ function renderAgeChart(coffeeId) {
   </div>`;
 }
 
-document.addEventListener('click', e => { if (e.target.closest && e.target.closest('#coffee-selector')) setTimeout(updateBrewLive, 0); });
+document.addEventListener('click', e => { if (e.target.closest && e.target.closest('#coffee-selector, #grinder-selector')) setTimeout(() => { updateBrewLive(); updateGrindMicrons(); renderBrewSuggestion(); }, 0); });
+
+
+// ==================== GRIND ↔ MICRONS ====================
+// Converts a grinder setting to approximate particle size (µm) and back, so grind sizes
+// can be compared across grinders. Uses per-click data where known, otherwise spreads the
+// grinder's settings linearly across its published range. Approximate: units vary.
+function grinderScale(g) {
+  if (!g) return null;
+  if (!(g.max > g.min)) return null;
+  if (g.umPerClick) {
+    const s0 = g.clickMin || 0;
+    const s1 = g.clickMax != null ? g.clickMax : s0 + Math.round((g.max - g.min) / g.umPerClick);
+    return { s0, s1, um0: g.min, per: g.umPerClick, step: g.step };
+  }
+  if (g.clickMax != null) { const s0 = g.clickMin || 0; return { s0, s1: g.clickMax, um0: g.min, per: (g.max - g.min) / (g.clickMax - s0), step: g.step }; }
+  if (!(g.settings > 0)) return null;
+  return { s0: 0, s1: g.settings, um0: g.min, per: (g.max - g.min) / g.settings, step: g.step };
+}
+function settingToMicrons(g, setting) {
+  const s = parseFloat(setting), sc = grinderScale(g);
+  if (!sc || isNaN(s)) return null;
+  return Math.round(sc.um0 + (s - sc.s0) * sc.per);
+}
+function micronsToSetting(g, um) {
+  const sc = grinderScale(g); if (!sc || um == null) return null;
+  let s = sc.s0 + (um - sc.um0) / sc.per;
+  s = Math.max(sc.s0, Math.min(sc.s1, s));
+  const step = sc.step || ((sc.s1 - sc.s0) >= 15 ? 1 : 0.5);
+  const dp = step < 1 ? (String(step).split('.')[1] || '').length : 0;
+  return parseFloat((Math.round(s / step) * step).toFixed(dp));
+}
+function grindWord(um) {
+  if (um == null) return '';
+  return um < 250 ? 'extra fine' : um < 400 ? 'fine' : um < 550 ? 'medium-fine' : um < 750 ? 'medium' : um < 950 ? 'medium-coarse' : 'coarse';
+}
+function methodRange(method) {
+  const name = method === 'Steep & Release' ? 'Pour Over' : method;
+  return BREW_METHODS.find(m => m.name === name) || null;
+}
+function brewMicrons(r) {
+  if (r.grindUm) return r.grindUm;
+  const g = r.grinderId ? GRINDERS.find(x => x.id === r.grinderId) : null;
+  return settingToMicrons(g, r.grind);
+}
+function selectedGrinder() { return state.selectedGrinderId ? GRINDERS.find(g => g.id === state.selectedGrinderId) : null; }
+
+// Live readout under the grind field in Log Brew
+function updateGrindMicrons() {
+  const el = document.getElementById('r-grind-um'); if (!el) return;
+  const g = selectedGrinder(), val = document.getElementById('r-grind').value;
+  if (!g) { el.innerHTML = val ? 'Pick a grinder to see the particle size' : ''; return; }
+  const um = settingToMicrons(g, val);
+  if (um == null) { el.innerHTML = ''; return; }
+  const mr = methodRange(state.selectedMethod);
+  let fit = '';
+  if (mr) fit = um < mr.min ? ` · <span style="color:#c0564b">finer than usual for ${state.selectedMethod} (${mr.min}–${mr.max}µm)</span>`
+               : um > mr.max ? ` · <span style="color:#c0564b">coarser than usual for ${state.selectedMethod} (${mr.min}–${mr.max}µm)</span>`
+               : ` · in the usual ${state.selectedMethod} range`;
+  el.innerHTML = `≈ <b>${um}µm</b> (${grindWord(um)})${fit}`;
+}
+
+// ==================== STARTING-POINT SUGGESTIONS ====================
+// Phase 0: rules from general brewing guidance (method, roast, process, altitude, decaf).
+// Personal model: the user's own good brews shift the rules, weighted by how similar the
+// coffees are. Runs entirely on the phone; nothing leaves the device.
+const METHOD_BASE = {
+  'Espresso':        { um: 280,  temp: 93, ratio: 2,  dose: 18 },
+  'Pourover':        { um: 560,  temp: 94, ratio: 16, dose: 15 },
+  'AeroPress':       { um: 520,  temp: 90, ratio: 15, dose: 15 },
+  'Chemex':          { um: 720,  temp: 94, ratio: 16, dose: 30 },
+  'French Press':    { um: 1000, temp: 95, ratio: 16, dose: 30 },
+  'Moka Pot':        { um: 480,  temp: 90, ratio: 10, dose: 18 },
+  'Cold Brew':       { um: 1100, temp: 20, ratio: 8,  dose: 100 },
+  'Steep & Release': { um: 620,  temp: 96, ratio: 16, dose: 15 },
+  'Other':           { um: 600,  temp: 93, ratio: 16, dose: 15 },
+};
+const ROAST_ADJ = { 'Light':[-40,2], 'Light-Medium':[-20,1], 'Medium':[0,0], 'Medium-Dark':[30,-2], 'Dark':[50,-4] };
+const FERMENTY = ['Natural','Anaerobic','Carbonic Maceration','Extended Fermentation'];
+
+function ruleSuggestion(cf, method) {
+  const base = METHOD_BASE[method] || METHOD_BASE.Other;
+  const scale = base.um / 600;                         // espresso adjusts in smaller µm steps
+  let um = base.um, temp = base.temp; const reasons = [`${method}: typical start ≈${base.um}µm, ${base.temp}°C, 1:${base.ratio}`];
+  const hotMethod = method !== 'Cold Brew';
+  const add = (dum, dt, why) => { um += dum * scale; if (hotMethod) temp += dt; reasons.push(why); };
+  if (cf) {
+    const ra = ROAST_ADJ[cf.roastLevel];
+    if (ra && (ra[0] || ra[1])) add(ra[0], ra[1], ra[0] < 0 ? `${cf.roastLevel} roast: finer and hotter (denser, less soluble)` : `${cf.roastLevel} roast: coarser and cooler (extracts easily, bitterness)`);
+    const alt = parseFloat(cf.masl);
+    if (alt >= 1800) add(-20, 1, `Grown at ${alt}m: dense bean, a little finer and hotter`);
+    else if (alt > 0 && alt < 1200) add(20, -1, `Grown at ${alt}m: softer bean, a little coarser and cooler`);
+    if (FERMENTY.includes(cf.process)) add(20, -1, `${cf.process} process: extracts readily, slightly coarser and cooler`);
+    else if (cf.process === 'Honey') add(10, 0, 'Honey process: slightly coarser');
+    else if (cf.process === 'Wet Hulled') add(10, -1, 'Wet hulled: slightly coarser and cooler');
+    if (cf.decaf) add(20, -2, 'Decaf: extracts faster, coarser and cooler');
+    const age = roastAgeToday(cf);
+    if (age !== null && age < 7) reasons.push(`Only ${age} day${age !== 1 ? 's' : ''} off roast: expect a lively bloom${method === 'Espresso' ? '; shots may run fast' : ''}`);
+  }
+  if (hotMethod) temp = Math.min(100, Math.round(temp));
+  return { um: Math.round(um), temp, ratio: base.ratio, reasons };
+}
+
+function coffeeSimilarity(a, b) {
+  if (!a || !b) return 0;
+  const order = ['Light','Light-Medium','Medium','Medium-Dark','Dark'];
+  let s = 0;
+  if (a.process && a.process === b.process) s += 0.3;
+  if (a.roastLevel && b.roastLevel) { const d = Math.abs(order.indexOf(a.roastLevel) - order.indexOf(b.roastLevel)); s += d === 0 ? 0.25 : d === 1 ? 0.1 : 0; }
+  if (a.country && a.country === b.country) s += 0.15;
+  if (a.varietal && b.varietal && a.varietal.toLowerCase() === b.varietal.toLowerCase()) s += 0.15;
+  const ma = parseFloat(a.masl), mb = parseFloat(b.masl);
+  if (ma > 0 && mb > 0 && Math.abs(ma - mb) <= 200) s += 0.15;
+  return s;
+}
+function describeMatch(a, b) {
+  const bits = [];
+  if (a.process && a.process === b.process) bits.push(a.process.toLowerCase());
+  if (a.roastLevel && a.roastLevel === b.roastLevel) bits.push(a.roastLevel.toLowerCase() + ' roast');
+  if (a.country && a.country === b.country) bits.push(a.country);
+  return bits.join(', ');
+}
+
+function computeSuggestion(cfId, method) {
+  const cf = state.coffees.find(c => c.id === cfId);
+  const isGood = r => r.extraction === 'good' || (r.rating >= 7 && r.extraction !== 'under' && r.extraction !== 'over');
+  // 1. This coffee already dialled in with this method -> use its best
+  const own = brewsFor(cfId).filter(r => r.method === method && isGood(r)).sort((a, b) => (b.rating || 0) - (a.rating || 0) || new Date(b.createdAt) - new Date(a.createdAt))[0];
+  if (own) {
+    const d = parseFloat(own.dose), y = parseFloat(own.yield);
+    return { source: 'coffee', um: brewMicrons(own), grindRaw: own.grind, grinderId: own.grinderId, temp: parseFloat(own.temp) || null,
+      ratio: d > 0 && y > 0 ? y / d : null, recipeId: own.recipeId || null,
+      reasons: [`Your ${own.rating ? own.rating + '/10 ' : ''}brew of this coffee on ${new Date(own.createdAt).toLocaleDateString('en-GB', {day:'numeric', month:'short'})}`] };
+  }
+  // 2. Rules, shifted by the user's own good brews on other coffees (similarity-weighted)
+  const rule = ruleSuggestion(cf, method);
+  const others = state.recipes.filter(r => r.coffeeId !== cfId && r.method === method && isGood(r));
+  let dUm = 0, wUm = 0, dT = 0, wT = 0, dR = 0, wR = 0, best = null, bestSim = -1; const recipeVotes = {};
+  others.forEach(r => {
+    const oc = state.coffees.find(c => c.id === r.coffeeId); if (!oc) return;
+    const sim = coffeeSimilarity(cf, oc), w = 0.3 + sim;       // every good brew counts a little; similar ones count more
+    const ref = ruleSuggestion(oc, method);
+    const um = brewMicrons(r); if (um != null) { dUm += w * (um - ref.um); wUm += w; }
+    const t = parseFloat(r.temp); if (t > 0 && method !== 'Cold Brew') { dT += w * (t - ref.temp); wT += w; }
+    const d = parseFloat(r.dose), y = parseFloat(r.yield); if (d > 0 && y > 0) { dR += w * (y / d - ref.ratio); wR += w; }
+    if (r.recipeId) recipeVotes[r.recipeId] = (recipeVotes[r.recipeId] || 0) + w;
+    if (sim > bestSim) { bestSim = sim; best = oc; }
+  });
+  const K = 2;                                                  // shrink towards the rules when there's little data
+  const res = { source: others.length ? 'personal' : 'rules', um: rule.um, temp: rule.temp, ratio: rule.ratio, reasons: rule.reasons.slice(), recipeId: null };
+  if (wUm) { const off = dUm / (wUm + K); res.um = Math.round(rule.um + off); if (Math.abs(off) >= 10) res.reasons.push(`Your good ${method} brews run ${off < 0 ? 'finer' : 'coarser'} than typical: ${off > 0 ? '+' : ''}${Math.round(off)}µm`); }
+  if (wT) { const off = dT / (wT + K); res.temp = Math.min(100, Math.round(rule.temp + off)); if (Math.abs(off) >= 0.5) res.reasons.push(`You tend to brew ${off > 0 ? 'hotter' : 'cooler'}: ${off > 0 ? '+' : ''}${off.toFixed(1)}°C`); }
+  if (wR) { res.ratio = Math.round((rule.ratio + dR / (wR + K)) * 10) / 10; }
+  if (others.length) res.reasons.push(`Based on ${others.length} of your good ${method} brew${others.length !== 1 ? 's' : ''}${best && bestSim >= 0.25 && describeMatch(cf || {}, best) ? `, closest match ${best.name} (${describeMatch(cf || {}, best)})` : ''}`);
+  const topRecipe = Object.entries(recipeVotes).sort((a, b) => b[1] - a[1])[0];
+  if (topRecipe) res.recipeId = topRecipe[0];
+  else if (RECIPES[method] && RECIPES[method].length) res.recipeId = RECIPES[method][0].id;
+  return res;
+}
+
+let suggestionSuppressed = false, lastSuggestion = null;
+function renderBrewSuggestion() {
+  const el = document.getElementById('brew-suggestion'); if (!el) return;
+  const editing = !!document.getElementById('r-edit-id')?.value;
+  if (suggestionSuppressed || editing || !state.selectedCoffeeId) { el.innerHTML = ''; lastSuggestion = null; return; }
+  const s = computeSuggestion(state.selectedCoffeeId, state.selectedMethod);
+  const g = selectedGrinder();
+  // Grind in the user's current grinder: same grinder as the source brew -> reuse the raw setting
+  let grindText, setting = null;
+  if (s.source === 'coffee' && s.grindRaw && (!g || s.grinderId === (g && g.id))) { setting = s.grindRaw; grindText = `Grind <b>${s.grindRaw}</b>${s.um ? ` (≈${s.um}µm)` : ''}`; }
+  else if (g && s.um != null) { setting = micronsToSetting(g, s.um); grindText = `Grind <b>${setting}</b> on ${g.model} (≈${s.um}µm)`; }
+  else if (s.um != null) grindText = `Grind ≈<b>${s.um}µm</b> (${grindWord(s.um)}) — pick a grinder for a setting`;
+  else grindText = s.grindRaw ? `Grind <b>${s.grindRaw}</b>` : '';
+  const rec = s.recipeId ? getAllRecipesForMethod(state.selectedMethod).find(x => x.id === s.recipeId) : null;
+  lastSuggestion = { ...s, setting, recipe: rec };
+  const label = s.source === 'coffee' ? 'Your best for this coffee' : s.source === 'personal' ? 'Suggested start · learned from your brews' : 'Suggested start · general guidance';
+  const parts = [grindText, s.temp && state.selectedMethod !== 'Cold Brew' ? `<b>${s.temp}°C</b>` : '', s.ratio ? `<b>1:${(Math.round(s.ratio * 10) / 10)}</b>` : ''].filter(Boolean);
+  el.innerHTML = `<div class="suggest-card">
+    <div style="display:flex;align-items:center;gap:8px;margin-bottom:6px">
+      <span class="suggest-label">💡 ${label}</span>
+      <button type="button" class="suggest-apply" onclick="applyBrewSuggestion()">Apply</button>
+    </div>
+    <div class="suggest-main">${parts.join(' · ')}</div>
+    ${rec ? `<div class="suggest-sub">Recipe: ${rec.name}</div>` : ''}
+    <details class="suggest-why"><summary>Why?</summary><ul>${s.reasons.map(r => `<li>${r}</li>`).join('')}</ul>
+      <div class="suggest-sub" style="margin-top:6px">A starting point, not a rule. Taste, then use Plan next to fine-tune.</div></details>
+  </div>`;
+}
+function applyBrewSuggestion() {
+  const s = lastSuggestion; if (!s) return;
+  const sel = document.getElementById('r-recipe-select');
+  if (s.recipe && sel && !isEspressoMethod(state.selectedMethod)) { sel.value = s.recipe.id; onRecipeChange(sel); }
+  const base = METHOD_BASE[state.selectedMethod] || METHOD_BASE.Other;
+  const doseEl = document.getElementById('r-dose'), yEl = document.getElementById('r-yield');
+  if (!s.recipe || isEspressoMethod(state.selectedMethod)) {
+    if (!doseEl.value) doseEl.value = base.dose;
+    if (s.ratio) yEl.value = Math.round(parseFloat(doseEl.value) * s.ratio);
+  }
+  if (s.setting != null && s.setting !== '') document.getElementById('r-grind').value = s.setting;
+  if (s.temp && state.selectedMethod !== 'Cold Brew') document.getElementById('r-temp').value = s.temp;
+  updateGrindMicrons(); updateBrewLive();
+  showToast('Starting point applied');
+}
+
+// Grinder converter (grinder detail)
+function updateGrinderConverter(gid) {
+  const g = GRINDERS.find(x => x.id === gid); if (!g) return;
+  const v = document.getElementById('conv-setting').value, out = document.getElementById('conv-out');
+  const um = settingToMicrons(g, v);
+  if (um == null) { out.innerHTML = ''; return; }
+  const fav = state.favouriteGrinderId && state.favouriteGrinderId !== gid ? GRINDERS.find(x => x.id === state.favouriteGrinderId) : null;
+  const fits = BREW_METHODS.filter(m => um >= m.min && um <= m.max && ['Espresso','Moka Pot','AeroPress','Pourover','French Press','Cold Brew'].includes(m.name)).map(m => m.name);
+  out.innerHTML = `≈ <b>${um}µm</b> (${grindWord(um)})${fits.length ? ' · suits ' + fits.join(', ') : ''}` +
+    (fav ? `<br>Same grind on your ${fav.model}: <b>${micronsToSetting(fav, um)}</b>` : '');
+}
+
+function planUmLine(d) {
+  const g = d.from.grinderId ? GRINDERS.find(x => x.id === d.from.grinderId) : null;
+  const a = settingToMicrons(g, d.grindBase), b = settingToMicrons(g, d.grind);
+  return a != null ? `<div style="font-size:11px;color:var(--text-muted)">≈${a}${a !== b ? ' → ' + b : ''}µm</div>` : '';
+}
+function methodSettingsGuide(g) {
+  const names = ['Espresso','Moka Pot','AeroPress','Pourover','French Press','Cold Brew'];
+  const rows = BREW_METHODS.filter(m => names.includes(m.name) && g.min <= m.max && g.max >= m.min).map(m => {
+    const a = micronsToSetting(g, Math.max(m.min, g.min)), b = micronsToSetting(g, Math.min(m.max, g.max));
+    return `<div style="display:flex;justify-content:space-between;padding:4px 0;border-bottom:1px solid var(--border)"><span>${m.name}</span><b>${a === b ? a : a + '–' + b}</b></div>`;
+  });
+  return rows.length ? `<div style="font-size:12px;color:var(--text);margin-top:12px"><div style="font-size:10px;letter-spacing:1px;text-transform:uppercase;color:var(--text-muted);margin-bottom:4px">Where to start on this grinder</div>${rows.join('')}</div>` : '';
+}
 
 // ==================== BREW TIMER ====================
 // Uses wall-clock timestamps, so it stays accurate if the phone sleeps or the app is backgrounded.
@@ -3433,7 +3685,7 @@ function renderPlanValues() {
   const arrow = (a,b,u='') => a===b ? `<b>${b}${u}</b> (no change)` : `${a}${u} → <b>${b}${u}</b>`;
   document.getElementById('plan-grind-val').innerHTML = d.grindBase === null
     ? (d.from.grind ? `${d.grindDir==='same' ? 'Keep' : 'Go '+d.grindDir+' than'} <b>${d.from.grind}</b>` : 'No grind logged last time')
-    : arrow(d.grindBase, d.grind);
+    : arrow(d.grindBase, d.grind) + planUmLine(d);
   document.getElementById('plan-temp-val').innerHTML = d.tempBase === null
     ? `No temperature logged — aim ${d.tempDir==='same' ? 'the same' : d.tempDir}`
     : arrow(d.tempBase, d.temp, '°C');

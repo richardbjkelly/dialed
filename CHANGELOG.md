@@ -403,13 +403,35 @@ Specialty coffee dialling-in tracker · Single-file PWA / Android APK
 
 ---
 
+## v3.1
+*30 September 2026*
+
+### Grind ↔ microns
+- Every grind setting converted to approximate particle size (µm) using the grinder database, so grinds compare across grinders
+- Live readout under Grind in Log Brew, with a warning when outside the method's usual range
+- µm shown on brew cards and in Plan next; saved with each new brew for future use
+- Grinder page: setting → µm converter, same grind on your default grinder, and a "where to start" table per method
+
+### Starting-point suggestions (on-device)
+- Log Brew suggests grind (as a setting on your grinder), temperature, ratio and a recipe, with Apply and a "Why?" breakdown
+- General guidance from method, roast level, altitude, process, decaf and roast age
+- Learns from your own good brews: shifts toward how you actually brew, weighting similar coffees more
+- Uses your best brew when a coffee is already dialled in; hidden when editing or brewing from Up next
+- Nothing leaves the phone
+
+### Fixes
+- Sculptor 078S/078 data corrected: about 55µm/50µm per dial number (not 25µm/click); guidance now matches published figures (078S espresso ≈0–2.6, pourover ≈3–8.3); decimal settings supported
+- Micron units no longer render as "MM" in capitalised labels
+
+---
+
 ## Pending / Roadmap
 - Rebuild the APK once to pick up the green app icon
-- Grind/temp suggestions by process, varietal and origin (on hold)
+- Opt-in pooled data + trained model (see feasibility notes): backend, consent, deletion, ICO registration
 - Google Drive sync (deferred — manual backup/restore and reminder in place)
 - Screenshot showcase for PWABuilder
 - Play Store listing
 
 ---
 
-*Document maintained automatically. Last updated: v3.0*
+*Document maintained automatically. Last updated: v3.1*
