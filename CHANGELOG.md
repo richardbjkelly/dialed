@@ -675,6 +675,18 @@ Specialty coffee dialling-in tracker · Single-file PWA / Android APK
 
 ---
 
+## v3.23
+*30 September 2026*
+
+### Coffee Library grid: photo-banner tiles
+- Grid tiles redesigned: the label photo runs across the top (patterned placeholder with the coffee's initial when there's no photo)
+- Rating (8/10), DECAF and FINISHED sit as badges on the photo; ⋯ menu in the photo's corner
+- Below: name (up to 2 lines), roaster (1 line), a one-line origin summary (country · process · roast) and brew count
+- Every tile is the same height, including at Extra large text; long values end in "…"
+- List view keeps the full-width tiles with every tag
+
+---
+
 ## Pending / Roadmap
 - Rebuild the APK once to pick up the new cup icon
 - Opt-in pooled data + trained model (see feasibility notes): backend, consent, deletion, ICO registration
@@ -684,4 +696,4 @@ Specialty coffee dialling-in tracker · Single-file PWA / Android APK
 
 ---
 
-*Document maintained automatically. Last updated: v3.22*
+*Document maintained automatically. Last updated: v3.23*

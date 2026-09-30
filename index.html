@@ -170,6 +170,25 @@
   .coffee-card-rating { font-size:11px; letter-spacing:.5px; color:rgba(250,250,247,0.85); margin-top:4px; }
   .detail-rating { font-size:12px; color:rgba(250,250,247,0.75); margin-top:10px; letter-spacing:.5px; }
   .detail-rating b { color:#FAFAF7; font-size:15px; }
+  /* Grid tile B: photo banner */
+  #coffees-list.grid .coffee-card.tile-b { display:flex; flex-direction:column; height:100%; }
+  .tile-banner { position:relative; height:88px; flex-shrink:0; background:#1c4030; overflow:hidden; }
+  .tile-photo { width:100%; height:100%; object-fit:cover; display:block; }
+  .tile-photo-empty { background:repeating-linear-gradient(45deg, #1f4633 0 8px, #1a3d2c 8px 16px); display:flex; align-items:center; justify-content:center; }
+  .tile-photo-empty span { font-family:'Space Grotesk',sans-serif !important; font-weight:600; font-size:30px; color:rgba(250,250,247,0.3); }
+  body:not(.dark-mode) .tile-photo-empty { background:repeating-linear-gradient(45deg, #2a5c44 0 8px, #25533d 8px 16px); }
+  .tile-badge { position:absolute; font-size:9px; letter-spacing:1px; border-radius:10px; padding:2px 7px; background:rgba(10,31,20,0.82); color:#FAFAF7; }
+  .tile-rating { right:8px; bottom:8px; font-size:10px; letter-spacing:.3px; } .tile-rating b { font-size:12px; }
+  .tile-decaf { left:8px; bottom:8px; color:#E0B98A; border:1px solid rgba(224,185,138,0.45); border-radius:4px; font-size:8px; letter-spacing:1.5px; }
+  .tile-fin { left:8px; top:8px; font-size:8px; font-weight:700; color:#F6B8AA; }
+  .tile-more { position:absolute !important; right:6px; top:4px; color:#FAFAF7 !important; background:rgba(10,31,20,0.55) !important; border-radius:8px; padding:2px 6px 6px !important; font-size:16px !important; }
+  .tile-body { padding:10px 12px 11px; display:flex; flex-direction:column; flex:1; min-height:0; }
+  .tile-name { font-family:'Space Grotesk',sans-serif !important; font-size:14px; line-height:1.25; color:var(--text); display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden; }
+  .tile-roaster { font-size:9px; letter-spacing:1px; color:var(--text-muted); margin-top:3px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+  .tile-summary { margin-top:auto; padding-top:8px; font-size:9px; color:var(--text-muted); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+  .tile-brews { font-size:10px; color:var(--text-muted); margin-top:3px; }
+  .coffee-card.tile-b.finished .tile-photo, .coffee-card.tile-b.finished .tile-body { opacity:.5; filter:grayscale(.4); }
+  #coffees-list.grid .card-wrap { min-height:212px; }
   .finish-rating { display:grid; grid-template-columns:repeat(10, minmax(0,1fr)); gap:4px; }
   .finish-rating button { height:38px; border:1.5px solid var(--border); border-radius:8px; background:var(--card); color:var(--text); font-size:13px; cursor:pointer; padding:0; }
   .finish-rating button.on { background:#123C27; border-color:#123C27; color:#FAFAF7; }
@@ -2614,6 +2633,28 @@ function libraryOrder() {
     (added(b.c) - added(a.c)) || (a.i - b.i)
   ).map(x => x.c);
 }
+// Grid tile (photo banner): label photo across the top, badges on the photo, then name, roaster, origin summary, brews
+function coffeeTileGrid(c, rc) {
+  const initial = (c.name || '?').trim().charAt(0).toUpperCase();
+  const banner = c.labelPhoto
+    ? `<img class="tile-photo" src="${c.labelPhoto}" alt="">`
+    : `<div class="tile-photo tile-photo-empty" aria-hidden="true"><span>${escHtml(initial)}</span></div>`;
+  const summary = [c.country, c.process, c.roastLevel].filter(Boolean).map(escHtml).join(' · ');
+  return `<div class="coffee-card tile-b${c.finishedBag ? ' finished' : ''}" onclick="showCoffeeDetail('${c.id}')">
+    <div class="tile-banner">${banner}
+      ${c.finishedBag ? '<span class="tile-badge tile-fin">FINISHED</span>' : ''}
+      ${c.decaf ? '<span class="tile-badge tile-decaf">DECAF</span>' : ''}
+      ${c.rating > 0 ? `<span class="tile-badge tile-rating"><b>${c.rating}</b>/10</span>` : ''}
+      <button class="card-more tile-more" aria-label="More options for ${escHtml(c.name)}" onclick="event.stopPropagation();showEditOverlay('coffee-${c.id}')">⋯</button>
+    </div>
+    <div class="tile-body">
+      <div class="tile-name">${escHtml(c.name)}</div>
+      <div class="tile-roaster">${escHtml(c.roaster || 'Unknown roaster')}</div>
+      <div class="tile-summary">${summary || '—'}</div>
+      <div class="tile-brews">${rc} brew${rc !== 1 ? 's' : ''}</div>
+    </div>
+  </div>`;
+}
 function setCoffeeLayout(v) {
   appSettings.coffeeLayout = v; saveSettings(); renderCoffeesView();
 }
@@ -2639,7 +2680,9 @@ function renderCoffeesView() {
     const headerImg = c.labelPhoto ? `<img src="${c.labelPhoto}" style="width:52px;height:52px;border-radius:8px;object-fit:cover;flex-shrink:0;border:1px solid rgba(255,255,255,0.15);cursor:zoom-in" alt="label" onclick="event.stopPropagation();openLightbox('${c.labelPhoto}')">` : '';
     const cardRating = c.rating > 0 ? `<div class="coffee-card-rating">${c.rating}/10</div>` : '';
     const finishedStyle = '';
-    return `<div class="card-wrap" ontouchstart="startLongPress('${c.id}','coffee')" ontouchend="endLongPress()" ontouchcancel="endLongPress()" oncontextmenu="event.stopPropagation();showEditOverlay('coffee-${c.id}');return false"><div class="card-edit-overlay" id="overlay-coffee-${c.id}"><button class="edit-overlay-btn" onclick="event.stopPropagation();openEditCoffee('${c.id}');hideEditOverlay('coffee-${c.id}')">✏ Edit</button><button class="edit-overlay-btn" onclick="event.stopPropagation();showTrendModal('${c.id}');hideEditOverlay('coffee-${c.id}')">📈 Trends</button><button class="edit-overlay-btn" onclick="event.stopPropagation();hideEditOverlay('coffee-${c.id}');toggleFinishedBag('${c.id}')">${c.finishedBag ? '↺ Reopen' : '✓ Finish'}</button><button class="edit-overlay-btn" onclick="event.stopPropagation();confirmDeleteCoffee('${c.id}')">✕ Delete</button><button class="edit-overlay-btn" onclick="event.stopPropagation();hideEditOverlay('coffee-${c.id}')">Cancel</button></div><div class="coffee-card${c.finishedBag ? ' finished' : ''}" onclick="showCoffeeDetail('${c.id}')" style="${finishedStyle}"><div class="coffee-card-header"><div><div class="coffee-card-name">${c.name}${c.finishedBag?'<span class="finished-badge">FINISHED</span>':''}</div><div class="coffee-card-roaster">${c.roaster||'Unknown Roaster'}</div>${cardRating}</div><div style="display:flex;align-items:flex-start;gap:8px">${headerImg}<button class="card-more" aria-label="More options" onclick="event.stopPropagation();showEditOverlay('coffee-${c.id}')">⋯</button></div></div><div class="coffee-card-body">${pills?`<div class="coffee-meta">${pills}</div>`:''}  <div class="card-foot"><div class="recipe-count">${rc} brew${rc!==1?'s':''} logged</div>${c.decaf ? '<span class="decaf-label">Decaf</span>' : ''}</div></div></div></div>`;
+    const wrapOpen = `<div class="card-wrap" ontouchstart="startLongPress('${c.id}','coffee')" ontouchend="endLongPress()" ontouchcancel="endLongPress()" oncontextmenu="event.stopPropagation();showEditOverlay('coffee-${c.id}');return false"><div class="card-edit-overlay" id="overlay-coffee-${c.id}"><button class="edit-overlay-btn" onclick="event.stopPropagation();openEditCoffee('${c.id}');hideEditOverlay('coffee-${c.id}')">✏ Edit</button><button class="edit-overlay-btn" onclick="event.stopPropagation();showTrendModal('${c.id}');hideEditOverlay('coffee-${c.id}')">📈 Trends</button><button class="edit-overlay-btn" onclick="event.stopPropagation();hideEditOverlay('coffee-${c.id}');toggleFinishedBag('${c.id}')">${c.finishedBag ? '↺ Reopen' : '✓ Finish'}</button><button class="edit-overlay-btn" onclick="event.stopPropagation();confirmDeleteCoffee('${c.id}')">✕ Delete</button><button class="edit-overlay-btn" onclick="event.stopPropagation();hideEditOverlay('coffee-${c.id}')">Cancel</button></div>`;
+    if (isGrid) return wrapOpen + coffeeTileGrid(c, rc) + `</div>`;
+    return wrapOpen + `<div class="coffee-card${c.finishedBag ? ' finished' : ''}" onclick="showCoffeeDetail('${c.id}')" style="${finishedStyle}"><div class="coffee-card-header"><div><div class="coffee-card-name">${c.name}${c.finishedBag?'<span class="finished-badge">FINISHED</span>':''}</div><div class="coffee-card-roaster">${c.roaster||'Unknown Roaster'}</div>${cardRating}</div><div style="display:flex;align-items:flex-start;gap:8px">${headerImg}<button class="card-more" aria-label="More options" onclick="event.stopPropagation();showEditOverlay('coffee-${c.id}')">⋯</button></div></div><div class="coffee-card-body">${pills?`<div class="coffee-meta">${pills}</div>`:''}  <div class="card-foot"><div class="recipe-count">${rc} brew${rc!==1?'s':''} logged</div>${c.decaf ? '<span class="decaf-label">Decaf</span>' : ''}</div></div></div>` + `</div>`;
   }).join('');
 }
 
