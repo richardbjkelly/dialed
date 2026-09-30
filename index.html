@@ -2199,9 +2199,11 @@ function getPeriodCoffees() {
   else from = new Date(0);
 
   // Coffees added in period
-  const coffees = state.coffees.filter(cf => cf.createdAt && new Date(cf.createdAt) >= from);
+  // Coffees without a createdAt (added in early versions) use their first brew date; always counted in All Time
+  const coffeeDate = cf => cf.createdAt || state.recipes.filter(r=>r.coffeeId===cf.id&&r.createdAt).map(r=>r.createdAt).sort()[0] || null;
+  const coffees = state.coffees.filter(cf => statsPeriod==='all' || (coffeeDate(cf) && new Date(coffeeDate(cf)) >= from));
   // Brews in period
-  const brews = state.recipes.filter(r => r.createdAt && new Date(r.createdAt) >= from);
+  const brews = state.recipes.filter(r => statsPeriod==='all' || (r.createdAt && new Date(r.createdAt) >= from));
   return { coffees, brews, from };
 }
 
@@ -2674,10 +2676,6 @@ function showToast(msg) { const t=document.getElementById('toast'); t.textConten
 
 document.querySelectorAll('.modal-overlay').forEach(o => o.addEventListener('click', e => { if(e.target===o) o.classList.remove('open'); }));
 
-// ==================== INIT ====================
-load();
-renderDashboard();
-updateCompareBar();
 
 let appSettings = { paletteId: 'terracotta', displayFontId: 'inter', monoFontId: 'inter', darkMode: false, overviewCategories: ['country','process','roaster','roasterCountry'] };
 
@@ -3088,6 +3086,13 @@ function closeSettings() {
   document.getElementById('settings-backdrop').classList.remove('open');
 }
 
+
+// ==================== INIT (runs last, after every declaration) ====================
+load();
+loadSettings();
+renderDashboard();
+updateCompareBar();
+try { history.replaceState({view:'dashboard'}, '', ''); } catch(e) {}
 </script>
 
 
