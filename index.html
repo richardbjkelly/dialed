@@ -206,12 +206,14 @@
   .rating-slider { display:flex; align-items:flex-start; gap:12px; }
   .rating-slider-track { flex:1; min-width:0; }
   .rating-slider-track .plan-range-ends { padding:0 4px; }
-  .rating-slider-val { padding-top:6px; }
+  .rating-slider-val { padding-top:0; }
   .rating-slider input[type=range] { width:100%; height:32px; accent-color:var(--espresso); touch-action:pan-y; }
   body.dark-mode .rating-slider input[type=range] { accent-color:#8FB3A5; }
   .rating-slider input.unset { opacity:.45; }
-  .rating-slider-val { min-width:112px; text-align:right; font-size:12px; color:var(--text-muted); white-space:nowrap; }
-  .rating-slider-val b { font-size:18px; color:var(--text); }
+  .rating-slider-val { flex:0 0 88px; width:88px; text-align:right; color:var(--text-muted); white-space:nowrap; line-height:1.15; }
+  .rating-slider-val .rs-num { font-size:12px; } .rating-slider-val .rs-num b { font-size:20px; color:var(--text); }
+  .rating-slider-val .rs-none { font-size:20px; }
+  .rating-slider-val .rs-word { font-size:10px; letter-spacing:.3px; margin-top:2px; overflow:hidden; text-overflow:ellipsis; }
   .finish-rating { display:grid; grid-template-columns:repeat(10, minmax(0,1fr)); gap:4px; }
   .finish-rating button { height:38px; border:1.5px solid var(--border); border-radius:8px; background:var(--card); color:var(--text); font-size:13px; cursor:pointer; padding:0; }
   .finish-rating button.on { background:#123C27; border-color:#123C27; color:#FAFAF7; }
@@ -993,7 +995,7 @@
           <input type="range" min="0" max="10" step="1" value="0" id="r-rating-range" class="unset" aria-describedby="r-rating-val" oninput="setRating(+this.value)">
           <div class="plan-range-ends"><span>–</span><span>5</span><span>10</span></div>
         </div>
-        <div class="rating-slider-val" id="r-rating-val">Not rated</div>
+        <div class="rating-slider-val" id="r-rating-val"><div class="rs-num rs-none">–</div><div class="rs-word">Not rated</div></div>
       </div>
       <input type="hidden" id="r-rating" value="0">
     </div>
@@ -2011,7 +2013,7 @@ function setRating(n) {
   state.selectedRating = n;
   const r = document.getElementById('r-rating-range'), v = document.getElementById('r-rating-val');
   if (r) { if (+r.value !== n) r.value = n; r.classList.toggle('unset', n === 0); r.setAttribute('aria-valuetext', n ? `${n} out of 10` : 'Not rated'); }
-  if (v) v.innerHTML = n ? `<b>${n}</b>/10 · ${RATING_WORDS[n]}` : 'Not rated';
+  if (v) v.innerHTML = n ? `<div class="rs-num"><b>${n}</b>/10</div><div class="rs-word">${RATING_WORDS[n]}</div>` : `<div class="rs-num rs-none">–</div><div class="rs-word">Not rated</div>`;
 }
 const ESPRESSO_METHODS = ['Espresso'];
 function isEspressoMethod(m) { return ESPRESSO_METHODS.includes(m); }

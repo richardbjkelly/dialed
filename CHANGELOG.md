@@ -704,6 +704,7 @@ Specialty coffee dialling-in tracker · Single-file PWA / Android APK
 - The row of ten cup buttons is now a 0–10 slider, starting at "Not rated"
 - Live label shows the choice, e.g. "8/10 · Great"; slide back to the start to clear
 - Editing a brew shows its saved rating; each new brew starts unrated
+- Value and description are stacked in a fixed-width column (e.g. "10/10" over "Outstanding"), so the slider stays the same length at every value and text size
 
 ---
 
