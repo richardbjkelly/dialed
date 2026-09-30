@@ -423,7 +423,13 @@
   .taste-row label { width:88px; font-size:12px; color:var(--text); }
   .taste-row input[type=range] { flex:1; accent-color:var(--crema); }
   .taste-row input.unset { opacity:.35; }
-  .taste-row .tv { width:18px; text-align:right; font-size:13px; color:var(--text); }
+  .taste-row .tv { width:40px; height:28px; flex-shrink:0; display:inline-flex; align-items:center; justify-content:center; gap:3px; border:1px solid transparent; border-radius:14px; background:none; font-size:13px; color:var(--text-muted); padding:0; cursor:default; }
+  .taste-row .tv.set { color:var(--text); border-color:var(--border); cursor:pointer; }
+  .taste-row .tv .tv-x { font-size:12px; line-height:1; color:var(--text-muted); }
+  .taste-row .tv.set:active { transform:scale(.92); }
+  body.dark-mode .taste-row .tv.set { border-color:var(--dm-border); }
+  .taste-head { display:flex; align-items:baseline; justify-content:space-between; margin-bottom:8px; }
+  .taste-clear-all { background:none; border:none; padding:4px 0 4px 8px; font-size:10px; letter-spacing:1px; text-transform:uppercase; color:var(--text-muted); text-decoration:underline; text-underline-offset:3px; cursor:pointer; }
   .taste-line { font-size:11px; color:var(--text-muted); margin-top:6px; }
   .card-more { background:none; border:none; color:var(--text-muted); font-size:20px; line-height:1; padding:0 4px 6px; cursor:pointer; border-radius:6px; letter-spacing:1px; }
   .coffee-card-header .card-more { color:rgba(250,250,247,0.8); }
@@ -992,11 +998,12 @@
       <input type="hidden" id="r-rating" value="0">
     </div>
     <div class="form-group">
-      <label class="form-label">Taste profile <span style="text-transform:none;letter-spacing:0;opacity:.7">(optional, 0–5)</span></label>
-      <div class="taste-row"><label for="taste-sweetness">Sweetness</label><input type="range" min="0" max="5" step="1" value="0" id="taste-sweetness" class="unset" oninput="onTasteInput('sweetness')"><span class="tv" id="taste-sweetness-val">–</span></div>
-      <div class="taste-row"><label for="taste-acidity">Acidity</label><input type="range" min="0" max="5" step="1" value="0" id="taste-acidity" class="unset" oninput="onTasteInput('acidity')"><span class="tv" id="taste-acidity-val">–</span></div>
-      <div class="taste-row"><label for="taste-body">Body</label><input type="range" min="0" max="5" step="1" value="0" id="taste-body" class="unset" oninput="onTasteInput('body')"><span class="tv" id="taste-body-val">–</span></div>
-      <div class="taste-row"><label for="taste-bitterness">Bitterness</label><input type="range" min="0" max="5" step="1" value="0" id="taste-bitterness" class="unset" oninput="onTasteInput('bitterness')"><span class="tv" id="taste-bitterness-val">–</span></div>
+      <div class="taste-head"><label class="form-label" style="margin:0">Taste profile <span style="text-transform:none;letter-spacing:0;opacity:.7">(optional, 0–5)</span></label>
+        <button type="button" class="taste-clear-all" id="taste-clear-all" onclick="resetTaste()" hidden>Clear all</button></div>
+      <div class="taste-row"><label for="taste-sweetness">Sweetness</label><input type="range" min="0" max="5" step="1" value="0" id="taste-sweetness" class="unset" oninput="onTasteInput('sweetness')"><button type="button" class="tv" id="taste-sweetness-val" onclick="setTasteSlider('sweetness', null)" aria-label="Clear sweetness" disabled>–</button></div>
+      <div class="taste-row"><label for="taste-acidity">Acidity</label><input type="range" min="0" max="5" step="1" value="0" id="taste-acidity" class="unset" oninput="onTasteInput('acidity')"><button type="button" class="tv" id="taste-acidity-val" onclick="setTasteSlider('acidity', null)" aria-label="Clear acidity" disabled>–</button></div>
+      <div class="taste-row"><label for="taste-body">Body</label><input type="range" min="0" max="5" step="1" value="0" id="taste-body" class="unset" oninput="onTasteInput('body')"><button type="button" class="tv" id="taste-body-val" onclick="setTasteSlider('body', null)" aria-label="Clear body" disabled>–</button></div>
+      <div class="taste-row"><label for="taste-bitterness">Bitterness</label><input type="range" min="0" max="5" step="1" value="0" id="taste-bitterness" class="unset" oninput="onTasteInput('bitterness')"><button type="button" class="tv" id="taste-bitterness-val" onclick="setTasteSlider('bitterness', null)" aria-label="Clear bitterness" disabled>–</button></div>
     </div>
     <div class="form-group"><label class="form-label">Tasting Notes & Adjustments</label><textarea class="form-textarea" id="r-notes" placeholder="e.g. Sour with grassy finish — grind finer next time."></textarea></div>
     <label class="finish-tick" id="r-finish-row"><input type="checkbox" id="r-finish-bag"> <span>Last brew from this bag — finish it after saving</span></label>
@@ -3837,8 +3844,10 @@ const TASTE_KEYS = [['sweetness', 'Sweetness'], ['acidity', 'Acidity'], ['body',
 function setTasteSlider(key, val) {
   const inp = document.getElementById('taste-' + key), out = document.getElementById('taste-' + key + '-val');
   if (!inp) return;
-  if (val === null || val === undefined) { inp.value = 0; inp.dataset.set = ''; out.textContent = '–'; inp.classList.add('unset'); }
-  else { inp.value = val; inp.dataset.set = '1'; out.textContent = val; inp.classList.remove('unset'); }
+  if (val === null || val === undefined) { inp.value = 0; inp.dataset.set = ''; out.textContent = '–'; out.disabled = true; out.classList.remove('set'); inp.classList.add('unset'); }
+  else { inp.value = val; inp.dataset.set = '1'; out.innerHTML = `${val}<span class="tv-x" aria-hidden="true">×</span>`; out.disabled = false; out.classList.add('set'); inp.classList.remove('unset'); }
+  const any = TASTE_KEYS.some(([k]) => document.getElementById('taste-' + k)?.dataset.set);
+  const all = document.getElementById('taste-clear-all'); if (all) all.hidden = !any;
 }
 function onTasteInput(key) { const inp = document.getElementById('taste-' + key); setTasteSlider(key, parseInt(inp.value)); }
 function resetTaste() { TASTE_KEYS.forEach(([k]) => setTasteSlider(k, null)); }

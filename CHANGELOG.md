@@ -707,6 +707,16 @@ Specialty coffee dialling-in tracker · Single-file PWA / Android APK
 
 ---
 
+## v3.26
+*30 September 2026*
+
+### Taste profile
+- Each slider's number is now a small chip: once set it shows the value with a ×; tap it to clear that one slider
+- A "Clear all" link appears beside the Taste profile heading whenever any slider is set
+- Cleared sliders aren't saved; editing a brew lets you clear values it already had
+
+---
+
 ## Pending / Roadmap
 - Rebuild the APK once to pick up the new cup icon
 - Opt-in pooled data + trained model (see feasibility notes): backend, consent, deletion, ICO registration
@@ -716,4 +726,4 @@ Specialty coffee dialling-in tracker · Single-file PWA / Android APK
 
 ---
 
-*Document maintained automatically. Last updated: v3.25*
+*Document maintained automatically. Last updated: v3.26*
