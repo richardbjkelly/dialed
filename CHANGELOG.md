@@ -667,6 +667,14 @@ Specialty coffee dialling-in tracker · Single-file PWA / Android APK
 
 ---
 
+## v3.22
+*30 September 2026*
+
+### Coffee rating
+- Cup icons replaced with plain text: "8/10" on library tiles, "Rating 8/10" on the coffee's page
+
+---
+
 ## Pending / Roadmap
 - Rebuild the APK once to pick up the new cup icon
 - Opt-in pooled data + trained model (see feasibility notes): backend, consent, deletion, ICO registration
@@ -676,4 +684,4 @@ Specialty coffee dialling-in tracker · Single-file PWA / Android APK
 
 ---
 
-*Document maintained automatically. Last updated: v3.21*
+*Document maintained automatically. Last updated: v3.22*
