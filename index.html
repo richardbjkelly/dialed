@@ -39,7 +39,8 @@
     --dm-input: #1c4030;
     --dm-input-focus: #234d3a;
     --dm-text: #FAFAF7;
-    --dm-text-muted: #7aaa96;
+    --dm-text-muted: #9EC4B3;
+    --dm-green-text: #9FCCBF;
     --dm-border: rgba(82,121,111,0.25);
     --dm-pill: rgba(82,121,111,0.12);
   }
@@ -100,6 +101,9 @@
   .tag-under { background: rgba(74,122,208,0.1); color: #4a7ad0; border: 1px solid rgba(74,122,208,0.25); }
   .tag-good { background: rgba(74,122,40,0.1); color: var(--green-light); border: 1px solid rgba(74,122,40,0.25); }
   .tag-over { background: rgba(139,26,26,0.1); color: var(--red); border: 1px solid rgba(139,26,26,0.25); }
+  body.dark-mode .tag-good  { color:#A6D9B8 !important; border-color:rgba(166,217,184,0.35) !important; background:rgba(166,217,184,0.08) !important; }
+  body.dark-mode .tag-under { color:#9DBDF5 !important; border-color:rgba(157,189,245,0.35) !important; background:rgba(157,189,245,0.08) !important; }
+  body.dark-mode .tag-over  { color:#F2A493 !important; border-color:rgba(242,164,147,0.35) !important; background:rgba(242,164,147,0.08) !important; }
   .recipe-params { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-bottom: 10px; }
   .param-block { text-align: center; background: var(--foam); border-radius: 8px; padding: 8px 4px; }
   .param-value { font-family: 'Playfair Display', serif; font-size: 18px; color: var(--espresso); line-height: 1; }
@@ -247,6 +251,11 @@
   @media (prefers-reduced-motion: reduce) { .switch, .switch .switch-knob { transition:none; } }
   #settings-dark-btn { background:var(--espresso) !important; color:#FAFAF7 !important; }
   /* Dark mode: swap the base palette so anything using these variables follows automatically */
+  /* Dark mode: lighter green for text so it reads clearly on the dark greens */
+  body.dark-mode { --crema-light: var(--dm-green-text); }
+  body.dark-mode .app-title, body.dark-mode .divider, body.dark-mode .star-btn.active, body.dark-mode .coffee-rating-btn.active,
+  body.dark-mode [style*="color:var(--crema)"]:not([style*="background-color:var(--crema)"]), body.dark-mode [style*="color: var(--crema)"]:not([style*="background-color: var(--crema)"]),
+  body.dark-mode [style*="color:#52796F"]:not([style*="background-color:#52796F"]) { color: var(--dm-green-text) !important; }
   body.dark-mode { --card: var(--dm-card); --foam: var(--dm-bg); --milk: #FAFAF7; --text: var(--dm-text); --text-muted: var(--dm-text-muted); --border: var(--dm-border); }
   .detail-hero .meta-pill, .coffee-card-header .meta-pill, .recipe-lib-header .meta-pill, .custom-recipe-card-header .meta-pill { color:#FAFAF7 !important; background:rgba(250,250,247,0.12) !important; border-color:rgba(250,250,247,0.25) !important; }
   /* Brew timer */
@@ -459,7 +468,7 @@
   body.dark-mode .type-btn.active { background: var(--espresso) !important; color: var(--crema-light) !important; }
   body.dark-mode .grinder-type-toggle { background: rgba(255,255,255,0.05) !important; }
   body.dark-mode .grinder-search input { background: var(--dm-input) !important; border-color: var(--dm-border) !important; color: var(--dm-text) !important; }
-  body.dark-mode .divider { color: var(--crema) !important; }
+  body.dark-mode .divider { color: var(--dm-green-text) !important; }
   body.dark-mode .custom-recipe-card { background: var(--dm-card) !important; border-color: var(--dm-border) !important; }
   body.dark-mode .trend-chart-wrap { background: var(--dm-card) !important; border-color: var(--dm-border) !important; }
   body.dark-mode .label-upload-btn { background: var(--dm-input) !important; border-color: var(--dm-border) !important; }

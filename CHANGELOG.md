@@ -550,6 +550,17 @@ Specialty coffee dialling-in tracker · Single-file PWA / Android APK
 
 ---
 
+## v3.12
+*30 September 2026*
+
+### Dark mode contrast
+- Muted green text lightened (#7aaa96 → #9EC4B3) and the accent green used for text (titles, dividers, active tab, grinder tags, labels) lightened to #9FCCBF
+- Contrast on dark cards goes from about 4.4–5:1 (as low as 2.4:1 for the old accent green) to 6–7.5:1
+- Under / Good / Over result tags given lighter blue / green / red in dark mode so they read on dark cards
+- Light mode unchanged
+
+---
+
 ## Pending / Roadmap
 - Rebuild the APK once to pick up the new cup icon
 - Remaining transitions: press feedback, charts drawing in, + rotation, timer step pulse
@@ -560,4 +571,4 @@ Specialty coffee dialling-in tracker · Single-file PWA / Android APK
 
 ---
 
-*Document maintained automatically. Last updated: v3.11*
+*Document maintained automatically. Last updated: v3.12*
