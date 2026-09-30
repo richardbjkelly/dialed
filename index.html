@@ -433,6 +433,10 @@
     <div class="stat-block"><div class="stat-value" id="stat-recipes">0</div><div class="stat-label">Brews</div></div>
     <div class="stat-block"><div class="stat-value" id="stat-good">—</div><div class="stat-label">Dialled In</div></div>
   </div>
+  <div id="save-error-banner" style="display:none;background:#8b1a1a;color:#fff;border-radius:10px;padding:12px 14px;margin-bottom:14px;font-size:12px;line-height:1.5">
+    <b>Couldn't save your latest change.</b> Your phone's storage for the app is full. Open Settings → Export Backup now so nothing is lost, then remove some label photos.
+  </div>
+  <div id="backup-reminder"></div>
   <div id="dashboard-fav-grinder"></div>
   <div id="upnext-section" style="margin-bottom:8px"></div>
   <div class="divider">Coffee Stats</div>
@@ -1486,7 +1490,106 @@ let state = {
 };
 let currentGrinderFilter = 'all';
 
-function save() { try { localStorage.setItem('dialin_v2', JSON.stringify(state)); } catch(e){} }
+// Photos live in IndexedDB (large quota); everything else in localStorage (~5MB).
+// Photos are stripped from the localStorage copy and re-attached from IndexedDB on start-up.
+let saveFailedWarned = false;
+function save() {
+  try {
+    localStorage.setItem('dialin_v2', JSON.stringify(state, (k, v) => k === 'labelPhoto' ? undefined : v));
+    saveFailedWarned = false;
+  } catch(e) {
+    console.error('Save failed', e);
+    if (!saveFailedWarned) { saveFailedWarned = true; showSaveError(); }
+  }
+  syncPhotos();
+}
+function showSaveError() {
+  const el = document.getElementById('save-error-banner'); if (!el) return;
+  el.style.display = 'block';
+}
+
+// ---- IndexedDB photo store ----
+let photoDbPromise = null;
+function photoDb() {
+  if (!photoDbPromise) photoDbPromise = new Promise((res, rej) => {
+    if (!window.indexedDB) return rej('no idb');
+    const req = indexedDB.open('dialed', 1);
+    req.onupgradeneeded = () => req.result.createObjectStore('photos');
+    req.onsuccess = () => res(req.result);
+    req.onerror = () => rej(req.error);
+  });
+  return photoDbPromise;
+}
+function idbDo(mode, fn) {
+  return photoDb().then(db => new Promise((res, rej) => {
+    const tx = db.transaction('photos', mode); const out = fn(tx.objectStore('photos'));
+    tx.oncomplete = () => res(out && out.result !== undefined ? out.result : out);
+    tx.onerror = () => rej(tx.error);
+  }));
+}
+const savedPhotos = {};   // coffeeId -> dataURL last written, so we only write changes
+function syncPhotos() {
+  const live = {};
+  state.coffees.forEach(cf => { if (cf.labelPhoto) live[cf.id] = cf.labelPhoto; });
+  const writes = Object.entries(live).filter(([id, url]) => savedPhotos[id] !== url);
+  const deletes = Object.keys(savedPhotos).filter(id => !live[id]);
+  if (!writes.length && !deletes.length) return;
+  idbDo('readwrite', st => { writes.forEach(([id, url]) => st.put(url, id)); deletes.forEach(id => st.delete(id)); })
+    .then(() => { writes.forEach(([id, url]) => savedPhotos[id] = url); deletes.forEach(id => delete savedPhotos[id]); })
+    .catch(e => { console.error('Photo save failed', e); if (!saveFailedWarned) { saveFailedWarned = true; showSaveError(); } });
+}
+async function loadPhotos() {
+  try {
+    // Legacy: photos still embedded in localStorage from earlier versions -> compress + move to IndexedDB
+    const legacy = state.coffees.filter(cf => cf.labelPhoto && !savedPhotos[cf.id]);
+    for (const cf of legacy) { cf.labelPhoto = await compressDataUrl(cf.labelPhoto); }
+    const keys = await idbDo('readonly', st => st.getAllKeys());
+    const vals = await idbDo('readonly', st => st.getAll());
+    (keys||[]).forEach((id, i) => {
+      const cf = state.coffees.find(x => x.id === id);
+      if (cf && !cf.labelPhoto) cf.labelPhoto = vals[i];
+      if (cf && cf.labelPhoto === vals[i]) savedPhotos[id] = vals[i];
+    });
+    save();   // writes compressed legacy photos to IDB and strips them from localStorage
+    rerenderCurrentView();
+  } catch(e) { console.error('Photo load failed', e); }
+}
+function rerenderCurrentView() {
+  renderDashboard();
+  if (state.currentView === 'coffees' && document.getElementById('coffees-list')) renderCoffeesView();
+  if (state.currentView === 'tracker') renderTracker();
+}
+
+// ---- Photo compression: long edge 900px, JPEG ~0.8 (a phone photo drops from ~4MB to ~100KB) ----
+function compressDataUrl(dataUrl, maxEdge = 900, quality = 0.8) {
+  return new Promise(resolve => {
+    if (!dataUrl || !dataUrl.startsWith('data:image')) return resolve(dataUrl);
+    const img = new Image();
+    img.onload = () => {
+      const scale = Math.min(1, maxEdge / Math.max(img.width, img.height));
+      if (scale === 1 && dataUrl.length < 250000) return resolve(dataUrl);
+      const cv = document.createElement('canvas');
+      cv.width = Math.round(img.width * scale); cv.height = Math.round(img.height * scale);
+      cv.getContext('2d').drawImage(img, 0, 0, cv.width, cv.height);
+      const out = cv.toDataURL('image/jpeg', quality);
+      resolve(out.length < dataUrl.length ? out : dataUrl);
+    };
+    img.onerror = () => resolve(dataUrl);
+    img.src = dataUrl;
+  });
+}
+
+// ---- Storage usage (Settings) ----
+async function renderStorageInfo() {
+  const el = document.getElementById('storage-info'); if (!el) return;
+  let ls = 0; try { ls = (localStorage.getItem('dialin_v2')||'').length * 2; } catch(e) {}
+  const photos = Object.values(savedPhotos).reduce((s, u) => s + u.length, 0);
+  const n = Object.keys(savedPhotos).length;
+  const kb = b => b > 1048576 ? (b/1048576).toFixed(1)+' MB' : Math.max(1, Math.round(b/1024))+' KB';
+  const pct = Math.min(100, Math.round(ls / (5*1048576) * 100));
+  const last = appSettings.lastBackupAt ? new Date(appSettings.lastBackupAt).toLocaleDateString('en-GB',{day:'numeric',month:'short',year:'numeric'}) : 'never';
+  el.innerHTML = `Data ${kb(ls)} of ~5 MB (${pct}%) · ${n} photo${n!==1?'s':''} ${kb(photos)} stored separately<br>Last backup: ${last}`;
+}
 function load() { try { const s = localStorage.getItem('dialin_v2'); if(s) { const p = JSON.parse(s); state = {...state, ...p}; } } catch(e){} }
 
 // ==================== NAVIGATION ====================
@@ -1928,8 +2031,8 @@ function handleLabelPhoto(input) {
   const file = input.files[0];
   if (!file) return;
   const reader = new FileReader();
-  reader.onload = e => {
-    pendingLabelDataUrl = e.target.result;
+  reader.onload = async e => {
+    pendingLabelDataUrl = await compressDataUrl(e.target.result);
     const wrap = document.getElementById('c-label-preview-wrap');
     wrap.innerHTML = `
       <div class="label-preview">
@@ -2007,6 +2110,20 @@ function updatePricePreview() {
   let t = (cur !== 'GBP' && g != null) ? '≈ £' + g.toFixed(2) + (fxLive ? '' : ' (approx. rate)') : '';
   if (weight > 0 && g != null) t += (t ? ' · ' : '') + '£' + (g / weight * 100).toFixed(2) + ' per 100g';
   el.textContent = t;
+}
+
+function renderBackupReminder() {
+  const el = document.getElementById('backup-reminder'); if (!el) return;
+  const last = appSettings.lastBackupAt || 0, snoozed = appSettings.backupSnoozeUntil || 0;
+  const hasData = state.coffees.length + state.recipes.length >= 3;
+  const due = Date.now() - last > 30*24*3600*1000 && Date.now() > snoozed;
+  if (!hasData || !due) { el.innerHTML = ''; return; }
+  const days = last ? Math.floor((Date.now()-last)/86400000) : null;
+  el.innerHTML = `<div style="display:flex;align-items:center;gap:10px;background:rgba(82,121,111,0.1);border:1px solid rgba(82,121,111,0.3);border-radius:10px;padding:10px 12px;margin-bottom:14px">
+    <div style="flex:1;font-size:12px;color:var(--text);line-height:1.4"><b>Back up your data</b><br><span style="color:var(--text-muted)">${days===null?'No backup yet':'Last backup '+days+' days ago'} — it only lives on this phone.</span></div>
+    <button class="btn-secondary" style="padding:8px 10px;color:var(--text)" onclick="backupData()">Export</button>
+    <button class="btn-secondary" style="padding:8px 10px" onclick="appSettings.backupSnoozeUntil=Date.now()+7*86400000;saveSettings();renderBackupReminder()" aria-label="Remind me later">✕</button>
+  </div>`;
 }
 
 // ==================== SAVE COFFEE ====================
@@ -2198,6 +2315,7 @@ function renderDashboard() {
 
   renderStatsDashboard();
   renderUpNext();
+  renderBackupReminder();
   el.innerHTML = recent.length ? recent.map(r=>recipeCard(r,false)).join('') : `<div class="empty-state"><div class="empty-icon">🫘</div><div class="empty-title">Nothing brewed yet</div><div class="empty-desc">Tap + to log your first coffee.</div></div>`;
 }
 
@@ -2885,6 +3003,7 @@ function backupData() {
   a.href = url; a.download = `dialed-backup-${new Date().toISOString().slice(0,10)}.json`;
   a.click(); URL.revokeObjectURL(url);
   showToast('Backup exported ✓');
+  appSettings.lastBackupAt = Date.now(); saveSettings(); renderDashboard(); renderStorageInfo();
 }
 
 function restoreData(input) {
@@ -3378,6 +3497,7 @@ function renderTrendCharts(coffeeId) {
 // ==================== SETTINGS PANEL ====================
 function openSettings() {
   renderOverviewCategoryOptions();
+  renderStorageInfo();
   document.getElementById('settings-panel').classList.add('open');
   document.getElementById('settings-backdrop').classList.add('open');
 }
@@ -3420,6 +3540,7 @@ function closeSettings() {
 load();
 loadSettings();
 refreshFx();
+loadPhotos();
 renderDashboard();
 updateCompareBar();
 try { history.replaceState({view:'dashboard'}, '', ''); } catch(e) {}
@@ -3477,6 +3598,7 @@ try { history.replaceState({view:'dashboard'}, '', ''); } catch(e) {}
       <div id="overview-category-options"></div>
     </div>
     <div class="settings-section-header">Data</div>
+    <div id="storage-info" style="padding:10px 20px;font-size:11px;line-height:1.6;color:var(--text-muted);background:var(--card);border-bottom:1px solid var(--border)"></div>
 
     <div class="settings-nav-item" onclick="backupData();closeSettings()">
       <span class="settings-nav-icon">⬆</span>
