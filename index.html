@@ -294,6 +294,23 @@
   .suggest-why ul { padding-left:16px; margin-top:6px; }
   .suggest-why li { margin-bottom:3px; line-height:1.4; }
   .unit { text-transform:none !important; }
+  /* ---- Transitions (short, transform/opacity only) ---- */
+  @keyframes viewIn { from { opacity:0; transform:translateY(6px); } to { opacity:1; transform:none; } }
+  @keyframes slideFromRight { from { opacity:.3; transform:translateX(28px); } to { opacity:1; transform:none; } }
+  @keyframes slideFromLeft { from { opacity:.3; transform:translateX(-28px); } to { opacity:1; transform:none; } }
+  @keyframes sheetDown { from { transform:translateY(0); } to { transform:translateY(100%); } }
+  @keyframes backdropIn { from { opacity:0; } to { opacity:1; } }
+  @keyframes backdropOut { from { opacity:1; } to { opacity:0; } }
+  .view.view-enter { animation: viewIn .16s ease-out; }
+  .view.slide-in-right { animation: slideFromRight .22s cubic-bezier(.2,.8,.2,1); }
+  .view.slide-in-left { animation: slideFromLeft .22s cubic-bezier(.2,.8,.2,1); }
+  .modal-overlay.open { animation: backdropIn .2s ease-out; }
+  .modal-overlay.closing { display:flex; pointer-events:none; animation: backdropOut .22s ease-in forwards; }
+  .modal-overlay.closing .modal { animation: sheetDown .22s cubic-bezier(.4,0,1,1) forwards; }
+  @media (prefers-reduced-motion: reduce) {
+    .view.view-enter, .view.slide-in-right, .view.slide-in-left, .modal, .modal-overlay.open,
+    .modal-overlay.closing, .modal-overlay.closing .modal { animation: none !important; }
+  }
   /* GRINDER STYLES */
   .grinder-type-toggle { display: flex; background: rgba(26,15,10,0.06); border-radius: 10px; padding: 3px; margin-bottom: 20px; }
   .type-btn { flex: 1; padding: 9px 12px; border: none; border-radius: 8px; font-family: 'DM Mono', monospace; font-size: 10px; letter-spacing: 1px; text-transform: uppercase; cursor: pointer; background: none; color: var(--text-muted); transition: all 0.2s; }
@@ -1592,7 +1609,7 @@ async function loadPhotos() {
       if (cf && !cf.labelPhoto) cf.labelPhoto = vals[i];
       if (cf && cf.labelPhoto === vals[i]) savedPhotos[id] = vals[i];
     });
-    save();   // writes compressed legacy photos to IDB and strips them from localStorage
+    if (legacy.length) save();   // only when old embedded photos were migrated: writes them to IDB and strips them from localStorage
     rerenderCurrentView();
   } catch(e) { console.error('Photo load failed', e); }
 }
@@ -1636,6 +1653,7 @@ function load() { try { const s = localStorage.getItem('dialin_v2'); if(s) { con
 
 // ==================== NAVIGATION ====================
 function showView(name, pushState=true) {
+  const changed = state.currentView !== name;
   document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
   document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active'));
   document.getElementById('view-' + name).classList.add('active');
@@ -1643,11 +1661,12 @@ function showView(name, pushState=true) {
   document.querySelectorAll('.nav-tab')[idx]?.classList.add('active');
   state.currentView = name;
   if(name==='dashboard') renderDashboard();
-  if(name==='coffees') renderCoffeesView();
+  if(name==='coffees') { if (!document.getElementById('coffees-list')) restoreCoffeeList(); else renderCoffeesView(); }
   if(name==='recipes') renderRecipes();
   if(name==='grinders') renderGrinders();
   if(name==='tracker') renderTracker();
   if(name==='compare') renderCompare();
+  if(changed) playEnter(document.getElementById('view-' + name), 'view-enter');
   if(pushState) history.pushState({view:name}, '', '');
 }
 
@@ -1655,7 +1674,7 @@ function showView(name, pushState=true) {
 let lastBackTime = 0;
 window.addEventListener('popstate', function(e) {
   const openModal = document.querySelector('.modal-overlay.open');
-  if (openModal) { openModal.classList.remove('open'); history.pushState({view:state.currentView},'',''); return; }
+  if (openModal) { closeModal(openModal.id); history.pushState({view:state.currentView},'',''); return; }
   const settingsOpen = document.getElementById('settings-drawer')?.classList.contains('open');
   if (settingsOpen) { closeSettings && closeSettings(); history.pushState({view:state.currentView},'',''); return; }
   if (state.currentView !== 'dashboard') {
@@ -1668,8 +1687,22 @@ window.addEventListener('popstate', function(e) {
   }
 });
 
-function openModal(id) { document.getElementById(id).classList.add('open'); }
-function closeModal(id) { document.getElementById(id).classList.remove('open'); }
+const reduceMotion = () => window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+const closingTimers = {};
+function openModal(id) {
+  const el = document.getElementById(id); if (!el) return;
+  clearTimeout(closingTimers[id]); el.classList.remove('closing');
+  el.classList.add('open');
+}
+function closeModal(id) {
+  const el = document.getElementById(id); if (!el || !el.classList.contains('open')) return;
+  el.classList.remove('open');
+  if (reduceMotion()) return;
+  // Stays visible (and ignores taps) while it slides away; a timer guarantees it always finishes
+  el.classList.add('closing');
+  clearTimeout(closingTimers[id]);
+  closingTimers[id] = setTimeout(() => el.classList.remove('closing'), 240);
+}
 function openFab() { openModal('modal-fab'); }
 
 function openRecipeModal() {
@@ -2371,6 +2404,7 @@ function renderDashboard() {
 // ==================== COFFEES ====================
 function renderCoffeesView() {
   const el = document.getElementById('coffees-list');
+  if (!el) return;
   if (!state.coffees.length) { el.innerHTML=`<div class="empty-state"><div class="empty-icon">📦</div><div class="empty-title">No coffees yet</div><div class="empty-desc">Tap + to add your first coffee.</div></div>`; return; }
   el.innerHTML = state.coffees.map(c => {
     const rc = state.recipes.filter(r=>r.coffeeId===c.id).length;
@@ -2392,6 +2426,12 @@ function toggleFinishedBag(id) {
 }
 
 function goBackToCoffees() {
+  restoreCoffeeList();
+  playEnter(document.getElementById('view-coffees'), 'slide-in-left');
+  history.pushState({view:'coffees'}, '', '');
+}
+function restoreCoffeeList() {
+  detailShownId = null;
   document.getElementById('view-coffees').innerHTML = `
     <div style="height:20px"></div>
     <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:4px">
@@ -2401,7 +2441,6 @@ function goBackToCoffees() {
     <div class="section-subtitle">Your collection</div>
     <div id="coffees-list"></div>`;
   renderCoffeesView();
-  history.pushState({view:'coffees'}, '', '');
 }
 
 function showCoffeeDetail(id) {
@@ -2439,6 +2478,8 @@ function showCoffeeDetail(id) {
     ${recs.length?recs.map(r=>recipeCard(r,true)).join(''):`<div class="empty-state"><div class="empty-icon">📋</div><div class="empty-title">No brews yet</div></div>`}
     <div style="height:80px"></div>`;
   renderTrendCharts(id);
+  if (detailShownId !== id) { window.scrollTo(0, 0); playEnter(document.getElementById('view-coffees'), 'slide-in-right'); }
+  detailShownId = id;
 }
 
 // ==================== RECIPES ====================
@@ -3012,7 +3053,7 @@ function renderCompare(containerId='view-compare') {
 function formatDate(d) { if(!d) return ''; return new Date(d+'T00:00:00').toLocaleDateString('en-GB',{day:'numeric',month:'short',year:'numeric'}).toUpperCase(); }
 function showToast(msg) { const t=document.getElementById('toast'); t.textContent=msg; t.classList.add('show'); setTimeout(()=>t.classList.remove('show'),2200); }
 
-document.querySelectorAll('.modal-overlay').forEach(o => o.addEventListener('click', e => { if(e.target===o) o.classList.remove('open'); }));
+document.querySelectorAll('.modal-overlay').forEach(o => o.addEventListener('click', e => { if(e.target===o) closeModal(o.id); }));
 
 
 let appSettings = { paletteId: 'terracotta', displayFontId: 'inter', monoFontId: 'inter', darkMode: false, overviewCategories: ['country','process','roaster','roasterCountry'] };
@@ -3611,6 +3652,15 @@ function planStepHint(d) {
   const um = Math.round(d.grindStepSize * sc.per);
   return `<div style="font-size:10px;color:var(--text-muted);margin-top:2px">${sc.stepless ? 'Stepless' : 'Stepped'} · each − / + is ${d.grindStepSize}${sc.stepless ? '' : ' click'} (≈${um}µm)</div>`;
 }
+
+function playEnter(el, cls) {
+  if (!el || reduceMotion()) return;
+  el.classList.remove('view-enter','slide-in-right','slide-in-left');
+  void el.offsetWidth;                // restart the animation if it was already applied
+  el.classList.add(cls);
+  el.addEventListener('animationend', () => el.classList.remove(cls), { once:true });
+}
+let detailShownId = null;
 
 // ==================== BREW TIMER ====================
 // Uses wall-clock timestamps, so it stays accurate if the phone sleeps or the app is backgrounded.

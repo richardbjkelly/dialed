@@ -440,8 +440,27 @@ Specialty coffee dialling-in tracker · Single-file PWA / Android APK
 
 ---
 
+## v3.3
+*30 September 2026*
+
+### Transitions (low-risk set)
+- Tabs fade in when switching (~0.16s), only on navigation, not when a screen refreshes
+- Coffee detail slides in from the right and back out to the left (~0.22s)
+- Sheets slide down and the backdrop fades when closing (~0.22s); a closing sheet never blocks taps, and a timer guarantees it always finishes
+- Android's "Remove animations" setting turns all motion off
+
+### Fixes
+- Tapping the Coffees tab from a coffee's detail page did nothing
+- App no longer re-saves all data on every launch (only after migrating old photos)
+
+### Held for later
+- Press feedback on cards/buttons, charts drawing in, + button rotation, timer step pulse
+
+---
+
 ## Pending / Roadmap
 - Rebuild the APK once to pick up the green app icon
+- Remaining transitions: press feedback, charts drawing in, + rotation, timer step pulse
 - Opt-in pooled data + trained model (see feasibility notes): backend, consent, deletion, ICO registration
 - Google Drive sync (deferred — manual backup/restore and reminder in place)
 - Screenshot showcase for PWABuilder
@@ -449,4 +468,4 @@ Specialty coffee dialling-in tracker · Single-file PWA / Android APK
 
 ---
 
-*Document maintained automatically. Last updated: v3.2*
+*Document maintained automatically. Last updated: v3.3*
