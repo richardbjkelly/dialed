@@ -609,6 +609,19 @@ Specialty coffee dialling-in tracker · Single-file PWA / Android APK
 
 ---
 
+## v3.17
+*30 September 2026*
+
+### Insights grouping (for when charts get busy)
+- Switches on automatically when a chart has more than 7 categories; charts with 7 or fewer are unchanged
+- Origin country and roaster country → region (Africa, Middle East, Central America, Caribbean, South America, Asia, Oceania, plus Europe / North America for roasters)
+- Process → family (Washed, Natural, Honey & pulped natural, Wet-hulled, Experimental, Decaf process)
+- Roast level → Light / Medium / Dark
+- A note under the chart title says what's grouped; tap any group (or "Other") to see what's inside with counts
+- Unrecognised values go to a grey "Other regions / process / roast" at the end; roasters and varietals keep top 6 + Other
+
+---
+
 ## Pending / Roadmap
 - Rebuild the APK once to pick up the new cup icon
 - Remaining transitions: press feedback, charts drawing in, + rotation, timer step pulse
@@ -619,4 +632,4 @@ Specialty coffee dialling-in tracker · Single-file PWA / Android APK
 
 ---
 
-*Document maintained automatically. Last updated: v3.16*
+*Document maintained automatically. Last updated: v3.17*

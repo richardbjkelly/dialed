@@ -226,6 +226,8 @@
   body.dark-mode .stats-card-sub { color:var(--dm-text-muted) !important; }
   body.dark-mode .stats-bar-item-header { color:var(--dm-text) !important; }
   .stack-legend-label { color: var(--text); }
+  .stack-group summary::-webkit-details-marker { display:none; }
+  .stack-group[open] summary .stack-legend-label span { opacity:.8; }
   body.dark-mode .stack-legend-label { color: var(--dm-text) !important; }
   body.dark-mode .fab { background: var(--crema) !important; }
   body.dark-mode .settings-panel .dark-toggle { background: var(--dm-input) !important; }
@@ -2715,36 +2717,101 @@ const STACK_COLORS_DARK  = ['#D66643','#4E85CA','#BF881E','#9F4685','#34A1C6','#
 const STACK_OTHER = { light:'#9AA09C', dark:'#7D857F' };
 function stackColor(i, label) {
   const dark = document.body.classList.contains('dark-mode');
-  if (label === 'Other') return dark ? STACK_OTHER.dark : STACK_OTHER.light;
+  if (label === 'Other' || /^Other /.test(label)) return dark ? STACK_OTHER.dark : STACK_OTHER.light;
   const pal = dark ? STACK_COLORS_DARK : STACK_COLORS_LIGHT;
   return pal[i % pal.length];
 }
 
-function renderStackedBar(items, total) {
+function renderStackedBar(items, total, opts = {}) {
   if (!items.length) return '<div style="font-size:11px;color:var(--text-muted);padding:4px 0">No data</div>';
   // Up to 7 named segments; beyond that, the top 6 by name plus one grey "Other" for the rest
   const MAX_SEGMENTS = 7;
   const shown = items.length <= MAX_SEGMENTS ? items.slice() : items.slice(0, MAX_SEGMENTS - 1);
   const rest = items.slice(shown.length);
   const otherCount = rest.reduce((s,[,n]) => s+n, 0);
-  if (otherCount > 0) shown.push(['Other', otherCount, rest.length]);
+  if (otherCount > 0) shown.push(['Other', otherCount, rest.flatMap(r => r[2] && r[2].length ? r[2] : [[r[0], r[1]]])]);
   const grandTotal = shown.reduce((s,[,n]) => s+n, 0);
   const segments = shown.map(([label, count], i) => {
     const pct = (count / grandTotal * 100).toFixed(1);
-    return `<div title="${label}: ${count}" style="width:${pct}%;background:${stackColor(i, label)};height:100%;transition:width .4s"></div>`;
+    return `<div title="${escHtml(label)}: ${count}" style="width:${pct}%;background:${stackColor(i, label)};height:100%;transition:width .4s"></div>`;
   }).join('');
-  const legend = shown.map(([label, count, extra], i) => `
-    <div style="display:flex;align-items:center;gap:6px;margin-bottom:3px">
-      <div style="width:10px;height:10px;border-radius:2px;background:${stackColor(i, label)};flex-shrink:0"></div>
-      <span class="stack-legend-label" style="font-size:11px;flex:1">${label}${label === 'Other' && extra ? ` <span style="color:var(--text-muted)">· ${extra} more</span>` : ''}</span>
+  const unit = opts.unit || ['item', 'items'];
+  const legend = shown.map(([label, count, members], i) => {
+    const swatch = `<div style="width:10px;height:10px;border-radius:2px;background:${stackColor(i, label)};flex-shrink:0"></div>`;
+    const hasMembers = Array.isArray(members) && members.length && !(members.length === 1 && members[0][0] === label);
+    if (!hasMembers) return `
+    <div style="display:flex;align-items:center;gap:6px;margin-bottom:3px">${swatch}
+      <span class="stack-legend-label" style="font-size:11px;flex:1">${escHtml(label)}</span>
       <span style="font-size:10px;color:var(--text-muted)">${count}</span>
-    </div>`).join('');
+    </div>`;
+    const list = members.slice().sort((a,b)=>b[1]-a[1]).map(([m,n]) => `<div style="display:flex;justify-content:space-between;font-size:10px;color:var(--text-muted);padding:1px 0 1px 16px"><span>${escHtml(m)}</span><span>${n}</span></div>`).join('');
+    return `
+    <details class="stack-group" style="margin-bottom:3px">
+      <summary style="display:flex;align-items:center;gap:6px;cursor:pointer;list-style:none">${swatch}
+        <span class="stack-legend-label" style="font-size:11px;flex:1">${escHtml(label)} <span style="color:var(--text-muted)">· ${members.length} ${members.length === 1 ? unit[0] : unit[1]} ▾</span></span>
+        <span style="font-size:10px;color:var(--text-muted)">${count}</span>
+      </summary>
+      <div style="margin:2px 0 6px">${list}</div>
+    </details>`;
+  }).join('');
   return `
+    ${opts.note ? `<div style="font-size:10px;color:var(--text-muted);margin:-6px 0 8px">${opts.note}</div>` : ''}
     <div style="height:16px;border-radius:6px;overflow:hidden;display:flex;gap:2px;margin-bottom:10px">${segments}</div>
     <div>${legend}</div>`;
 }
+function escHtml(v) { return String(v).replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c])); }
 
-function renderBarChart(items, total) { return renderStackedBar(items, total); }
+// ---- Grouping for busy charts: kicks in automatically once a chart has more than 7 categories ----
+const REGION_OF = (() => {
+  const m = {}, add = (region, list) => list.split('|').forEach(c => m[c.trim().toLowerCase()] = region);
+  add('Africa', "Ethiopia|Kenya|Rwanda|Burundi|Uganda|Tanzania|DRC|DR Congo|Congo|Democratic Republic of the Congo|Democratic Republic of Congo|Malawi|Zambia|Zimbabwe|Cameroon|Ivory Coast|Côte d'Ivoire|Cote d'Ivoire|Madagascar|South Sudan|Sudan|Mozambique|Angola|Ghana|Nigeria|Togo|Sierra Leone|Liberia|Guinea|Central African Republic|Gabon|South Africa|Morocco|Egypt|Tunisia|St Helena|Saint Helena|Reunion|Réunion");
+  add('Middle East', "Yemen|Saudi Arabia|Oman|UAE|United Arab Emirates|Israel|Jordan|Lebanon|Turkey|Türkiye|Qatar|Kuwait|Bahrain|Iran|Iraq");
+  add('Central America', "Mexico|Guatemala|Honduras|El Salvador|Nicaragua|Costa Rica|Panama|Belize");
+  add('Caribbean', "Jamaica|Cuba|Dominican Republic|Haiti|Puerto Rico|Trinidad and Tobago|Barbados");
+  add('South America', "Colombia|Brazil|Peru|Ecuador|Bolivia|Venezuela|Argentina|Chile|Paraguay|Uruguay|Guyana|Suriname");
+  add('Asia', "India|Indonesia|Vietnam|Viet Nam|China|Yunnan|Thailand|Laos|Myanmar|Burma|Philippines|Nepal|Timor-Leste|East Timor|Timor|Taiwan|Japan|South Korea|Korea|Malaysia|Sri Lanka|Singapore|Hong Kong|Sumatra|Java|Sulawesi|Bali|Flores|Mongolia|Pakistan|Bangladesh|Cambodia");
+  add('Oceania', "Papua New Guinea|PNG|Australia|New Zealand|Hawaii|Kona|Fiji|Vanuatu|Samoa|Tonga");
+  add('North America', "USA|US|United States|United States of America|Canada");
+  add('Europe', "UK|United Kingdom|England|Scotland|Wales|Northern Ireland|Ireland|France|Germany|Italy|Spain|Portugal|Netherlands|Belgium|Luxembourg|Denmark|Norway|Sweden|Finland|Iceland|Switzerland|Austria|Poland|Czechia|Czech Republic|Slovakia|Hungary|Greece|Romania|Bulgaria|Croatia|Slovenia|Serbia|Estonia|Latvia|Lithuania|Ukraine|Russia|Cyprus|Malta");
+  return m;
+})();
+function processFamily(p) {
+  const s = String(p).toLowerCase();
+  if (/swiss water|mountain water|\bea\b|ethyl acetate|sugar ?cane|\bco2\b|decaf/.test(s)) return 'Decaf process';
+  if (/anaerob|carbonic|thermal|co-?ferm|infus|lactic|yeast|koji|double ferm|extended ferm|macerat|experimental|cold ferm|fruit/.test(s)) return 'Experimental';
+  if (/wet[- ]?hull|giling/.test(s)) return 'Wet-hulled';
+  if (/honey|pulped natural|semi[- ]?washed|semi[- ]?dry/.test(s)) return 'Honey & pulped natural';
+  if (/natural|dry|sun[- ]?dried/.test(s)) return 'Natural';
+  if (/wash|wet/.test(s)) return 'Washed';
+  return 'Other process';
+}
+function roastFamily(r) {
+  const s = String(r).toLowerCase();
+  if (/dark|espresso|french|italian/.test(s)) return 'Dark';
+  if (/medium|omni|city/.test(s)) return 'Medium';
+  if (/light|filter|nordic|cinnamon/.test(s)) return 'Light';
+  return 'Other roast';
+}
+const GROUPERS = {
+  country:        { by: v => REGION_OF[String(v).trim().toLowerCase()] || 'Other regions', note: n => `Grouped by region · ${n} countries` },
+  roasterCountry: { by: v => REGION_OF[String(v).trim().toLowerCase()] || 'Other regions', note: n => `Grouped by region · ${n} countries` },
+  process:        { by: processFamily, note: n => `Grouped by process family · ${n} processes` },
+  roastLevel:     { by: roastFamily, note: n => `Grouped into light / medium / dark · ${n} roast levels` },
+};
+// items: [[label, count], ...] most common first. Returns chart items plus an optional note.
+const CHART_UNITS = { country:['country','countries'], roasterCountry:['country','countries'], process:['process','processes'], roastLevel:['roast level','roast levels'], roaster:['roaster','roasters'], varietal:['varietal','varietals'] };
+function groupForChart(key, items) {
+  const g = GROUPERS[key], unit = CHART_UNITS[key];
+  if (!g || items.length <= 7) return { items, opts: { unit } };
+  const groups = {};
+  items.forEach(([label, n]) => { const k = g.by(label); (groups[k] = groups[k] || { n: 0, members: [] }); groups[k].n += n; groups[k].members.push([label, n]); });
+  const isCatchAll = k => /^Other /.test(k);
+  const grouped = Object.entries(groups).map(([k, v]) => [k, v.n, v.members]).sort((a, b) => (isCatchAll(a[0]) - isCatchAll(b[0])) || (b[1] - a[1]));
+  if (grouped.length >= items.length) return { items, opts: { unit } };   // grouping wouldn't help
+  return { items: grouped, opts: { note: g.note(items.length), unit } };
+}
+
+function renderBarChart(items, total, opts) { return renderStackedBar(items, total, opts); }
 
 function renderStatsDashboard() {
   const el = document.getElementById('stats-dashboard');
@@ -2815,7 +2882,8 @@ function renderStatsDashboard() {
       return cats.map(k => {
         const cat = catMap[k];
         if (!cat || !cat.data.length) return '';
-        return `<div style="margin-bottom:20px"><div class="divider" style="margin-top:0">${cat.label}</div><div class="stats-bar-chart">${renderBarChart(cat.data, coffees.length)}</div></div>`;
+        const gd = groupForChart(k, cat.data);
+        return `<div style="margin-bottom:20px"><div class="divider" style="margin-top:0">${cat.label}</div><div class="stats-bar-chart">${renderBarChart(gd.items, coffees.length, gd.opts)}</div></div>`;
       }).join('');
     })()}
   `;
