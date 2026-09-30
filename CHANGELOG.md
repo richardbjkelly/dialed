@@ -648,6 +648,17 @@ Specialty coffee dialling-in tracker · Single-file PWA / Android APK
 
 ---
 
+## v3.20
+*30 September 2026*
+
+### Finish bag
+- New Finish bag sheet asks for final ratings: overall rating out of 10 (pre-filled if already rated), "Would you buy it again?" Yes / Maybe / No, and optional final notes; shows brews logged, how many were dialled in and the best brew
+- Reach it from: Log Brew ("Last brew from this bag — finish it after saving"; opens instead of Plan next), the ⋯ menu on library tiles (✓ Finish / ↺ Reopen), the Finish bag button on the coffee's page, and the empty-bag prompt
+- Finished coffee pages show date finished, final rating, buy-again and notes; the grams-left gauge is replaced by grams used
+- Reopening is immediate and keeps the ratings; "Not now" leaves the bag active
+
+---
+
 ## Pending / Roadmap
 - Rebuild the APK once to pick up the new cup icon
 - Opt-in pooled data + trained model (see feasibility notes): backend, consent, deletion, ICO registration
@@ -657,4 +668,4 @@ Specialty coffee dialling-in tracker · Single-file PWA / Android APK
 
 ---
 
-*Document maintained automatically. Last updated: v3.19*
+*Document maintained automatically. Last updated: v3.20*
