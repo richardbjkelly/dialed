@@ -2187,9 +2187,10 @@ function buildPriceData() {
   const g = toGBP(price, currency);
   return { price, currency, weight: weight>0?weight:null, priceGBP: g!=null ? Math.round(g*100)/100 : null };
 }
-function per100g(cf) { return (cf && cf.priceGBP > 0 && cf.weight > 0) ? cf.priceGBP / cf.weight * 100 : null; }
+function showCosts() { return appSettings.showCosts !== false; }
+function per100g(cf) { return (showCosts() && cf && cf.priceGBP > 0 && cf.weight > 0) ? cf.priceGBP / cf.weight * 100 : null; }
 function priceLabel(cf) {
-  if (!cf || !(cf.price > 0)) return '';
+  if (!showCosts() || !cf || !(cf.price > 0)) return '';
   const whole = cf.currency==='JPY' || cf.currency==='KRW';
   const orig = (CUR_SYMBOL[cf.currency] || cf.currency+' ') + (whole ? Math.round(cf.price) : Number(cf.price).toFixed(2));
   const parts = [orig + (cf.weight ? ' · ' + cf.weight + 'g' : '')];
@@ -3073,7 +3074,7 @@ function showToast(msg) { const t=document.getElementById('toast'); t.textConten
 document.querySelectorAll('.modal-overlay').forEach(o => o.addEventListener('click', e => { if(e.target===o) closeModal(o.id); }));
 
 
-let appSettings = { paletteId: 'terracotta', displayFontId: 'inter', monoFontId: 'inter', darkMode: false, suggestedStart: true, overviewCategories: ['country','process','roaster','roasterCountry'] };
+let appSettings = { paletteId: 'terracotta', displayFontId: 'inter', monoFontId: 'inter', darkMode: false, suggestedStart: true, showCosts: true, overviewCategories: ['country','process','roaster','roasterCountry'] };
 
 function loadSettings() {
   try {
@@ -3125,8 +3126,17 @@ function toggleSuggestedStart() {
   saveSettings(); syncSuggestedStartSwitch(); renderBrewSuggestion();
 }
 function syncSuggestedStartSwitch() {
-  const b = document.getElementById('settings-suggest-switch'); if (!b) return;
-  b.setAttribute('aria-checked', appSettings.suggestedStart === false ? 'false' : 'true');
+  const b = document.getElementById('settings-suggest-switch');
+  if (b) b.setAttribute('aria-checked', appSettings.suggestedStart === false ? 'false' : 'true');
+  const c = document.getElementById('settings-costs-switch');
+  if (c) c.setAttribute('aria-checked', showCosts() ? 'true' : 'false');
+}
+function toggleShowCosts() {
+  appSettings.showCosts = !showCosts();
+  saveSettings(); syncSuggestedStartSwitch();
+  // Redraw everything that can show a price, cost per brew or total spent
+  renderDashboard(); renderCoffeesView();
+  if (typeof detailShownId !== 'undefined' && detailShownId) showCoffeeDetail(detailShownId);
 }
 
 function toggleDarkMode() {
@@ -4147,6 +4157,14 @@ if ('serviceWorker' in navigator && location.protocol.startsWith('http')) {
         <div class="settings-toggle-sub">Show a grind and temperature starting point when logging a brew</div>
       </div>
       <button type="button" class="switch" id="settings-suggest-switch" role="switch" aria-checked="true" aria-label="Suggested Start" onclick="toggleSuggestedStart()"><span class="switch-knob"></span></button>
+    </div>
+
+    <div class="settings-toggle-row">
+      <div style="flex:1;padding-right:12px">
+        <div class="settings-toggle-label">Show Costs</div>
+        <div class="settings-toggle-sub">Bag price, £ per 100g, cost per brew and total spent</div>
+      </div>
+      <button type="button" class="switch" id="settings-costs-switch" role="switch" aria-checked="true" aria-label="Show costs" onclick="toggleShowCosts()"><span class="switch-knob"></span></button>
     </div>
 
     <div class="settings-section-header">Appearance</div>

@@ -507,6 +507,16 @@ Specialty coffee dialling-in tracker · Single-file PWA / Android APK
 
 ---
 
+## v3.8
+*30 September 2026*
+
+### Settings
+- New **Show Costs** switch under Brewing (on by default, saved between sessions)
+- Off hides every cost figure: bag price, £/100g tags, cost per brew/cup, average cost per cup, and the Avg Price / Spent cards on Insights
+- Price and currency can still be entered on a coffee while costs are hidden, so nothing is lost
+
+---
+
 ## Pending / Roadmap
 - Rebuild the APK once to pick up the new cup icon
 - Remaining transitions: press feedback, charts drawing in, + rotation, timer step pulse
@@ -517,4 +527,4 @@ Specialty coffee dialling-in tracker · Single-file PWA / Android APK
 
 ---
 
-*Document maintained automatically. Last updated: v3.7*
+*Document maintained automatically. Last updated: v3.8*
