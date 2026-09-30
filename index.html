@@ -197,7 +197,8 @@
   .settings-nav-item { display:flex; align-items:center; justify-content:space-between; padding:18px 20px; border-bottom:1px solid var(--border); cursor:pointer; background:var(--card); transition:background .15s; }
   .settings-nav-item:hover { background:var(--foam); }
   .settings-nav-item:active { background:var(--border); }
-  .settings-nav-icon { font-size:20px; margin-right:14px; }
+  .settings-nav-icon { font-size:20px; margin-right:14px; color:var(--crema); display:flex; align-items:center; justify-content:center; width:24px; flex-shrink:0; }
+  body.dark-mode .settings-nav-icon { color:var(--crema-light); }
   .settings-nav-label { font-size:15px; font-weight:600; color:var(--text); flex:1; }
   .settings-nav-sub { font-size:11px; color:var(--text-muted); margin-top:2px; }
   .settings-nav-arrow { color:var(--text-muted); font-size:16px; }
@@ -1837,7 +1838,7 @@ function updateRecipeDropdown(method) {
 
 function onRecipeChange(sel) {
   state.selectedRecipeId = sel.value || null;
-  setTimeout(() => { renderStepGuide(); updateBrewLive(); }, 0);
+  setTimeout(() => { renderStepGuide(); updateBrewLive(); renderBrewSuggestion(); }, 0);
   renderRecipeCard(state.selectedMethod, sel.value);
   const method = state.selectedMethod;
   const options = getAllRecipesForMethod(method);
@@ -3566,7 +3567,9 @@ function renderBrewSuggestion() {
   const el = document.getElementById('brew-suggestion'); if (!el) return;
   const editing = !!document.getElementById('r-edit-id')?.value;
   if (suggestionSuppressed || editing || !state.selectedCoffeeId) { el.innerHTML = ''; lastSuggestion = null; return; }
-  const s = computeSuggestion(state.selectedCoffeeId, state.selectedMethod);
+  const method = state.selectedMethod;
+  const cf = state.coffees.find(c => c.id === state.selectedCoffeeId);
+  const s = computeSuggestion(state.selectedCoffeeId, method);
   const g = selectedGrinder();
   // Grind in the user's current grinder: same grinder as the source brew -> reuse the raw setting
   let grindText, setting = null;
@@ -3574,35 +3577,55 @@ function renderBrewSuggestion() {
   else if (g && s.um != null) { setting = micronsToSetting(g, s.um); grindText = `Grind <b>${setting}</b> on ${g.model} (≈${s.um}µm)`; }
   else if (s.um != null) grindText = `Grind ≈<b>${s.um}µm</b> (${grindWord(s.um)}) — pick a grinder for a setting`;
   else grindText = s.grindRaw ? `Grind <b>${s.grindRaw}</b>` : '';
-  const rec = s.recipeId ? getAllRecipesForMethod(state.selectedMethod).find(x => x.id === s.recipeId) : null;
-  lastSuggestion = { ...s, setting, recipe: rec };
+
+  // Recipes are fixed. A recipe the user picked is always kept; otherwise we may propose one.
+  // Only grind and water temperature are tuned to the coffee — never dose, water, ratio or step timings.
+  const recipes = getAllRecipesForMethod(method);
+  const chosen = state.selectedRecipeId ? recipes.find(x => x.id === state.selectedRecipeId) : null;
+  const rec = chosen || (s.recipeId ? recipes.find(x => x.id === s.recipeId) : null);
+  let temp = s.temp, reasons = s.reasons.slice();
+  const base = METHOD_BASE[method] || METHOD_BASE.Other;
+  if (rec && s.source !== 'coffee') {
+    reasons[0] = `${method}: typical grind ≈${base.um}µm`;
+    if (rec.temp && method !== 'Cold Brew') {
+      const delta = ruleSuggestion(cf, method).temp - base.temp;
+      temp = Math.min(100, Math.round(rec.temp + delta));
+      reasons.push(`Temperature starts from the recipe's ${rec.temp}°C${delta ? `, ${delta > 0 ? '+' : ''}${delta}°C for this coffee` : ''}${rec.temp + delta > 100 ? ' (capped at 100°C)' : ''}`);
+    }
+  }
+  const recRatio = rec ? (rec.ratio || (rec.dose && rec.water ? '1:' + (rec.water / rec.dose).toFixed(1) : '')) : '';
+  const ratioText = rec ? recRatio : (s.ratio ? '1:' + (Math.round(s.ratio * 10) / 10) : '');
+  lastSuggestion = { ...s, temp, setting, recipe: rec, recipeChosen: !!chosen };
   const label = s.source === 'coffee' ? 'Your best for this coffee' : s.source === 'personal' ? 'Suggested start · learned from your brews' : 'Suggested start · general guidance';
-  const parts = [grindText, s.temp && state.selectedMethod !== 'Cold Brew' ? `<b>${s.temp}°C</b>` : '', s.ratio ? `<b>1:${(Math.round(s.ratio * 10) / 10)}</b>` : ''].filter(Boolean);
+  const parts = [grindText, temp && method !== 'Cold Brew' ? `<b>${temp}°C</b>` : ''].filter(Boolean);
   el.innerHTML = `<div class="suggest-card">
     <div style="display:flex;align-items:center;gap:8px;margin-bottom:6px">
       <span class="suggest-label">💡 ${label}</span>
       <button type="button" class="suggest-apply" onclick="applyBrewSuggestion()">Apply</button>
     </div>
-    <div class="suggest-main">${parts.join(' · ')}</div>
-    ${rec ? `<div class="suggest-sub">Recipe: ${rec.name}</div>` : ''}
-    <details class="suggest-why"><summary>Why?</summary><ul>${s.reasons.map(r => `<li>${r}</li>`).join('')}</ul>
+    <div class="suggest-main">${parts.join(' · ')}${!rec && ratioText ? ` · <b>${ratioText}</b>` : ''}</div>
+    ${rec ? `<div class="suggest-sub">${chosen ? 'Your recipe' : 'Recipe'}: ${rec.name}${recRatio ? ' · ' + recRatio : ''} — dose, water and steps as written</div>` : ''}
+    <details class="suggest-why"><summary>Why?</summary><ul>${reasons.map(r => `<li>${r}</li>`).join('')}</ul>
       <div class="suggest-sub" style="margin-top:6px">A starting point, not a rule. Taste, then use Plan next to fine-tune.</div></details>
   </div>`;
 }
 function applyBrewSuggestion() {
   const s = lastSuggestion; if (!s) return;
+  const method = state.selectedMethod;
   const sel = document.getElementById('r-recipe-select');
-  if (s.recipe && sel && !isEspressoMethod(state.selectedMethod)) { sel.value = s.recipe.id; onRecipeChange(sel); }
-  const base = METHOD_BASE[state.selectedMethod] || METHOD_BASE.Other;
-  const doseEl = document.getElementById('r-dose'), yEl = document.getElementById('r-yield');
-  if (!s.recipe || isEspressoMethod(state.selectedMethod)) {
+  // Fill in a proposed recipe only when none is chosen; never replace the user's recipe
+  if (s.recipe && !s.recipeChosen && sel && !isEspressoMethod(method)) { sel.value = s.recipe.id; onRecipeChange(sel); }
+  if (!s.recipe) {
+    // No recipe: fill dose and water/yield from the suggested ratio
+    const base = METHOD_BASE[method] || METHOD_BASE.Other;
+    const doseEl = document.getElementById('r-dose'), yEl = document.getElementById('r-yield');
     if (!doseEl.value) doseEl.value = base.dose;
     if (s.ratio) yEl.value = Math.round(parseFloat(doseEl.value) * s.ratio);
   }
   if (s.setting != null && s.setting !== '') document.getElementById('r-grind').value = s.setting;
-  if (s.temp && state.selectedMethod !== 'Cold Brew') document.getElementById('r-temp').value = s.temp;
+  if (s.temp && method !== 'Cold Brew') document.getElementById('r-temp').value = s.temp;
   updateGrindMicrons(); updateBrewLive();
-  showToast('Starting point applied');
+  showToast(s.recipe ? 'Grind and temperature set' : 'Starting point applied');
 }
 
 // Grinder converter (grinder detail)
@@ -4074,7 +4097,7 @@ if ('serviceWorker' in navigator && location.protocol.startsWith('http')) {
     <div class="settings-section-header">Browse</div>
 
     <div class="settings-nav-item" onclick="closeSettings();showView('recipes')">
-      <span class="settings-nav-icon">📋</span>
+      <span class="settings-nav-icon"><svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="4" width="14" height="17" rx="2"/><rect x="9" y="2.5" width="6" height="3.5" rx="1"/><path d="M9 11h6M9 14.5h6M9 18h3.5"/></svg></span>
       <div style="flex:1">
         <div class="settings-nav-label">Recipes</div>
         <div class="settings-nav-sub">Built-in & custom brew recipes</div>
@@ -4083,7 +4106,7 @@ if ('serviceWorker' in navigator && location.protocol.startsWith('http')) {
     </div>
 
     <div class="settings-nav-item" onclick="closeSettings();showView('grinders')">
-      <span class="settings-nav-icon">⚙️</span>
+      <span class="settings-nav-icon"><svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M7.5 10.5h9l-1.3 9.5H8.8z"/><path d="M6.5 10.5h11"/><path d="M12 10.5V6.5h5"/><circle cx="18.2" cy="6.5" r="1.3"/><path d="M10 14.5h4"/></svg></span>
       <div style="flex:1">
         <div class="settings-nav-label">Grinders</div>
         <div class="settings-nav-sub">Browse 58 grinders, compare, set default</div>
@@ -4112,7 +4135,7 @@ if ('serviceWorker' in navigator && location.protocol.startsWith('http')) {
     <div id="storage-info" style="padding:10px 20px;font-size:11px;line-height:1.6;color:var(--text-muted);background:var(--card);border-bottom:1px solid var(--border)"></div>
 
     <div class="settings-nav-item" onclick="backupData();closeSettings()">
-      <span class="settings-nav-icon">⬆</span>
+      <span class="settings-nav-icon"><svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 15V4M7.5 8.5 12 4l4.5 4.5"/><path d="M5 14v5a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1v-5"/></svg></span>
       <div style="flex:1">
         <div class="settings-nav-label">Export Backup</div>
         <div class="settings-nav-sub">Download all your data as JSON</div>
@@ -4120,7 +4143,7 @@ if ('serviceWorker' in navigator && location.protocol.startsWith('http')) {
     </div>
 
     <div class="settings-nav-item" onclick="document.getElementById('restore-input').click();closeSettings()">
-      <span class="settings-nav-icon">⬇</span>
+      <span class="settings-nav-icon"><svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 4v11M7.5 10.5 12 15l4.5-4.5"/><path d="M5 14v5a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1v-5"/></svg></span>
       <div style="flex:1">
         <div class="settings-nav-label">Import Backup</div>
         <div class="settings-nav-sub">Restore from a previous export</div>

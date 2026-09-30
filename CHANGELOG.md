@@ -458,6 +458,21 @@ Specialty coffee dialling-in tracker · Single-file PWA / Android APK
 
 ---
 
+## v3.4
+*30 September 2026*
+
+### Suggestions respect recipes
+- Recipes are fixed: suggestions never change dose, water, ratio, steps or step timings
+- A recipe you've chosen is always kept (previously Apply could swap it for one from your history)
+- Only grind and water temperature are tuned; temperature starts from the recipe's own value and shifts for the coffee (e.g. +2°C light roast, capped at 100°C)
+- A recipe is only proposed when none is chosen, and is then used as written
+- Suggestion updates when you change recipe
+
+### UI
+- Settings icons (Recipes, Grinders, Export, Import) are now outline icons matching the bottom bar
+
+---
+
 ## Pending / Roadmap
 - Rebuild the APK once to pick up the green app icon
 - Remaining transitions: press feedback, charts drawing in, + rotation, timer step pulse
@@ -468,4 +483,4 @@ Specialty coffee dialling-in tracker · Single-file PWA / Android APK
 
 ---
 
-*Document maintained automatically. Last updated: v3.3*
+*Document maintained automatically. Last updated: v3.4*
