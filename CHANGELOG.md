@@ -632,9 +632,24 @@ Specialty coffee dialling-in tracker · Single-file PWA / Android APK
 
 ---
 
+## v3.19
+*30 September 2026*
+
+### Transitions (the held-back set)
+- Press feedback: buttons, chips, tabs and tiles shrink slightly while pressed; nav icons dip; Settings rows tint
+- + button rotates into × while its menu is open, and back when it closes (all five ways of closing checked)
+- Insights bars sweep in from the left; trend and days-off-roast lines draw in, with dots and shading fading in after
+- Brew timer: the step guide pulses when it moves to the next step (alongside the existing vibration), once per step
+- All of it is switched off when the phone's Reduce Motion setting is on
+- Tested: 44 checks with motion on and 44 with Reduce Motion, plus every earlier test suite
+
+### Insights
+- Bars slightly thinner (16px → 12px)
+
+---
+
 ## Pending / Roadmap
 - Rebuild the APK once to pick up the new cup icon
-- Remaining transitions: press feedback, charts drawing in, + rotation, timer step pulse
 - Opt-in pooled data + trained model (see feasibility notes): backend, consent, deletion, ICO registration
 - Google Drive sync (deferred — manual backup/restore and reminder in place)
 - Screenshot showcase for PWABuilder
@@ -642,4 +657,4 @@ Specialty coffee dialling-in tracker · Single-file PWA / Android APK
 
 ---
 
-*Document maintained automatically. Last updated: v3.18*
+*Document maintained automatically. Last updated: v3.19*

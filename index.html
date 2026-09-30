@@ -406,6 +406,47 @@
     .view.view-enter, .view.slide-in-right, .view.slide-in-left, .modal, .modal-overlay.open,
     .modal-overlay.closing, .modal-overlay.closing .modal { animation: none !important; }
   }
+
+  /* ---- Micro-interactions (v3.19) ---- */
+  /* Press feedback: a quick, small shrink while a finger is down */
+  .coffee-card, .grinder-card, .settings-nav-item, .btn-primary, .btn-secondary, .method-tab, .type-btn, .extraction-btn,
+  .plan-chip, .edit-overlay-btn, .dark-toggle, .card-more, .text-size-options button, .layout-toggle button, .brew-timer-btn,
+  .upnext-handle, .star-btn, .nav-tab svg, .coffee-selector-item, .settings-toggle-row .switch {
+    transition-property: transform, background-color, border-color, color, opacity, box-shadow;
+    transition-duration: .12s; transition-timing-function: ease-out;
+  }
+  .coffee-card:active, .grinder-card:active, .coffee-selector-item:active { transform: scale(.985); }
+  .settings-nav-item:active { background: rgba(82,121,111,0.08); }
+  .btn-primary:active, .btn-secondary:active, .method-tab:active, .type-btn:active, .extraction-btn:active, .plan-chip:active,
+  .edit-overlay-btn:active, .dark-toggle:active, .card-more:active, .text-size-options button:active, .layout-toggle button:active,
+  .brew-timer-btn:active, .star-btn:active { transform: scale(.95); }
+  .nav-tab:active svg { transform: scale(.88); }
+  .upnext-handle:active { transform: scale(.9); }
+  /* + button turns into × while its menu is open */
+  .fab { transition: transform .25s cubic-bezier(.2,.8,.2,1), background-color .15s, box-shadow .15s; }
+  .fab:active { transform: scale(.92); }
+  .fab.fab-open { transform: rotate(135deg); }
+  /* Insights: bars sweep in, lines draw in */
+  .chart-sweep { animation: chartSweep .6s cubic-bezier(.2,.8,.2,1) both; }
+  @keyframes chartSweep { from { clip-path: inset(0 100% 0 0 round 5px); } to { clip-path: inset(0 0 0 0 round 5px); } }
+  .chart-draw { stroke-dasharray: 1; stroke-dashoffset: 1; animation: chartDraw .9s cubic-bezier(.4,0,.2,1) .05s forwards; }
+  @keyframes chartDraw { to { stroke-dashoffset: 0; } }
+  .chart-fade { animation: chartFade .6s ease-out .25s both; }
+  @keyframes chartFade { from { opacity: 0; } to { opacity: 1; } }
+  /* Brew timer: a pulse when the guide moves to the next step */
+  .brew-guide.guide-pulse { animation: guidePulse .7s ease-out; }
+  @keyframes guidePulse { 0% { transform: scale(1); box-shadow: 0 0 0 0 rgba(82,121,111,.55); background: rgba(82,121,111,.30); }
+                          35% { transform: scale(1.025); }
+                          100% { transform: scale(1); box-shadow: 0 0 0 10px rgba(82,121,111,0); } }
+  @media (prefers-reduced-motion: reduce) {
+    .coffee-card:active, .grinder-card:active, .coffee-selector-item:active, .btn-primary:active, .btn-secondary:active, .method-tab:active,
+    .type-btn:active, .extraction-btn:active, .plan-chip:active, .edit-overlay-btn:active, .dark-toggle:active, .card-more:active,
+    .text-size-options button:active, .layout-toggle button:active, .brew-timer-btn:active, .star-btn:active, .nav-tab:active svg,
+    .upnext-handle:active, .fab:active { transform: none; }
+    .fab, .fab.fab-open { transition: none; }
+    .chart-sweep, .chart-fade, .brew-guide.guide-pulse { animation: none; }
+    .chart-draw { animation: none; stroke-dasharray: none; stroke-dashoffset: 0; }
+  }
   /* GRINDER STYLES */
   .grinder-type-toggle { display: flex; background: rgba(26,15,10,0.06); border-radius: 10px; padding: 3px; margin-bottom: 20px; }
   .type-btn { flex: 1; padding: 9px 12px; border: none; border-radius: 8px; font-family: 'DM Mono', monospace; font-size: 10px; letter-spacing: 1px; text-transform: uppercase; cursor: pointer; background: none; color: var(--text-muted); transition: all 0.2s; }
@@ -1780,16 +1821,19 @@ window.addEventListener('popstate', function(e) {
   }
 });
 
+document.addEventListener('touchstart', () => {}, { passive: true });  // lets :active press states show on iOS
 const reduceMotion = () => window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 const closingTimers = {};
 function openModal(id) {
   const el = document.getElementById(id); if (!el) return;
   clearTimeout(closingTimers[id]); el.classList.remove('closing');
   el.classList.add('open');
+  if (id === 'modal-fab') document.querySelector('.fab')?.classList.add('fab-open');
 }
 function closeModal(id) {
   const el = document.getElementById(id); if (!el || !el.classList.contains('open')) return;
   el.classList.remove('open');
+  if (id === 'modal-fab') document.querySelector('.fab')?.classList.remove('fab-open');
   if (reduceMotion()) return;
   // Stays visible (and ignores taps) while it slides away; a timer guarantees it always finishes
   el.classList.add('closing');
@@ -2776,7 +2820,7 @@ function renderStackedBar(items, total, opts = {}) {
   }).join('');
   return `
     ${opts.note ? `<div style="font-size:10px;color:var(--text-muted);margin:-6px 0 8px">${opts.note}</div>` : ''}
-    <div style="height:16px;border-radius:6px;overflow:hidden;display:flex;gap:2px;margin-bottom:10px">${segments}</div>
+    <div class="chart-sweep" style="height:12px;border-radius:5px;overflow:hidden;display:flex;gap:2px;margin-bottom:10px">${segments}</div>
     <div>${legend}</div>`;
 }
 function escHtml(v) { return String(v).replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c])); }
@@ -3650,7 +3694,13 @@ function renderStepGuide() {
   if (steps.length < 2) { el.style.display = 'none'; lastGuideIdx = -1; return; }
   const s = brewTimerSecs(), running = !!brewTimer.startedAt;
   let idx = -1; steps.forEach((st, i) => { if (s >= st.at) idx = i; });
-  if ((running || s > 0) && idx !== lastGuideIdx && idx >= 0) { if (lastGuideIdx !== -1 || idx > 0) { if (navigator.vibrate) navigator.vibrate(120); } lastGuideIdx = idx; }
+  if ((running || s > 0) && idx !== lastGuideIdx && idx >= 0) {
+    if (lastGuideIdx !== -1 || idx > 0) {
+      if (navigator.vibrate) navigator.vibrate(120);
+      if (running && !reduceMotion()) { el.classList.remove('guide-pulse'); void el.offsetWidth; el.classList.add('guide-pulse'); el.addEventListener('animationend', () => el.classList.remove('guide-pulse'), { once: true }); }
+    }
+    lastGuideIdx = idx;
+  }
   const fmt = n => Math.floor(n / 60) + ':' + String(n % 60).padStart(2, '0');
   const next = steps[idx + 1];
   el.style.display = 'block';
@@ -3679,7 +3729,7 @@ function renderAgeChart(coffeeId) {
   return `<div class="trend-chart-wrap" style="padding:14px 10px 8px;margin-top:12px">
     <div style="font-size:12px;font-weight:600;color:var(--text);margin:0 0 2px 6px">Taste by days off roast</div>
     <div style="font-size:11px;color:var(--text-muted);margin:0 0 6px 6px">Best so far: ${best.v}/10 on day ${best.d}</div>
-    <svg viewBox="0 0 ${W} ${H}" style="width:100%;overflow:visible">${grid}<path d="${path}" stroke="#52796F" stroke-width="2" fill="none" stroke-linejoin="round"/>${dots}${xl}</svg>
+    <svg viewBox="0 0 ${W} ${H}" style="width:100%;overflow:visible">${grid}<path class="chart-draw" pathLength="1" d="${path}" stroke="#52796F" stroke-width="2" fill="none" stroke-linejoin="round"/><g class="chart-fade">${dots}</g>${xl}</svg>
   </div>`;
 }
 
@@ -4376,7 +4426,7 @@ function renderTrendCharts(coffeeId) {
       <div style="margin-top:8px">
         <div style="font-size:10px;color:var(--text-muted);margin-bottom:4px;letter-spacing:.5px">BREW TIME</div>
         <svg viewBox="0 0 ${W} ${TH}" style="width:100%;overflow:visible">
-          <path d="${timeLine}" stroke="#8aab9e" stroke-width="1.5" fill="none" stroke-linecap="round" stroke-linejoin="round" stroke-dasharray="4,3"/>
+          <path class="chart-fade" d="${timeLine}" stroke="#8aab9e" stroke-width="1.5" fill="none" stroke-linecap="round" stroke-linejoin="round" stroke-dasharray="4,3"/>
           ${timeDots}
         </svg>
       </div>`;
@@ -4393,11 +4443,11 @@ function renderTrendCharts(coffeeId) {
           </linearGradient>
         </defs>
         ${yTicks}
-        <path d="${areaPath}" fill="url(#scoreGrad)"/>
-        <path d="${linePath}" stroke="#52796F" stroke-width="2.5" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
-        ${scoreDots}
+        <path class="chart-fade" d="${areaPath}" fill="url(#scoreGrad)"/>
+        <path class="chart-draw" pathLength="1" d="${linePath}" stroke="#52796F" stroke-width="2.5" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+        <g class="chart-fade">${scoreDots}
         ${tempMarkers}
-        ${grindMarkers}
+        ${grindMarkers}</g>
         ${dateLabels}
       </svg>
       ${dateRow}
