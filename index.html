@@ -265,6 +265,21 @@
   .plan-chip { flex:1; padding:10px 4px; border:1.5px solid var(--border); border-radius:var(--radius-sm); background:var(--card); color:var(--text); font-family:'Space Mono',monospace; font-size:10px; letter-spacing:.5px; text-transform:uppercase; cursor:pointer; text-align:center; }
   .plan-chip.selected { background:var(--espresso); border-color:var(--espresso); color:#FAFAF7; }
   body.dark-mode .plan-chip.selected { background:var(--crema); border-color:var(--crema); }
+  .plan-slider { margin-bottom:18px; }
+  .plan-slider .plan-val { text-align:center; font-family:'Space Mono',monospace; font-size:14px; color:var(--text); margin-bottom:6px; }
+  .plan-slider .plan-val b { font-size:20px; }
+  .plan-slider input[type=range] { width:100%; height:32px; accent-color:var(--espresso); touch-action:pan-y; }
+  body.dark-mode .plan-slider input[type=range] { accent-color:#8FB3A5; }
+  .plan-slider input[type=range]:disabled { opacity:.3; }
+  .plan-slider input.unset { opacity:.45; }
+  .upnext-list { position:relative; }
+  .upnext-head { display:flex; align-items:flex-start; gap:10px; }
+  .upnext-handle { flex-shrink:0; width:36px; height:36px; margin:-6px -8px 0 auto; display:flex; align-items:center; justify-content:center; border:none; background:none; color:var(--text-muted); cursor:grab; touch-action:none; border-radius:8px; }
+  .upnext-handle:active { cursor:grabbing; }
+  .upnext-card.dragging { position:relative; z-index:5; box-shadow:0 10px 28px rgba(18,60,39,.28); transform:scale(1.02); transition:box-shadow .15s, transform .15s; }
+  .upnext-card.drag-shift { transition:transform .18s ease; }
+  .upnext-hint { font-size:10px; color:var(--text-muted); margin:-6px 0 10px; letter-spacing:.5px; }
+  .plan-range-ends { display:flex; justify-content:space-between; font-size:10px; color:var(--text-muted); margin-top:-2px; }
   .plan-stepper { display:flex; align-items:center; gap:10px; margin-bottom:18px; }
   .plan-stepper button { width:40px; height:40px; border-radius:10px; border:1.5px solid var(--border); background:var(--card); color:var(--text); font-size:20px; cursor:pointer; }
   .plan-stepper button:disabled { opacity:.3; }
@@ -943,21 +958,23 @@
       <div class="plan-chip" data-dir="same" onclick="setPlanDir('grind','same')">Same</div>
       <div class="plan-chip" data-dir="coarser" onclick="setPlanDir('grind','coarser')">Coarser</div>
     </div>
-    <div class="plan-stepper" id="plan-grind-stepper">
-      <button type="button" onclick="nudgePlan('grind',-1)" aria-label="Finer">−</button>
+    <div class="plan-slider" id="plan-grind-stepper">
       <div class="plan-val" id="plan-grind-val"></div>
-      <button type="button" onclick="nudgePlan('grind',1)" aria-label="Coarser">+</button>
+      <input type="range" id="plan-grind-range" aria-label="Grind setting" oninput="slidePlan('grind', this.value)">
+      <div class="plan-range-ends"><span id="plan-grind-min"></span><span id="plan-grind-step"></span><span id="plan-grind-max"></span></div>
     </div>
+    <div id="plan-temp-block">
     <div class="form-label">Water temperature</div>
     <div class="plan-chips" id="plan-temp-chips">
       <div class="plan-chip" data-dir="cooler" onclick="setPlanDir('temp','cooler')">Cooler</div>
       <div class="plan-chip" data-dir="same" onclick="setPlanDir('temp','same')">Same</div>
       <div class="plan-chip" data-dir="hotter" onclick="setPlanDir('temp','hotter')">Hotter</div>
     </div>
-    <div class="plan-stepper" id="plan-temp-stepper">
-      <button type="button" onclick="nudgePlan('temp',-1)" aria-label="Cooler">−</button>
+    <div class="plan-slider" id="plan-temp-stepper">
       <div class="plan-val" id="plan-temp-val"></div>
-      <button type="button" onclick="nudgePlan('temp',1)" aria-label="Hotter">+</button>
+      <input type="range" id="plan-temp-range" min="80" max="100" step="1" aria-label="Water temperature" oninput="slidePlan('temp', this.value)">
+      <div class="plan-range-ends"><span>80°C</span><span>1°C steps</span><span>100°C</span></div>
+    </div>
     </div>
     <div class="form-group"><label class="form-label">Note for next time (optional)</label><input type="text" class="form-input" id="plan-note" placeholder="e.g. Try a slower final pour"></div>
     <button class="btn-primary" onclick="savePlan()">Add to Up next</button>
@@ -3725,20 +3742,29 @@ function grinderRangeLabel(g) {
   return g.clickMin !== undefined ? `${g.clickMin}–${g.clickMax} clicks` : `${g.settings} settings`;
 }
 // One nudge in Plan next: a click on stepped grinders; ~20µm (filter) or ~6µm (espresso) on stepless ones
+// Slider resolution: 0.1 on stepless grinders, the grinder's own click size on stepped ones
 function planGrindStep(g, method, rawGrind) {
   const sc = grinderScale(g);
   if (!sc) return grindStep(rawGrind);
-  if (!sc.stepless) return sc.step || 1;
-  const want = (isEspressoMethod(method) ? 6 : 20) / sc.per;
-  const minStep = sc.step || (sc.s1 - sc.s0 > 100 ? 1 : sc.s1 - sc.s0 >= 40 ? 0.5 : 0.1);
-  if (minStep >= 1) return Math.max(1, Math.round(want));
-  return Math.max(minStep, Math.round(want * 10) / 10);
+  if (sc.stepless) return 0.1;
+  return sc.step || 1;
+}
+// Slider range: roughly ±150µm around the last setting (at least ±10 steps), kept inside the grinder's range
+function planGrindRange(d) {
+  const g = d.from.grinderId ? GRINDERS.find(x => x.id === d.from.grinderId) : null;
+  const sc = grinderScale(g), st = d.grindStepSize, base = d.grindBase;
+  let w = Math.max(10 * st, sc ? 150 / sc.per : 10 * st);
+  w = Math.ceil(w / st) * st;
+  let lo = base - w, hi = base + w;
+  if (sc) { lo = Math.max(lo, sc.s0); hi = Math.min(hi, sc.s1); }
+  lo = Math.max(0, lo);
+  return { lo: roundTo(Math.floor(lo / st) * st, st), hi: roundTo(Math.ceil(hi / st) * st, st) };
 }
 function planStepHint(d) {
   const g = d.from.grinderId ? GRINDERS.find(x => x.id === d.from.grinderId) : null;
   const sc = grinderScale(g); if (!sc || d.grindBase === null) return '';
   const um = Math.round(d.grindStepSize * sc.per);
-  return `<div style="font-size:10px;color:var(--text-muted);margin-top:2px">${sc.stepless ? 'Stepless' : 'Stepped'} · each − / + is ${d.grindStepSize}${sc.stepless ? '' : ' click'} (≈${um}µm)</div>`;
+  return `<div style="font-size:10px;color:var(--text-muted);margin-top:2px">${sc.stepless ? 'Stepless' : 'Stepped'} · slider moves in ${d.grindStepSize}${sc.stepless ? '' : d.grindStepSize === 1 ? ' click' : ' clicks'} (≈${um}µm)</div>`;
 }
 
 function playEnter(el, cls) {
@@ -3818,6 +3844,15 @@ function openPlanNext(brewId) {
   };
   document.getElementById('plan-tip').textContent = (tips[r.extraction] || 'Pick what to change for the next brew.') + ' Changing one thing at a time shows what made the difference.';
   document.getElementById('plan-note').value = '';
+  // Set up the sliders around last time's values
+  const gr = document.getElementById('plan-grind-range');
+  if (grind !== null) { const rg = planGrindRange(planDraft); gr.min = rg.lo; gr.max = rg.hi; gr.step = gs; gr.disabled = false;
+    document.getElementById('plan-grind-min').textContent = rg.lo; document.getElementById('plan-grind-max').textContent = rg.hi;
+    document.getElementById('plan-grind-step').textContent = gs + ' steps'; }
+  else { gr.disabled = true; ['min','max','step'].forEach(k => document.getElementById('plan-grind-'+k).textContent = ''); }
+  const tr = document.getElementById('plan-temp-range'); tr.disabled = false;
+  document.getElementById('plan-temp-block').style.display = r.method === 'Cold Brew' ? 'none' : '';
+  if (temp !== null) planDraft.temp = Math.min(100, Math.max(80, temp));
   setPlanDir('grind', r.extraction==='under' ? 'finer' : r.extraction==='over' ? 'coarser' : 'same');
   setPlanDir('temp', 'same');
   openModal('modal-plan');
@@ -3830,10 +3865,11 @@ function setPlanDir(kind, dir) {
   const d = planDraft; if (!d) return;
   if (kind === 'grind') {
     d.grindDir = dir;
-    if (d.grindBase !== null) d.grind = roundTo(Math.max(0, d.grindBase + (dir==='finer' ? -d.grindStepSize : dir==='coarser' ? d.grindStepSize : 0)), d.grindStepSize);
+    if (d.grindBase !== null) { const rg = planGrindRange(d); d.grind = roundTo(Math.min(rg.hi, Math.max(rg.lo, d.grindBase + (dir==='finer' ? -d.grindStepSize : dir==='coarser' ? d.grindStepSize : 0))), d.grindStepSize); }
   } else {
     d.tempDir = dir;
-    if (d.tempBase !== null) d.temp = Math.min(100, d.tempBase + (dir==='hotter' ? 1 : dir==='cooler' ? -1 : 0));
+    if (d.tempBase !== null) d.temp = Math.min(100, Math.max(80, d.tempBase + (dir==='hotter' ? 1 : dir==='cooler' ? -1 : 0)));
+    else if (dir === 'same') d.temp = null;
   }
   syncPlanChips(kind); renderPlanValues();
 }
@@ -3850,34 +3886,106 @@ function nudgePlan(kind, delta) {
   }
   syncPlanChips(kind); renderPlanValues();
 }
-function renderPlanValues() {
+function slidePlan(kind, val) {
+  const d = planDraft; if (!d) return;
+  const v = parseFloat(val);
+  if (kind === 'grind') {
+    if (d.grindBase === null) return;
+    d.grind = roundTo(v, d.grindStepSize);
+    d.grindDir = d.grind < d.grindBase ? 'finer' : d.grind > d.grindBase ? 'coarser' : 'same';
+  } else {
+    d.temp = v;
+    d.tempDir = d.tempBase === null ? 'set' : d.temp > d.tempBase ? 'hotter' : d.temp < d.tempBase ? 'cooler' : 'same';
+  }
+  syncPlanChips(kind); renderPlanValues(true);
+}
+function renderPlanValues(fromSlider) {
   const d = planDraft;
   const arrow = (a,b,u='') => a===b ? `<b>${b}${u}</b> (no change)` : `${a}${u} → <b>${b}${u}</b>`;
   document.getElementById('plan-grind-val').innerHTML = d.grindBase === null
     ? (d.from.grind ? `${d.grindDir==='same' ? 'Keep' : 'Go '+d.grindDir+' than'} <b>${d.from.grind}</b>` : 'No grind logged last time')
     : arrow(d.grindBase, d.grind) + planUmLine(d) + planStepHint(d);
   document.getElementById('plan-temp-val').innerHTML = d.tempBase === null
-    ? `No temperature logged — aim ${d.tempDir==='same' ? 'the same' : d.tempDir}`
-    : arrow(d.tempBase, d.temp, '°C');
-  document.querySelectorAll('#plan-grind-stepper button').forEach(b => b.disabled = d.grindBase === null);
-  document.querySelectorAll('#plan-temp-stepper button').forEach(b => b.disabled = d.tempBase === null);
+    ? (d.temp != null ? `No temperature last time · plan <b>${d.temp}°C</b>` : `No temperature logged — slide to set one`)
+    : arrow(d.tempBase, d.temp, '°C') + (d.tempBase < 80 || d.tempBase > 100 ? `<div style="font-size:11px;color:var(--text-muted)">Last brew was ${d.tempBase}°C; the planner covers 80–100°C</div>` : '');
+  if (!fromSlider) {
+    const gr = document.getElementById('plan-grind-range'), tr = document.getElementById('plan-temp-range');
+    if (d.grindBase !== null && d.grind !== null) gr.value = d.grind;
+    tr.value = d.temp != null ? d.temp : 93;
+    tr.classList.toggle('unset', d.temp == null);
+  }
 }
 function savePlan() {
   const d = planDraft; if (!d) return;
   const r = d.from;
   if (!state.plannedBrews) state.plannedBrews = [];
-  // One plan per coffee + method: a newer plan replaces the older one
+  // One plan per coffee + method: a newer plan replaces the older one in the same place; otherwise it joins the end of the queue
+  const oldIdx = state.plannedBrews.findIndex(p => p.coffeeId===r.coffeeId && p.method===r.method);
   state.plannedBrews = state.plannedBrews.filter(p => !(p.coffeeId===r.coffeeId && p.method===r.method));
-  state.plannedBrews.unshift({
+  state.plannedBrews.splice(oldIdx >= 0 ? oldIdx : state.plannedBrews.length, 0, {
     id: 'plan-' + Date.now(), createdAt: new Date().toISOString(), basedOn: r.id, fromExtraction: r.extraction || '',
     coffeeId: r.coffeeId, grinderId: r.grinderId || null, method: r.method, recipeId: r.recipeId || null,
     dose: r.dose, yield: r.yield,
     grind: d.grindBase !== null ? String(d.grind) : r.grind, grindFrom: r.grind, grindDir: d.grindDir,
-    temp: d.tempBase !== null ? String(d.temp) : r.temp, tempFrom: r.temp, tempDir: d.tempDir,
+    temp: d.temp != null ? String(d.temp) : r.temp, tempFrom: r.temp, tempDir: d.tempDir,
     note: document.getElementById('plan-note').value.trim()
   });
   save(); closeModal('modal-plan'); planDraft = null;
   showToast('Added to Up next'); renderDashboard();
+}
+// ---- Drag to reorder Up next ----
+let planDrag = null;
+function startPlanDrag(e, handle) {
+  const card = handle.closest('.upnext-card'), list = document.getElementById('upnext-list');
+  if (!card || !list) return;
+  e.preventDefault();
+  try { handle.setPointerCapture(e.pointerId); } catch(_) {}
+  const cards = [...list.querySelectorAll('.upnext-card')];
+  planDrag = { card, list, startY: e.clientY, from: cards.indexOf(card), to: cards.indexOf(card), rects: cards.map(c => c.getBoundingClientRect()), cards };
+  card.classList.add('dragging');
+  cards.forEach(c => { if (c !== card) c.classList.add('drag-shift'); });
+  if (navigator.vibrate) navigator.vibrate(15);
+  handle.onpointermove = movePlanDrag;
+  handle.onpointerup = handle.onpointercancel = endPlanDrag;
+}
+function movePlanDrag(e) {
+  const d = planDrag; if (!d) return;
+  const dy = e.clientY - d.startY;
+  d.card.style.transform = `translateY(${dy}px) scale(1.02)`;
+  const r = d.rects[d.from], mid = r.top + r.height / 2 + dy;
+  let to = 0; d.rects.forEach((rc, i) => { if (i !== d.from && mid > rc.top + rc.height / 2) to++; });
+  if (to === d.to) return;
+  d.to = to;
+  const h = r.height + 10;  // card height + gap
+  d.cards.forEach((c, i) => {
+    if (c === d.card) return;
+    let shift = 0;
+    if (d.from < to && i > d.from && i <= to) shift = -h;
+    if (d.from > to && i >= to && i < d.from) shift = h;
+    c.style.transform = shift ? `translateY(${shift}px)` : '';
+  });
+}
+function endPlanDrag() {
+  const d = planDrag; if (!d) return; planDrag = null;
+  d.cards.forEach(c => { c.style.transform = ''; c.classList.remove('dragging', 'drag-shift'); });
+  if (d.to !== d.from) reorderPlans(d.cards.map(c => c.dataset.planId), d.from, d.to);
+}
+function reorderPlans(ids, from, to) {
+  const [moved] = ids.splice(from, 1); ids.splice(to, 0, moved);
+  const all = state.plannedBrews || [];
+  const shown = ids.map(id => all.find(p => p.id === id)).filter(Boolean);
+  state.plannedBrews = shown.concat(all.filter(p => !ids.includes(p.id)));  // hidden plans (finished bags) keep their order after
+  save(); renderUpNext();
+}
+// Keyboard: arrow up/down on a focused handle moves the plan
+function keyMovePlan(e, id) {
+  if (e.key !== 'ArrowUp' && e.key !== 'ArrowDown') return;
+  e.preventDefault();
+  const ids = [...document.querySelectorAll('#upnext-list .upnext-card')].map(c => c.dataset.planId);
+  const from = ids.indexOf(id), to = from + (e.key === 'ArrowUp' ? -1 : 1);
+  if (from < 0 || to < 0 || to >= ids.length) return;
+  reorderPlans(ids, from, to);
+  document.querySelector(`#upnext-list [data-plan-id="${id}"] .upnext-handle`)?.focus();
 }
 function brewPlan(planId) {
   const p = (state.plannedBrews||[]).find(x=>x.id===planId); if (!p) return;
@@ -3891,7 +3999,7 @@ function renderUpNext() {
   const el = document.getElementById('upnext-section'); if (!el) return;
   const plans = (state.plannedBrews||[]).filter(p => { const cf = state.coffees.find(c=>c.id===p.coffeeId); return cf && !cf.finishedBag; });
   if (!plans.length) { el.innerHTML = ''; return; }
-  el.innerHTML = '<div class="divider">Up next</div>' + plans.map(p => {
+  el.innerHTML = '<div class="divider">Up next</div>' + (plans.length > 1 ? '<div class="upnext-hint">Drag ⠿ to reorder</div>' : '') + '<div class="upnext-list" id="upnext-list">' + plans.map(p => {
     const cf = state.coffees.find(c=>c.id===p.coffeeId);
     const rec = p.recipeId ? getAllRecipesForMethod(p.method).find(x=>x.id===p.recipeId) : null;
     const chg = [];
@@ -3899,9 +4007,11 @@ function renderUpNext() {
     if (p.grind) chg.push(`<span class="meta-pill">Grind ${p.grindFrom && p.grindFrom!==p.grind ? p.grindFrom+' → ' : ''}${p.grind}${!numericGrind && p.grindDir!=='same' ? ' ('+p.grindDir+')' : ''}</span>`);
     if (p.temp) chg.push(`<span class="meta-pill">${p.tempFrom && p.tempFrom!==p.temp ? p.tempFrom+' → ' : ''}${p.temp}°C</span>`);
     if (p.fromExtraction) chg.push(`<span class="extraction-tag tag-${p.fromExtraction}">after ${p.fromExtraction}</span>`);
-    return `<div class="upnext-card">
+    return `<div class="upnext-card" data-plan-id="${p.id}">
+      <div class="upnext-head"><div style="flex:1;min-width:0">
       <div class="upnext-title">${cf.name}</div>
       <div class="upnext-sub">${p.method}${rec ? ' · '+rec.name : ''}</div>
+      </div>${plans.length > 1 ? `<button type="button" class="upnext-handle" aria-label="Drag to reorder ${cf.name}" onpointerdown="startPlanDrag(event, this)" onkeydown="keyMovePlan(event, '${p.id}')"><svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor" aria-hidden="true"><circle cx="5.5" cy="3.5" r="1.3"/><circle cx="10.5" cy="3.5" r="1.3"/><circle cx="5.5" cy="8" r="1.3"/><circle cx="10.5" cy="8" r="1.3"/><circle cx="5.5" cy="12.5" r="1.3"/><circle cx="10.5" cy="12.5" r="1.3"/></svg></button>` : ''}</div>
       <div class="upnext-changes">${chg.join('')}</div>
       ${p.note ? `<div class="upnext-sub" style="margin:-4px 0 10px">📝 ${p.note}</div>` : ''}
       <div class="upnext-actions">
@@ -3909,7 +4019,7 @@ function renderUpNext() {
         <button class="btn-secondary" onclick="dismissPlan('${p.id}')" aria-label="Dismiss">✕</button>
       </div>
     </div>`;
-  }).join('');
+  }).join('') + '</div>';
 }
 
 // ==================== TREND CHARTS ====================

@@ -535,6 +535,21 @@ Specialty coffee dialling-in tracker · Single-file PWA / Android APK
 
 ---
 
+## v3.11
+*30 September 2026*
+
+### Plan next
+- Grind − / + arrows replaced with a slider: 0.1 steps on stepless grinders, the grinder's own click size on stepped ones
+- Slider covers roughly ±150µm around the last setting (at least ±10 steps), kept inside the grinder's range; shows µm and the step size
+- Temperature slider from 80 to 100°C in 1°C steps; can now set a temperature even when the last brew had none (hidden for Cold Brew)
+- Finer / Same / Coarser and Cooler / Same / Hotter chips still work as one-step shortcuts
+
+### Up next
+- Drag the ⠿ handle to reorder planned brews (arrow keys also work on a focused handle)
+- New plans join the end of the queue; re-planning the same coffee + method keeps its place
+
+---
+
 ## Pending / Roadmap
 - Rebuild the APK once to pick up the new cup icon
 - Remaining transitions: press feedback, charts drawing in, + rotation, timer step pulse
@@ -545,4 +560,4 @@ Specialty coffee dialling-in tracker · Single-file PWA / Android APK
 
 ---
 
-*Document maintained automatically. Last updated: v3.10*
+*Document maintained automatically. Last updated: v3.11*
