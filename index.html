@@ -229,6 +229,8 @@
   .btn-primary.fab-recipe-btn { background:transparent !important; color:var(--text) !important; border:1.5px solid var(--crema) !important; }
   body.dark-mode .btn-primary.fab-recipe-btn { color:var(--dm-text) !important; }
   #settings-dark-btn { background:var(--espresso) !important; color:#FAFAF7 !important; }
+  /* Dark mode: swap the base palette so anything using these variables follows automatically */
+  body.dark-mode { --card: var(--dm-card); --foam: var(--dm-bg); --milk: #FAFAF7; --text: var(--dm-text); --text-muted: var(--dm-text-muted); --border: var(--dm-border); }
   /* GRINDER STYLES */
   .grinder-type-toggle { display: flex; background: rgba(26,15,10,0.06); border-radius: 10px; padding: 3px; margin-bottom: 20px; }
   .type-btn { flex: 1; padding: 9px 12px; border: none; border-radius: 8px; font-family: 'DM Mono', monospace; font-size: 10px; letter-spacing: 1px; text-transform: uppercase; cursor: pointer; background: none; color: var(--text-muted); transition: all 0.2s; }
