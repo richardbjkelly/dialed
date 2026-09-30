@@ -3544,6 +3544,10 @@ loadPhotos();
 renderDashboard();
 updateCompareBar();
 try { history.replaceState({view:'dashboard'}, '', ''); } catch(e) {}
+// Offline support (only over http/https — e.g. GitHub Pages)
+if ('serviceWorker' in navigator && location.protocol.startsWith('http')) {
+  window.addEventListener('load', () => navigator.serviceWorker.register('sw.js').catch(e => console.warn('SW registration failed', e)));
+}
 </script>
 
 
