@@ -565,6 +565,7 @@ Specialty coffee dialling-in tracker · Single-file PWA / Android APK
 *30 September 2026*
 
 ### Coffee Library layout
+- Grid tiles show country, process, roast level and varietal first, then a "+N" tag for the rest (altitude, £/100g, grams left, days off roast); list view still shows every tag
 - Small list / grid switch on the right of the Coffee Library subtitle
 - Grid shows two coffees per row with compact tiles (smaller type, up to three rows of tags); list is the original full-width tiles
 - Choice is remembered, including after opening a coffee and coming back
