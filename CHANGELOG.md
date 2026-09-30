@@ -697,6 +697,16 @@ Specialty coffee dialling-in tracker · Single-file PWA / Android APK
 
 ---
 
+## v3.25
+*30 September 2026*
+
+### Log Brew rating
+- The row of ten cup buttons is now a 0–10 slider, starting at "Not rated"
+- Live label shows the choice, e.g. "8/10 · Great"; slide back to the start to clear
+- Editing a brew shows its saved rating; each new brew starts unrated
+
+---
+
 ## Pending / Roadmap
 - Rebuild the APK once to pick up the new cup icon
 - Opt-in pooled data + trained model (see feasibility notes): backend, consent, deletion, ICO registration
@@ -706,4 +716,4 @@ Specialty coffee dialling-in tracker · Single-file PWA / Android APK
 
 ---
 
-*Document maintained automatically. Last updated: v3.24*
+*Document maintained automatically. Last updated: v3.25*
