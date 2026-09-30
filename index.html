@@ -157,6 +157,8 @@
   .card-edit-overlay { position:absolute; inset:0; background:rgba(18,60,39,0.93); border-radius:var(--radius); display:flex; align-items:center; justify-content:center; gap:10px; opacity:0; pointer-events:none; transition:opacity .15s; z-index:10; flex-wrap:wrap; padding:12px; }
   .card-edit-overlay.visible { opacity:1; pointer-events:all; }
   .edit-overlay-btn { background:rgba(255,255,255,0.12); border:1px solid rgba(255,255,255,0.3); color:#FAFAF7; font-size:11px; padding:9px 14px; border-radius:8px; cursor:pointer; font-family:'Space Mono',monospace; }
+  .btn-delete-coffee { display:block; width:100%; margin:28px 0 8px; padding:12px; background:none; border:1px solid var(--border); border-radius:10px; color:#A33A2B; font-family:'Space Mono',monospace; font-size:12px; letter-spacing:1px; text-transform:uppercase; cursor:pointer; }
+  body.dark-mode .btn-delete-coffee { border-color:var(--dm-border); color:#E08A7C; }
   .edit-overlay-btn:hover { background:rgba(255,255,255,0.22); }
   /* Time inputs */
   .time-row { display:flex; gap:6px; align-items:center; }
@@ -912,7 +914,7 @@
 <div class="modal-overlay" id="modal-confirm-delete">
   <div class="modal" style="max-height:50vh">
     <div class="modal-handle"></div>
-    <div class="modal-title" style="font-size:18px">Delete Brew?</div>
+    <div class="modal-title" id="confirm-delete-title" style="font-size:18px">Delete Brew?</div>
     <div class="modal-subtitle" id="confirm-delete-subtitle">This cannot be undone.</div>
     <div style="display:flex;gap:10px;margin-top:16px">
       <button class="btn-secondary" style="flex:1" onclick="closeModal('modal-confirm-delete')">Cancel</button>
@@ -2430,7 +2432,7 @@ function renderCoffeesView() {
     const headerImg = c.labelPhoto ? `<img src="${c.labelPhoto}" style="width:52px;height:52px;border-radius:8px;object-fit:cover;flex-shrink:0;border:1px solid rgba(255,255,255,0.15);cursor:zoom-in" alt="label" onclick="event.stopPropagation();openLightbox('${c.labelPhoto}')">` : '';
     const cardRating = c.rating > 0 ? `<div style="display:inline-flex;gap:1px;color:var(--crema);margin-top:4px">${Array(c.rating).fill('<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 14 14" width="14" height="14"><g><path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" d="M2 4h8.5v5c0 0.53043 -0.2107 1.0391 -0.58579 1.4142C9.53914 10.7893 9.03043 11 8.5 11h-5c-0.53043 0 -1.03914 -0.2107 -1.41421 -0.5858C1.71071 10.0391 1.5 9.53043 1.5 9V4.5c0 -0.13261 0.05268 -0.25979 0.14645 -0.35355C1.74021 4.05268 1.86739 4 2 4Z" stroke-width="1"></path><path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" d="M0.5 13.5h13" stroke-width="1"></path><path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" d="M10.5 4h1c0.5304 0 1.0391 0.21071 1.4142 0.58579 0.3751 0.37507 0.5858 0.88378 0.5858 1.41421s-0.2107 1.03914 -0.5858 1.41421C12.5391 7.78929 12.0304 8 11.5 8h-1" stroke-width="1"></path><path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" d="M3 0.5v1" stroke-width="1"></path><path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" d="M8 0.5v1" stroke-width="1"></path><path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" d="M5.5 0.5v1" stroke-width="1"></path></g></svg>').join('')}</div><span style="font-family:'DM Mono',monospace;font-size:9px;color:var(--text-muted);margin-left:4px">${c.rating}/10</span>` : '';
     const finishedStyle = c.finishedBag ? 'opacity:0.45;filter:grayscale(0.4);' : '';
-    return `<div class="card-wrap" ontouchstart="startLongPress('${c.id}','coffee')" ontouchend="endLongPress()" ontouchcancel="endLongPress()" oncontextmenu="event.stopPropagation();showEditOverlay('coffee-${c.id}');return false"><div class="card-edit-overlay" id="overlay-coffee-${c.id}"><button class="edit-overlay-btn" onclick="event.stopPropagation();openEditCoffee('${c.id}');hideEditOverlay('coffee-${c.id}')">✏ Edit</button><button class="edit-overlay-btn" onclick="event.stopPropagation();showTrendModal('${c.id}');hideEditOverlay('coffee-${c.id}')">📈 Trends</button><button class="edit-overlay-btn" onclick="event.stopPropagation();hideEditOverlay('coffee-${c.id}')">Cancel</button></div><div class="coffee-card" onclick="showCoffeeDetail('${c.id}')" style="${finishedStyle}"><div class="coffee-card-header"><div><div class="coffee-card-name">${c.name}${c.finishedBag?'<span style="margin-left:6px;font-family:\'DM Mono\',monospace;font-size:8px;background:rgba(139,26,26,0.15);color:#8b1a1a;border-radius:10px;padding:2px 6px;letter-spacing:1px">FINISHED</span>':''}</div><div class="coffee-card-roaster">${c.roaster||'Unknown Roaster'}</div>${cardRating}</div><div style="display:flex;align-items:flex-start;gap:8px">${headerImg}<button class="card-more" aria-label="More options" onclick="event.stopPropagation();showEditOverlay('coffee-${c.id}')">⋯</button></div></div><div class="coffee-card-body">${pills?`<div class="coffee-meta">${pills}</div>`:''}  <div class="recipe-count">${rc} brew${rc!==1?'s':''} logged</div></div></div></div>`;
+    return `<div class="card-wrap" ontouchstart="startLongPress('${c.id}','coffee')" ontouchend="endLongPress()" ontouchcancel="endLongPress()" oncontextmenu="event.stopPropagation();showEditOverlay('coffee-${c.id}');return false"><div class="card-edit-overlay" id="overlay-coffee-${c.id}"><button class="edit-overlay-btn" onclick="event.stopPropagation();openEditCoffee('${c.id}');hideEditOverlay('coffee-${c.id}')">✏ Edit</button><button class="edit-overlay-btn" onclick="event.stopPropagation();showTrendModal('${c.id}');hideEditOverlay('coffee-${c.id}')">📈 Trends</button><button class="edit-overlay-btn" onclick="event.stopPropagation();confirmDeleteCoffee('${c.id}')">✕ Delete</button><button class="edit-overlay-btn" onclick="event.stopPropagation();hideEditOverlay('coffee-${c.id}')">Cancel</button></div><div class="coffee-card" onclick="showCoffeeDetail('${c.id}')" style="${finishedStyle}"><div class="coffee-card-header"><div><div class="coffee-card-name">${c.name}${c.finishedBag?'<span style="margin-left:6px;font-family:\'DM Mono\',monospace;font-size:8px;background:rgba(139,26,26,0.15);color:#8b1a1a;border-radius:10px;padding:2px 6px;letter-spacing:1px">FINISHED</span>':''}</div><div class="coffee-card-roaster">${c.roaster||'Unknown Roaster'}</div>${cardRating}</div><div style="display:flex;align-items:flex-start;gap:8px">${headerImg}<button class="card-more" aria-label="More options" onclick="event.stopPropagation();showEditOverlay('coffee-${c.id}')">⋯</button></div></div><div class="coffee-card-body">${pills?`<div class="coffee-meta">${pills}</div>`:''}  <div class="recipe-count">${rc} brew${rc!==1?'s':''} logged</div></div></div></div>`;
   }).join('');
 }
 
@@ -2494,6 +2496,7 @@ function showCoffeeDetail(id) {
     <div class="section-title" style="margin-bottom:4px">Brew Log</div>
     <div class="section-subtitle">${recs.length} attempt${recs.length!==1?'s':''}</div>
     ${recs.length?recs.map(r=>recipeCard(r,true)).join(''):`<div class="empty-state"><div class="empty-icon">📋</div><div class="empty-title">No brews yet</div></div>`}
+    <button type="button" class="btn-delete-coffee" onclick="confirmDeleteCoffee('${c.id}')">Delete coffee</button>
     <div style="height:80px"></div>`;
   renderTrendCharts(id);
   if (detailShownId !== id) { window.scrollTo(0, 0); playEnter(document.getElementById('view-coffees'), 'slide-in-right'); }
@@ -3168,7 +3171,9 @@ function openLightbox(src) {
   if (img) img.src = src;
   openModal('modal-lightbox');
 }
+function setDeleteTitle(t) { const el = document.getElementById('confirm-delete-title'); if (el) el.textContent = t; }
 function confirmDeleteCustomRecipe(id) {
+  setDeleteTitle('Delete Recipe?');
   const r = (state.customRecipes||[]).find(x=>x.id===id);
   const sub = document.getElementById('confirm-delete-subtitle');
   if (sub) sub.textContent = r ? 'Delete recipe "' + r.name + '"?' : 'This cannot be undone.';
@@ -3177,8 +3182,29 @@ function confirmDeleteCustomRecipe(id) {
   openModal('modal-confirm-delete');
 }
 
+function confirmDeleteCoffee(id) {
+  hideAllOverlays(); setDeleteTitle('Delete Coffee?');
+  const c = state.coffees.find(x=>x.id===id); if (!c) return;
+  const n = state.recipes.filter(r=>r.coffeeId===id).length;
+  const sub = document.getElementById('confirm-delete-subtitle');
+  if (sub) sub.textContent = 'Delete "' + c.name + '"' + (n ? ' and its ' + n + ' brew' + (n!==1?'s':'') : '') + '? This cannot be undone.';
+  const btn = document.getElementById('confirm-delete-btn');
+  if (btn) btn.onclick = () => { deleteCoffee(id); closeModal('modal-confirm-delete'); };
+  openModal('modal-confirm-delete');
+}
+function deleteCoffee(id) {
+  state.coffees = state.coffees.filter(c=>c.id!==id);
+  state.recipes = state.recipes.filter(r=>r.coffeeId!==id);
+  state.plannedBrews = (state.plannedBrews||[]).filter(p=>p.coffeeId!==id);
+  if (state.selectedCoffeeId === id) state.selectedCoffeeId = null;
+  save();  // also removes the label photo from storage
+  showToast('Coffee deleted');
+  if (typeof detailShownId !== 'undefined' && detailShownId === id) restoreCoffeeList(); else renderCoffeesView();
+  renderDashboard();
+}
+
 function confirmDeleteBrew(id) {
-  hideAllOverlays();
+  hideAllOverlays(); setDeleteTitle('Delete Brew?');
   const r = state.recipes.find(x=>x.id===id);
   const coffee = r ? state.coffees.find(c=>c.id===r.coffeeId) : null;
   const sub = document.getElementById('confirm-delete-subtitle');

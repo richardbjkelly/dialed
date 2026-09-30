@@ -517,6 +517,16 @@ Specialty coffee dialling-in tracker · Single-file PWA / Android APK
 
 ---
 
+## v3.9
+*30 September 2026*
+
+### Delete coffees
+- ✕ Delete added to the ⋯ menu on each coffee card, and a Delete coffee button at the bottom of a coffee's page
+- Confirmation names the coffee and how many brews go with it; deleting also removes its brews, planned brews and label photo
+- Delete confirmation title now matches what's being deleted (coffee, brew or recipe)
+
+---
+
 ## Pending / Roadmap
 - Rebuild the APK once to pick up the new cup icon
 - Remaining transitions: press feedback, charts drawing in, + rotation, timer step pulse
@@ -527,4 +537,4 @@ Specialty coffee dialling-in tracker · Single-file PWA / Android APK
 
 ---
 
-*Document maintained automatically. Last updated: v3.8*
+*Document maintained automatically. Last updated: v3.9*
