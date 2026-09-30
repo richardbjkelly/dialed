@@ -573,6 +573,21 @@ Specialty coffee dialling-in tracker · Single-file PWA / Android APK
 
 ---
 
+## v3.14
+*30 September 2026*
+
+### Text size
+- Settings › Appearance › Text Size: Small (90%), Default, Large (115%), Extra large (130%)
+- Scales text, buttons and spacing together; saved between sessions
+- Full-height sheets, the Settings panel and photo viewer still fit the screen at every size
+- Extra large shows one coffee per row even in grid view
+- Drag-to-reorder in Up next corrected for the scaling
+
+### Coffee Library
+- Decaf coffees show a small DECAF label at the bottom right of the tile (grid and list)
+
+---
+
 ## Pending / Roadmap
 - Rebuild the APK once to pick up the new cup icon
 - Remaining transitions: press feedback, charts drawing in, + rotation, timer step pulse
@@ -583,4 +598,4 @@ Specialty coffee dialling-in tracker · Single-file PWA / Android APK
 
 ---
 
-*Document maintained automatically. Last updated: v3.13*
+*Document maintained automatically. Last updated: v3.14*

@@ -45,7 +45,8 @@
     --dm-pill: rgba(82,121,111,0.12);
   }
   * { box-sizing: border-box; margin: 0; padding: 0; }
-  body { font-family: 'DM Sans', sans-serif; background: var(--foam); color: var(--text); min-height: 100vh; overflow-x: hidden; }
+  :root { --ui-zoom: 1; }
+  body { font-family: 'DM Sans', sans-serif; background: var(--foam); color: var(--text); min-height: calc(100vh / var(--ui-zoom)); overflow-x: hidden; zoom: var(--ui-zoom); }
   body::before { content: ''; position: fixed; inset: 0; background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.03'/%3E%3C/svg%3E"); pointer-events: none; z-index: 0; opacity: 0.4; }
 
   .app-header { background: var(--espresso); color: var(--milk); padding: 20px 20px 20px; position: sticky; top: 0; z-index: 100; box-shadow: 0 4px 20px rgba(26,15,10,0.3); }
@@ -117,7 +118,7 @@
   .fab { position:fixed; bottom:82px; right:24px; width: 56px; height: 56px; border-radius: 50%; background: var(--espresso); color: #FFFFFF; border: none; font-size: 26px; cursor: pointer; box-shadow: 0 4px 20px rgba(18,60,39,0.4); display: flex; align-items: center; justify-content: center; transition: all 0.15s; z-index: 200; }
   .modal-overlay { position: fixed; inset: 0; background: rgba(26,15,10,0.6); z-index: 300; display: none; align-items: flex-end; backdrop-filter: blur(2px); }
   .modal-overlay.open { display: flex; }
-  .modal { background: var(--foam); border-radius: 24px 24px 0 0; width: 100%; max-height: 92vh; overflow-y: auto; padding: 0 20px 40px; animation: slideUp 0.3s cubic-bezier(0.16,1,0.3,1); }
+  .modal { background: var(--foam); border-radius: 24px 24px 0 0; width: 100%; max-height: calc(92vh / var(--ui-zoom)); overflow-y: auto; padding: 0 20px 40px; animation: slideUp 0.3s cubic-bezier(0.16,1,0.3,1); }
   @keyframes slideUp { from { transform: translateY(100%); } to { transform: translateY(0); } }
   .modal-handle { width: 36px; height: 4px; background: rgba(26,15,10,0.2); border-radius: 2px; margin: 14px auto 20px; }
   .modal-title { font-family: 'Playfair Display', serif; font-size: 22px; color: var(--espresso); margin-bottom: 4px; }
@@ -158,6 +159,9 @@
 
   /* Long-press edit overlay */
   .card-wrap { position:relative; }
+  .card-foot { display:flex; align-items:center; justify-content:space-between; gap:8px; }
+  .decaf-label { font-size:9px; letter-spacing:1.5px; text-transform:uppercase; color:#8A5A2B; border:1px solid rgba(138,90,43,0.35); border-radius:4px; padding:1px 5px; flex-shrink:0; }
+  body.dark-mode .decaf-label { color:#E0B98A; border-color:rgba(224,185,138,0.4); }
   .lib-sub-row { display:flex; align-items:center; justify-content:space-between; gap:10px; margin:2px 0 14px; }
   .layout-toggle { display:flex; border:1px solid var(--border); border-radius:8px; overflow:hidden; flex-shrink:0; }
   .layout-toggle button { width:36px; height:30px; display:flex; align-items:center; justify-content:center; border:none; background:transparent; color:var(--text-muted); cursor:pointer; padding:0; }
@@ -222,7 +226,7 @@
 
 
   /* Settings panel */
-  .settings-panel { position:fixed; top:0; right:-100%; width:min(380px,100vw); height:100vh; background:var(--foam); z-index:600; box-shadow:-4px 0 40px rgba(0,0,0,0.18); transition:right .3s cubic-bezier(.4,0,.2,1); overflow-y:auto; display:flex; flex-direction:column; }
+  .settings-panel { position:fixed; top:0; right:-100%; width:min(380px, calc(100vw / var(--ui-zoom))); height:calc(100vh / var(--ui-zoom)); background:var(--foam); z-index:600; box-shadow:-4px 0 40px rgba(0,0,0,0.18); transition:right .3s cubic-bezier(.4,0,.2,1); overflow-y:auto; display:flex; flex-direction:column; }
   .settings-panel.open { right:0; }
   .settings-backdrop { position:fixed; inset:0; background:rgba(0,0,0,0.4); z-index:599; opacity:0; pointer-events:none; transition:opacity .3s; }
   .settings-backdrop.open { opacity:1; pointer-events:all; }
@@ -266,6 +270,14 @@
 
   .btn-primary.fab-recipe-btn { background:transparent !important; color:var(--text) !important; border:1.5px solid var(--crema) !important; }
   body.dark-mode .btn-primary.fab-recipe-btn { color:var(--dm-text) !important; }
+  .text-size-options { display:grid; grid-template-columns:repeat(4, minmax(0,1fr)); gap:6px; }
+  .text-size-options button { display:flex; flex-direction:column; align-items:center; justify-content:flex-end; gap:4px; min-height:56px; padding:8px 2px; border:1.5px solid var(--border); border-radius:10px; background:var(--card); color:var(--text); font-size:9px; letter-spacing:.3px; cursor:pointer; line-height:1.1; }
+  .text-size-options button span { font-family:'Space Grotesk',sans-serif !important; font-weight:600; line-height:1; }
+  .text-size-options button.active { background:#123C27; border-color:#123C27; color:#FAFAF7; }
+  body.dark-mode .text-size-options button { background:var(--dm-input); border-color:var(--dm-border); }
+  body.dark-mode .text-size-options button.active { background:#52796F; border-color:#52796F; color:#FFFFFF; }
+  /* Extra large: one coffee per row even in grid view */
+  body.text-xl #coffees-list.grid { grid-template-columns:minmax(0,1fr); }
   .switch { position:relative; width:46px; height:28px; flex-shrink:0; border-radius:14px; border:none; padding:0; cursor:pointer; background:#E5E7EB; transition:background .2s ease; }
   .switch .switch-knob { position:absolute; top:3px; left:3px; width:22px; height:22px; border-radius:50%; background:#FFFFFF; box-shadow:0 1px 3px rgba(0,0,0,.2); transition:transform .2s ease; }
   .switch[aria-checked="true"] { background:#123C27; }
@@ -963,12 +975,12 @@
 
 <!-- MODAL: Photo Lightbox -->
 <div class="modal-overlay" id="modal-lightbox" onclick="closeModal('modal-lightbox')" style="align-items:center;padding:20px">
-  <img id="lightbox-img" src="" alt="Label" style="max-width:100%;max-height:90vh;border-radius:12px;object-fit:contain;box-shadow:0 8px 40px rgba(0,0,0,0.5)">
+  <img id="lightbox-img" src="" alt="Label" style="max-width:100%;max-height:calc(90vh / var(--ui-zoom));border-radius:12px;object-fit:contain;box-shadow:0 8px 40px rgba(0,0,0,0.5)">
 </div>
 
 <!-- MODAL: Confirm Delete -->
 <div class="modal-overlay" id="modal-confirm-delete">
-  <div class="modal" style="max-height:50vh">
+  <div class="modal" style="max-height:calc(50vh / var(--ui-zoom))">
     <div class="modal-handle"></div>
     <div class="modal-title" id="confirm-delete-title" style="font-size:18px">Delete Brew?</div>
     <div class="modal-subtitle" id="confirm-delete-subtitle">This cannot be undone.</div>
@@ -2505,7 +2517,7 @@ function renderCoffeesView() {
     const headerImg = c.labelPhoto ? `<img src="${c.labelPhoto}" style="width:52px;height:52px;border-radius:8px;object-fit:cover;flex-shrink:0;border:1px solid rgba(255,255,255,0.15);cursor:zoom-in" alt="label" onclick="event.stopPropagation();openLightbox('${c.labelPhoto}')">` : '';
     const cardRating = c.rating > 0 ? `<div style="display:inline-flex;gap:1px;color:var(--crema);margin-top:4px">${Array(c.rating).fill('<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 14 14" width="14" height="14"><g><path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" d="M2 4h8.5v5c0 0.53043 -0.2107 1.0391 -0.58579 1.4142C9.53914 10.7893 9.03043 11 8.5 11h-5c-0.53043 0 -1.03914 -0.2107 -1.41421 -0.5858C1.71071 10.0391 1.5 9.53043 1.5 9V4.5c0 -0.13261 0.05268 -0.25979 0.14645 -0.35355C1.74021 4.05268 1.86739 4 2 4Z" stroke-width="1"></path><path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" d="M0.5 13.5h13" stroke-width="1"></path><path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" d="M10.5 4h1c0.5304 0 1.0391 0.21071 1.4142 0.58579 0.3751 0.37507 0.5858 0.88378 0.5858 1.41421s-0.2107 1.03914 -0.5858 1.41421C12.5391 7.78929 12.0304 8 11.5 8h-1" stroke-width="1"></path><path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" d="M3 0.5v1" stroke-width="1"></path><path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" d="M8 0.5v1" stroke-width="1"></path><path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" d="M5.5 0.5v1" stroke-width="1"></path></g></svg>').join('')}</div><span style="font-family:'DM Mono',monospace;font-size:9px;color:var(--text-muted);margin-left:4px">${c.rating}/10</span>` : '';
     const finishedStyle = c.finishedBag ? 'opacity:0.45;filter:grayscale(0.4);' : '';
-    return `<div class="card-wrap" ontouchstart="startLongPress('${c.id}','coffee')" ontouchend="endLongPress()" ontouchcancel="endLongPress()" oncontextmenu="event.stopPropagation();showEditOverlay('coffee-${c.id}');return false"><div class="card-edit-overlay" id="overlay-coffee-${c.id}"><button class="edit-overlay-btn" onclick="event.stopPropagation();openEditCoffee('${c.id}');hideEditOverlay('coffee-${c.id}')">✏ Edit</button><button class="edit-overlay-btn" onclick="event.stopPropagation();showTrendModal('${c.id}');hideEditOverlay('coffee-${c.id}')">📈 Trends</button><button class="edit-overlay-btn" onclick="event.stopPropagation();confirmDeleteCoffee('${c.id}')">✕ Delete</button><button class="edit-overlay-btn" onclick="event.stopPropagation();hideEditOverlay('coffee-${c.id}')">Cancel</button></div><div class="coffee-card" onclick="showCoffeeDetail('${c.id}')" style="${finishedStyle}"><div class="coffee-card-header"><div><div class="coffee-card-name">${c.name}${c.finishedBag?'<span style="margin-left:6px;font-family:\'DM Mono\',monospace;font-size:8px;background:rgba(139,26,26,0.15);color:#8b1a1a;border-radius:10px;padding:2px 6px;letter-spacing:1px">FINISHED</span>':''}</div><div class="coffee-card-roaster">${c.roaster||'Unknown Roaster'}</div>${cardRating}</div><div style="display:flex;align-items:flex-start;gap:8px">${headerImg}<button class="card-more" aria-label="More options" onclick="event.stopPropagation();showEditOverlay('coffee-${c.id}')">⋯</button></div></div><div class="coffee-card-body">${pills?`<div class="coffee-meta">${pills}</div>`:''}  <div class="recipe-count">${rc} brew${rc!==1?'s':''} logged</div></div></div></div>`;
+    return `<div class="card-wrap" ontouchstart="startLongPress('${c.id}','coffee')" ontouchend="endLongPress()" ontouchcancel="endLongPress()" oncontextmenu="event.stopPropagation();showEditOverlay('coffee-${c.id}');return false"><div class="card-edit-overlay" id="overlay-coffee-${c.id}"><button class="edit-overlay-btn" onclick="event.stopPropagation();openEditCoffee('${c.id}');hideEditOverlay('coffee-${c.id}')">✏ Edit</button><button class="edit-overlay-btn" onclick="event.stopPropagation();showTrendModal('${c.id}');hideEditOverlay('coffee-${c.id}')">📈 Trends</button><button class="edit-overlay-btn" onclick="event.stopPropagation();confirmDeleteCoffee('${c.id}')">✕ Delete</button><button class="edit-overlay-btn" onclick="event.stopPropagation();hideEditOverlay('coffee-${c.id}')">Cancel</button></div><div class="coffee-card" onclick="showCoffeeDetail('${c.id}')" style="${finishedStyle}"><div class="coffee-card-header"><div><div class="coffee-card-name">${c.name}${c.finishedBag?'<span style="margin-left:6px;font-family:\'DM Mono\',monospace;font-size:8px;background:rgba(139,26,26,0.15);color:#8b1a1a;border-radius:10px;padding:2px 6px;letter-spacing:1px">FINISHED</span>':''}</div><div class="coffee-card-roaster">${c.roaster||'Unknown Roaster'}</div>${cardRating}</div><div style="display:flex;align-items:flex-start;gap:8px">${headerImg}<button class="card-more" aria-label="More options" onclick="event.stopPropagation();showEditOverlay('coffee-${c.id}')">⋯</button></div></div><div class="coffee-card-body">${pills?`<div class="coffee-meta">${pills}</div>`:''}  <div class="card-foot"><div class="recipe-count">${rc} brew${rc!==1?'s':''} logged</div>${c.decaf ? '<span class="decaf-label">Decaf</span>' : ''}</div></div></div></div>`;
   }).join('');
 }
 
@@ -3154,7 +3166,7 @@ function showToast(msg) { const t=document.getElementById('toast'); t.textConten
 document.querySelectorAll('.modal-overlay').forEach(o => o.addEventListener('click', e => { if(e.target===o) closeModal(o.id); }));
 
 
-let appSettings = { paletteId: 'terracotta', displayFontId: 'inter', monoFontId: 'inter', darkMode: false, suggestedStart: true, showCosts: true, overviewCategories: ['country','process','roaster','roasterCountry'] };
+let appSettings = { paletteId: 'terracotta', displayFontId: 'inter', monoFontId: 'inter', darkMode: false, suggestedStart: true, showCosts: true, textSize: 'default', overviewCategories: ['country','process','roaster','roasterCountry'] };
 
 function loadSettings() {
   try {
@@ -3169,8 +3181,18 @@ function saveSettings() {
   try { localStorage.setItem('dialin_settings', JSON.stringify(appSettings)); } catch(e) {}
 }
 
+const TEXT_SIZES = [ ['small','Small',0.9], ['default','Default',1], ['large','Large',1.15], ['xlarge','Extra large',1.3] ];
+function uiZoom() { const t = TEXT_SIZES.find(x => x[0] === appSettings.textSize); return t ? t[2] : 1; }
+function applyTextSize() {
+  const z = uiZoom();
+  document.documentElement.style.setProperty('--ui-zoom', z);
+  document.body.classList.toggle('text-xl', z >= 1.3);
+  document.querySelectorAll('#text-size-options button').forEach(b => { const on = b.dataset.size === (appSettings.textSize || 'default'); b.classList.toggle('active', on); b.setAttribute('aria-pressed', on); });
+}
+function setTextSize(v) { appSettings.textSize = v; saveSettings(); applyTextSize(); }
 function applySettings() {
   // Fonts are set in the stylesheet (Space Grotesk headings, Space Mono body)
+  applyTextSize();
   applyDarkMode();
 }
 
@@ -4006,13 +4028,13 @@ function startPlanDrag(e, handle) {
 }
 function movePlanDrag(e) {
   const d = planDrag; if (!d) return;
-  const dy = e.clientY - d.startY;
+  const dy = (e.clientY - d.startY) / uiZoom();
   d.card.style.transform = `translateY(${dy}px) scale(1.02)`;
-  const r = d.rects[d.from], mid = r.top + r.height / 2 + dy;
+  const r = d.rects[d.from], mid = r.top + r.height / 2 + dy * uiZoom();
   let to = 0; d.rects.forEach((rc, i) => { if (i !== d.from && mid > rc.top + rc.height / 2) to++; });
   if (to === d.to) return;
   d.to = to;
-  const h = r.height + 10;  // card height + gap
+  const h = r.height / uiZoom() + 10;  // card height + gap, in zoomed px
   d.cards.forEach((c, i) => {
     if (c === d.card) return;
     let shift = 0;
@@ -4257,7 +4279,7 @@ function renderTrendCharts(coffeeId) {
 
 // ==================== SETTINGS PANEL ====================
 function openSettings() {
-  renderOverviewCategoryOptions(); syncSuggestedStartSwitch();
+  renderOverviewCategoryOptions(); syncSuggestedStartSwitch(); applyTextSize();
   renderStorageInfo();
   document.getElementById('settings-panel').classList.add('open');
   document.getElementById('settings-backdrop').classList.add('open');
@@ -4373,6 +4395,19 @@ if ('serviceWorker' in navigator && location.protocol.startsWith('http')) {
       <button class="dark-toggle" id="settings-dark-btn" onclick="toggleDarkMode()" style="margin:0">
         <svg xmlns="http://www.w3.org/2000/svg" viewBox="-0.5 -0.5 16 16" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" width="18" height="18"><path d="M13.125 7.9937499999999995A5.625 5.625 0 1 1 7.0062500000000005 1.875 4.375 4.375 0 0 0 13.125 7.9937499999999995z" stroke-width="1"></path></svg>
       </button>
+    </div>
+
+    <div class="settings-toggle-row" style="flex-direction:column;align-items:stretch;gap:10px">
+      <div>
+        <div class="settings-toggle-label">Text Size</div>
+        <div class="settings-toggle-sub">Scales text, buttons and spacing across the app</div>
+      </div>
+      <div class="text-size-options" id="text-size-options" role="group" aria-label="Text size">
+        <button type="button" data-size="small" onclick="setTextSize('small')"><span style="font-size:11px">A</span>Small</button>
+        <button type="button" data-size="default" onclick="setTextSize('default')"><span style="font-size:14px">A</span>Default</button>
+        <button type="button" data-size="large" onclick="setTextSize('large')"><span style="font-size:17px">A</span>Large</button>
+        <button type="button" data-size="xlarge" onclick="setTextSize('xlarge')"><span style="font-size:20px">A</span>Extra large</button>
+      </div>
     </div>
 
     <div class="settings-section-header">Insights charts</div>
