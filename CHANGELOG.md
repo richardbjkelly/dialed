@@ -527,6 +527,14 @@ Specialty coffee dialling-in tracker · Single-file PWA / Android APK
 
 ---
 
+## v3.10
+*30 September 2026*
+
+### Dark mode fix
+- Under / Good / Over now fill with blue / green / red when selected in dark mode (a dark-mode override was hiding the selected colour)
+
+---
+
 ## Pending / Roadmap
 - Rebuild the APK once to pick up the new cup icon
 - Remaining transitions: press feedback, charts drawing in, + rotation, timer step pulse
@@ -537,4 +545,4 @@ Specialty coffee dialling-in tracker · Single-file PWA / Android APK
 
 ---
 
-*Document maintained automatically. Last updated: v3.9*
+*Document maintained automatically. Last updated: v3.10*
