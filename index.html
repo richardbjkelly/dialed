@@ -173,8 +173,9 @@
   #coffees-list.grid .coffee-card-header img { width:34px !important; height:34px !important; }
   #coffees-list.grid .coffee-card-header .card-more { padding:0 2px 4px; }
   #coffees-list.grid .coffee-card-body { padding:10px 12px; }
-  #coffees-list.grid .coffee-meta { gap:4px; margin-bottom:8px; max-height:62px; overflow:hidden; }
+  #coffees-list.grid .coffee-meta { gap:4px; margin-bottom:8px; }
   .meta-pill.meta-more { opacity:.75; }
+  #coffees-list.grid .meta-pill { max-width:100%; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; box-sizing:border-box; }
   #coffees-list.grid .coffee-card-header > div:first-child { flex:1; min-width:0; }
   #coffees-list.grid .coffee-card-header > div:last-child { flex-shrink:0; gap:4px !important; }
   #coffees-list.grid .meta-pill { font-size:9px; padding:2px 6px; }
@@ -2491,7 +2492,11 @@ function renderCoffeesView() {
   if (!state.coffees.length) { el.innerHTML=`<div class="empty-state"><div class="empty-icon">📦</div><div class="empty-title">No coffees yet</div><div class="empty-desc">Tap + to add your first coffee.</div></div>`; return; }
   el.innerHTML = state.coffees.map(c => {
     const rc = state.recipes.filter(r=>r.coffeeId===c.id).length;
-    const maslPill = (c.masl ? `<span class="meta-pill">${c.masl}m</span>` : '') + (per100g(c)!=null ? `<span class="meta-pill">£${per100g(c).toFixed(2)}/100g</span>` : '') + (gramsLeft(c)!=null && !c.finishedBag ? `<span class="meta-pill">${Math.round(gramsLeft(c))}g left</span>` : '') + (roastAgeToday(c)!=null && !c.finishedBag ? `<span class="meta-pill">${roastAgeToday(c)}d off roast</span>` : ''); const corePills = [c.country,c.process,c.roastLevel,c.varietal].filter(Boolean).map(p=>`<span class="meta-pill">${p}</span>`);
+    const maslPill = (c.masl ? `<span class="meta-pill">${c.masl}m</span>` : '') + (per100g(c)!=null ? `<span class="meta-pill">£${per100g(c).toFixed(2)}/100g</span>` : '') + (gramsLeft(c)!=null && !c.finishedBag ? `<span class="meta-pill">${Math.round(gramsLeft(c))}g left</span>` : '') + (roastAgeToday(c)!=null && !c.finishedBag ? `<span class="meta-pill">${roastAgeToday(c)}d off roast</span>` : ''); const isGrid = appSettings.coffeeLayout === 'grid';
+    // Grid: several varietals collapse to the first one plus a count, e.g. "Castillo +2"
+    let varietal = c.varietal, varietalTitle = '';
+    if (isGrid && varietal) { const parts = String(varietal).split(/\s*(?:,|\/|&|\+|;|\band\b)\s*/i).filter(Boolean); if (parts.length > 1) { varietalTitle = varietal; varietal = parts[0] + ' +' + (parts.length - 1); } }
+    const corePills = [c.country,c.process,c.roastLevel,varietal].filter(Boolean).map(p=>`<span class="meta-pill"${p===varietal&&varietalTitle?` title="${varietalTitle}"`:''}>${p}</span>`);
     const extraCount = (maslPill.match(/class="meta-pill"/g) || []).length;
     // Grid tiles: country, process, roast and varietal first; anything else becomes "+N"
     const pills = appSettings.coffeeLayout === 'grid'
