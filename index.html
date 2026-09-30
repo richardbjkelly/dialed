@@ -231,6 +231,7 @@
   #settings-dark-btn { background:var(--espresso) !important; color:#FAFAF7 !important; }
   /* Dark mode: swap the base palette so anything using these variables follows automatically */
   body.dark-mode { --card: var(--dm-card); --foam: var(--dm-bg); --milk: #FAFAF7; --text: var(--dm-text); --text-muted: var(--dm-text-muted); --border: var(--dm-border); }
+  .detail-hero .meta-pill, .coffee-card-header .meta-pill, .recipe-lib-header .meta-pill, .custom-recipe-card-header .meta-pill { color:#FAFAF7 !important; background:rgba(250,250,247,0.12) !important; border-color:rgba(250,250,247,0.25) !important; }
   /* GRINDER STYLES */
   .grinder-type-toggle { display: flex; background: rgba(26,15,10,0.06); border-radius: 10px; padding: 3px; margin-bottom: 20px; }
   .type-btn { flex: 1; padding: 9px 12px; border: none; border-radius: 8px; font-family: 'DM Mono', monospace; font-size: 10px; letter-spacing: 1px; text-transform: uppercase; cursor: pointer; background: none; color: var(--text-muted); transition: all 0.2s; }
@@ -602,7 +603,13 @@
     </div>
     <div class="form-row">
       <div class="form-group"><label class="form-label">Roast Date</label><input type="date" class="form-input" id="c-roastdate"></div>
+      <div class="form-group"><label class="form-label">Bag Weight (g)</label><input type="number" class="form-input" id="c-weight" placeholder="e.g. 250" min="0" inputmode="decimal" oninput="updatePricePreview()"></div>
     </div>
+    <div class="form-row">
+      <div class="form-group"><label class="form-label">Price</label><input type="number" class="form-input" id="c-price" placeholder="e.g. 14.50" min="0" step="0.01" inputmode="decimal" oninput="updatePricePreview()"></div>
+      <div class="form-group"><label class="form-label">Currency</label><select class="form-select" id="c-currency" onchange="updatePricePreview()"><option value="GBP">GBP</option><option value="EUR">EUR</option><option value="USD">USD</option><option value="AUD">AUD</option><option value="CAD">CAD</option><option value="NZD">NZD</option><option value="JPY">JPY</option><option value="CHF">CHF</option><option value="SEK">SEK</option><option value="NOK">NOK</option><option value="DKK">DKK</option><option value="HKD">HKD</option><option value="SGD">SGD</option><option value="KRW">KRW</option><option value="CNY">CNY</option></select></div>
+    </div>
+    <div id="c-price-preview" style="font-size:11px;color:var(--text-muted);margin:-6px 0 14px"></div>
     <div class="form-group"><label class="form-label">Tasting Notes (from bag)</label><input type="text" class="form-input" id="c-notes" placeholder="e.g. Blueberry, jasmine, dark chocolate"></div>
     <div class="form-group">
       <label class="form-label">Overall Rating</label>
@@ -1874,6 +1881,54 @@ function setCoffeeRating(n) {
   document.getElementById('c-rating-label').textContent = n > 0 ? `${n}/10 — ${labels[n]}` : 'Not rated';
 }
 
+
+// ==================== PRICE & CURRENCY ====================
+// Units of each currency per £1. Approximate fallback; refreshed from ECB rates (via Frankfurter) when online.
+const FX_FALLBACK = { GBP:1, EUR:1.17, USD:1.33, AUD:2.02, CAD:1.83, NZD:2.22, JPY:195, CHF:1.10, SEK:13.9, NOK:14.3, DKK:8.7, HKD:10.4, SGD:1.72, KRW:1830, CNY:9.6 };
+const CUR_SYMBOL = { GBP:'£', EUR:'€', USD:'$', AUD:'A$', CAD:'C$', NZD:'NZ$', JPY:'¥', CHF:'CHF ', SEK:'kr ', NOK:'kr ', DKK:'kr ', HKD:'HK$', SGD:'S$', KRW:'₩', CNY:'¥' };
+let fxRates = { ...FX_FALLBACK }, fxLive = false;
+try { const cached = JSON.parse(localStorage.getItem('dialed_fx')||'null'); if (cached && cached.rates) { fxRates = { ...FX_FALLBACK, ...cached.rates, GBP:1 }; fxLive = true; } } catch(e) {}
+async function refreshFx() {
+  try {
+    const cached = JSON.parse(localStorage.getItem('dialed_fx')||'null');
+    if (cached && Date.now() - cached.at < 24*3600*1000) return;
+    let r = await fetch('https://api.frankfurter.dev/v1/latest?base=GBP').catch(()=>null);
+    if (!r || !r.ok) r = await fetch('https://api.frankfurter.app/latest?from=GBP');
+    const d = await r.json();
+    if (d && d.rates) { fxRates = { ...FX_FALLBACK, ...d.rates, GBP:1 }; fxLive = true; localStorage.setItem('dialed_fx', JSON.stringify({ at: Date.now(), rates: d.rates })); }
+  } catch(e) { /* offline: keep cached or fallback rates */ }
+}
+function toGBP(amount, cur) { const r = fxRates[cur] || FX_FALLBACK[cur]; return r ? amount / r : null; }
+function buildPriceData() {
+  const price = parseFloat(document.getElementById('c-price').value);
+  const weight = parseFloat(document.getElementById('c-weight').value);
+  const currency = document.getElementById('c-currency').value || 'GBP';
+  if (!(price > 0)) return { price:null, currency, weight: weight>0?weight:null, priceGBP:null };
+  appSettings.lastCurrency = currency; saveSettings();
+  const g = toGBP(price, currency);
+  return { price, currency, weight: weight>0?weight:null, priceGBP: g!=null ? Math.round(g*100)/100 : null };
+}
+function per100g(cf) { return (cf && cf.priceGBP > 0 && cf.weight > 0) ? cf.priceGBP / cf.weight * 100 : null; }
+function priceLabel(cf) {
+  if (!cf || !(cf.price > 0)) return '';
+  const whole = cf.currency==='JPY' || cf.currency==='KRW';
+  const orig = (CUR_SYMBOL[cf.currency] || cf.currency+' ') + (whole ? Math.round(cf.price) : Number(cf.price).toFixed(2));
+  const parts = [orig + (cf.weight ? ' · ' + cf.weight + 'g' : '')];
+  if (per100g(cf) != null) parts.push('£' + per100g(cf).toFixed(2) + '/100g');
+  return parts.join(' · ');
+}
+function updatePricePreview() {
+  const el = document.getElementById('c-price-preview'); if (!el) return;
+  const price = parseFloat(document.getElementById('c-price')?.value);
+  const weight = parseFloat(document.getElementById('c-weight')?.value);
+  const cur = document.getElementById('c-currency')?.value || 'GBP';
+  if (!(price > 0)) { el.textContent = ''; return; }
+  const g = toGBP(price, cur);
+  let t = (cur !== 'GBP' && g != null) ? '≈ £' + g.toFixed(2) + (fxLive ? '' : ' (approx. rate)') : '';
+  if (weight > 0 && g != null) t += (t ? ' · ' : '') + '£' + (g / weight * 100).toFixed(2) + ' per 100g';
+  el.textContent = t;
+}
+
 // ==================== SAVE COFFEE ====================
 function toggleCustomProcess(sel) {
   const custom = document.getElementById('c-process-custom');
@@ -1890,11 +1945,14 @@ function resetCoffeeModal() {
   document.getElementById('c-modal-title').textContent = 'Add Coffee';
   document.getElementById('c-edit-id').value = '';
   ['c-name','c-roaster','c-roaster-city','c-roaster-country','c-producer','c-farm',
-   'c-country','c-region','c-varietal','c-notes','c-roastdate','c-masl','c-process-custom']
+   'c-country','c-region','c-varietal','c-notes','c-roastdate','c-masl','c-process-custom','c-weight','c-price']
     .forEach(id => { const el = document.getElementById(id); if(el) el.value=''; });
   document.getElementById('c-process').value='';
   document.getElementById('c-process-custom').style.display='none';
   document.getElementById('c-roast').value='';
+  const cdecaf=document.getElementById('c-decaf'); if(cdecaf) cdecaf.checked=false;
+  const ccur=document.getElementById('c-currency'); if(ccur) ccur.value=appSettings.lastCurrency||'GBP';
+  updatePricePreview();
   pendingCoffeeRating=0;
   document.getElementById('c-rating').value=0;
   document.querySelectorAll('.coffee-rating-btn').forEach(b=>b.classList.remove('active'));
@@ -1926,6 +1984,10 @@ function openEditCoffee(id) {
   document.getElementById('c-masl').value = coffee.masl || '';
   document.getElementById('c-roast').value = coffee.roastLevel || '';
   document.getElementById('c-roastdate').value = coffee.roastDate || '';
+  document.getElementById('c-weight').value = coffee.weight || '';
+  document.getElementById('c-price').value = coffee.price || '';
+  document.getElementById('c-currency').value = coffee.currency || 'GBP';
+  updatePricePreview();
   document.getElementById('c-notes').value = coffee.notes || '';
   // Process
   const knownProcesses = ['Washed','Natural','Honey','Anaerobic','Wet Hulled','Carbonic Maceration','Extended Fermentation'];
@@ -1966,6 +2028,7 @@ function saveCoffee() {
     process: getProcessValue(),
     roastLevel: document.getElementById('c-roast').value,
     roastDate: document.getElementById('c-roastdate').value,
+    ...buildPriceData(),
     notes: document.getElementById('c-notes').value.trim(),
     labelPhoto: pendingLabelDataUrl || null,
     rating: pendingCoffeeRating || 0,
@@ -2054,7 +2117,7 @@ function renderCoffeesView() {
   if (!state.coffees.length) { el.innerHTML=`<div class="empty-state"><div class="empty-icon">📦</div><div class="empty-title">No coffees yet</div><div class="empty-desc">Tap + to add your first coffee.</div></div>`; return; }
   el.innerHTML = state.coffees.map(c => {
     const rc = state.recipes.filter(r=>r.coffeeId===c.id).length;
-    const maslPill = c.masl ? `<span class="meta-pill">${c.masl}m</span>` : ''; const pills = [c.country,c.process,c.roastLevel,c.varietal].filter(Boolean).map(p=>`<span class="meta-pill">${p}</span>`).join('') + maslPill;
+    const maslPill = (c.masl ? `<span class="meta-pill">${c.masl}m</span>` : '') + (per100g(c)!=null ? `<span class="meta-pill">£${per100g(c).toFixed(2)}/100g</span>` : ''); const pills = [c.country,c.process,c.roastLevel,c.varietal].filter(Boolean).map(p=>`<span class="meta-pill">${p}</span>`).join('') + maslPill;
     const headerImg = c.labelPhoto ? `<img src="${c.labelPhoto}" style="width:52px;height:52px;border-radius:8px;object-fit:cover;flex-shrink:0;border:1px solid rgba(255,255,255,0.15);cursor:zoom-in" alt="label" onclick="event.stopPropagation();openLightbox('${c.labelPhoto}')">` : '';
     const cardRating = c.rating > 0 ? `<div style="display:inline-flex;gap:1px;color:var(--crema);margin-top:4px">${Array(c.rating).fill('<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 14 14" width="14" height="14"><g><path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" d="M2 4h8.5v5c0 0.53043 -0.2107 1.0391 -0.58579 1.4142C9.53914 10.7893 9.03043 11 8.5 11h-5c-0.53043 0 -1.03914 -0.2107 -1.41421 -0.5858C1.71071 10.0391 1.5 9.53043 1.5 9V4.5c0 -0.13261 0.05268 -0.25979 0.14645 -0.35355C1.74021 4.05268 1.86739 4 2 4Z" stroke-width="1"></path><path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" d="M0.5 13.5h13" stroke-width="1"></path><path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" d="M10.5 4h1c0.5304 0 1.0391 0.21071 1.4142 0.58579 0.3751 0.37507 0.5858 0.88378 0.5858 1.41421s-0.2107 1.03914 -0.5858 1.41421C12.5391 7.78929 12.0304 8 11.5 8h-1" stroke-width="1"></path><path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" d="M3 0.5v1" stroke-width="1"></path><path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" d="M8 0.5v1" stroke-width="1"></path><path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" d="M5.5 0.5v1" stroke-width="1"></path></g></svg>').join('')}</div><span style="font-family:'DM Mono',monospace;font-size:9px;color:var(--text-muted);margin-left:4px">${c.rating}/10</span>` : '';
     const finishedStyle = c.finishedBag ? 'opacity:0.45;filter:grayscale(0.4);' : '';
@@ -2089,7 +2152,7 @@ function showCoffeeDetail(id) {
   const locationStr = [c.roasterCity,c.roasterCountry].filter(Boolean).join(', ');
   const producerStr = [c.producer?'Producer: '+c.producer:'', c.farm?'Farm: '+c.farm:''].filter(Boolean).join(' · ');
   const recs = state.recipes.filter(r=>r.coffeeId===id);
-  const maslPill2 = c.masl ? `<span class="meta-pill">⛰ ${c.masl} masl</span>` : ''; const pills = [c.country,c.region,c.varietal,c.process,c.roastLevel].filter(Boolean).map(p=>`<span class="meta-pill">${p}</span>`).join('') + maslPill2;
+  const maslPill2 = (c.masl ? `<span class="meta-pill">⛰ ${c.masl} masl</span>` : '') + (priceLabel(c) ? `<span class="meta-pill">${priceLabel(c)}</span>` : ''); const pills = [c.country,c.region,c.varietal,c.process,c.roastLevel].filter(Boolean).map(p=>`<span class="meta-pill">${p}</span>`).join('') + maslPill2;
   document.getElementById('view-coffees').innerHTML = `
     <div style="height:20px"></div>
     <button class="detail-back" onclick="goBackToCoffees()">← Back</button>
@@ -2113,8 +2176,6 @@ function showCoffeeDetail(id) {
       <button class="btn-secondary" style="flex:1" onclick="showTrendModal('${c.id}')">📈 Trends</button>
       <button class="btn-secondary" style="flex:1" onclick="toggleFinishedBag('${c.id}')">${c.finishedBag?'✓ Finished':'Mark Finished'}</button>
     </div>
-    <div class="section-title" style="margin-bottom:4px">Starting Suggestions</div>
-    <div id="brew-suggestions" style="margin-bottom:20px"></div>
     <div class="section-title" style="margin-bottom:4px">Brew Log</div>
     <div class="section-subtitle">${recs.length} attempt${recs.length!==1?'s':''}</div>
     ${recs.length?recs.map(r=>recipeCard(r,true)).join(''):`<div class="empty-state"><div class="empty-icon">📋</div><div class="empty-title">No brews yet</div></div>`}
@@ -2292,6 +2353,12 @@ function renderStatsDashboard() {
         <div class="stats-card-value">${avgBrewRating}</div>
         <div class="stats-card-sub">out of 10</div>
       </div>
+      ${(() => { const priced = coffees.filter(cf => per100g(cf) != null);
+        if (!priced.length) return '';
+        const avg = priced.reduce((s,cf) => s + per100g(cf), 0) / priced.length;
+        const spent = coffees.filter(cf => cf.priceGBP > 0).reduce((s,cf) => s + cf.priceGBP, 0);
+        return `<div class="stats-card"><div class="stats-card-label">Avg Price</div><div class="stats-card-value">£${avg.toFixed(2)}</div><div class="stats-card-sub">per 100g</div></div>
+                <div class="stats-card"><div class="stats-card-label">Spent</div><div class="stats-card-value">£${spent.toFixed(2)}</div><div class="stats-card-sub">on beans</div></div>`; })()}
     </div>
 
     ${(() => {
@@ -3092,6 +3159,7 @@ function closeSettings() {
 // ==================== INIT (runs last, after every declaration) ====================
 load();
 loadSettings();
+refreshFx();
 renderDashboard();
 updateCompareBar();
 try { history.replaceState({view:'dashboard'}, '', ''); } catch(e) {}
