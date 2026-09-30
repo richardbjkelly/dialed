@@ -226,6 +226,9 @@
   .meta-pill { background:rgba(82,121,111,0.1) !important; border:1px solid rgba(82,121,111,0.25) !important; color:var(--text) !important; }
   body.dark-mode .meta-pill { color:var(--dm-text) !important; }
 
+  .btn-primary.fab-recipe-btn { background:transparent !important; color:var(--text) !important; border:1.5px solid var(--crema) !important; }
+  body.dark-mode .btn-primary.fab-recipe-btn { color:var(--dm-text) !important; }
+  #settings-dark-btn { background:var(--espresso) !important; color:#FAFAF7 !important; }
   /* GRINDER STYLES */
   .grinder-type-toggle { display: flex; background: rgba(26,15,10,0.06); border-radius: 10px; padding: 3px; margin-bottom: 20px; }
   .type-btn { flex: 1; padding: 9px 12px; border: none; border-radius: 8px; font-family: 'DM Mono', monospace; font-size: 10px; letter-spacing: 1px; text-transform: uppercase; cursor: pointer; background: none; color: var(--text-muted); transition: all 0.2s; }
@@ -721,7 +724,7 @@
       <button class="btn-primary" style="flex:1;padding:18px 10px;background:var(--crema);color:var(--espresso)" onclick="closeModal('modal-fab');openRecipeModal()">☕ Log Brew</button>
     </div>
     <div style="height:12px"></div>
-    <button class="btn-primary" style="width:100%;background:rgba(255,255,255,0.1);color:var(--milk);border:1px solid rgba(255,255,255,0.15)" onclick="closeModal('modal-fab');showView('recipes');setTimeout(()=>{const b=document.querySelector('#recipe-tab-bar .type-btn:last-child');switchRecipeTab('custom',b);openNewCustomRecipe();},100)">📋 New Custom Recipe</button>
+    <button class="btn-primary fab-recipe-btn" style="width:100%" onclick="closeModal('modal-fab');showView('recipes');setTimeout(()=>{const b=document.querySelector('#recipe-tab-bar .type-btn:last-child');switchRecipeTab('custom',b);openNewCustomRecipe();},100)">📋 New Custom Recipe</button>
     <div style="height:12px"></div>
     <button class="btn-secondary" style="width:100%" onclick="closeModal('modal-fab')">Cancel</button>
   </div>
@@ -2053,7 +2056,7 @@ function renderCoffeesView() {
     const headerImg = c.labelPhoto ? `<img src="${c.labelPhoto}" style="width:52px;height:52px;border-radius:8px;object-fit:cover;flex-shrink:0;border:1px solid rgba(255,255,255,0.15);cursor:zoom-in" alt="label" onclick="event.stopPropagation();openLightbox('${c.labelPhoto}')">` : '';
     const cardRating = c.rating > 0 ? `<div style="display:inline-flex;gap:1px;color:var(--crema);margin-top:4px">${Array(c.rating).fill('<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 14 14" width="14" height="14"><g><path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" d="M2 4h8.5v5c0 0.53043 -0.2107 1.0391 -0.58579 1.4142C9.53914 10.7893 9.03043 11 8.5 11h-5c-0.53043 0 -1.03914 -0.2107 -1.41421 -0.5858C1.71071 10.0391 1.5 9.53043 1.5 9V4.5c0 -0.13261 0.05268 -0.25979 0.14645 -0.35355C1.74021 4.05268 1.86739 4 2 4Z" stroke-width="1"></path><path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" d="M0.5 13.5h13" stroke-width="1"></path><path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" d="M10.5 4h1c0.5304 0 1.0391 0.21071 1.4142 0.58579 0.3751 0.37507 0.5858 0.88378 0.5858 1.41421s-0.2107 1.03914 -0.5858 1.41421C12.5391 7.78929 12.0304 8 11.5 8h-1" stroke-width="1"></path><path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" d="M3 0.5v1" stroke-width="1"></path><path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" d="M8 0.5v1" stroke-width="1"></path><path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" d="M5.5 0.5v1" stroke-width="1"></path></g></svg>').join('')}</div><span style="font-family:'DM Mono',monospace;font-size:9px;color:var(--text-muted);margin-left:4px">${c.rating}/10</span>` : '';
     const finishedStyle = c.finishedBag ? 'opacity:0.45;filter:grayscale(0.4);' : '';
-    return `<div class="card-wrap" ontouchstart="startLongPress('${c.id}','coffee')" ontouchend="endLongPress()" ontouchcancel="endLongPress()" oncontextmenu="showEditOverlay('coffee-${c.id}');return false"><div class="card-edit-overlay" id="overlay-coffee-${c.id}"><button class="edit-overlay-btn" onclick="event.stopPropagation();openEditCoffee('${c.id}');hideEditOverlay('coffee-${c.id}')">✏ Edit</button><button class="edit-overlay-btn" onclick="event.stopPropagation();showTrendModal('${c.id}');hideEditOverlay('coffee-${c.id}')">📈 Trends</button><button class="edit-overlay-btn" onclick="event.stopPropagation();hideEditOverlay('coffee-${c.id}')">Cancel</button></div><div class="coffee-card" onclick="showCoffeeDetail('${c.id}')" style="${finishedStyle}"><div class="coffee-card-header"><div><div class="coffee-card-name">${c.name}${c.finishedBag?'<span style="margin-left:6px;font-family:\'DM Mono\',monospace;font-size:8px;background:rgba(139,26,26,0.15);color:#8b1a1a;border-radius:10px;padding:2px 6px;letter-spacing:1px">FINISHED</span>':''}</div><div class="coffee-card-roaster">${c.roaster||'Unknown Roaster'}</div>${cardRating}</div>${headerImg}</div><div class="coffee-card-body">${pills?`<div class="coffee-meta">${pills}</div>`:''}  <div class="recipe-count">${rc} brew${rc!==1?'s':''} logged</div></div></div>`;
+    return `<div class="card-wrap" ontouchstart="startLongPress('${c.id}','coffee')" ontouchend="endLongPress()" ontouchcancel="endLongPress()" oncontextmenu="event.stopPropagation();showEditOverlay('coffee-${c.id}');return false"><div class="card-edit-overlay" id="overlay-coffee-${c.id}"><button class="edit-overlay-btn" onclick="event.stopPropagation();openEditCoffee('${c.id}');hideEditOverlay('coffee-${c.id}')">✏ Edit</button><button class="edit-overlay-btn" onclick="event.stopPropagation();showTrendModal('${c.id}');hideEditOverlay('coffee-${c.id}')">📈 Trends</button><button class="edit-overlay-btn" onclick="event.stopPropagation();hideEditOverlay('coffee-${c.id}')">Cancel</button></div><div class="coffee-card" onclick="showCoffeeDetail('${c.id}')" style="${finishedStyle}"><div class="coffee-card-header"><div><div class="coffee-card-name">${c.name}${c.finishedBag?'<span style="margin-left:6px;font-family:\'DM Mono\',monospace;font-size:8px;background:rgba(139,26,26,0.15);color:#8b1a1a;border-radius:10px;padding:2px 6px;letter-spacing:1px">FINISHED</span>':''}</div><div class="coffee-card-roaster">${c.roaster||'Unknown Roaster'}</div>${cardRating}</div>${headerImg}</div><div class="coffee-card-body">${pills?`<div class="coffee-meta">${pills}</div>`:''}  <div class="recipe-count">${rc} brew${rc!==1?'s':''} logged</div></div></div></div>`;
   }).join('');
 }
 
@@ -2133,7 +2136,7 @@ function recipeCard(r, showDel=false) {
   const recipeObj = r.recipeId ? Object.values(RECIPES).flat().find(x=>x.id===r.recipeId) : null;
   const recipeBadge = recipeObj ? `<span style="display:inline-block;margin-top:4px;margin-left:4px;font-family:'DM Mono',monospace;font-size:9px;background:rgba(18,60,39,0.08);border:1px solid rgba(18,60,39,0.15);color:var(--espresso);border-radius:20px;padding:2px 8px;letter-spacing:.5px">📋 ${recipeObj.name.split('—')[0].trim()}</span>` : '';
   const thumbHtml = coffee?.labelPhoto ? `<img src="${coffee.labelPhoto}" class="brew-label-thumb" alt="label" onclick="openLightbox('${coffee.labelPhoto}')" style="cursor:zoom-in">` : '';
-  return `<div class="card-wrap" ontouchstart="startLongPress('${r.id}','brew')" ontouchend="endLongPress()" ontouchcancel="endLongPress()" oncontextmenu="showEditOverlay('brew-${r.id}');return false"><div class="card-edit-overlay" id="overlay-brew-${r.id}"><button class="edit-overlay-btn" onclick="event.stopPropagation();editBrew('${r.id}');hideEditOverlay('brew-${r.id}')">✏ Edit</button><button class="edit-overlay-btn" onclick="event.stopPropagation();confirmDeleteBrew('${r.id}')">✕ Delete</button><button class="edit-overlay-btn" onclick="event.stopPropagation();hideEditOverlay('brew-${r.id}')">Cancel</button></div><div class="recipe-entry">
+  return `<div class="card-wrap" ontouchstart="startLongPress('${r.id}','brew')" ontouchend="endLongPress()" ontouchcancel="endLongPress()" oncontextmenu="event.stopPropagation();showEditOverlay('brew-${r.id}');return false"><div class="card-edit-overlay" id="overlay-brew-${r.id}"><button class="edit-overlay-btn" onclick="event.stopPropagation();editBrew('${r.id}');hideEditOverlay('brew-${r.id}')">✏ Edit</button><button class="edit-overlay-btn" onclick="event.stopPropagation();confirmDeleteBrew('${r.id}')">✕ Delete</button><button class="edit-overlay-btn" onclick="event.stopPropagation();hideEditOverlay('brew-${r.id}')">Cancel</button></div><div class="recipe-entry">
     <div class="recipe-entry-header">
       <div style="display:flex;gap:10px;align-items:flex-start;flex:1">
         ${thumbHtml}
@@ -2795,11 +2798,24 @@ function hideAllOverlays() {
   document.querySelectorAll('.card-edit-overlay').forEach(el => el.classList.remove('visible'));
 }
 // ==================== LONG PRESS ====================
-let longPressTimer = null;
+let longPressTimer = null, lpStartX = 0, lpStartY = 0, suppressNextClick = false;
 function startLongPress(id, type) {
-  longPressTimer = setTimeout(() => showEditOverlay(type+'-'+id), 500);
+  if (event && event.touches && event.touches[0]) { lpStartX = event.touches[0].clientX; lpStartY = event.touches[0].clientY; }
+  if (event) event.stopPropagation();
+  clearTimeout(longPressTimer);
+  longPressTimer = setTimeout(() => { longPressTimer = null; suppressNextClick = true; showEditOverlay(type+'-'+id); if (navigator.vibrate) navigator.vibrate(15); }, 500);
 }
-function endLongPress() { if(longPressTimer){clearTimeout(longPressTimer);longPressTimer=null;} }
+function endLongPress() { clearTimeout(longPressTimer); longPressTimer = null; }
+document.addEventListener('touchmove', e => {
+  if (!longPressTimer || !e.touches[0]) return;
+  if (Math.abs(e.touches[0].clientX-lpStartX) > 10 || Math.abs(e.touches[0].clientY-lpStartY) > 10) endLongPress();
+}, {passive:true});
+document.addEventListener('scroll', endLongPress, {passive:true, capture:true});
+document.addEventListener('touchend', () => { if (suppressNextClick) setTimeout(() => { suppressNextClick = false; }, 400); }, {passive:true, capture:true});
+// Swallow the click fired when a long-press is released, so it doesn't open the card underneath
+document.addEventListener('click', e => {
+  if (suppressNextClick) { suppressNextClick = false; e.stopPropagation(); e.preventDefault(); }
+}, true);
 function showEditOverlay(key) {
   document.querySelectorAll('.card-edit-overlay').forEach(el=>el.classList.remove('visible'));
   const el=document.getElementById('overlay-'+key); if(el) el.classList.add('visible');
