@@ -230,6 +230,13 @@
 
   .btn-primary.fab-recipe-btn { background:transparent !important; color:var(--text) !important; border:1.5px solid var(--crema) !important; }
   body.dark-mode .btn-primary.fab-recipe-btn { color:var(--dm-text) !important; }
+  .switch { position:relative; width:46px; height:28px; flex-shrink:0; border-radius:14px; border:none; padding:0; cursor:pointer; background:#E5E7EB; transition:background .2s ease; }
+  .switch .switch-knob { position:absolute; top:3px; left:3px; width:22px; height:22px; border-radius:50%; background:#FFFFFF; box-shadow:0 1px 3px rgba(0,0,0,.2); transition:transform .2s ease; }
+  .switch[aria-checked="true"] { background:#123C27; }
+  .switch[aria-checked="true"] .switch-knob { transform:translateX(18px); }
+  body.dark-mode .switch { background:#3a3f3c; }
+  body.dark-mode .switch[aria-checked="true"] { background:#52796F; }
+  @media (prefers-reduced-motion: reduce) { .switch, .switch .switch-knob { transition:none; } }
   #settings-dark-btn { background:var(--espresso) !important; color:#FAFAF7 !important; }
   /* Dark mode: swap the base palette so anything using these variables follows automatically */
   body.dark-mode { --card: var(--dm-card); --foam: var(--dm-bg); --milk: #FAFAF7; --text: var(--dm-text); --text-muted: var(--dm-text-muted); --border: var(--dm-border); }
@@ -1772,6 +1779,7 @@ function openRecipeModal() {
   const mTab = [...document.querySelectorAll('.method-tab')].find(t => (t.getAttribute('onclick')||'').includes("'"+state.selectedMethod+"'"));
   if (mTab) selectMethod(mTab, state.selectedMethod);
   const rpid = document.getElementById('r-plan-id'); if (rpid) rpid.value = '';
+  if (currentRecipe()) autofillFromRecipe(currentRecipe(), true);
   renderBrewTimer();
   resetTaste();
   updateBrewLive();
@@ -1811,6 +1819,7 @@ function selectMethod(el, val) {
   // Toggle time format
   const espT=document.getElementById('r-time-esp'), filT=document.getElementById('r-time-filter');
   if(espT&&filT){ espT.style.display=isEspressoMethod(val)?'flex':'none'; filT.style.display=isEspressoMethod(val)?'none':'flex'; }
+  autofillFromRecipe(currentRecipe(), false);
   renderBrewSuggestion(); updateGrindMicrons();
 }
 
@@ -1836,6 +1845,25 @@ function updateRecipeDropdown(method) {
   renderRecipeCard(method, sel.value);
 }
 
+// Dose and water come from the recipe but stay editable.
+// force=true (user picked a recipe, or a fresh Log Brew) always fills;
+// otherwise only empty fields, or fields still holding the last autofilled value, are replaced.
+let recipeAutofill = { dose: null, water: null };
+function autofillFromRecipe(recipe, force) {
+  const d = document.getElementById('r-dose'), y = document.getElementById('r-yield');
+  if (!d || !y) return;
+  const nd = recipe && recipe.dose ? recipe.dose : null, nw = recipe && recipe.water ? recipe.water : null;
+  const replaceable = (el, prev) => force || !el.value || (prev != null && parseFloat(el.value) === parseFloat(prev));
+  if (replaceable(d, recipeAutofill.dose)) d.value = nd != null ? nd : '';
+  if (replaceable(y, recipeAutofill.water)) y.value = nw != null ? nw : '';
+  recipeAutofill = { dose: nd, water: nw };
+  updateBrewLive();
+}
+function currentRecipe() {
+  if (!state.selectedRecipeId || isEspressoMethod(state.selectedMethod)) return null;
+  return getAllRecipesForMethod(state.selectedMethod).find(r => r.id === state.selectedRecipeId) || null;
+}
+
 function onRecipeChange(sel) {
   state.selectedRecipeId = sel.value || null;
   setTimeout(() => { renderStepGuide(); updateBrewLive(); renderBrewSuggestion(); }, 0);
@@ -1844,9 +1872,7 @@ function onRecipeChange(sel) {
   const options = getAllRecipesForMethod(method);
   const recipe = options.find(r => r.id === sel.value);
   if (recipe) {
-    // Only fill if value is non-null and non-zero
-    if (recipe.dose) document.getElementById('r-dose').value = recipe.dose;
-    if (recipe.water) document.getElementById('r-yield').value = recipe.water;
+    autofillFromRecipe(recipe, true);
     if (recipe.temp) document.getElementById('r-temp').value = recipe.temp;
     // Set grind hint in notes if field is empty and hint exists
     const grindEl = document.getElementById('r-grind');
@@ -1855,8 +1881,7 @@ function onRecipeChange(sel) {
     }
   } else {
     // No recipe selected — clear autofilled fields
-    document.getElementById('r-dose').value = '';
-    document.getElementById('r-yield').value = '';
+    autofillFromRecipe(null, true);
     document.getElementById('r-temp').value = '';
   }
 }
@@ -3057,7 +3082,7 @@ function showToast(msg) { const t=document.getElementById('toast'); t.textConten
 document.querySelectorAll('.modal-overlay').forEach(o => o.addEventListener('click', e => { if(e.target===o) closeModal(o.id); }));
 
 
-let appSettings = { paletteId: 'terracotta', displayFontId: 'inter', monoFontId: 'inter', darkMode: false, overviewCategories: ['country','process','roaster','roasterCountry'] };
+let appSettings = { paletteId: 'terracotta', displayFontId: 'inter', monoFontId: 'inter', darkMode: false, suggestedStart: true, overviewCategories: ['country','process','roaster','roasterCountry'] };
 
 function loadSettings() {
   try {
@@ -3102,6 +3127,15 @@ function restoreData(input) {
   };
   reader.readAsText(file);
   input.value = '';
+}
+
+function toggleSuggestedStart() {
+  appSettings.suggestedStart = appSettings.suggestedStart === false;
+  saveSettings(); syncSuggestedStartSwitch(); renderBrewSuggestion();
+}
+function syncSuggestedStartSwitch() {
+  const b = document.getElementById('settings-suggest-switch'); if (!b) return;
+  b.setAttribute('aria-checked', appSettings.suggestedStart === false ? 'false' : 'true');
 }
 
 function toggleDarkMode() {
@@ -3566,7 +3600,7 @@ let suggestionSuppressed = false, lastSuggestion = null;
 function renderBrewSuggestion() {
   const el = document.getElementById('brew-suggestion'); if (!el) return;
   const editing = !!document.getElementById('r-edit-id')?.value;
-  if (suggestionSuppressed || editing || !state.selectedCoffeeId) { el.innerHTML = ''; lastSuggestion = null; return; }
+  if (appSettings.suggestedStart === false || suggestionSuppressed || editing || !state.selectedCoffeeId) { el.innerHTML = ''; lastSuggestion = null; return; }
   const method = state.selectedMethod;
   const cf = state.coffees.find(c => c.id === state.selectedCoffeeId);
   const s = computeSuggestion(state.selectedCoffeeId, method);
@@ -4026,7 +4060,7 @@ function renderTrendCharts(coffeeId) {
 
 // ==================== SETTINGS PANEL ====================
 function openSettings() {
-  renderOverviewCategoryOptions();
+  renderOverviewCategoryOptions(); syncSuggestedStartSwitch();
   renderStorageInfo();
   document.getElementById('settings-panel').classList.add('open');
   document.getElementById('settings-backdrop').classList.add('open');
@@ -4112,6 +4146,16 @@ if ('serviceWorker' in navigator && location.protocol.startsWith('http')) {
         <div class="settings-nav-sub">Browse 58 grinders, compare, set default</div>
       </div>
       <span class="settings-nav-arrow">›</span>
+    </div>
+
+    <div class="settings-section-header">Brewing</div>
+
+    <div class="settings-toggle-row">
+      <div style="flex:1;padding-right:12px">
+        <div class="settings-toggle-label">Suggested Start</div>
+        <div class="settings-toggle-sub">Show a grind and temperature starting point when logging a brew</div>
+      </div>
+      <button type="button" class="switch" id="settings-suggest-switch" role="switch" aria-checked="true" aria-label="Suggested Start" onclick="toggleSuggestedStart()"><span class="switch-knob"></span></button>
     </div>
 
     <div class="settings-section-header">Appearance</div>

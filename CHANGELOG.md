@@ -473,6 +473,19 @@ Specialty coffee dialling-in tracker · Single-file PWA / Android APK
 
 ---
 
+## v3.5
+*30 September 2026*
+
+### Settings
+- New Brewing section with a **Suggested Start** switch; turning it off hides the suggestion card in Log Brew (saved between sessions, on by default)
+
+### Recipe autofill
+- Dose and Water (ml) fill in from the recipe whenever one is picked, and when Log Brew opens with a remembered recipe
+- Both stay editable; switching method tab only replaces values you haven't changed yourself
+- Choosing "No recipe / custom" clears the recipe values
+
+---
+
 ## Pending / Roadmap
 - Rebuild the APK once to pick up the green app icon
 - Remaining transitions: press feedback, charts drawing in, + rotation, timer step pulse
@@ -483,4 +496,4 @@ Specialty coffee dialling-in tracker · Single-file PWA / Android APK
 
 ---
 
-*Document maintained automatically. Last updated: v3.4*
+*Document maintained automatically. Last updated: v3.5*
