@@ -158,6 +158,28 @@
 
   /* Long-press edit overlay */
   .card-wrap { position:relative; }
+  .lib-sub-row { display:flex; align-items:center; justify-content:space-between; gap:10px; margin:2px 0 14px; }
+  .layout-toggle { display:flex; border:1px solid var(--border); border-radius:8px; overflow:hidden; flex-shrink:0; }
+  .layout-toggle button { width:36px; height:30px; display:flex; align-items:center; justify-content:center; border:none; background:transparent; color:var(--text-muted); cursor:pointer; padding:0; }
+  .layout-toggle button + button { border-left:1px solid var(--border); }
+  .layout-toggle button.active { background:var(--espresso); color:#FAFAF7; }
+  body.dark-mode .layout-toggle { border-color:var(--dm-border); }
+  body.dark-mode .layout-toggle button.active { background:var(--dm-input); color:var(--dm-green-text); }
+  #coffees-list.grid { display:grid; grid-template-columns:repeat(2, minmax(0,1fr)); gap:12px; align-items:start; }
+  #coffees-list.grid .coffee-card { margin-bottom:0; }
+  #coffees-list.grid .coffee-card-header { padding:11px 12px; align-items:flex-start; }
+  #coffees-list.grid .coffee-card-name { font-size:14px; line-height:1.25; overflow-wrap:anywhere; }
+  #coffees-list.grid .coffee-card-roaster { font-size:9px; }
+  #coffees-list.grid .coffee-card-header img { width:34px !important; height:34px !important; }
+  #coffees-list.grid .coffee-card-header .card-more { padding:0 2px 4px; }
+  #coffees-list.grid .coffee-card-body { padding:10px 12px; }
+  #coffees-list.grid .coffee-meta { gap:4px; margin-bottom:8px; max-height:62px; overflow:hidden; }
+  #coffees-list.grid .coffee-card-header > div:first-child { flex:1; min-width:0; }
+  #coffees-list.grid .coffee-card-header > div:last-child { flex-shrink:0; gap:4px !important; }
+  #coffees-list.grid .meta-pill { font-size:9px; padding:2px 6px; }
+  #coffees-list.grid .recipe-count { font-size:10px; }
+  #coffees-list.grid .card-edit-overlay { gap:6px; padding:8px; }
+  #coffees-list.grid .edit-overlay-btn { padding:7px 9px; font-size:10px; }
   .card-edit-overlay { position:absolute; inset:0; background:rgba(18,60,39,0.93); border-radius:var(--radius); display:flex; align-items:center; justify-content:center; gap:10px; opacity:0; pointer-events:none; transition:opacity .15s; z-index:10; flex-wrap:wrap; padding:12px; }
   .card-edit-overlay.visible { opacity:1; pointer-events:all; }
   .edit-overlay-btn { background:rgba(255,255,255,0.12); border:1px solid rgba(255,255,255,0.3); color:#FAFAF7; font-size:11px; padding:9px 14px; border-radius:8px; cursor:pointer; font-family:'Space Mono',monospace; }
@@ -526,7 +548,11 @@
 <div id="view-coffees" class="view">
   <div style="height:20px"></div>
   <div class="section-title">Coffee Library</div>
-  <div class="section-subtitle">Your beans & roasters</div>
+  <div class="lib-sub-row"><div class="section-subtitle" style="margin:0">Your beans &amp; roasters</div>
+      <div class="layout-toggle" role="group" aria-label="Library layout">
+        <button type="button" data-layout="list" aria-label="Full-width tiles" onclick="setCoffeeLayout('list')"><svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" aria-hidden="true"><rect x="2" y="2.5" width="12" height="4.5" rx="1.2"/><rect x="2" y="9" width="12" height="4.5" rx="1.2"/></svg></button>
+        <button type="button" data-layout="grid" aria-label="Two per row" onclick="setCoffeeLayout('grid')"><svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" aria-hidden="true"><rect x="2" y="2.5" width="5" height="4.5" rx="1.2"/><rect x="9" y="2.5" width="5" height="4.5" rx="1.2"/><rect x="2" y="9" width="5" height="4.5" rx="1.2"/><rect x="9" y="9" width="5" height="4.5" rx="1.2"/></svg></button>
+      </div></div>
   <div id="coffees-list"></div>
 </div>
 
@@ -2452,9 +2478,15 @@ function renderDashboard() {
 }
 
 // ==================== COFFEES ====================
+function setCoffeeLayout(v) {
+  appSettings.coffeeLayout = v; saveSettings(); renderCoffeesView();
+}
 function renderCoffeesView() {
   const el = document.getElementById('coffees-list');
   if (!el) return;
+  const layout = appSettings.coffeeLayout === 'grid' ? 'grid' : 'list';
+  el.classList.toggle('grid', layout === 'grid' && state.coffees.length > 0);
+  document.querySelectorAll('.layout-toggle button').forEach(b => { const on = b.dataset.layout === layout; b.classList.toggle('active', on); b.setAttribute('aria-pressed', on); });
   if (!state.coffees.length) { el.innerHTML=`<div class="empty-state"><div class="empty-icon">📦</div><div class="empty-title">No coffees yet</div><div class="empty-desc">Tap + to add your first coffee.</div></div>`; return; }
   el.innerHTML = state.coffees.map(c => {
     const rc = state.recipes.filter(r=>r.coffeeId===c.id).length;
@@ -2488,7 +2520,11 @@ function restoreCoffeeList() {
       <div class="section-title">Coffee Library</div>
       <button class="btn-secondary" onclick="resetCoffeeModal();openModal('modal-coffee')" style="margin-top:4px">+ Add Coffee</button>
     </div>
-    <div class="section-subtitle">Your collection</div>
+    <div class="lib-sub-row"><div class="section-subtitle" style="margin:0">Your beans &amp; roasters</div>
+      <div class="layout-toggle" role="group" aria-label="Library layout">
+        <button type="button" data-layout="list" aria-label="Full-width tiles" onclick="setCoffeeLayout('list')"><svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" aria-hidden="true"><rect x="2" y="2.5" width="12" height="4.5" rx="1.2"/><rect x="2" y="9" width="12" height="4.5" rx="1.2"/></svg></button>
+        <button type="button" data-layout="grid" aria-label="Two per row" onclick="setCoffeeLayout('grid')"><svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" aria-hidden="true"><rect x="2" y="2.5" width="5" height="4.5" rx="1.2"/><rect x="9" y="2.5" width="5" height="4.5" rx="1.2"/><rect x="2" y="9" width="5" height="4.5" rx="1.2"/><rect x="9" y="9" width="5" height="4.5" rx="1.2"/></svg></button>
+      </div></div>
     <div id="coffees-list"></div>`;
   renderCoffeesView();
 }

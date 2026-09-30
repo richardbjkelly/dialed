@@ -561,6 +561,16 @@ Specialty coffee dialling-in tracker · Single-file PWA / Android APK
 
 ---
 
+## v3.13
+*30 September 2026*
+
+### Coffee Library layout
+- Small list / grid switch on the right of the Coffee Library subtitle
+- Grid shows two coffees per row with compact tiles (smaller type, up to three rows of tags); list is the original full-width tiles
+- Choice is remembered, including after opening a coffee and coming back
+
+---
+
 ## Pending / Roadmap
 - Rebuild the APK once to pick up the new cup icon
 - Remaining transitions: press feedback, charts drawing in, + rotation, timer step pulse
@@ -571,4 +581,4 @@ Specialty coffee dialling-in tracker · Single-file PWA / Android APK
 
 ---
 
-*Document maintained automatically. Last updated: v3.12*
+*Document maintained automatically. Last updated: v3.13*
