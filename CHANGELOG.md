@@ -486,8 +486,19 @@ Specialty coffee dialling-in tracker · Single-file PWA / Android APK
 
 ---
 
+## v3.6
+*30 September 2026*
+
+### New app icon
+- White coffee cup on dialed green, cropped by the tile edge, handle on the right
+- Maskable (Android) version scaled into the safe zone so the handle survives circle/squircle masks
+- Added apple-touch-icon (180px) and a browser-tab favicon
+- Service worker cache bumped to `dialed-v2` so the new icons are picked up
+
+---
+
 ## Pending / Roadmap
-- Rebuild the APK once to pick up the green app icon
+- Rebuild the APK once to pick up the new cup icon
 - Remaining transitions: press feedback, charts drawing in, + rotation, timer step pulse
 - Opt-in pooled data + trained model (see feasibility notes): backend, consent, deletion, ICO registration
 - Google Drive sync (deferred — manual backup/restore and reminder in place)
@@ -496,4 +507,4 @@ Specialty coffee dialling-in tracker · Single-file PWA / Android APK
 
 ---
 
-*Document maintained automatically. Last updated: v3.5*
+*Document maintained automatically. Last updated: v3.6*

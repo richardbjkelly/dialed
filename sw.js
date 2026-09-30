@@ -1,9 +1,9 @@
 // dialed service worker — offline support
 // App page: network-first (always fresh when online, cached copy when offline).
 // Icons/manifest: stale-while-revalidate. Google Fonts: cache-first.
-const CACHE = 'dialed-v1';
+const CACHE = 'dialed-v2';
 const CORE = ['./', './index.html', './manifest.json',
-  './icon-any-192.png', './icon-any-512.png', './icon-maskable-192.png', './icon-maskable-512.png'];
+  './icon-any-192.png', './icon-any-512.png', './icon-maskable-192.png', './icon-maskable-512.png', './apple-touch-icon.png'];
 
 self.addEventListener('install', e => {
   e.waitUntil(caches.open(CACHE).then(c => c.addAll(CORE)).then(() => self.skipWaiting()));
