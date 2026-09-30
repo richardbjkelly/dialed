@@ -173,7 +173,7 @@
   /* Grid tile B: photo banner */
   #coffees-list.grid .coffee-card.tile-b { display:flex; flex-direction:column; height:100%; }
   .tile-banner { position:relative; height:88px; flex-shrink:0; background:#1c4030; overflow:hidden; }
-  .tile-photo { width:100%; height:100%; object-fit:cover; display:block; }
+  .tile-photo { width:100%; height:100%; object-fit:cover; object-position:center 25%; display:block; }
   .tile-photo-empty { background:repeating-linear-gradient(45deg, #1f4633 0 8px, #1a3d2c 8px 16px); display:flex; align-items:center; justify-content:center; }
   .tile-photo-empty span { font-family:'Space Grotesk',sans-serif !important; font-weight:600; font-size:30px; color:rgba(250,250,247,0.3); }
   body:not(.dark-mode) .tile-photo-empty { background:repeating-linear-gradient(45deg, #2a5c44 0 8px, #25533d 8px 16px); }
@@ -189,6 +189,20 @@
   .tile-brews { font-size:10px; color:var(--text-muted); margin-top:3px; }
   .coffee-card.tile-b.finished .tile-photo, .coffee-card.tile-b.finished .tile-body { opacity:.5; filter:grayscale(.4); }
   #coffees-list.grid .card-wrap { min-height:212px; }
+  /* Frosted glass: photo fills the tile, text sits on a blurred dark-green panel over its lower part */
+  #coffees-list.grid .coffee-card.tile-b { position:relative; background:#0f2a1d !important; }
+  #coffees-list.grid .coffee-card.tile-b .tile-banner { position:absolute; inset:0; height:auto; }
+  #coffees-list.grid .coffee-card.tile-b .tile-body { position:relative; z-index:1; margin-top:auto; flex:0 0 auto; height:112px;
+    background:rgba(12,38,26,.66); -webkit-backdrop-filter:blur(12px) saturate(1.2); backdrop-filter:blur(12px) saturate(1.2); border-top:1px solid rgba(255,255,255,.08); }
+  @supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
+    #coffees-list.grid .coffee-card.tile-b .tile-body { background:rgba(12,38,26,.9); }
+  }
+  #coffees-list.grid .coffee-card.tile-b .tile-name { color:#FAFAF7 !important; text-shadow:0 1px 2px rgba(0,0,0,.35); }
+  #coffees-list.grid .coffee-card.tile-b .tile-roaster, #coffees-list.grid .coffee-card.tile-b .tile-summary,
+  #coffees-list.grid .coffee-card.tile-b .tile-brews { color:rgba(250,250,247,.82) !important; text-shadow:0 1px 2px rgba(0,0,0,.3); }
+  #coffees-list.grid .coffee-card.tile-b .tile-rating { top:8px; bottom:auto; right:40px; }
+  #coffees-list.grid .coffee-card.tile-b .tile-decaf { top:8px; bottom:auto; left:8px; }
+  #coffees-list.grid .coffee-card.tile-b.finished .tile-decaf { top:32px; }
   .finish-rating { display:grid; grid-template-columns:repeat(10, minmax(0,1fr)); gap:4px; }
   .finish-rating button { height:38px; border:1.5px solid var(--border); border-radius:8px; background:var(--card); color:var(--text); font-size:13px; cursor:pointer; padding:0; }
   .finish-rating button.on { background:#123C27; border-color:#123C27; color:#FAFAF7; }

@@ -687,6 +687,16 @@ Specialty coffee dialling-in tracker · Single-file PWA / Android APK
 
 ---
 
+## v3.24
+*30 September 2026*
+
+### Grid tiles: frosted glass
+- The photo now fills the whole tile; name, roaster, summary and brews sit on a blurred dark-green glass panel over the lower part
+- Rating and DECAF badges moved to the top of the photo; photos are framed slightly towards the top, where most labels put the name
+- Same look in light and dark mode; phones without blur support get a solid panel instead
+
+---
+
 ## Pending / Roadmap
 - Rebuild the APK once to pick up the new cup icon
 - Opt-in pooled data + trained model (see feasibility notes): backend, consent, deletion, ICO registration
@@ -696,4 +706,4 @@ Specialty coffee dialling-in tracker · Single-file PWA / Android APK
 
 ---
 
-*Document maintained automatically. Last updated: v3.23*
+*Document maintained automatically. Last updated: v3.24*
