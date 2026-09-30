@@ -10,7 +10,8 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="dialed">
 <meta name="theme-color" content="#123C27">
-<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=DM+Mono:wght@300;400;500&family=DM+Sans:wght@300;400;500&family=Lora:ital,wght@0,400;0,700;1,400&family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,700;1,9..144,400&family=Inter:wght@300;400;500&family=Space+Grotesk:wght@300;400;500&family=Space+Mono:wght@400;700&family=Josefin+Sans:wght@300;400;600&display=swap" rel="stylesheet">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
 <style>
   :root {
     --espresso: #123C27;
@@ -275,6 +276,12 @@
   .taste-line { font-size:11px; color:var(--text-muted); margin-top:6px; }
   .card-more { background:none; border:none; color:var(--text-muted); font-size:20px; line-height:1; padding:0 4px 6px; cursor:pointer; border-radius:6px; letter-spacing:1px; }
   .coffee-card-header .card-more { color:rgba(250,250,247,0.8); }
+  /* Typography: Space Mono throughout, Space Grotesk for headings and names */
+  * { font-family: 'Space Mono', ui-monospace, monospace !important; }
+  .app-title, .modal-title, .section-title, .coffee-card-name, .recipe-lib-title, .grinder-detail-name, .grinder-model,
+  .upnext-title, .settings-panel-title, .empty-title, .cs-name, h1, h2, h3,
+  [style*="Playfair"] { font-family: 'Space Grotesk', system-ui, sans-serif !important; letter-spacing: -0.3px !important; }
+  .app-title { font-weight: 700 !important; letter-spacing: -1px !important; }
   /* GRINDER STYLES */
   .grinder-type-toggle { display: flex; background: rgba(26,15,10,0.06); border-radius: 10px; padding: 3px; margin-bottom: 20px; }
   .type-btn { flex: 1; padding: 9px 12px; border: none; border-radius: 8px; font-family: 'DM Mono', monospace; font-size: 10px; letter-spacing: 1px; text-transform: uppercase; cursor: pointer; background: none; color: var(--text-muted); transition: all 0.2s; }
@@ -453,17 +460,6 @@
   <div id="backup-reminder"></div>
   <div id="dashboard-fav-grinder"></div>
   <div id="upnext-section" style="margin-bottom:8px"></div>
-  <div class="divider">Coffee Stats</div>
-  <div class="stats-section">
-    <div class="stats-period-bar" id="stats-period-bar">
-      <button class="type-btn active" onclick="setStatsPeriod('year',this)">This Year</button>
-      <button class="type-btn" onclick="setStatsPeriod('6m',this)">6 Months</button>
-      <button class="type-btn" onclick="setStatsPeriod('3m',this)">3 Months</button>
-      <button class="type-btn" onclick="setStatsPeriod('month',this)">This Month</button>
-      <button class="type-btn" onclick="setStatsPeriod('all',this)">All Time</button>
-    </div>
-    <div id="stats-dashboard"></div>
-  </div>
   <div class="divider">Recent brews</div>
   <div id="recent-brews"></div>
 </div>
@@ -515,12 +511,21 @@
 <!-- TRACKER -->
 <div id="view-tracker" class="view">
   <div style="height:20px"></div>
-  <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:16px">
-    <div>
-      <div class="section-title">Brew Tracker</div>
-      <div class="section-subtitle" id="tracker-count">All brews</div>
+  <div class="section-title">Insights</div>
+  <div class="section-subtitle">Your coffee in numbers</div>
+  <div class="divider" style="margin-top:4px">Coffee stats</div>
+  <div class="stats-section">
+    <div class="stats-period-bar" id="stats-period-bar">
+      <button class="type-btn active" onclick="setStatsPeriod('year',this)">This Year</button>
+      <button class="type-btn" onclick="setStatsPeriod('6m',this)">6 Months</button>
+      <button class="type-btn" onclick="setStatsPeriod('3m',this)">3 Months</button>
+      <button class="type-btn" onclick="setStatsPeriod('month',this)">This Month</button>
+      <button class="type-btn" onclick="setStatsPeriod('all',this)">All Time</button>
     </div>
+    <div id="stats-dashboard"></div>
   </div>
+  <div class="divider">All brews</div>
+  <div class="section-subtitle" id="tracker-count" style="margin-top:-6px">All brews</div>
 
   <!-- Filter bar -->
   <div style="display:flex;gap:8px;margin-bottom:10px;overflow-x:auto;padding-bottom:2px;flex-wrap:nowrap">
@@ -2315,7 +2320,8 @@ function getGreeting() {
 }
 
 function showAllBrews() {
-  showView('recipes');
+  showView('tracker');
+  setTimeout(() => document.querySelector('#view-tracker .divider:nth-of-type(2)')?.scrollIntoView({behavior:'smooth'}), 50);
 }
 
 function renderDashboard() {
@@ -2333,8 +2339,8 @@ function renderDashboard() {
       </div>`
     : `<div style="font-family:'DM Mono',monospace;font-size:10px;color:var(--text-muted);margin-bottom:16px;letter-spacing:.5px">No default grinder set — <span style="color:var(--crema);cursor:pointer" onclick="showView('grinders')">Browse grinders →</span></div>`;
   const el = document.getElementById('recent-brews');
-  const recent = state.recipes.slice(0,10);
-  const hasMore = state.recipes.length > 10;
+  const recent = state.recipes.slice(0,5);
+  const hasMore = state.recipes.length > 5;
   const divEl = el.previousElementSibling;
   if (divEl && divEl.classList.contains('divider')) {
     divEl.innerHTML = `<span>Recent brews</span>${hasMore?`<button onclick="showAllBrews()" style="background:none;border:none;font-family:'DM Mono',monospace;font-size:9px;color:var(--crema);cursor:pointer;letter-spacing:1px;text-transform:uppercase;margin-left:8px">View all (${state.recipes.length}) →</button>`:''}`;
@@ -2697,6 +2703,7 @@ function setTrackerSort(key, btn) {
 }
 
 function renderTracker() {
+  renderStatsDashboard();
   const el = document.getElementById('tracker-list');
   const countEl = document.getElementById('tracker-count');
   if (!el) return;
@@ -2999,27 +3006,7 @@ function saveSettings() {
 }
 
 function applySettings() {
-  // Apply Inter font globally
-  let dynStyle = document.getElementById('dyn-font-style');
-  if (!dynStyle) { dynStyle = document.createElement('style'); dynStyle.id = 'dyn-font-style'; document.head.appendChild(dynStyle); }
-  dynStyle.textContent = `
-    * { font-family: 'Space Mono', monospace !important; }
-    .app-title,
-    .modal-title,
-    .section-title,
-    .coffee-card-name,
-    .recipe-lib-title,
-    .custom-recipe-card-header .recipe-lib-title,
-    .detail-hero [style*="Playfair"],
-    .detail-hero [style*="font-size:24px"],
-    .detail-hero [style*="font-size:20px"],
-    .grinder-detail-name,
-    h1, h2, h3 {
-      font-family: 'Space Grotesk', sans-serif !important;
-      letter-spacing: -0.3px !important;
-    }
-    .app-title { font-weight: 700 !important; letter-spacing: -1px !important; }
-  `;
+  // Fonts are set in the stylesheet (Space Grotesk headings, Space Mono body)
   applyDarkMode();
 }
 
@@ -3782,9 +3769,9 @@ if ('serviceWorker' in navigator && location.protocol.startsWith('http')) {
       </button>
     </div>
 
-    <div class="settings-section-header">Overview Stats</div>
+    <div class="settings-section-header">Insights charts</div>
     <div style="padding:14px 20px;background:var(--card);border-bottom:1px solid var(--border)">
-      <div style="font-size:12px;color:var(--text-muted);margin-bottom:10px">Choose which categories appear on the Overview tab</div>
+      <div style="font-size:12px;color:var(--text-muted);margin-bottom:10px">Choose which categories appear on the Insights tab</div>
       <div id="overview-category-options"></div>
     </div>
     <div class="settings-section-header">Data</div>
@@ -3819,7 +3806,7 @@ if ('serviceWorker' in navigator && location.protocol.startsWith('http')) {
     <span class="nav-tab-icon"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><path d="M17 8h1a4 4 0 0 1 0 8h-1"/><path d="M3 8h14v9a4 4 0 0 1-4 4H7a4 4 0 0 1-4-4V8z"/><line x1="6" y1="2" x2="6" y2="4"/><line x1="10" y1="2" x2="10" y2="4"/><line x1="14" y1="2" x2="14" y2="4"/></svg></span>Coffees
   </button>
   <button class="nav-tab" onclick="showView('tracker')">
-    <span class="nav-tab-icon"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/><line x1="2" y1="20" x2="22" y2="20"/></svg></span>Tracker
+    <span class="nav-tab-icon"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/><line x1="2" y1="20" x2="22" y2="20"/></svg></span>Insights
   </button>
   <button class="nav-tab" onclick="openSettings()">
     <span class="nav-tab-icon"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><line x1="4" y1="6" x2="20" y2="6"/><line x1="4" y1="12" x2="20" y2="12"/><line x1="4" y1="18" x2="20" y2="18"/><circle cx="8" cy="6" r="2" fill="var(--espresso)" stroke="currentColor" class="nav-fill"/><circle cx="16" cy="12" r="2" fill="var(--espresso)" stroke="currentColor" class="nav-fill"/><circle cx="10" cy="18" r="2" fill="var(--espresso)" class="nav-fill" stroke="currentColor"/></svg></span>Settings
