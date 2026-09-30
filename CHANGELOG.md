@@ -425,6 +425,21 @@ Specialty coffee dialling-in tracker · Single-file PWA / Android APK
 
 ---
 
+## v3.2
+*30 September 2026*
+
+### Stepless grinders
+- 17 grinders marked stepless: Timemore Sculptor 064S/078/078S, Niche Zero/Duo, DF64 Gen 2, Eureka Mignon (3), Mahlkönig E65S, Lelit William, Rocket Faustino, Compak K3, Kinu M47 (2), Lido ET, OE Lido 3
+- Labelled "stepless" / "stepless dial 0–18" instead of "clicks"; µm per number/click shown for every grinder
+- Suggestions and conversions give fine positions (e.g. 4.8) on stepless grinders, whole clicks on stepped ones
+- Plan next nudges by ~20µm (filter) or ~6µm (espresso) on stepless grinders, one click on stepped ones, with the step shown
+- Settings outside a grinder's range are flagged instead of converted
+
+### Fixes
+- Micron units no longer capitalised to "ΜM" anywhere
+
+---
+
 ## Pending / Roadmap
 - Rebuild the APK once to pick up the green app icon
 - Opt-in pooled data + trained model (see feasibility notes): backend, consent, deletion, ICO registration
@@ -434,4 +449,4 @@ Specialty coffee dialling-in tracker · Single-file PWA / Android APK
 
 ---
 
-*Document maintained automatically. Last updated: v3.1*
+*Document maintained automatically. Last updated: v3.2*

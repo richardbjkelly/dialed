@@ -293,6 +293,7 @@
   .suggest-why summary { cursor:pointer; color:var(--text); }
   .suggest-why ul { padding-left:16px; margin-top:6px; }
   .suggest-why li { margin-bottom:3px; line-height:1.4; }
+  .unit { text-transform:none !important; }
   /* GRINDER STYLES */
   .grinder-type-toggle { display: flex; background: rgba(26,15,10,0.06); border-radius: 10px; padding: 3px; margin-bottom: 20px; }
   .type-btn { flex: 1; padding: 9px 12px; border: none; border-radius: 8px; font-family: 'DM Mono', monospace; font-size: 10px; letter-spacing: 1px; text-transform: uppercase; cursor: pointer; background: none; color: var(--text-muted); transition: all 0.2s; }
@@ -1461,14 +1462,14 @@ const GRINDERS = [
   {id:'m18',brand:'Timemore',model:'Slim Plus',type:'manual',settings:36,min:150,max:1000,notes:'Slim stainless steel profile.'},
   {id:'m19',brand:'Knock',model:'Feldgrind 2',type:'manual',settings:39,min:100,max:900,notes:'Precision espresso capability. All stainless steel.'},
   {id:'m20',brand:'Knock',model:'Aergrind',type:'manual',settings:24,min:150,max:900,notes:'Slim to fit inside AeroPress. Perfect travel setup.'},
-  {id:'m21',brand:'Kinu',model:'M47 Classic',type:'manual',settings:50,min:100,max:900,notes:'German-engineered. Exceptional precision and build quality.'},
-  {id:'m22',brand:'Kinu',model:'M47 Phoenix',type:'manual',settings:50,min:100,max:900,notes:'Entry Kinu. Stainless body with polymer base.'},
+  {id:'m21',stepless:true,brand:'Kinu',model:'M47 Classic',type:'manual',settings:50,min:100,max:900,notes:'German-engineered. Exceptional precision and build quality.'},
+  {id:'m22',stepless:true,brand:'Kinu',model:'M47 Phoenix',type:'manual',settings:50,min:100,max:900,notes:'Entry Kinu. Stainless body with polymer base.'},
   {id:'m23',brand:'Goat Story',model:'Arco',type:'manual',settings:60,min:100,max:1100,notes:'Dual burr system switches between espresso and filter modes.'},
   {id:'m24',brand:'Helor',model:'101',type:'manual',settings:48,min:150,max:1100,notes:'Korean-made. Precise adjustment, strong ergonomic handle.'},
   {id:'m25',brand:'Porlex',model:'Mini II',type:'manual',settings:16,min:200,max:1200,notes:'Japanese ceramic burrs. Compact travel grinder.'},
   {id:'m26',brand:'JavaPresse',model:'Manual Grinder',type:'manual',settings:18,min:200,max:1200,notes:'Budget entry level. Good for beginners exploring coffee.'},
-  {id:'m27',brand:'Lido',model:'ET',type:'manual',settings:30,min:200,max:1400,notes:'Excellent for pour-over and French press. Side-handle design.'},
-  {id:'m28',brand:'Orphan Espresso',model:'Lido 3',type:'manual',settings:30,min:200,max:1400,notes:'Strong, consistent coarser grind. Popular with filter lovers.'},
+  {id:'m27',stepless:true,brand:'Lido',model:'ET',type:'manual',settings:30,min:200,max:1400,notes:'Excellent for pour-over and French press. Side-handle design.'},
+  {id:'m28',stepless:true,brand:'Orphan Espresso',model:'Lido 3',type:'manual',settings:30,min:200,max:1400,notes:'Strong, consistent coarser grind. Popular with filter lovers.'},
 
   // ELECTRIC
   {id:'e01',brand:'Baratza',model:'Encore',type:'electric',settings:40,min:250,max:1100,notes:'The classic beginner electric. 40 stepped settings. Easy to use.'},
@@ -1480,27 +1481,27 @@ const GRINDERS = [
   {id:'e07',brand:'Fellow',model:'Opus',type:'electric',settings:41,min:200,max:1300,notes:'All-purpose conical. Espresso to cold brew. Compact.'},
   {id:'e08',brand:'Breville',model:'Smart Grinder Pro',type:'electric',settings:60,min:200,max:1300,notes:'60 grind settings. Digital display. Popular mid-range choice.'},
   {id:'e09',brand:'Breville',model:'Dose Control Pro',type:'electric',settings:25,min:200,max:1100,notes:'Dose by weight or time. Compact footprint.'},
-  {id:'e10',brand:'Eureka',model:'Mignon Specialità',type:'electric',settings:350,min:100,max:900,notes:'Stepless adjustment. Flat burr. Very quiet. Italian-made.'},
-  {id:'e11',brand:'Eureka',model:'Mignon Silenzio',type:'electric',settings:350,min:100,max:900,notes:'Sound-dampened body. Espresso focused stepless.'},
-  {id:'e12',brand:'Eureka',model:'Mignon Classico',type:'electric',settings:350,min:100,max:900,notes:'Entry-level Mignon. Stepless. Italian craftsmanship.'},
-  {id:'e13',brand:'Niche',model:'Zero',type:'electric',settings:360,min:100,max:1000,notes:'Single dose, near-zero retention. Stepless conical. Cult favourite.'},
-  {id:'e14',brand:'Niche',model:'Duo',type:'electric',settings:360,min:100,max:1300,notes:'Dual burr stack. Handles espresso and filter simultaneously.'},
+  {id:'e10',stepless:true,brand:'Eureka',model:'Mignon Specialità',type:'electric',settings:350,min:100,max:900,notes:'Stepless adjustment. Flat burr. Very quiet. Italian-made.'},
+  {id:'e11',stepless:true,brand:'Eureka',model:'Mignon Silenzio',type:'electric',settings:350,min:100,max:900,notes:'Sound-dampened body. Espresso focused stepless.'},
+  {id:'e12',stepless:true,brand:'Eureka',model:'Mignon Classico',type:'electric',settings:350,min:100,max:900,notes:'Entry-level Mignon. Stepless. Italian craftsmanship.'},
+  {id:'e13',stepless:true,brand:'Niche',model:'Zero',type:'electric',settings:360,min:100,max:1000,notes:'Single dose, near-zero retention. Stepless conical. Cult favourite.'},
+  {id:'e14',stepless:true,brand:'Niche',model:'Duo',type:'electric',settings:360,min:100,max:1300,notes:'Dual burr stack. Handles espresso and filter simultaneously.'},
   {id:'e15',brand:'Wilfa',model:'Svart Aroma',type:'electric',settings:17,min:250,max:1100,notes:'Scandinavian design. Popular budget electric option.'},
   {id:'e16',brand:'Mahlkönig',model:'X54',type:'electric',settings:220,min:150,max:1200,notes:'Home flat burr. Professional quality for all brew methods.'},
-  {id:'e17',brand:'Mahlkönig',model:'E65S GbW',type:'electric',settings:250,min:100,max:700,notes:'Professional espresso grinder. Gravimetric dosing. Café standard.'},
-  {id:'e18',brand:'Lelit',model:'William PL72',type:'electric',settings:340,min:120,max:900,notes:'Italian flat burr. Espresso-focused. Stepless micrometric.'},
-  {id:'e19',brand:'DF64',model:'Gen 2',type:'electric',settings:200,min:100,max:1200,notes:'Single dose. 64mm flat burr. Highly regarded enthusiast choice.'},
+  {id:'e17',stepless:true,brand:'Mahlkönig',model:'E65S GbW',type:'electric',settings:250,min:100,max:700,notes:'Professional espresso grinder. Gravimetric dosing. Café standard.'},
+  {id:'e18',stepless:true,brand:'Lelit',model:'William PL72',type:'electric',settings:340,min:120,max:900,notes:'Italian flat burr. Espresso-focused. Stepless micrometric.'},
+  {id:'e19',stepless:true,brand:'DF64',model:'Gen 2',type:'electric',settings:200,min:100,max:1200,notes:'Single dose. 64mm flat burr. Highly regarded enthusiast choice.'},
   {id:'e20',brand:'Capresso',model:'Infinity Plus',type:'electric',settings:16,min:250,max:1200,notes:'Slow-speed burr. Quiet. Good home value.'},
   {id:'e21',brand:'Oxo',model:'Brew Burr Grinder',type:'electric',settings:38,min:250,max:1200,notes:'One-touch timer. User-friendly design.'},
-  {id:'e22',brand:'Rocket',model:'Faustino',type:'electric',settings:300,min:100,max:900,notes:'Italian espresso-focused. Stepless micrometric adjustment.'},
-  {id:'e23',brand:'Compak',model:'K3 Touch',type:'electric',settings:100,min:100,max:900,notes:'Commercial-grade home grinder. Touchscreen interface.'},
+  {id:'e22',stepless:true,brand:'Rocket',model:'Faustino',type:'electric',settings:300,min:100,max:900,notes:'Italian espresso-focused. Stepless micrometric adjustment.'},
+  {id:'e23',stepless:true,brand:'Compak',model:'K3 Touch',type:'electric',settings:100,min:100,max:900,notes:'Commercial-grade home grinder. Touchscreen interface.'},
   {id:'e24',brand:'Flair Espresso',model:'Royal Grinder',type:'electric',settings:80,min:100,max:600,notes:'Espresso-only. Pairs perfectly with Flair manual presses.'},
-  {id:'e25',brand:'Timemore',model:'Sculptor 064S',type:'electric',settings:200,min:100,max:1000,notes:'Single dose flat burr. Stepless. Beautiful aesthetics.'},
+  {id:'e25',stepless:true,brand:'Timemore',model:'Sculptor 064S',type:'electric',settings:200,min:100,max:1000,notes:'Single dose flat burr. Stepless. Beautiful aesthetics.'},
   {id:'e26',brand:'Comandante',model:'MC6 Goat',type:'electric',settings:90,min:100,max:1100,notes:'Electric version of legendary C40 with same burr geometry.'},
   {id:'e27',brand:'Cuisinart',model:'DBM-8',type:'electric',settings:18,min:250,max:1300,notes:'Budget electric. Good entry-level starting point.'},
   {id:'e28',brand:'De\'Longhi',model:'KG89',type:'electric',settings:14,min:280,max:1300,notes:'Affordable home grinder. Auto-dosing. Beginner-friendly.'},
-  {id:'e29',brand:'Timemore',model:'Sculptor 078S',type:'electric',settings:36,min:235,max:1235,clickMin:0,clickMax:18,step:0.1,notes:'Dial 0–18 with fine adjustment, about 55µm per number. Espresso ≈0–2.6, pourover ≈3–8.3, French press ≈8.2–18 (Honest Coffee Guide).'},
-  {id:'e30',brand:'Timemore',model:'Sculptor 078',type:'electric',settings:36,min:370,max:1270,clickMin:0,clickMax:18,step:0.1,notes:'Filter-only Turbo burrs, about 50µm per number. Approximate: pourover ≈0.6–6.6, French press ≈6.4–18.'},
+  {id:'e29',stepless:true,brand:'Timemore',model:'Sculptor 078S',type:'electric',settings:36,min:235,max:1235,clickMin:0,clickMax:18,step:0.1,notes:'Dial 0–18 with fine adjustment, about 55µm per number. Espresso ≈0–2.6, pourover ≈3–8.3, French press ≈8.2–18 (Honest Coffee Guide).'},
+  {id:'e30',stepless:true,brand:'Timemore',model:'Sculptor 078',type:'electric',settings:36,min:370,max:1270,clickMin:0,clickMax:18,step:0.1,notes:'Filter-only Turbo burrs, about 50µm per number. Approximate: pourover ≈0.6–6.6, French press ≈6.4–18.'},
 ];
 
 // Brew method grind ranges (microns) — data from honestcoffeeguide.com
@@ -2469,7 +2470,7 @@ function recipeCard(r, showDel=false) {
       <div style="display:flex;align-items:center;gap:6px;flex-shrink:0">${exTag}<button class="card-more" aria-label="More options" onclick="event.stopPropagation();showEditOverlay('brew-${r.id}')">⋯</button></div>
     </div>
     <div class="recipe-params">
-      <div class="param-block"><div class="param-value">${r.grind||'—'}</div><div class="param-label">Grind${brewMicrons(r)?' · <span style="text-transform:none">'+brewMicrons(r)+'µm</span>':''}</div></div>
+      <div class="param-block"><div class="param-value">${r.grind||'—'}</div><div class="param-label">Grind${brewMicrons(r)?' · <span class="unit">'+brewMicrons(r)+'µm</span>':''}</div></div>
       <div class="param-block"><div class="param-value">${r.dose?r.dose+'g':'—'}</div><div class="param-label">Dose</div></div>
       <div class="param-block"><div class="param-value">${formatBrewTime(r.time,r.method)}</div><div class="param-label">Time</div></div>
     </div>
@@ -2783,7 +2784,7 @@ function renderGrinders() {
       <div style="flex:1">
         <div class="grinder-brand">${g.brand}${isFav?' <span style="font-size:9px;color:var(--crema);font-family:DM Mono,monospace;letter-spacing:1px;text-transform:uppercase">★ Default</span>':''}</div>
         <div class="grinder-model">${g.model}</div>
-        <div style="font-family:'DM Mono',monospace;font-size:9px;color:var(--text-muted);margin-top:4px">${g.min}–${g.max}µm${g.clickMin!==undefined?' · '+g.clickMin+'–'+g.clickMax+' clicks':' · '+g.settings+' settings'}</div>
+        <div style="font-family:'DM Mono',monospace;font-size:9px;color:var(--text-muted);margin-top:4px">${g.min}–${g.max}µm · ${grinderRangeLabel(g)}</div>
       </div>
       <div style="display:flex;flex-direction:column;align-items:flex-end;gap:6px">
         <span class="grinder-type-badge badge-${g.type}">${g.type==='manual'?'✋ Manual':'⚡ Electric'}</span>
@@ -2864,7 +2865,8 @@ function showGrinderDetail(gid) {
         ${isFav?'<span style="font-family:\'DM Mono\',monospace;font-size:9px;background:rgba(200,135,58,0.25);color:var(--crema-light);border-radius:20px;padding:2px 8px;letter-spacing:1px">★ DEFAULT GRINDER</span>':''}
       </div>
       <div class="grinder-specs-grid">
-        <div class="grinder-spec-block"><div class="grinder-spec-value">${g.clickMin!==undefined?g.clickMin+'–'+g.clickMax:g.settings}</div><div class="grinder-spec-label">${g.clickMin!==undefined?'Click Range':'Settings'}</div></div>
+        <div class="grinder-spec-block"><div class="grinder-spec-value">${g.clickMin!==undefined?g.clickMin+'–'+g.clickMax:g.settings}</div><div class="grinder-spec-label">${g.stepless?(g.clickMin!==undefined?'Dial · stepless':'Stepless'):(g.clickMin!==undefined?'Click Range':'Settings')}</div></div>
+        ${!g.umPerClick && grinderScale(g) ? `<div class="grinder-spec-block"><div class="grinder-spec-value">~${Math.round(grinderScale(g).per)}</div><div class="grinder-spec-label"><span class="unit">µm</span> per ${g.stepless?'number':'click'}</div></div>` : ''}
         <div class="grinder-spec-block"><div class="grinder-spec-value" style="font-size:13px">${g.min}–${g.max}µm</div><div class="grinder-spec-label">Grind Range</div></div>
         ${g.umPerClick?`<div class="grinder-spec-block"><div class="grinder-spec-value">~${g.umPerClick}</div><div class="grinder-spec-label">µm/click</div></div>`:''}
       </div>
@@ -3363,22 +3365,29 @@ function grinderScale(g) {
   if (g.umPerClick) {
     const s0 = g.clickMin || 0;
     const s1 = g.clickMax != null ? g.clickMax : s0 + Math.round((g.max - g.min) / g.umPerClick);
-    return { s0, s1, um0: g.min, per: g.umPerClick, step: g.step };
+    return { s0, s1, um0: g.min, per: g.umPerClick, step: g.step, stepless: !!g.stepless };
   }
-  if (g.clickMax != null) { const s0 = g.clickMin || 0; return { s0, s1: g.clickMax, um0: g.min, per: (g.max - g.min) / (g.clickMax - s0), step: g.step }; }
+  if (g.clickMax != null) { const s0 = g.clickMin || 0; return { s0, s1: g.clickMax, um0: g.min, per: (g.max - g.min) / (g.clickMax - s0), step: g.step, stepless: !!g.stepless }; }
   if (!(g.settings > 0)) return null;
-  return { s0: 0, s1: g.settings, um0: g.min, per: (g.max - g.min) / g.settings, step: g.step };
+  return { s0: 0, s1: g.settings, um0: g.min, per: (g.max - g.min) / g.settings, step: g.step, stepless: !!g.stepless };
+}
+function settingInRange(g, setting) {
+  const s = parseFloat(setting), sc = grinderScale(g);
+  if (!sc || isNaN(s)) return true;
+  const tol = (sc.step || 1) * 0.5;
+  return s >= sc.s0 - tol && s <= sc.s1 + tol;
 }
 function settingToMicrons(g, setting) {
   const s = parseFloat(setting), sc = grinderScale(g);
-  if (!sc || isNaN(s)) return null;
+  if (!sc || isNaN(s) || !settingInRange(g, setting)) return null;
   return Math.round(sc.um0 + (s - sc.s0) * sc.per);
 }
 function micronsToSetting(g, um) {
   const sc = grinderScale(g); if (!sc || um == null) return null;
   let s = sc.s0 + (um - sc.um0) / sc.per;
   s = Math.max(sc.s0, Math.min(sc.s1, s));
-  const step = sc.step || ((sc.s1 - sc.s0) >= 15 ? 1 : 0.5);
+  const span = sc.s1 - sc.s0;
+  const step = sc.step || (sc.stepless ? (span > 100 ? 1 : span >= 40 ? 0.5 : 0.1) : (span >= 15 ? 1 : 0.5));
   const dp = step < 1 ? (String(step).split('.')[1] || '').length : 0;
   return parseFloat((Math.round(s / step) * step).toFixed(dp));
 }
@@ -3402,6 +3411,7 @@ function updateGrindMicrons() {
   const el = document.getElementById('r-grind-um'); if (!el) return;
   const g = selectedGrinder(), val = document.getElementById('r-grind').value;
   if (!g) { el.innerHTML = val ? 'Pick a grinder to see the particle size' : ''; return; }
+  if (val !== '' && !settingInRange(g, val)) { const sc = grinderScale(g); el.innerHTML = `<span style="color:#c0564b">${val} is outside the ${g.model}'s ${sc.s0}–${sc.s1} range</span>`; return; }
   const um = settingToMicrons(g, val);
   if (um == null) { el.innerHTML = ''; return; }
   const mr = methodRange(state.selectedMethod);
@@ -3580,6 +3590,28 @@ function methodSettingsGuide(g) {
   return rows.length ? `<div style="font-size:12px;color:var(--text);margin-top:12px"><div style="font-size:10px;letter-spacing:1px;text-transform:uppercase;color:var(--text-muted);margin-bottom:4px">Where to start on this grinder</div>${rows.join('')}</div>` : '';
 }
 
+
+function grinderRangeLabel(g) {
+  if (g.stepless) return g.clickMin !== undefined ? `stepless dial ${g.clickMin}–${g.clickMax}` : 'stepless';
+  return g.clickMin !== undefined ? `${g.clickMin}–${g.clickMax} clicks` : `${g.settings} settings`;
+}
+// One nudge in Plan next: a click on stepped grinders; ~20µm (filter) or ~6µm (espresso) on stepless ones
+function planGrindStep(g, method, rawGrind) {
+  const sc = grinderScale(g);
+  if (!sc) return grindStep(rawGrind);
+  if (!sc.stepless) return sc.step || 1;
+  const want = (isEspressoMethod(method) ? 6 : 20) / sc.per;
+  const minStep = sc.step || (sc.s1 - sc.s0 > 100 ? 1 : sc.s1 - sc.s0 >= 40 ? 0.5 : 0.1);
+  if (minStep >= 1) return Math.max(1, Math.round(want));
+  return Math.max(minStep, Math.round(want * 10) / 10);
+}
+function planStepHint(d) {
+  const g = d.from.grinderId ? GRINDERS.find(x => x.id === d.from.grinderId) : null;
+  const sc = grinderScale(g); if (!sc || d.grindBase === null) return '';
+  const um = Math.round(d.grindStepSize * sc.per);
+  return `<div style="font-size:10px;color:var(--text-muted);margin-top:2px">${sc.stepless ? 'Stepless' : 'Stepped'} · each − / + is ${d.grindStepSize}${sc.stepless ? '' : ' click'} (≈${um}µm)</div>`;
+}
+
 // ==================== BREW TIMER ====================
 // Uses wall-clock timestamps, so it stays accurate if the phone sleeps or the app is backgrounded.
 let brewTimer = { startedAt:null, elapsed:0, tick:null, wakeLock:null };
@@ -3635,8 +3667,8 @@ function roundTo(v, step) { const d = step < 1 ? String(step).split('.')[1].leng
 function openPlanNext(brewId) {
   const r = state.recipes.find(x=>x.id===brewId); if (!r) return;
   const coffee = state.coffees.find(x=>x.id===r.coffeeId);
-  const grind = numOrNull(r.grind), temp = numOrNull(r.temp), gs = grindStep(r.grind);
   const grinder = r.grinderId ? GRINDERS.find(g=>g.id===r.grinderId) : null;
+  const grind = numOrNull(r.grind), temp = numOrNull(r.temp), gs = planGrindStep(grinder, r.method, r.grind);
   planDraft = { from:r, grindBase:grind, tempBase:temp, grindStepSize:gs, grind, temp, grindDir:'same', tempDir:'same' };
   document.getElementById('plan-subtitle').textContent = (coffee?coffee.name:'Coffee') + ' · ' + (r.method||'');
   const res = r.extraction ? `<span class="extraction-tag tag-${r.extraction}">${r.extraction==='good'?'✓ Good':r.extraction}</span>` : 'no result logged';
@@ -3685,7 +3717,7 @@ function renderPlanValues() {
   const arrow = (a,b,u='') => a===b ? `<b>${b}${u}</b> (no change)` : `${a}${u} → <b>${b}${u}</b>`;
   document.getElementById('plan-grind-val').innerHTML = d.grindBase === null
     ? (d.from.grind ? `${d.grindDir==='same' ? 'Keep' : 'Go '+d.grindDir+' than'} <b>${d.from.grind}</b>` : 'No grind logged last time')
-    : arrow(d.grindBase, d.grind) + planUmLine(d);
+    : arrow(d.grindBase, d.grind) + planUmLine(d) + planStepHint(d);
   document.getElementById('plan-temp-val').innerHTML = d.tempBase === null
     ? `No temperature logged — aim ${d.tempDir==='same' ? 'the same' : d.tempDir}`
     : arrow(d.tempBase, d.temp, '°C');
