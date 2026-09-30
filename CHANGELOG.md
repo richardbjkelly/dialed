@@ -659,6 +659,14 @@ Specialty coffee dialling-in tracker · Single-file PWA / Android APK
 
 ---
 
+## v3.21
+*30 September 2026*
+
+### Fix
+- ⋯ on a brew in a coffee's Brew Log did nothing: the same brew is also drawn (hidden) on Overview and Insights, and the menu opened on the hidden copy. Menus now open on the copy you can see; checked from all three screens, including Edit, Plan next and Delete
+
+---
+
 ## Pending / Roadmap
 - Rebuild the APK once to pick up the new cup icon
 - Opt-in pooled data + trained model (see feasibility notes): backend, consent, deletion, ICO registration
@@ -668,4 +676,4 @@ Specialty coffee dialling-in tracker · Single-file PWA / Android APK
 
 ---
 
-*Document maintained automatically. Last updated: v3.20*
+*Document maintained automatically. Last updated: v3.21*

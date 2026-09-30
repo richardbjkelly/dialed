@@ -3606,11 +3606,16 @@ document.addEventListener('touchend', () => { if (suppressNextClick) setTimeout(
 document.addEventListener('click', e => {
   if (suppressNextClick) { suppressNextClick = false; e.stopPropagation(); e.preventDefault(); }
 }, true);
+// The same brew can be on screen twice (Overview "Recent brews" and a coffee's Brew Log, one of them hidden),
+// so open the menu on the copy that's actually visible
+function overlaysFor(key) { return [...document.querySelectorAll(`[id="overlay-${key}"]`)]; }
 function showEditOverlay(key) {
   document.querySelectorAll('.card-edit-overlay').forEach(el=>el.classList.remove('visible'));
-  const el=document.getElementById('overlay-'+key); if(el) el.classList.add('visible');
+  const all = overlaysFor(key);
+  const el = all.find(o => o.closest('.card-wrap')?.getClientRects().length) || all[0];
+  if (el) el.classList.add('visible');
 }
-function hideEditOverlay(key) { const el=document.getElementById('overlay-'+key); if(el) el.classList.remove('visible'); }
+function hideEditOverlay(key) { overlaysFor(key).forEach(el => el.classList.remove('visible')); }
 document.addEventListener('touchstart', e=>{
   if(!e.target.closest('.card-edit-overlay')&&!e.target.closest('.recipe-entry')&&!e.target.closest('.coffee-card'))
     document.querySelectorAll('.card-edit-overlay').forEach(el=>el.classList.remove('visible'));
