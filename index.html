@@ -159,6 +159,16 @@
 
   /* Long-press edit overlay */
   .card-wrap { position:relative; }
+  /* Finished bags: faded, but the FINISHED badge stays at full strength */
+  .coffee-card.finished { box-shadow:none; }
+  .coffee-card.finished .coffee-card-header { background:#8E9C95 !important; }
+  .coffee-card.finished .coffee-card-name { color:rgba(250,250,247,0.75); }
+  .coffee-card.finished .coffee-card-roaster, .coffee-card.finished .card-more, .coffee-card.finished .coffee-card-header img, .coffee-card.finished .coffee-card-body { opacity:.5; filter:grayscale(.4); }
+  body.dark-mode .coffee-card.finished { background:rgba(22,54,36,0.5) !important; }
+  body.dark-mode .coffee-card.finished .coffee-card-header { background:#1B2B23 !important; }
+  body.dark-mode .coffee-card.finished .coffee-card-name { color:rgba(250,250,247,0.55); }
+  .finished-badge { margin-left:6px; font-size:8px; background:#FAFAF7; color:#8b1a1a; font-weight:700; border-radius:10px; padding:2px 6px; letter-spacing:1px; vertical-align:middle; white-space:nowrap; }
+  body.dark-mode .finished-badge { background:rgba(242,164,147,0.2); color:#F6B8AA; }
   .card-foot { display:flex; align-items:center; justify-content:space-between; gap:8px; }
   .decaf-label { font-size:9px; letter-spacing:1.5px; text-transform:uppercase; color:#8A5A2B; border:1px solid rgba(138,90,43,0.35); border-radius:4px; padding:1px 5px; flex-shrink:0; }
   body.dark-mode .decaf-label { color:#E0B98A; border-color:rgba(224,185,138,0.4); }
@@ -570,7 +580,10 @@
 <!-- COFFEES -->
 <div id="view-coffees" class="view">
   <div style="height:20px"></div>
-  <div class="section-title">Coffee Library</div>
+  <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:4px">
+    <div class="section-title">Coffee Library</div>
+    <button class="btn-secondary" onclick="resetCoffeeModal();openModal('modal-coffee')" style="margin-top:4px">+ Add Coffee</button>
+  </div>
   <div class="lib-sub-row"><div class="section-subtitle" style="margin:0">Your beans &amp; roasters</div>
       <div class="layout-toggle" role="group" aria-label="Library layout">
         <button type="button" data-layout="list" aria-label="Full-width tiles" onclick="setCoffeeLayout('list')"><svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" aria-hidden="true"><rect x="2" y="2.5" width="12" height="4.5" rx="1.2"/><rect x="2" y="9" width="12" height="4.5" rx="1.2"/></svg></button>
@@ -2536,8 +2549,8 @@ function renderCoffeesView() {
       : corePills.join('') + maslPill;
     const headerImg = c.labelPhoto ? `<img src="${c.labelPhoto}" style="width:52px;height:52px;border-radius:8px;object-fit:cover;flex-shrink:0;border:1px solid rgba(255,255,255,0.15);cursor:zoom-in" alt="label" onclick="event.stopPropagation();openLightbox('${c.labelPhoto}')">` : '';
     const cardRating = c.rating > 0 ? `<div style="display:inline-flex;gap:1px;color:var(--crema);margin-top:4px">${Array(c.rating).fill('<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 14 14" width="14" height="14"><g><path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" d="M2 4h8.5v5c0 0.53043 -0.2107 1.0391 -0.58579 1.4142C9.53914 10.7893 9.03043 11 8.5 11h-5c-0.53043 0 -1.03914 -0.2107 -1.41421 -0.5858C1.71071 10.0391 1.5 9.53043 1.5 9V4.5c0 -0.13261 0.05268 -0.25979 0.14645 -0.35355C1.74021 4.05268 1.86739 4 2 4Z" stroke-width="1"></path><path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" d="M0.5 13.5h13" stroke-width="1"></path><path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" d="M10.5 4h1c0.5304 0 1.0391 0.21071 1.4142 0.58579 0.3751 0.37507 0.5858 0.88378 0.5858 1.41421s-0.2107 1.03914 -0.5858 1.41421C12.5391 7.78929 12.0304 8 11.5 8h-1" stroke-width="1"></path><path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" d="M3 0.5v1" stroke-width="1"></path><path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" d="M8 0.5v1" stroke-width="1"></path><path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" d="M5.5 0.5v1" stroke-width="1"></path></g></svg>').join('')}</div><span style="font-family:'DM Mono',monospace;font-size:9px;color:var(--text-muted);margin-left:4px">${c.rating}/10</span>` : '';
-    const finishedStyle = c.finishedBag ? 'opacity:0.45;filter:grayscale(0.4);' : '';
-    return `<div class="card-wrap" ontouchstart="startLongPress('${c.id}','coffee')" ontouchend="endLongPress()" ontouchcancel="endLongPress()" oncontextmenu="event.stopPropagation();showEditOverlay('coffee-${c.id}');return false"><div class="card-edit-overlay" id="overlay-coffee-${c.id}"><button class="edit-overlay-btn" onclick="event.stopPropagation();openEditCoffee('${c.id}');hideEditOverlay('coffee-${c.id}')">✏ Edit</button><button class="edit-overlay-btn" onclick="event.stopPropagation();showTrendModal('${c.id}');hideEditOverlay('coffee-${c.id}')">📈 Trends</button><button class="edit-overlay-btn" onclick="event.stopPropagation();confirmDeleteCoffee('${c.id}')">✕ Delete</button><button class="edit-overlay-btn" onclick="event.stopPropagation();hideEditOverlay('coffee-${c.id}')">Cancel</button></div><div class="coffee-card" onclick="showCoffeeDetail('${c.id}')" style="${finishedStyle}"><div class="coffee-card-header"><div><div class="coffee-card-name">${c.name}${c.finishedBag?'<span style="margin-left:6px;font-family:\'DM Mono\',monospace;font-size:8px;background:rgba(139,26,26,0.15);color:#8b1a1a;border-radius:10px;padding:2px 6px;letter-spacing:1px">FINISHED</span>':''}</div><div class="coffee-card-roaster">${c.roaster||'Unknown Roaster'}</div>${cardRating}</div><div style="display:flex;align-items:flex-start;gap:8px">${headerImg}<button class="card-more" aria-label="More options" onclick="event.stopPropagation();showEditOverlay('coffee-${c.id}')">⋯</button></div></div><div class="coffee-card-body">${pills?`<div class="coffee-meta">${pills}</div>`:''}  <div class="card-foot"><div class="recipe-count">${rc} brew${rc!==1?'s':''} logged</div>${c.decaf ? '<span class="decaf-label">Decaf</span>' : ''}</div></div></div></div>`;
+    const finishedStyle = '';
+    return `<div class="card-wrap" ontouchstart="startLongPress('${c.id}','coffee')" ontouchend="endLongPress()" ontouchcancel="endLongPress()" oncontextmenu="event.stopPropagation();showEditOverlay('coffee-${c.id}');return false"><div class="card-edit-overlay" id="overlay-coffee-${c.id}"><button class="edit-overlay-btn" onclick="event.stopPropagation();openEditCoffee('${c.id}');hideEditOverlay('coffee-${c.id}')">✏ Edit</button><button class="edit-overlay-btn" onclick="event.stopPropagation();showTrendModal('${c.id}');hideEditOverlay('coffee-${c.id}')">📈 Trends</button><button class="edit-overlay-btn" onclick="event.stopPropagation();confirmDeleteCoffee('${c.id}')">✕ Delete</button><button class="edit-overlay-btn" onclick="event.stopPropagation();hideEditOverlay('coffee-${c.id}')">Cancel</button></div><div class="coffee-card${c.finishedBag ? ' finished' : ''}" onclick="showCoffeeDetail('${c.id}')" style="${finishedStyle}"><div class="coffee-card-header"><div><div class="coffee-card-name">${c.name}${c.finishedBag?'<span class="finished-badge">FINISHED</span>':''}</div><div class="coffee-card-roaster">${c.roaster||'Unknown Roaster'}</div>${cardRating}</div><div style="display:flex;align-items:flex-start;gap:8px">${headerImg}<button class="card-more" aria-label="More options" onclick="event.stopPropagation();showEditOverlay('coffee-${c.id}')">⋯</button></div></div><div class="coffee-card-body">${pills?`<div class="coffee-meta">${pills}</div>`:''}  <div class="card-foot"><div class="recipe-count">${rc} brew${rc!==1?'s':''} logged</div>${c.decaf ? '<span class="decaf-label">Decaf</span>' : ''}</div></div></div></div>`;
   }).join('');
 }
 
@@ -2731,13 +2744,20 @@ function renderStackedBar(items, total, opts = {}) {
   const otherCount = rest.reduce((s,[,n]) => s+n, 0);
   if (otherCount > 0) shown.push(['Other', otherCount, rest.flatMap(r => r[2] && r[2].length ? r[2] : [[r[0], r[1]]])]);
   const grandTotal = shown.reduce((s,[,n]) => s+n, 0);
+  // Colour follows the entry, not its rank in this period: use its all-time slot when it has one
+  const PAL_SIZE = STACK_COLORS_LIGHT.length, rank = opts.colorRank || [];
+  const slot = {}, used = new Set();
+  shown.forEach(([label]) => { const r = rank.indexOf(label); if (r >= 0 && r < PAL_SIZE && !used.has(r)) { slot[label] = r; used.add(r); } });
+  let free = 0;
+  shown.forEach(([label]) => { if (slot[label] === undefined && label !== 'Other') { while (used.has(free)) free++; slot[label] = free % PAL_SIZE; used.add(free); } });
+  const colorOf = (label, i) => stackColor(slot[label] !== undefined ? slot[label] : i, label);
   const segments = shown.map(([label, count], i) => {
     const pct = (count / grandTotal * 100).toFixed(1);
-    return `<div title="${escHtml(label)}: ${count}" style="width:${pct}%;background:${stackColor(i, label)};height:100%;transition:width .4s"></div>`;
+    return `<div title="${escHtml(label)}: ${count}" style="width:${pct}%;background:${colorOf(label, i)};height:100%;transition:width .4s"></div>`;
   }).join('');
   const unit = opts.unit || ['item', 'items'];
   const legend = shown.map(([label, count, members], i) => {
-    const swatch = `<div style="width:10px;height:10px;border-radius:2px;background:${stackColor(i, label)};flex-shrink:0"></div>`;
+    const swatch = `<div style="width:10px;height:10px;border-radius:2px;background:${colorOf(label, i)};flex-shrink:0"></div>`;
     const hasMembers = Array.isArray(members) && members.length && !(members.length === 1 && members[0][0] === label);
     if (!hasMembers) return `
     <div style="display:flex;align-items:center;gap:6px;margin-bottom:3px">${swatch}
@@ -2799,6 +2819,14 @@ const GROUPERS = {
   roastLevel:     { by: roastFamily, note: n => `Grouped into light / medium / dark · ${n} roast levels` },
 };
 // items: [[label, count], ...] most common first. Returns chart items plus an optional note.
+// All-time order of a category's values (or of its groups), used to give each entry a fixed colour
+function colorRankFor(key, grouped) {
+  const all = topN(state.coffees, key);
+  if (!grouped || !GROUPERS[key]) return all.map(x => x[0]);
+  const totals = {};
+  all.forEach(([label, n]) => { const g = GROUPERS[key].by(label); totals[g] = (totals[g] || 0) + n; });
+  return Object.entries(totals).sort((a, b) => b[1] - a[1]).map(x => x[0]);
+}
 const CHART_UNITS = { country:['country','countries'], roasterCountry:['country','countries'], process:['process','processes'], roastLevel:['roast level','roast levels'], roaster:['roaster','roasters'], varietal:['varietal','varietals'] };
 function groupForChart(key, items) {
   const g = GROUPERS[key], unit = CHART_UNITS[key];
@@ -2883,6 +2911,7 @@ function renderStatsDashboard() {
         const cat = catMap[k];
         if (!cat || !cat.data.length) return '';
         const gd = groupForChart(k, cat.data);
+        gd.opts.colorRank = colorRankFor(k, !!gd.opts.note);
         return `<div style="margin-bottom:20px"><div class="divider" style="margin-top:0">${cat.label}</div><div class="stats-bar-chart">${renderBarChart(gd.items, coffees.length, gd.opts)}</div></div>`;
       }).join('');
     })()}

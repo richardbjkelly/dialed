@@ -622,6 +622,16 @@ Specialty coffee dialling-in tracker · Single-file PWA / Android APK
 
 ---
 
+## v3.18
+*30 September 2026*
+
+### Quick fixes
+- FINISHED badge now readable in both modes: finished tiles fade their parts individually instead of the whole card, so the badge stays at full strength
+- "+ Add Coffee" button always shows in the Coffee Library (previously only after returning from a coffee's page)
+- Insights colours follow the entry, not its rank: each value keeps its all-time colour when you switch period (e.g. Ethiopia stays blue in This year even if it's the top origin)
+
+---
+
 ## Pending / Roadmap
 - Rebuild the APK once to pick up the new cup icon
 - Remaining transitions: press feedback, charts drawing in, + rotation, timer step pulse
@@ -632,4 +642,4 @@ Specialty coffee dialling-in tracker · Single-file PWA / Android APK
 
 ---
 
-*Document maintained automatically. Last updated: v3.17*
+*Document maintained automatically. Last updated: v3.18*
