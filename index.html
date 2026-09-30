@@ -261,6 +261,20 @@
   .upnext-actions { display:flex; gap:8px; }
   .upnext-actions .btn-primary { margin-top:0; padding:10px; }
   .upnext-actions .btn-secondary { padding:10px 14px; }
+  .brew-live { font-size:12px; color:var(--text-muted); margin:-4px 0 12px; min-height:16px; }
+  .brew-live b { color:var(--text); }
+  .brew-guide { background:rgba(82,121,111,0.12); border-radius:10px; padding:10px 12px; margin:-6px 0 14px; }
+  .guide-label { font-size:9px; letter-spacing:1.5px; text-transform:uppercase; color:var(--text-muted); }
+  .guide-now { font-size:14px; font-weight:600; color:var(--text); margin:2px 0 4px; line-height:1.35; }
+  .guide-next { font-size:11px; color:var(--text-muted); }
+  .taste-row { display:flex; align-items:center; gap:10px; margin-bottom:6px; }
+  .taste-row label { width:88px; font-size:12px; color:var(--text); }
+  .taste-row input[type=range] { flex:1; accent-color:var(--crema); }
+  .taste-row input.unset { opacity:.35; }
+  .taste-row .tv { width:18px; text-align:right; font-size:13px; color:var(--text); }
+  .taste-line { font-size:11px; color:var(--text-muted); margin-top:6px; }
+  .card-more { background:none; border:none; color:var(--text-muted); font-size:20px; line-height:1; padding:0 4px 6px; cursor:pointer; border-radius:6px; letter-spacing:1px; }
+  .coffee-card-header .card-more { color:rgba(250,250,247,0.8); }
   /* GRINDER STYLES */
   .grinder-type-toggle { display: flex; background: rgba(26,15,10,0.06); border-radius: 10px; padding: 3px; margin-bottom: 20px; }
   .type-btn { flex: 1; padding: 9px 12px; border: none; border-radius: 8px; font-family: 'DM Mono', monospace; font-size: 10px; letter-spacing: 1px; text-transform: uppercase; cursor: pointer; background: none; color: var(--text-muted); transition: all 0.2s; }
@@ -706,15 +720,16 @@
     <div class="divider">Grind & Dose</div>
     <div class="form-row">
       <div class="form-group"><label class="form-label">Grind Setting</label><input type="number" class="form-input" id="r-grind" placeholder="e.g. 8" step="0.5"></div>
-      <div class="form-group"><label class="form-label">Dose (g)</label><input type="number" class="form-input" id="r-dose" placeholder="e.g. 18" step="0.1"></div>
+      <div class="form-group"><label class="form-label">Dose (g)</label><input type="number" class="form-input" id="r-dose" placeholder="e.g. 18" step="0.1" oninput="updateBrewLive()"></div>
     </div>
     <div class="brew-timer">
       <div class="brew-timer-display" id="brew-timer-display">0:00</div>
       <button type="button" class="brew-timer-btn reset" id="brew-timer-reset" onclick="resetBrewTimer()" style="display:none">Reset</button>
       <button type="button" class="brew-timer-btn start" id="brew-timer-toggle" onclick="toggleBrewTimer()">▶ Start brew</button>
     </div>
+    <div id="brew-step-guide" class="brew-guide" style="display:none"></div>
     <div class="form-row">
-      <div class="form-group"><label class="form-label" id="r-yield-label">Yield (g)</label><input type="number" class="form-input" id="r-yield" placeholder="e.g. 36" step="0.1"></div>
+      <div class="form-group"><label class="form-label" id="r-yield-label">Yield (g)</label><input type="number" class="form-input" id="r-yield" placeholder="e.g. 36" step="0.1" oninput="updateBrewLive()"></div>
       <div class="form-group">
         <label class="form-label">Time</label>
         <div class="time-row" id="r-time-esp">
@@ -729,6 +744,7 @@
         </div>
       </div>
     </div>
+    <div id="r-ratio-live" class="brew-live"></div>
     <div class="form-group"><label class="form-label">Water Temp (°C)</label><input type="number" class="form-input" id="r-temp" placeholder="e.g. 93" style="width:50%"></div>
     <div class="divider">Extraction</div>
     <div class="form-group">
@@ -755,6 +771,13 @@
         <button class="star-btn" onclick="setRating(10)"><svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 14 14" width="19" height="19"><g><path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" d="M2 4h8.5v5c0 0.53043 -0.2107 1.0391 -0.58579 1.4142C9.53914 10.7893 9.03043 11 8.5 11h-5c-0.53043 0 -1.03914 -0.2107 -1.41421 -0.5858C1.71071 10.0391 1.5 9.53043 1.5 9V4.5c0 -0.13261 0.05268 -0.25979 0.14645 -0.35355C1.74021 4.05268 1.86739 4 2 4Z" stroke-width="1"></path><path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" d="M0.5 13.5h13" stroke-width="1"></path><path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" d="M10.5 4h1c0.5304 0 1.0391 0.21071 1.4142 0.58579 0.3751 0.37507 0.5858 0.88378 0.5858 1.41421s-0.2107 1.03914 -0.5858 1.41421C12.5391 7.78929 12.0304 8 11.5 8h-1" stroke-width="1"></path><path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" d="M3 0.5v1" stroke-width="1"></path><path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" d="M8 0.5v1" stroke-width="1"></path><path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" d="M5.5 0.5v1" stroke-width="1"></path></g></svg></button>
       </div>
       <input type="hidden" id="r-rating" value="0">
+    </div>
+    <div class="form-group">
+      <label class="form-label">Taste profile <span style="text-transform:none;letter-spacing:0;opacity:.7">(optional, 0–5)</span></label>
+      <div class="taste-row"><label for="taste-sweetness">Sweetness</label><input type="range" min="0" max="5" step="1" value="0" id="taste-sweetness" class="unset" oninput="onTasteInput('sweetness')"><span class="tv" id="taste-sweetness-val">–</span></div>
+      <div class="taste-row"><label for="taste-acidity">Acidity</label><input type="range" min="0" max="5" step="1" value="0" id="taste-acidity" class="unset" oninput="onTasteInput('acidity')"><span class="tv" id="taste-acidity-val">–</span></div>
+      <div class="taste-row"><label for="taste-body">Body</label><input type="range" min="0" max="5" step="1" value="0" id="taste-body" class="unset" oninput="onTasteInput('body')"><span class="tv" id="taste-body-val">–</span></div>
+      <div class="taste-row"><label for="taste-bitterness">Bitterness</label><input type="range" min="0" max="5" step="1" value="0" id="taste-bitterness" class="unset" oninput="onTasteInput('bitterness')"><span class="tv" id="taste-bitterness-val">–</span></div>
     </div>
     <div class="form-group"><label class="form-label">Tasting Notes & Adjustments</label><textarea class="form-textarea" id="r-notes" placeholder="e.g. Sour with grassy finish — grind finer next time."></textarea></div>
     <button class="btn-primary" onclick="saveRecipe()">Log Brew</button>
@@ -1697,6 +1720,8 @@ function openRecipeModal() {
   if (mTab) selectMethod(mTab, state.selectedMethod);
   const rpid = document.getElementById('r-plan-id'); if (rpid) rpid.value = '';
   renderBrewTimer();
+  resetTaste();
+  updateBrewLive();
   openModal('modal-recipe');
 }
 
@@ -1758,6 +1783,7 @@ function updateRecipeDropdown(method) {
 
 function onRecipeChange(sel) {
   state.selectedRecipeId = sel.value || null;
+  setTimeout(() => { renderStepGuide(); updateBrewLive(); }, 0);
   renderRecipeCard(state.selectedMethod, sel.value);
   const method = state.selectedMethod;
   const options = getAllRecipesForMethod(method);
@@ -2021,7 +2047,6 @@ function renderRecipeCard(method, recipeId) {
         ${recipe.steps.map(s => `<li style="font-size:12px;color:rgba(245,237,227,.75);line-height:1.5;margin-bottom:5px">${s}</li>`).join('')}
       </ol>
     </div>`;
-  renderSuggestions(id);
 }
 
 // ==================== LABEL PHOTO ====================
@@ -2250,7 +2275,7 @@ function saveRecipe() {
   if (!state.selectedCoffeeId) { showToast('Select a coffee'); return; }
   if (brewTimer.startedAt) stopBrewTimer();
   const editBrewId = document.getElementById('r-edit-id')?.value||'';
-  const brewData = {coffeeId:state.selectedCoffeeId, grinderId:state.selectedGrinderId||null, recipeId:state.selectedRecipeId||null, method:state.selectedMethod||'Espresso', grind:document.getElementById('r-grind').value, dose:document.getElementById('r-dose').value, yield:document.getElementById('r-yield').value, time:getBrewTimeSecs(), temp:document.getElementById('r-temp').value, extraction:state.selectedExtraction, rating:state.selectedRating, notes:document.getElementById('r-notes').value.trim()};
+  const brewData = {coffeeId:state.selectedCoffeeId, grinderId:state.selectedGrinderId||null, recipeId:state.selectedRecipeId||null, method:state.selectedMethod||'Espresso', grind:document.getElementById('r-grind').value, dose:document.getElementById('r-dose').value, yield:document.getElementById('r-yield').value, time:getBrewTimeSecs(), temp:document.getElementById('r-temp').value, extraction:state.selectedExtraction, rating:state.selectedRating, notes:document.getElementById('r-notes').value.trim(), taste:readTaste()};
   if (editBrewId) {
     const idx = state.recipes.findIndex(x=>x.id===editBrewId);
     if(idx>=0) state.recipes[idx]={...state.recipes[idx],...brewData};
@@ -2273,6 +2298,8 @@ function saveRecipe() {
   showToast(editBrewId ? 'Brew updated ✓' : 'Brew logged ✓'); renderDashboard(); if(state.currentView==='recipes') renderRecipes();
   if (state.currentView==='tracker') renderTracker();
   if (newBrewId) setTimeout(() => openPlanNext(newBrewId), 350);
+  const bagCf = state.coffees.find(x => x.id === brewData.coffeeId);
+  if (newBrewId && bagCf && !bagCf.finishedBag && gramsLeft(bagCf) === 0) setTimeout(() => showToast('That bag looks empty — mark it finished on the coffee page'), 2600);
 }
 
 // ==================== DASHBOARD ====================
@@ -2325,11 +2352,11 @@ function renderCoffeesView() {
   if (!state.coffees.length) { el.innerHTML=`<div class="empty-state"><div class="empty-icon">📦</div><div class="empty-title">No coffees yet</div><div class="empty-desc">Tap + to add your first coffee.</div></div>`; return; }
   el.innerHTML = state.coffees.map(c => {
     const rc = state.recipes.filter(r=>r.coffeeId===c.id).length;
-    const maslPill = (c.masl ? `<span class="meta-pill">${c.masl}m</span>` : '') + (per100g(c)!=null ? `<span class="meta-pill">£${per100g(c).toFixed(2)}/100g</span>` : ''); const pills = [c.country,c.process,c.roastLevel,c.varietal].filter(Boolean).map(p=>`<span class="meta-pill">${p}</span>`).join('') + maslPill;
+    const maslPill = (c.masl ? `<span class="meta-pill">${c.masl}m</span>` : '') + (per100g(c)!=null ? `<span class="meta-pill">£${per100g(c).toFixed(2)}/100g</span>` : '') + (gramsLeft(c)!=null && !c.finishedBag ? `<span class="meta-pill">${Math.round(gramsLeft(c))}g left</span>` : '') + (roastAgeToday(c)!=null && !c.finishedBag ? `<span class="meta-pill">${roastAgeToday(c)}d off roast</span>` : ''); const pills = [c.country,c.process,c.roastLevel,c.varietal].filter(Boolean).map(p=>`<span class="meta-pill">${p}</span>`).join('') + maslPill;
     const headerImg = c.labelPhoto ? `<img src="${c.labelPhoto}" style="width:52px;height:52px;border-radius:8px;object-fit:cover;flex-shrink:0;border:1px solid rgba(255,255,255,0.15);cursor:zoom-in" alt="label" onclick="event.stopPropagation();openLightbox('${c.labelPhoto}')">` : '';
     const cardRating = c.rating > 0 ? `<div style="display:inline-flex;gap:1px;color:var(--crema);margin-top:4px">${Array(c.rating).fill('<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 14 14" width="14" height="14"><g><path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" d="M2 4h8.5v5c0 0.53043 -0.2107 1.0391 -0.58579 1.4142C9.53914 10.7893 9.03043 11 8.5 11h-5c-0.53043 0 -1.03914 -0.2107 -1.41421 -0.5858C1.71071 10.0391 1.5 9.53043 1.5 9V4.5c0 -0.13261 0.05268 -0.25979 0.14645 -0.35355C1.74021 4.05268 1.86739 4 2 4Z" stroke-width="1"></path><path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" d="M0.5 13.5h13" stroke-width="1"></path><path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" d="M10.5 4h1c0.5304 0 1.0391 0.21071 1.4142 0.58579 0.3751 0.37507 0.5858 0.88378 0.5858 1.41421s-0.2107 1.03914 -0.5858 1.41421C12.5391 7.78929 12.0304 8 11.5 8h-1" stroke-width="1"></path><path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" d="M3 0.5v1" stroke-width="1"></path><path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" d="M8 0.5v1" stroke-width="1"></path><path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" d="M5.5 0.5v1" stroke-width="1"></path></g></svg>').join('')}</div><span style="font-family:'DM Mono',monospace;font-size:9px;color:var(--text-muted);margin-left:4px">${c.rating}/10</span>` : '';
     const finishedStyle = c.finishedBag ? 'opacity:0.45;filter:grayscale(0.4);' : '';
-    return `<div class="card-wrap" ontouchstart="startLongPress('${c.id}','coffee')" ontouchend="endLongPress()" ontouchcancel="endLongPress()" oncontextmenu="event.stopPropagation();showEditOverlay('coffee-${c.id}');return false"><div class="card-edit-overlay" id="overlay-coffee-${c.id}"><button class="edit-overlay-btn" onclick="event.stopPropagation();openEditCoffee('${c.id}');hideEditOverlay('coffee-${c.id}')">✏ Edit</button><button class="edit-overlay-btn" onclick="event.stopPropagation();showTrendModal('${c.id}');hideEditOverlay('coffee-${c.id}')">📈 Trends</button><button class="edit-overlay-btn" onclick="event.stopPropagation();hideEditOverlay('coffee-${c.id}')">Cancel</button></div><div class="coffee-card" onclick="showCoffeeDetail('${c.id}')" style="${finishedStyle}"><div class="coffee-card-header"><div><div class="coffee-card-name">${c.name}${c.finishedBag?'<span style="margin-left:6px;font-family:\'DM Mono\',monospace;font-size:8px;background:rgba(139,26,26,0.15);color:#8b1a1a;border-radius:10px;padding:2px 6px;letter-spacing:1px">FINISHED</span>':''}</div><div class="coffee-card-roaster">${c.roaster||'Unknown Roaster'}</div>${cardRating}</div>${headerImg}</div><div class="coffee-card-body">${pills?`<div class="coffee-meta">${pills}</div>`:''}  <div class="recipe-count">${rc} brew${rc!==1?'s':''} logged</div></div></div></div>`;
+    return `<div class="card-wrap" ontouchstart="startLongPress('${c.id}','coffee')" ontouchend="endLongPress()" ontouchcancel="endLongPress()" oncontextmenu="event.stopPropagation();showEditOverlay('coffee-${c.id}');return false"><div class="card-edit-overlay" id="overlay-coffee-${c.id}"><button class="edit-overlay-btn" onclick="event.stopPropagation();openEditCoffee('${c.id}');hideEditOverlay('coffee-${c.id}')">✏ Edit</button><button class="edit-overlay-btn" onclick="event.stopPropagation();showTrendModal('${c.id}');hideEditOverlay('coffee-${c.id}')">📈 Trends</button><button class="edit-overlay-btn" onclick="event.stopPropagation();hideEditOverlay('coffee-${c.id}')">Cancel</button></div><div class="coffee-card" onclick="showCoffeeDetail('${c.id}')" style="${finishedStyle}"><div class="coffee-card-header"><div><div class="coffee-card-name">${c.name}${c.finishedBag?'<span style="margin-left:6px;font-family:\'DM Mono\',monospace;font-size:8px;background:rgba(139,26,26,0.15);color:#8b1a1a;border-radius:10px;padding:2px 6px;letter-spacing:1px">FINISHED</span>':''}</div><div class="coffee-card-roaster">${c.roaster||'Unknown Roaster'}</div>${cardRating}</div><div style="display:flex;align-items:flex-start;gap:8px">${headerImg}<button class="card-more" aria-label="More options" onclick="event.stopPropagation();showEditOverlay('coffee-${c.id}')">⋯</button></div></div><div class="coffee-card-body">${pills?`<div class="coffee-meta">${pills}</div>`:''}  <div class="recipe-count">${rc} brew${rc!==1?'s':''} logged</div></div></div></div>`;
   }).join('');
 }
 
@@ -2384,6 +2411,7 @@ function showCoffeeDetail(id) {
       <button class="btn-secondary" style="flex:1" onclick="showTrendModal('${c.id}')">📈 Trends</button>
       <button class="btn-secondary" style="flex:1" onclick="toggleFinishedBag('${c.id}')">${c.finishedBag?'✓ Finished':'Mark Finished'}</button>
     </div>
+    ${bagPanelHtml(c)}${bestBrewHtml(c)}
     <div class="section-title" style="margin-bottom:4px">Brew Log</div>
     <div class="section-subtitle">${recs.length} attempt${recs.length!==1?'s':''}</div>
     ${recs.length?recs.map(r=>recipeCard(r,true)).join(''):`<div class="empty-state"><div class="empty-icon">📋</div><div class="empty-title">No brews yet</div></div>`}
@@ -2400,11 +2428,11 @@ function recipeCard(r, showDel=false) {
   const stars = r.rating>0 ? `<span style="display:inline-flex;align-items:center;gap:2px;color:var(--crema)"><svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 14 14" width="11" height="11"><g><path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" d="M2 4h8.5v5c0 0.53043 -0.2107 1.0391 -0.58579 1.4142C9.53914 10.7893 9.03043 11 8.5 11h-5c-0.53043 0 -1.03914 -0.2107 -1.41421 -0.5858C1.71071 10.0391 1.5 9.53043 1.5 9V4.5c0 -0.13261 0.05268 -0.25979 0.14645 -0.35355C1.74021 4.05268 1.86739 4 2 4Z" stroke-width="1"></path><path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" d="M0.5 13.5h13" stroke-width="1"></path><path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" d="M10.5 4h1c0.5304 0 1.0391 0.21071 1.4142 0.58579 0.3751 0.37507 0.5858 0.88378 0.5858 1.41421s-0.2107 1.03914 -0.5858 1.41421C12.5391 7.78929 12.0304 8 11.5 8h-1" stroke-width="1"></path><path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" d="M3 0.5v1" stroke-width="1"></path><path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" d="M8 0.5v1" stroke-width="1"></path><path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" d="M5.5 0.5v1" stroke-width="1"></path></g></svg><span style="font-size:10px;margin-left:2px">${r.rating}/10</span></span>` : '';
   
   const isEsp = isEspressoMethod(r.method||'Espresso');
-  const ratio = (r.dose&&r.yield) ? (parseFloat(r.yield)/parseFloat(r.dose)).toFixed(1)+':1' : '—';
+  const ratio = ratioStr(r); const dayOff = daysOffRoast(r, coffee); const cupCost = costPerCup(r, coffee);
   const yieldLabel = isEsp ? 'Yield' : 'Water';
   const yieldUnit = isEsp ? 'g' : 'ml';
   const grinderBadge = grinder ? `<span style="display:inline-block;margin-top:4px;font-family:'DM Mono',monospace;font-size:9px;background:rgba(82,121,111,0.1);border:1px solid rgba(82,121,111,0.25);color:var(--crema);border-radius:20px;padding:2px 8px;letter-spacing:.5px">${grinder.type==='manual'?'✋':'⚡'} ${grinder.brand} ${grinder.model}</span>` : '';
-  const recipeObj = r.recipeId ? Object.values(RECIPES).flat().find(x=>x.id===r.recipeId) : null;
+  const recipeObj = r.recipeId ? [...Object.values(RECIPES).flat(), ...(state.customRecipes||[])].find(x=>x.id===r.recipeId) : null;
   const recipeBadge = recipeObj ? `<span style="display:inline-block;margin-top:4px;margin-left:4px;font-family:'DM Mono',monospace;font-size:9px;background:rgba(18,60,39,0.08);border:1px solid rgba(18,60,39,0.15);color:var(--espresso);border-radius:20px;padding:2px 8px;letter-spacing:.5px">📋 ${recipeObj.name.split('—')[0].trim()}</span>` : '';
   const thumbHtml = coffee?.labelPhoto ? `<img src="${coffee.labelPhoto}" class="brew-label-thumb" alt="label" onclick="openLightbox('${coffee.labelPhoto}')" style="cursor:zoom-in">` : '';
   return `<div class="card-wrap" ontouchstart="startLongPress('${r.id}','brew')" ontouchend="endLongPress()" ontouchcancel="endLongPress()" oncontextmenu="event.stopPropagation();showEditOverlay('brew-${r.id}');return false"><div class="card-edit-overlay" id="overlay-brew-${r.id}"><button class="edit-overlay-btn" onclick="event.stopPropagation();editBrew('${r.id}');hideEditOverlay('brew-${r.id}')">✏ Edit</button><button class="edit-overlay-btn" onclick="event.stopPropagation();hideEditOverlay('brew-${r.id}');openPlanNext('${r.id}')">↻ Plan next</button><button class="edit-overlay-btn" onclick="event.stopPropagation();confirmDeleteBrew('${r.id}')">✕ Delete</button><button class="edit-overlay-btn" onclick="event.stopPropagation();hideEditOverlay('brew-${r.id}')">Cancel</button></div><div class="recipe-entry">
@@ -2417,7 +2445,7 @@ function recipeCard(r, showDel=false) {
           ${grinderBadge}
         </div>
       </div>
-      <div style="display:flex;align-items:center;gap:6px;flex-shrink:0">${exTag}</div>
+      <div style="display:flex;align-items:center;gap:6px;flex-shrink:0">${exTag}<button class="card-more" aria-label="More options" onclick="event.stopPropagation();showEditOverlay('brew-${r.id}')">⋯</button></div>
     </div>
     <div class="recipe-params">
       <div class="param-block"><div class="param-value">${r.grind||'—'}</div><div class="param-label">Grind</div></div>
@@ -2425,9 +2453,10 @@ function recipeCard(r, showDel=false) {
       <div class="param-block"><div class="param-value">${formatBrewTime(r.time,r.method)}</div><div class="param-label">Time</div></div>
     </div>
     <div style="display:flex;justify-content:space-between;align-items:center">
-      <div style="font-family:'DM Mono',monospace;font-size:10px;color:var(--text-muted)">${date}${r.yield?' · '+r.yield+yieldUnit+' '+yieldLabel.toLowerCase():''}${r.temp?' · '+r.temp+'°C':''} · ${ratio}</div>
+      <div style="font-family:'DM Mono',monospace;font-size:10px;color:var(--text-muted)">${date}${dayOff!==null?' · Day '+dayOff:''}${r.yield?' · '+r.yield+yieldUnit+' '+yieldLabel.toLowerCase():''}${ratio?' · '+ratio:''}${r.temp?' · '+r.temp+'°C':''}${cupCost!=null?' · £'+cupCost.toFixed(2):''}</div>
       ${stars}
     </div>
+    ${r.taste?`<div class="taste-line">${tasteLine(r.taste)}</div>`:''}
     ${r.notes?`<div class="recipe-notes">${r.notes}</div>`:''}
   </div></div>`;
 }
@@ -3151,11 +3180,166 @@ function fillBrewModal(r, opts={}) {
     if (r.extraction) selectExtraction(r.extraction);
     else { state.selectedExtraction=''; document.querySelectorAll('.extraction-btn').forEach(b=>b.classList.remove('selected')); }
     setRating(r.rating || 0);
+    TASTE_KEYS.forEach(([k]) => setTasteSlider(k, r.taste && r.taste[k] !== undefined ? r.taste[k] : null));
   } else {
     state.selectedExtraction=''; document.querySelectorAll('.extraction-btn').forEach(b=>b.classList.remove('selected'));
     setRating(0);
   }
+  updateBrewLive();
 }
+
+
+// ==================== DIALLING-IN HELPERS ====================
+const DAY_MS = 86400000;
+function daysOffRoast(r, cf) {
+  if (!cf || !cf.roastDate || !r || !r.createdAt) return null;
+  const d = Math.floor((new Date(r.createdAt) - new Date(cf.roastDate + 'T00:00:00')) / DAY_MS);
+  return d >= 0 ? d : null;
+}
+function roastAgeToday(cf) {
+  if (!cf || !cf.roastDate) return null;
+  const d = Math.floor((Date.now() - new Date(cf.roastDate + 'T00:00:00')) / DAY_MS);
+  return d >= 0 ? d : null;
+}
+function ratioStr(r) {
+  const d = parseFloat(r.dose), y = parseFloat(r.yield);
+  if (!(d > 0) || !(y > 0)) return '';
+  const x = y / d; return '1:' + (x >= 10 ? x.toFixed(1) : x.toFixed(1).replace(/\.0$/, '.0'));
+}
+function costPerCup(r, cf) {
+  const p = per100g(cf), d = parseFloat(r.dose);
+  return (p != null && d > 0) ? p * d / 100 : null;
+}
+function brewsFor(cfId) { return state.recipes.filter(r => r.coffeeId === cfId); }
+function gramsUsed(cf) { return brewsFor(cf.id).reduce((s, r) => s + (parseFloat(r.dose) || 0), 0); }
+function gramsLeft(cf) { return cf && cf.weight > 0 ? Math.max(0, cf.weight - gramsUsed(cf)) : null; }
+function avgDose(cf) { const ds = brewsFor(cf.id).map(r => parseFloat(r.dose)).filter(d => d > 0); return ds.length ? ds.reduce((a, b) => a + b, 0) / ds.length : null; }
+function bestBrew(cfId) {
+  const rated = brewsFor(cfId).filter(r => r.rating > 0);
+  if (!rated.length) return null;
+  return rated.sort((a, b) => (b.rating - a.rating) || ((b.extraction === 'good') - (a.extraction === 'good')) || (new Date(b.createdAt) - new Date(a.createdAt)))[0];
+}
+function bagPanelHtml(cf) {
+  const left = gramsLeft(cf), used = gramsUsed(cf), ad = avgDose(cf);
+  const costs = brewsFor(cf.id).map(r => costPerCup(r, cf)).filter(x => x != null);
+  const age = roastAgeToday(cf);
+  const rows = [];
+  if (left != null) {
+    const pct = Math.round(left / cf.weight * 100);
+    const brewsLeft = ad ? Math.floor(left / ad) : null;
+    const low = left <= 0 ? 'Empty' : (brewsLeft !== null && brewsLeft <= 1) ? 'Nearly empty' : '';
+    rows.push(`<div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:6px">
+        <span style="font-size:13px;font-weight:600;color:var(--text)">${Math.round(left)}g left <span style="font-weight:400;color:var(--text-muted);font-size:11px">of ${cf.weight}g${brewsLeft !== null && left > 0 ? ' · ~' + brewsLeft + ' brew' + (brewsLeft !== 1 ? 's' : '') : ''}</span></span>
+        ${low ? `<span class="extraction-tag tag-over">${low}</span>` : ''}
+      </div>
+      <div class="stats-bar-track" style="height:8px;margin-bottom:10px"><div class="stats-bar-fill" style="width:${pct}%;background:${pct <= 15 ? '#c0564b' : 'var(--crema)'}"></div></div>
+      ${left <= 0 && !cf.finishedBag ? `<button class="btn-secondary" style="width:100%;margin-bottom:10px;color:var(--text)" onclick="toggleFinishedBag('${cf.id}')">Bag's empty — mark finished</button>` : ''}`);
+  }
+  const facts = [];
+  if (age !== null) facts.push(`Roasted <b>${age}</b> day${age !== 1 ? 's' : ''} ago`);
+  if (left == null && used > 0) facts.push(`<b>${Math.round(used)}g</b> used`);
+  if (costs.length) facts.push(`<b>£${(costs.reduce((a, b) => a + b, 0) / costs.length).toFixed(2)}</b> avg per cup`);
+  if (!rows.length && !facts.length) return '';
+  return `<div class="card" style="padding:14px 16px">${rows.join('')}${facts.length ? `<div style="font-size:12px;color:var(--text-muted);display:flex;flex-wrap:wrap;gap:4px 14px">${facts.map(f => `<span>${f}</span>`).join('')}</div>` : ''}
+    ${left == null ? `<div style="font-size:11px;color:var(--text-muted);margin-top:6px">Add the bag weight (Edit) to track grams left.</div>` : ''}</div>`;
+}
+function bestBrewHtml(cf) {
+  const b = bestBrew(cf.id); if (!b) return '';
+  const parts = [b.grind ? 'Grind ' + b.grind : '', b.dose ? b.dose + 'g' : '', ratioStr(b), b.temp ? b.temp + '°C' : '', b.time ? formatBrewTime(b.time, b.method) : ''].filter(Boolean);
+  return `<div class="card" style="padding:14px 16px;border:1.5px solid var(--crema)">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px">
+      <span style="font-size:10px;letter-spacing:1.5px;text-transform:uppercase;color:var(--text-muted)">★ Best brew so far</span>
+      <span style="font-size:12px;color:var(--text);font-weight:600">${b.rating}/10</span>
+    </div>
+    <div style="font-size:14px;color:var(--text);font-weight:600;margin-bottom:2px">${b.method}</div>
+    <div style="font-size:12px;color:var(--text-muted);margin-bottom:12px">${parts.join(' · ')}</div>
+    <button class="btn-primary" style="margin-top:0;padding:11px" onclick="repeatBrew('${b.id}')">↻ Repeat this brew</button>
+  </div>`;
+}
+function repeatBrew(id) {
+  const r = state.recipes.find(x => x.id === id); if (!r) return;
+  fillBrewModal(r, { title: 'Log Brew · Repeat' });
+}
+
+// ---- Live ratio + cost in Log Brew ----
+function updateBrewLive() {
+  const el = document.getElementById('r-ratio-live'); if (!el) return;
+  const r = { dose: document.getElementById('r-dose').value, yield: document.getElementById('r-yield').value };
+  const cf = state.coffees.find(c => c.id === state.selectedCoffeeId);
+  const parts = [];
+  const ratio = ratioStr(r); if (ratio) parts.push('Ratio <b>' + ratio + '</b>');
+  const cost = costPerCup(r, cf); if (cost != null) parts.push('<b>£' + cost.toFixed(2) + '</b> per cup');
+  const left = cf ? gramsLeft(cf) : null; const d = parseFloat(r.dose);
+  if (left != null && d > 0 && !document.getElementById('r-edit-id').value) parts.push(`${Math.max(0, Math.round(left - d))}g left after this`);
+  el.innerHTML = parts.join(' · ');
+}
+
+// ---- Tasting sliders ----
+const TASTE_KEYS = [['sweetness', 'Sweetness'], ['acidity', 'Acidity'], ['body', 'Body'], ['bitterness', 'Bitterness']];
+function setTasteSlider(key, val) {
+  const inp = document.getElementById('taste-' + key), out = document.getElementById('taste-' + key + '-val');
+  if (!inp) return;
+  if (val === null || val === undefined) { inp.value = 0; inp.dataset.set = ''; out.textContent = '–'; inp.classList.add('unset'); }
+  else { inp.value = val; inp.dataset.set = '1'; out.textContent = val; inp.classList.remove('unset'); }
+}
+function onTasteInput(key) { const inp = document.getElementById('taste-' + key); setTasteSlider(key, parseInt(inp.value)); }
+function resetTaste() { TASTE_KEYS.forEach(([k]) => setTasteSlider(k, null)); }
+function readTaste() {
+  const t = {}; TASTE_KEYS.forEach(([k]) => { const inp = document.getElementById('taste-' + k); if (inp && inp.dataset.set) t[k] = parseInt(inp.value); });
+  return Object.keys(t).length ? t : null;
+}
+function tasteLine(t) {
+  if (!t) return '';
+  return TASTE_KEYS.filter(([k]) => t[k] !== undefined).map(([k, l]) => `${l} ${t[k]}`).join(' · ');
+}
+
+// ---- Guided recipe steps on the timer ----
+let lastGuideIdx = -1;
+function timedSteps() {
+  const rec = state.selectedRecipeId ? getAllRecipesForMethod(state.selectedMethod).find(x => x.id === state.selectedRecipeId) : null;
+  if (!rec) return [];
+  return rec.steps.map(s => { const m = s.match(/^~?\s*(\d{1,2}):(\d{2})\s*[—–-]\s*(.*)$/); return m ? { at: +m[1] * 60 + +m[2], text: m[3] } : null; }).filter(Boolean).sort((a, b) => a.at - b.at);
+}
+function renderStepGuide() {
+  const el = document.getElementById('brew-step-guide'); if (!el) return;
+  const steps = timedSteps();
+  if (steps.length < 2) { el.style.display = 'none'; lastGuideIdx = -1; return; }
+  const s = brewTimerSecs(), running = !!brewTimer.startedAt;
+  let idx = -1; steps.forEach((st, i) => { if (s >= st.at) idx = i; });
+  if ((running || s > 0) && idx !== lastGuideIdx && idx >= 0) { if (lastGuideIdx !== -1 || idx > 0) { if (navigator.vibrate) navigator.vibrate(120); } lastGuideIdx = idx; }
+  const fmt = n => Math.floor(n / 60) + ':' + String(n % 60).padStart(2, '0');
+  const next = steps[idx + 1];
+  el.style.display = 'block';
+  if (!running && s === 0) {
+    el.innerHTML = `<div class="guide-label">First step at ${fmt(steps[0].at)}</div><div class="guide-now">${steps[0].text}</div>`;
+    return;
+  }
+  el.innerHTML = `<div class="guide-label">Now</div><div class="guide-now">${idx >= 0 ? steps[idx].text : 'Get ready…'}</div>` +
+    (next ? `<div class="guide-next">Next in <b>${fmt(Math.max(0, next.at - s))}</b> · ${next.text}</div>` : `<div class="guide-next">Last step — stop the timer when it's finished draining.</div>`);
+}
+
+// ---- Taste vs days off roast (Trends) ----
+function renderAgeChart(coffeeId) {
+  const cf = state.coffees.find(c => c.id === coffeeId);
+  if (!cf || !cf.roastDate) return '';
+  const pts = brewsFor(coffeeId).map(r => ({ d: daysOffRoast(r, cf), v: parseFloat(r.rating) })).filter(p => p.d !== null && p.v > 0).sort((a, b) => a.d - b.d);
+  if (pts.length < 2) return '';
+  const W = 320, H = 120, PL = 26, PR = 10, PT = 14, PB = 24, CW = W - PL - PR, CH = H - PT - PB;
+  const dmin = pts[0].d, dmax = pts[pts.length - 1].d, dr = (dmax - dmin) || 1;
+  const xs = d => PL + (d - dmin) / dr * CW, ys = v => PT + CH - v / 10 * CH;
+  const path = pts.map((p, i) => (i ? 'L' : 'M') + xs(p.d).toFixed(1) + ',' + ys(p.v).toFixed(1)).join(' ');
+  const best = pts.reduce((a, b) => b.v > a.v ? b : a);
+  const grid = [0, 5, 10].map(v => `<line x1="${PL}" x2="${W - PR}" y1="${ys(v)}" y2="${ys(v)}" stroke="var(--border)"/><text x="${PL - 4}" y="${ys(v) + 3}" font-size="8" fill="var(--text-muted)" text-anchor="end">${v}</text>`).join('');
+  const dots = pts.map(p => `<circle cx="${xs(p.d).toFixed(1)}" cy="${ys(p.v).toFixed(1)}" r="${p === best ? 5 : 3.5}" fill="${p === best ? '#123C27' : '#52796F'}" stroke="white" stroke-width="1.5"/>`).join('');
+  const xl = [...new Set(pts.map(p => p.d))].map(d => `<text x="${xs(d).toFixed(1)}" y="${H - 6}" font-size="8" fill="var(--text-muted)" text-anchor="middle">D${d}</text>`).join('');
+  return `<div class="trend-chart-wrap" style="padding:14px 10px 8px;margin-top:12px">
+    <div style="font-size:12px;font-weight:600;color:var(--text);margin:0 0 2px 6px">Taste by days off roast</div>
+    <div style="font-size:11px;color:var(--text-muted);margin:0 0 6px 6px">Best so far: ${best.v}/10 on day ${best.d}</div>
+    <svg viewBox="0 0 ${W} ${H}" style="width:100%;overflow:visible">${grid}<path d="${path}" stroke="#52796F" stroke-width="2" fill="none" stroke-linejoin="round"/>${dots}${xl}</svg>
+  </div>`;
+}
+
+document.addEventListener('click', e => { if (e.target.closest && e.target.closest('#coffee-selector')) setTimeout(updateBrewLive, 0); });
 
 // ==================== BREW TIMER ====================
 // Uses wall-clock timestamps, so it stays accurate if the phone sleeps or the app is backgrounded.
@@ -3170,6 +3354,7 @@ function renderBrewTimer() {
   t.textContent = running ? '■ Stop' : (s ? '▶ Resume' : '▶ Start brew');
   t.className = 'brew-timer-btn ' + (running ? 'stop' : 'start');
   rs.style.display = (!running && s) ? '' : 'none';
+  renderStepGuide();
 }
 async function toggleBrewTimer() {
   if (brewTimer.startedAt) { stopBrewTimer(); return; }
@@ -3193,6 +3378,7 @@ function resetBrewTimer() {
   clearInterval(brewTimer.tick);
   try { brewTimer.wakeLock && brewTimer.wakeLock.release(); } catch(e) {}
   brewTimer = { startedAt:null, elapsed:0, tick:null, wakeLock:null };
+  lastGuideIdx = -1;
   renderBrewTimer();
 }
 document.addEventListener('visibilitychange', async () => {
@@ -3490,7 +3676,7 @@ function renderTrendCharts(coffeeId) {
       </svg>
       ${dateRow}
       ${timeChart}
-    </div>`;
+    </div>` + renderAgeChart(coffeeId);
 }
 
 
