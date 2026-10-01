@@ -724,6 +724,7 @@ Specialty coffee dialling-in tracker · Single-file PWA / Android APK
 - Google Drive sync (deferred — manual backup/restore and reminder in place)
 - Screenshot showcase for PWABuilder
 - Play Store listing
+- On hold: sharing with friends — start with share links (coffee + best recipe via the phone's share sheet, imported by tapping the link); connected friends/feed later if wanted
 
 ---
 
