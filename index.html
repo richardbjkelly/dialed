@@ -861,17 +861,6 @@
   <div id="compare-content"></div>
 </div>
 
-<!-- MY RECIPES (hidden — integrated into Recipes tab) -->
-<div id="view-myrecipes" style="display:none">
-  <div style="height:20px"></div>
-  <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:4px">
-    <div class="section-title">My Recipes</div>
-    <button class="btn-secondary" onclick="openNewCustomRecipe()" style="margin-top:4px">+ New Recipe</button>
-  </div>
-  <div class="section-subtitle">Your custom brew recipes</div>
-  <div id="myrecipes-list"></div>
-</div>
-
 <!-- Compare floating bar -->
 <div class="compare-bar" id="compare-bar">
   <div class="compare-bar-text" id="compare-bar-text">0 grinders selected</div>
@@ -1932,30 +1921,54 @@ function sanitizeState(raw) {
   };
   const safeRef = v => { const t = String(v == null ? '' : v); return idMap[t] || (SAFE_ID.test(t) ? t : null); };
   const num010 = v => { const n = Math.round(Number(v)); return n >= 1 && n <= 10 ? n : 0; };
+  // Values that are shown as numbers must be numbers (or number-like text); anything else is blanked
+  const NUMISH = /^-?\d{1,7}([.,]\d{1,4})?$/;
+  const numish = v => (v == null || v === '') ? v : (typeof v === 'number' ? (isFinite(v) ? v : '') : (NUMISH.test(String(v).trim()) ? String(v).trim() : ''));
+  const plain = (v, max = 30) => { const t = String(v == null ? '' : v); return /^[\p{L}\p{N} .,+&\/()’:\-]*$/u.test(t) && t.length <= max ? t : ''; };
+  const isoDate = v => (typeof v === 'string' && !isNaN(Date.parse(v))) ? v : undefined;
+  const nums = (o, keys) => keys.forEach(k => { if (k in o) o[k] = numish(o[k]); });
+  const cleanTaste = t => { if (!isObj(t)) return undefined; const r = {}; ['sweetness','acidity','body','bitterness'].forEach(k => { const n = Math.round(Number(t[k])); if (t[k] != null && n >= 0 && n <= 5) r[k] = n; }); return Object.keys(r).length ? r : undefined; };
   const out = {};
   out.coffees = (raw.coffees || []).filter(isObj).map(c => {
     const o = { ...c, id: fixId(c.id, 'c'), name: String(c.name == null || c.name === '' ? 'Unnamed coffee' : c.name) };
     if (typeof o.labelPhoto !== 'string' || !o.labelPhoto.startsWith('data:image/')) delete o.labelPhoto;
     if (o.rating != null) o.rating = num010(o.rating);
     o.finishedBag = !!o.finishedBag; o.decaf = !!o.decaf;
+    nums(o, ['weight', 'price', 'priceGBP', 'masl']);
+    if ('currency' in o && !/^[A-Z]{3}$/.test(String(o.currency))) o.currency = 'GBP';
+    if ('roastDate' in o && !/^\d{4}-\d{2}-\d{2}$/.test(String(o.roastDate))) o.roastDate = '';
+    ['createdAt', 'finishedAt'].forEach(k => { if (k in o) { const d = isoDate(o[k]); if (d) o[k] = d; else delete o[k]; } });
+    if ('buyAgain' in o && !['yes', 'maybe', 'no', ''].includes(o.buyAgain)) o.buyAgain = '';
     return o;
   });
   out.customRecipes = (raw.customRecipes || []).filter(isObj).map(r => ({ ...r, id: fixId(r.id, 'cr'), name: String(r.name == null ? 'Recipe' : r.name),
-    steps: Array.isArray(r.steps) ? r.steps.map(x => String(x)) : [] }));
+    steps: Array.isArray(r.steps) ? r.steps.map(x => String(x)) : [], method: plain(r.method) || 'Other',
+    dose: numish(r.dose), water: numish(r.water), temp: numish(r.temp), custom: true }));
   out.recipes = (raw.recipes || []).filter(isObj).map(r => {
     const o = { ...r, id: fixId(r.id, 'b'), coffeeId: safeRef(r.coffeeId) || '', grinderId: safeRef(r.grinderId), recipeId: safeRef(r.recipeId) };
     if (o.rating != null) o.rating = num010(o.rating);
-    if (o.taste != null && !isObj(o.taste)) delete o.taste;
+    if ('taste' in o) { const t = cleanTaste(o.taste); if (t) o.taste = t; else delete o.taste; }
     if (!['under', 'good', 'over', ''].includes(o.extraction || '')) o.extraction = '';
+    nums(o, ['dose', 'yield', 'temp', 'time', 'grindUm']);
+    if ('grind' in o) o.grind = plain(o.grind, 20);
+    o.method = plain(o.method) || 'Other';
+    if ('createdAt' in o) { const d = isoDate(o.createdAt); if (d) o.createdAt = d; else delete o.createdAt; }
     return o;
   });
-  out.plannedBrews = (raw.plannedBrews || []).filter(isObj).map(p => ({ ...p, id: fixId(p.id, 'plan-'), coffeeId: safeRef(p.coffeeId) || '', grinderId: safeRef(p.grinderId), recipeId: safeRef(p.recipeId), basedOn: safeRef(p.basedOn) }));
+  out.plannedBrews = (raw.plannedBrews || []).filter(isObj).map(p => {
+    const o = { ...p, id: fixId(p.id, 'plan-'), coffeeId: safeRef(p.coffeeId) || '', grinderId: safeRef(p.grinderId), recipeId: safeRef(p.recipeId), basedOn: safeRef(p.basedOn) };
+    nums(o, ['dose', 'yield', 'temp', 'tempFrom']);
+    ['grind', 'grindFrom', 'grindDir', 'tempDir'].forEach(k => { if (k in o) o[k] = plain(o[k], 20); });
+    o.method = plain(o.method) || 'Other';
+    if (!['under', 'good', 'over', ''].includes(o.fromExtraction || '')) o.fromExtraction = '';
+    return o;
+  });
   out.compareIds = Array.isArray(raw.compareIds) ? raw.compareIds.map(safeRef).filter(Boolean) : [];
   out.favouriteGrinderId = safeRef(raw.favouriteGrinderId);
   out.selectedGrinderId = safeRef(raw.selectedGrinderId);
   out.selectedRecipeId = safeRef(raw.selectedRecipeId);
   out.selectedCoffeeId = safeRef(raw.selectedCoffeeId);
-  if (typeof raw.selectedMethod === 'string' && raw.selectedMethod.length < 40) out.selectedMethod = raw.selectedMethod;
+  if (plain(raw.selectedMethod)) out.selectedMethod = plain(raw.selectedMethod);
   return out;
 }
 function tsOf(x) { const t = x && x.createdAt ? Date.parse(x.createdAt) : NaN; return isNaN(t) ? 0 : t; }
@@ -2067,7 +2080,7 @@ function openRecipeModal() {
   state.coffees.filter(selectable).forEach(c => {
     const d = document.createElement('div');
     d.className = 'coffee-selector-item' + (state.selectedCoffeeId===c.id?' selected':'');
-    d.innerHTML = `<div class="cs-name">${c.name}</div><div class="cs-sub">${c.roaster||''}</div>`;
+    d.innerHTML = `<div class="cs-name">${escHtml(c.name)}</div><div class="cs-sub">${escHtml(c.roaster||'')}</div>`;
     d.onclick = () => { state.selectedCoffeeId=c.id; cs.querySelectorAll('.coffee-selector-item').forEach(x=>x.classList.remove('selected')); d.classList.add('selected'); renderBrewHistory(); renderBrewSuggestion(); };
     cs.appendChild(d);
   });
@@ -2182,7 +2195,7 @@ function updateRecipeDropdown(method) {
   wrap.style.display = 'block';
   const options = getAllRecipesForMethod(method);
   sel.innerHTML = '<option value="">— No recipe / custom —</option>' +
-    options.map(r => `<option value="${r.id}">${r.custom?'★ ':''}${r.name} · ${r.dose}g / ${r.water}ml</option>`).join('');
+    options.map(r => `<option value="${r.id}">${r.custom?'★ ':''}${escHtml(r.name)} · ${escHtml(r.dose)}g / ${escHtml(r.water)}ml</option>`).join('');
   // Restore previously selected recipe if same method
   if (state.selectedRecipeId) {
     const still = options.find(r => r.id === state.selectedRecipeId);
@@ -2270,8 +2283,8 @@ function renderBuiltinRecipes() {
       html += `<div class="recipe-lib-card">
         <div class="recipe-lib-header">
           <div style="flex:1">
-            <div class="recipe-lib-title">${r.name}</div>
-            <div class="recipe-lib-author">${r.author||''}${r.grindHint?' · '+r.grindHint:''}</div>
+            <div class="recipe-lib-title">${escHtml(r.name)}</div>
+            <div class="recipe-lib-author">${escHtml(r.author||'')}${r.grindHint?' · '+escHtml(r.grindHint):''}</div>
           </div>
           <span class="meta-pill" style="flex-shrink:0">${method}</span>
         </div>
@@ -2280,11 +2293,11 @@ function renderBuiltinRecipes() {
             ${r.dose?`<span class="meta-pill">${r.dose}g</span>`:''}
             ${r.water?`<span class="meta-pill">${r.water}ml</span>`:''}
             ${r.temp?`<span class="meta-pill">${r.temp}°C</span>`:''}
-            ${r.ratio?`<span class="meta-pill">${r.ratio}</span>`:''}
+            ${r.ratio?`<span class="meta-pill">${escHtml(r.ratio)}</span>`:''}
             ${pourMeta?`<span class="meta-pill">${pourMeta}</span>`:''}
           </div>
           <ol class="recipe-lib-steps">
-            ${r.steps.map(s=>`<li>${s}</li>`).join('')}
+            ${r.steps.map(s=>`<li>${escHtml(s)}</li>`).join('')}
           </ol>
         </div>
         <div class="recipe-lib-actions">
@@ -2436,8 +2449,8 @@ function renderMyRecipes() {
     <div class="custom-recipe-card">
       <div class="custom-recipe-card-header">
         <div>
-          <div style="font-family:'Playfair Display',serif;font-size:16px;color:var(--crema-light)">${r.name}</div>
-          <div style="font-family:'DM Mono',monospace;font-size:10px;color:rgba(245,237,227,.6);letter-spacing:1px;margin-top:2px">${r.author?r.author+' · ':''}${r.method}</div>
+          <div style="font-family:'Playfair Display',serif;font-size:16px;color:var(--crema-light)">${escHtml(r.name)}</div>
+          <div style="font-family:'DM Mono',monospace;font-size:10px;color:rgba(245,237,227,.6);letter-spacing:1px;margin-top:2px">${r.author?escHtml(r.author)+' · ':''}${escHtml(r.method)}</div>
         </div>
         <div style="display:flex;gap:8px;align-items:center">
           <button class="btn-secondary" style="padding:5px 10px;font-size:9px" onclick="openEditCustomRecipe('${r.id}')">Edit</button>
@@ -2449,11 +2462,11 @@ function renderMyRecipes() {
           ${r.dose?`<span class="meta-pill">${r.dose}g dose</span>`:''}
           ${r.water?`<span class="meta-pill">${r.water}ml water</span>`:''}
           ${r.temp?`<span class="meta-pill">${r.temp}°C</span>`:''}
-          ${r.ratio?`<span class="meta-pill">${r.ratio}</span>`:''}
-          ${r.grindHint?`<span class="meta-pill">${r.grindHint}</span>`:''}
+          ${r.ratio?`<span class="meta-pill">${escHtml(r.ratio)}</span>`:''}
+          ${r.grindHint?`<span class="meta-pill">${escHtml(r.grindHint)}</span>`:''}
         </div>
         <ol style="padding-left:18px;margin:0">
-          ${r.steps.map(s=>`<li style="font-size:13px;color:var(--text);line-height:1.6;margin-bottom:4px">${s}</li>`).join('')}
+          ${r.steps.map(s=>`<li style="font-size:13px;color:var(--text);line-height:1.6;margin-bottom:4px">${escHtml(s)}</li>`).join('')}
         </ol>
       </div>
     </div>`).join('');
@@ -2468,10 +2481,10 @@ function renderRecipeCard(method, recipeId) {
   card.style.display = 'block';
   card.innerHTML = `
     <div style="background:var(--espresso);border-radius:var(--radius-sm);padding:14px;margin-top:10px">
-      <div style="font-family:'Playfair Display',serif;font-size:15px;color:var(--crema-light);margin-bottom:2px">${recipe.name}</div>
-      <div style="font-family:'DM Mono',monospace;font-size:9px;color:rgba(245,237,227,.45);letter-spacing:1px;margin-bottom:12px">${recipe.dose}g · ${recipe.water}ml · ${recipe.temp}°C · ${recipe.ratio}${recipe.grindHint?' · '+recipe.grindHint:''}${recipe.pours?' · '+recipe.pours+' pours':''}${recipe.totalTime?' · '+recipe.totalTime:''}</div>
+      <div style="font-family:'Playfair Display',serif;font-size:15px;color:var(--crema-light);margin-bottom:2px">${escHtml(recipe.name)}</div>
+      <div style="font-family:'DM Mono',monospace;font-size:9px;color:rgba(245,237,227,.45);letter-spacing:1px;margin-bottom:12px">${recipe.dose}g · ${recipe.water}ml · ${recipe.temp}°C · ${escHtml(recipe.ratio)}${recipe.grindHint?' · '+escHtml(recipe.grindHint):''}${recipe.pours?' · '+recipe.pours+' pours':''}${recipe.totalTime?' · '+recipe.totalTime:''}</div>
       <ol style="padding-left:16px;margin:0">
-        ${recipe.steps.map(s => `<li style="font-size:12px;color:rgba(245,237,227,.75);line-height:1.5;margin-bottom:5px">${s}</li>`).join('')}
+        ${recipe.steps.map(s => `<li style="font-size:12px;color:rgba(245,237,227,.75);line-height:1.5;margin-bottom:5px">${escHtml(s)}</li>`).join('')}
       </ol>
     </div>`;
 }
@@ -2830,7 +2843,7 @@ function renderCoffeesView() {
     // Grid: several varietals collapse to the first one plus a count, e.g. "Castillo +2"
     let varietal = c.varietal, varietalTitle = '';
     if (isGrid && varietal) { const parts = String(varietal).split(/\s*(?:,|\/|&|\+|;|\band\b)\s*/i).filter(Boolean); if (parts.length > 1) { varietalTitle = varietal; varietal = parts[0] + ' +' + (parts.length - 1); } }
-    const corePills = [c.country,c.process,c.roastLevel,varietal].filter(Boolean).map(p=>`<span class="meta-pill"${p===varietal&&varietalTitle?` title="${varietalTitle}"`:''}>${p}</span>`);
+    const corePills = [c.country,c.process,c.roastLevel,varietal].filter(Boolean).map(p=>`<span class="meta-pill"${p===varietal&&varietalTitle?` title="${escHtml(varietalTitle)}"`:''}>${escHtml(p)}</span>`);
     const extraCount = (maslPill.match(/class="meta-pill"/g) || []).length;
     // Grid tiles: country, process, roast and varietal first; anything else becomes "+N"
     const pills = appSettings.coffeeLayout === 'grid'
@@ -2839,9 +2852,9 @@ function renderCoffeesView() {
     const headerImg = c.labelPhoto ? `<img src="${c.labelPhoto}" style="width:52px;height:52px;border-radius:8px;object-fit:cover;flex-shrink:0;border:1px solid rgba(255,255,255,0.15);cursor:zoom-in" alt="label" onclick="event.stopPropagation();openLightbox('${c.labelPhoto}')">` : '';
     const cardRating = c.rating > 0 ? `<div class="coffee-card-rating">${c.rating}/10</div>` : '';
     const finishedStyle = '';
-    const wrapOpen = `<div class="card-wrap" ontouchstart="startLongPress('${c.id}','coffee')" ontouchend="endLongPress()" ontouchcancel="endLongPress()" oncontextmenu="event.stopPropagation();showEditOverlay('coffee-${c.id}');return false"><div class="card-edit-overlay" id="overlay-coffee-${c.id}"><button class="edit-overlay-btn" onclick="event.stopPropagation();openEditCoffee('${c.id}');hideEditOverlay('coffee-${c.id}')">✏ Edit</button><button class="edit-overlay-btn" onclick="event.stopPropagation();showTrendModal('${c.id}');hideEditOverlay('coffee-${c.id}')">📈 Trends</button><button class="edit-overlay-btn" onclick="event.stopPropagation();hideEditOverlay('coffee-${c.id}');toggleFinishedBag('${c.id}')">${c.finishedBag ? '↺ Reopen' : '✓ Finish'}</button><button class="edit-overlay-btn" onclick="event.stopPropagation();confirmDeleteCoffee('${c.id}')">✕ Delete</button><button class="edit-overlay-btn" onclick="event.stopPropagation();hideEditOverlay('coffee-${c.id}')">Cancel</button></div>`;
+    const wrapOpen = `<div class="card-wrap" ontouchstart="startLongPress('${c.id}','coffee')" ontouchend="endLongPress()" ontouchcancel="endLongPress()" oncontextmenu="event.stopPropagation();showEditOverlay('coffee-${c.id}');return false"><div class="card-edit-overlay" data-overlay="coffee-${c.id}"><button class="edit-overlay-btn" onclick="event.stopPropagation();openEditCoffee('${c.id}');hideEditOverlay('coffee-${c.id}')">✏ Edit</button><button class="edit-overlay-btn" onclick="event.stopPropagation();showTrendModal('${c.id}');hideEditOverlay('coffee-${c.id}')">📈 Trends</button><button class="edit-overlay-btn" onclick="event.stopPropagation();hideEditOverlay('coffee-${c.id}');toggleFinishedBag('${c.id}')">${c.finishedBag ? '↺ Reopen' : '✓ Finish'}</button><button class="edit-overlay-btn" onclick="event.stopPropagation();confirmDeleteCoffee('${c.id}')">✕ Delete</button><button class="edit-overlay-btn" onclick="event.stopPropagation();hideEditOverlay('coffee-${c.id}')">Cancel</button></div>`;
     if (isGrid) return wrapOpen + coffeeTileGrid(c, rc) + `</div>`;
-    return wrapOpen + `<div class="coffee-card${c.finishedBag ? ' finished' : ''}" onclick="showCoffeeDetail('${c.id}')" style="${finishedStyle}"><div class="coffee-card-header"><div><div class="coffee-card-name">${c.name}${c.finishedBag?'<span class="finished-badge">FINISHED</span>':''}</div><div class="coffee-card-roaster">${c.roaster||'Unknown Roaster'}</div>${cardRating}</div><div style="display:flex;align-items:flex-start;gap:8px">${headerImg}<button class="card-more" aria-label="More options" onclick="event.stopPropagation();showEditOverlay('coffee-${c.id}')">⋯</button></div></div><div class="coffee-card-body">${pills?`<div class="coffee-meta">${pills}</div>`:''}  <div class="card-foot"><div class="recipe-count">${rc} brew${rc!==1?'s':''} logged</div>${c.decaf ? '<span class="decaf-label">Decaf</span>' : ''}</div></div></div>` + `</div>`;
+    return wrapOpen + `<div class="coffee-card${c.finishedBag ? ' finished' : ''}" onclick="showCoffeeDetail('${c.id}')" style="${finishedStyle}"><div class="coffee-card-header"><div><div class="coffee-card-name">${escHtml(c.name)}${c.finishedBag?'<span class="finished-badge">FINISHED</span>':''}</div><div class="coffee-card-roaster">${escHtml(c.roaster||'Unknown Roaster')}</div>${cardRating}</div><div style="display:flex;align-items:flex-start;gap:8px">${headerImg}<button class="card-more" aria-label="More options" onclick="event.stopPropagation();showEditOverlay('coffee-${c.id}')">⋯</button></div></div><div class="coffee-card-body">${pills?`<div class="coffee-meta">${pills}</div>`:''}  <div class="card-foot"><div class="recipe-count">${rc} brew${rc!==1?'s':''} logged</div>${c.decaf ? '<span class="decaf-label">Decaf</span>' : ''}</div></div></div>` + `</div>`;
   }).join('');
 }
 
@@ -2936,7 +2949,7 @@ function showCoffeeDetail(id) {
   const locationStr = [c.roasterCity,c.roasterCountry].filter(Boolean).join(', ');
   const producerStr = [c.producer?'Producer: '+c.producer:'', c.farm?'Farm: '+c.farm:''].filter(Boolean).join(' · ');
   const recs = state.recipes.filter(r=>r.coffeeId===id);
-  const maslPill2 = (c.masl ? `<span class="meta-pill">⛰ ${c.masl} masl</span>` : '') + (priceLabel(c) ? `<span class="meta-pill">${priceLabel(c)}</span>` : ''); const pills = [c.country,c.region,c.varietal,c.process,c.roastLevel].filter(Boolean).map(p=>`<span class="meta-pill">${p}</span>`).join('') + maslPill2;
+  const maslPill2 = (c.masl ? `<span class="meta-pill">⛰ ${c.masl} masl</span>` : '') + (priceLabel(c) ? `<span class="meta-pill">${priceLabel(c)}</span>` : ''); const pills = [c.country,c.region,c.varietal,c.process,c.roastLevel].filter(Boolean).map(p=>`<span class="meta-pill">${escHtml(p)}</span>`).join('') + maslPill2;
   document.getElementById('view-coffees').innerHTML = `
     <div style="height:20px"></div>
     <button class="detail-back" onclick="goBackToCoffees()">← Back</button>
@@ -2944,14 +2957,14 @@ function showCoffeeDetail(id) {
       <div style="display:flex;gap:14px;align-items:flex-start">
         ${c.labelPhoto?`<img src="${c.labelPhoto}" onclick="openLightbox(this.src)" style="width:72px;height:90px;object-fit:cover;border-radius:10px;flex-shrink:0;border:1px solid rgba(255,255,255,0.15);cursor:zoom-in" alt="bag label">`:''}
         <div style="flex:1">
-          <div style="font-family:'Playfair Display',serif;font-size:24px;color:var(--crema-light)">${c.name}</div>
-          <div style="font-family:'DM Mono',monospace;font-size:11px;color:rgba(245,237,227,.75);letter-spacing:1px;margin-bottom:14px">${c.roaster||'Unknown Roaster'}</div>
+          <div style="font-family:'Playfair Display',serif;font-size:24px;color:var(--crema-light)">${escHtml(c.name)}</div>
+          <div style="font-family:'DM Mono',monospace;font-size:11px;color:rgba(245,237,227,.75);letter-spacing:1px;margin-bottom:14px">${escHtml(c.roaster||'Unknown Roaster')}</div>
           <div class="coffee-meta">${pills||'<span style="opacity:.5;font-size:12px">No details added</span>'}</div>
           ${c.roastDate?`<div style="font-family:'DM Mono',monospace;font-size:10px;color:rgba(245,237,227,.7);margin-top:10px">${formatDate(c.roastDate)}</div>`:''}
           ${c.rating>0?`<div class="detail-rating">Rating <b>${c.rating}/10</b></div>`:''}
-          ${locationStr?`<div style="font-family:'DM Mono',monospace;font-size:10px;color:rgba(245,237,227,.6);margin-top:8px">📍 ${locationStr}</div>`:''}
-          ${producerStr?`<div style="font-family:'DM Mono',monospace;font-size:10px;color:rgba(245,237,227,.6);margin-top:4px">${producerStr}</div>`:''}
-          ${c.notes?`<div style="font-size:13px;color:rgba(245,237,227,.9);margin-top:12px;font-style:italic">"${c.notes}"</div>`:''}
+          ${locationStr?`<div style="font-family:'DM Mono',monospace;font-size:10px;color:rgba(245,237,227,.6);margin-top:8px">📍 ${escHtml(locationStr)}</div>`:''}
+          ${producerStr?`<div style="font-family:'DM Mono',monospace;font-size:10px;color:rgba(245,237,227,.6);margin-top:4px">${escHtml(producerStr)}</div>`:''}
+          ${c.notes?`<div style="font-size:13px;color:rgba(245,237,227,.9);margin-top:12px;font-style:italic">"${escHtml(c.notes)}"</div>`:''}
         </div>
       </div>
     </div>
@@ -3002,15 +3015,15 @@ function recipeCard(r, showDel=false) {
   const yieldUnit = isEsp ? 'g' : 'ml';
   const grinderBadge = grinder ? `<span style="display:inline-block;margin-top:4px;font-family:'DM Mono',monospace;font-size:9px;background:rgba(82,121,111,0.1);border:1px solid rgba(82,121,111,0.25);color:var(--crema);border-radius:20px;padding:2px 8px;letter-spacing:.5px">${grinder.type==='manual'?'✋':'⚡'} ${grinder.brand} ${grinder.model}</span>` : '';
   const recipeObj = r.recipeId ? [...Object.values(RECIPES).flat(), ...(state.customRecipes||[])].find(x=>x.id===r.recipeId) : null;
-  const recipeBadge = recipeObj ? `<span style="display:inline-block;margin-top:4px;margin-left:4px;font-family:'DM Mono',monospace;font-size:9px;background:rgba(18,60,39,0.08);border:1px solid rgba(18,60,39,0.15);color:var(--espresso);border-radius:20px;padding:2px 8px;letter-spacing:.5px">📋 ${recipeObj.name.split('—')[0].trim()}</span>` : '';
+  const recipeBadge = recipeObj ? `<span style="display:inline-block;margin-top:4px;margin-left:4px;font-family:'DM Mono',monospace;font-size:9px;background:rgba(18,60,39,0.08);border:1px solid rgba(18,60,39,0.15);color:var(--espresso);border-radius:20px;padding:2px 8px;letter-spacing:.5px">📋 ${escHtml(recipeObj.name.split('—')[0].trim())}</span>` : '';
   const thumbHtml = coffee?.labelPhoto ? `<img src="${coffee.labelPhoto}" class="brew-label-thumb" alt="label" onclick="openLightbox('${coffee.labelPhoto}')" style="cursor:zoom-in">` : '';
-  return `<div class="card-wrap" ontouchstart="startLongPress('${r.id}','brew')" ontouchend="endLongPress()" ontouchcancel="endLongPress()" oncontextmenu="event.stopPropagation();showEditOverlay('brew-${r.id}');return false"><div class="card-edit-overlay" id="overlay-brew-${r.id}"><button class="edit-overlay-btn" onclick="event.stopPropagation();editBrew('${r.id}');hideEditOverlay('brew-${r.id}')">✏ Edit</button><button class="edit-overlay-btn" onclick="event.stopPropagation();hideEditOverlay('brew-${r.id}');openPlanNext('${r.id}')">↻ Plan next</button><button class="edit-overlay-btn" onclick="event.stopPropagation();confirmDeleteBrew('${r.id}')">✕ Delete</button><button class="edit-overlay-btn" onclick="event.stopPropagation();hideEditOverlay('brew-${r.id}')">Cancel</button></div><div class="recipe-entry">
+  return `<div class="card-wrap" ontouchstart="startLongPress('${r.id}','brew')" ontouchend="endLongPress()" ontouchcancel="endLongPress()" oncontextmenu="event.stopPropagation();showEditOverlay('brew-${r.id}');return false"><div class="card-edit-overlay" data-overlay="brew-${r.id}"><button class="edit-overlay-btn" onclick="event.stopPropagation();editBrew('${r.id}');hideEditOverlay('brew-${r.id}')">✏ Edit</button><button class="edit-overlay-btn" onclick="event.stopPropagation();hideEditOverlay('brew-${r.id}');openPlanNext('${r.id}')">↻ Plan next</button><button class="edit-overlay-btn" onclick="event.stopPropagation();confirmDeleteBrew('${r.id}')">✕ Delete</button><button class="edit-overlay-btn" onclick="event.stopPropagation();hideEditOverlay('brew-${r.id}')">Cancel</button></div><div class="recipe-entry">
     <div class="recipe-entry-header">
       <div style="display:flex;gap:10px;align-items:flex-start;flex:1">
         ${thumbHtml}
         <div style="flex:1;min-width:0">
-          <div style="font-family:'Playfair Display',serif;font-size:14px">${coffee?.name||'Unknown Coffee'}</div>
-          <div style="font-family:'DM Mono',monospace;font-size:10px;color:var(--text-muted)">${coffee?.roaster||''}${coffee?.roaster&&r.method?' · ':''}${r.method||''}</div>
+          <div style="font-family:'Playfair Display',serif;font-size:14px">${escHtml(coffee?.name||'Unknown Coffee')}</div>
+          <div style="font-family:'DM Mono',monospace;font-size:10px;color:var(--text-muted)">${escHtml(coffee?.roaster||'')}${coffee?.roaster&&r.method?' · ':''}${escHtml(r.method||'')}</div>
           ${grinderBadge}
         </div>
       </div>
@@ -3140,7 +3153,7 @@ function renderStackedBar(items, total, opts = {}) {
     <div class="chart-sweep" style="height:12px;border-radius:5px;overflow:hidden;display:flex;gap:2px;margin-bottom:10px">${segments}</div>
     <div>${legend}</div>`;
 }
-function escHtml(v) { return String(v).replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c])); }
+function escHtml(v) { return String(v == null ? '' : v).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
 
 // ---- Grouping for busy charts: kicks in automatically once a chart has more than 7 categories ----
 const REGION_OF = (() => {
@@ -3338,13 +3351,13 @@ function renderSuggestions(coffeeId) {
   }
   el.innerHTML = suggestions.slice(0,3).map(s => `
     <div style="background:var(--card);border:1px solid var(--border);border-radius:var(--radius-sm);padding:12px 14px;margin-bottom:8px">
-      <div style="font-size:13px;font-weight:600;color:var(--text);margin-bottom:4px">${s.method}</div>
+      <div style="font-size:13px;font-weight:600;color:var(--text);margin-bottom:4px">${escHtml(s.method)}</div>
       <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:6px">
         ${s.avgGrind ? '<span class="meta-pill">Grind ~'+s.avgGrind+'</span>' : ''}
         ${s.avgTemp  ? '<span class="meta-pill">Temp ~'+s.avgTemp+'°C</span>'  : ''}
         <span class="meta-pill">Based on ${s.count} brew${s.count!==1?'s':''}</span>
       </div>
-      <div style="font-size:10px;color:var(--text-muted)">Matched by ${s.reasons.join(', ')}</div>
+      <div style="font-size:10px;color:var(--text-muted)">Matched by ${escHtml(s.reasons.join(', '))}</div>
     </div>`).join('');
 }
 
@@ -3369,7 +3382,7 @@ function renderTracker() {
   if (coffeeFilter) {
     const current = coffeeFilter.value;
     coffeeFilter.innerHTML = '<option value="">All Coffees</option>' +
-      state.coffees.map(cf => `<option value="${cf.id}" ${cf.id===current?'selected':''}>${cf.name}${cf.roaster?' — '+cf.roaster:''}</option>`).join('');
+      state.coffees.map(cf => `<option value="${cf.id}" ${cf.id===current?'selected':''}>${escHtml(cf.name)}${cf.roaster?' — '+escHtml(cf.roaster):''}</option>`).join('');
   }
 
   let brews = [...state.recipes];
@@ -3897,7 +3910,7 @@ document.addEventListener('click', e => {
 }, true);
 // The same brew can be on screen twice (Overview "Recent brews" and a coffee's Brew Log, one of them hidden),
 // so open the menu on the copy that's actually visible
-function overlaysFor(key) { return [...document.querySelectorAll(`[id="overlay-${key}"]`)]; }
+function overlaysFor(key) { return [...document.querySelectorAll('[data-overlay]')].filter(o => o.dataset.overlay === key); }
 function showEditOverlay(key) {
   document.querySelectorAll('.card-edit-overlay').forEach(el=>el.classList.remove('visible'));
   const all = overlaysFor(key);
@@ -4032,7 +4045,7 @@ function bestBrewHtml(cf) {
       <span style="font-size:10px;letter-spacing:1.5px;text-transform:uppercase;color:var(--text-muted)">★ Best brew so far</span>
       <span style="font-size:12px;color:var(--text);font-weight:600">${b.rating}/10</span>
     </div>
-    <div style="font-size:14px;color:var(--text);font-weight:600;margin-bottom:2px">${b.method}</div>
+    <div style="font-size:14px;color:var(--text);font-weight:600;margin-bottom:2px">${escHtml(b.method)}</div>
     <div style="font-size:12px;color:var(--text-muted);margin-bottom:12px">${parts.join(' · ')}</div>
     <button class="btn-primary" style="margin-top:0;padding:11px" onclick="repeatBrew('${b.id}')">↻ Repeat this brew</button>
   </div>`;
@@ -4152,11 +4165,11 @@ function renderStepGuide() {
   const next = steps[idx + 1];
   el.style.display = 'block';
   if (!running && s === 0) {
-    el.innerHTML = `<div class="guide-label">First step at ${fmt(steps[0].at)}</div><div class="guide-now">${steps[0].text}</div>`;
+    el.innerHTML = `<div class="guide-label">First step at ${fmt(steps[0].at)}</div><div class="guide-now">${escHtml(steps[0].text)}</div>`;
     return;
   }
-  el.innerHTML = `<div class="guide-label">Now</div><div class="guide-now">${idx >= 0 ? steps[idx].text : 'Get ready…'}</div>` +
-    (next ? `<div class="guide-next">Next in <b>${fmt(Math.max(0, next.at - s))}</b> · ${next.text}</div>` : `<div class="guide-next">Last step — stop the timer when it's finished draining.</div>`);
+  el.innerHTML = `<div class="guide-label">Now</div><div class="guide-now">${idx >= 0 ? escHtml(steps[idx].text) : 'Get ready…'}</div>` +
+    (next ? `<div class="guide-next">Next in <b>${fmt(Math.max(0, next.at - s))}</b> · ${escHtml(next.text)}</div>` : `<div class="guide-next">Last step — stop the timer when it's finished draining.</div>`);
 }
 
 // ---- Taste vs days off roast (Trends) ----
@@ -4276,11 +4289,11 @@ function ruleSuggestion(cf, method) {
   const add = (dum, dt, why) => { um += dum * scale; if (hotMethod) temp += dt; reasons.push(why); };
   if (cf) {
     const ra = ROAST_ADJ[cf.roastLevel];
-    if (ra && (ra[0] || ra[1])) add(ra[0], ra[1], ra[0] < 0 ? `${cf.roastLevel} roast: finer and hotter (denser, less soluble)` : `${cf.roastLevel} roast: coarser and cooler (extracts easily, bitterness)`);
+    if (ra && (ra[0] || ra[1])) add(ra[0], ra[1], ra[0] < 0 ? `${escHtml(cf.roastLevel)} roast: finer and hotter (denser, less soluble)` : `${escHtml(cf.roastLevel)} roast: coarser and cooler (extracts easily, bitterness)`);
     const alt = parseFloat(cf.masl);
     if (alt >= 1800) add(-20, 1, `Grown at ${alt}m: dense bean, a little finer and hotter`);
     else if (alt > 0 && alt < 1200) add(20, -1, `Grown at ${alt}m: softer bean, a little coarser and cooler`);
-    if (FERMENTY.includes(cf.process)) add(20, -1, `${cf.process} process: extracts readily, slightly coarser and cooler`);
+    if (FERMENTY.includes(cf.process)) add(20, -1, `${escHtml(cf.process)} process: extracts readily, slightly coarser and cooler`);
     else if (cf.process === 'Honey') add(10, 0, 'Honey process: slightly coarser');
     else if (cf.process === 'Wet Hulled') add(10, -1, 'Wet hulled: slightly coarser and cooler');
     if (cf.decaf) add(20, -2, 'Decaf: extracts faster, coarser and cooler');
@@ -4341,7 +4354,7 @@ function computeSuggestion(cfId, method) {
   if (wUm) { const off = dUm / (wUm + K); res.um = Math.round(rule.um + off); if (Math.abs(off) >= 10) res.reasons.push(`Your good ${method} brews run ${off < 0 ? 'finer' : 'coarser'} than typical: ${off > 0 ? '+' : ''}${Math.round(off)}µm`); }
   if (wT) { const off = dT / (wT + K); res.temp = Math.min(100, Math.round(rule.temp + off)); if (Math.abs(off) >= 0.5) res.reasons.push(`You tend to brew ${off > 0 ? 'hotter' : 'cooler'}: ${off > 0 ? '+' : ''}${off.toFixed(1)}°C`); }
   if (wR) { res.ratio = Math.round((rule.ratio + dR / (wR + K)) * 10) / 10; }
-  if (others.length) res.reasons.push(`Based on ${others.length} of your good ${method} brew${others.length !== 1 ? 's' : ''}${best && bestSim >= 0.25 && describeMatch(cf || {}, best) ? `, closest match ${best.name} (${describeMatch(cf || {}, best)})` : ''}`);
+  if (others.length) res.reasons.push(`Based on ${others.length} of your good ${method} brew${others.length !== 1 ? 's' : ''}${best && bestSim >= 0.25 && describeMatch(cf || {}, best) ? `, closest match ${escHtml(best.name)} (${describeMatch(cf || {}, best)})` : ''}`);
   const topRecipe = Object.entries(recipeVotes).sort((a, b) => b[1] - a[1])[0];
   if (topRecipe) res.recipeId = topRecipe[0];
   else if (RECIPES[method] && RECIPES[method].length) res.recipeId = RECIPES[method][0].id;
@@ -4359,10 +4372,10 @@ function renderBrewSuggestion() {
   const g = selectedGrinder();
   // Grind in the user's current grinder: same grinder as the source brew -> reuse the raw setting
   let grindText, setting = null;
-  if (s.source === 'coffee' && s.grindRaw && (!g || s.grinderId === (g && g.id))) { setting = s.grindRaw; grindText = `Grind <b>${s.grindRaw}</b>${s.um ? ` (≈${s.um}µm)` : ''}`; }
+  if (s.source === 'coffee' && s.grindRaw && (!g || s.grinderId === (g && g.id))) { setting = s.grindRaw; grindText = `Grind <b>${escHtml(s.grindRaw)}</b>${s.um ? ` (≈${s.um}µm)` : ''}`; }
   else if (g && s.um != null) { setting = micronsToSetting(g, s.um); grindText = `Grind <b>${setting}</b> on ${g.model} (≈${s.um}µm)`; }
   else if (s.um != null) grindText = `Grind ≈<b>${s.um}µm</b> (${grindWord(s.um)}) — pick a grinder for a setting`;
-  else grindText = s.grindRaw ? `Grind <b>${s.grindRaw}</b>` : '';
+  else grindText = s.grindRaw ? `Grind <b>${escHtml(s.grindRaw)}</b>` : '';
 
   // Recipes are fixed. A recipe the user picked is always kept; otherwise we may propose one.
   // Only grind and water temperature are tuned to the coffee — never dose, water, ratio or step timings.
@@ -4390,7 +4403,7 @@ function renderBrewSuggestion() {
       <button type="button" class="suggest-apply" onclick="applyBrewSuggestion()">Apply</button>
     </div>
     <div class="suggest-main">${parts.join(' · ')}${!rec && ratioText ? ` · <b>${ratioText}</b>` : ''}</div>
-    ${rec ? `<div class="suggest-sub">${chosen ? 'Your recipe' : 'Recipe'}: ${rec.name}${recRatio ? ' · ' + recRatio : ''} — dose, water and steps as written</div>` : ''}
+    ${rec ? `<div class="suggest-sub">${chosen ? 'Your recipe' : 'Recipe'}: ${escHtml(rec.name)}${recRatio ? ' · ' + recRatio : ''} — dose, water and steps as written</div>` : ''}
     <details class="suggest-why"><summary>Why?</summary><ul>${reasons.map(r => `<li>${r}</li>`).join('')}</ul>
       <div class="suggest-sub" style="margin-top:6px">A starting point, not a rule. Taste, then use Plan next to fine-tune.</div></details>
   </div>`;
@@ -4713,11 +4726,11 @@ function renderUpNext() {
     if (p.fromExtraction) chg.push(`<span class="extraction-tag tag-${p.fromExtraction}">after ${p.fromExtraction}</span>`);
     return `<div class="upnext-card" data-plan-id="${p.id}">
       <div class="upnext-head"><div style="flex:1;min-width:0">
-      <div class="upnext-title">${cf.name}</div>
-      <div class="upnext-sub">${p.method}${rec ? ' · '+rec.name : ''}</div>
-      </div>${plans.length > 1 ? `<button type="button" class="upnext-handle" aria-label="Drag to reorder ${cf.name}" onpointerdown="startPlanDrag(event, this)" onkeydown="keyMovePlan(event, '${p.id}')"><svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor" aria-hidden="true"><circle cx="5.5" cy="3.5" r="1.3"/><circle cx="10.5" cy="3.5" r="1.3"/><circle cx="5.5" cy="8" r="1.3"/><circle cx="10.5" cy="8" r="1.3"/><circle cx="5.5" cy="12.5" r="1.3"/><circle cx="10.5" cy="12.5" r="1.3"/></svg></button>` : ''}</div>
+      <div class="upnext-title">${escHtml(cf.name)}</div>
+      <div class="upnext-sub">${escHtml(p.method)}${rec ? ' · '+escHtml(rec.name) : ''}</div>
+      </div>${plans.length > 1 ? `<button type="button" class="upnext-handle" aria-label="Drag to reorder ${escHtml(cf.name)}" onpointerdown="startPlanDrag(event, this)" onkeydown="keyMovePlan(event, '${p.id}')"><svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor" aria-hidden="true"><circle cx="5.5" cy="3.5" r="1.3"/><circle cx="10.5" cy="3.5" r="1.3"/><circle cx="5.5" cy="8" r="1.3"/><circle cx="10.5" cy="8" r="1.3"/><circle cx="5.5" cy="12.5" r="1.3"/><circle cx="10.5" cy="12.5" r="1.3"/></svg></button>` : ''}</div>
       <div class="upnext-changes">${chg.join('')}</div>
-      ${p.note ? `<div class="upnext-sub" style="margin:-4px 0 10px">📝 ${p.note}</div>` : ''}
+      ${p.note ? `<div class="upnext-sub" style="margin:-4px 0 10px">📝 ${escHtml(p.note)}</div>` : ''}
       <div class="upnext-actions">
         <button class="btn-primary" style="flex:1" onclick="brewPlan('${p.id}')">Brew now</button>
         <button class="btn-secondary" onclick="dismissPlan('${p.id}')" aria-label="Dismiss">✕</button>
