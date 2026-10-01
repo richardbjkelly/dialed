@@ -739,6 +739,7 @@ Specialty coffee dialling-in tracker · Single-file PWA / Android APK
 - "Use" on either side fills the form with that brew's coffee, method, recipe, grinder, grind, dose, water and temperature, keeping a running timer and any notes
 - Follows the coffee you pick and updates as soon as you switch; one brew shows a single "Last & best" card; unrated brews show "Last" only
 - Collapsing it is remembered; hidden while editing a brew
+- Even 20px spacing above and below the panel, with or without a recipe card above it
 - Replaces Suggested Start for coffees you've already brewed (Suggested Start still covers new coffees)
 
 ---
