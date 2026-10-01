@@ -2894,7 +2894,7 @@ function libraryOrder() {
 function coffeeTileGrid(c, rc) {
   const initial = (c.name || '?').trim().charAt(0).toUpperCase();
   const banner = c.labelPhoto
-    ? `<img class="tile-photo" src="${c.labelPhoto}" alt="">`
+    ? `<img class="tile-photo" src="${photoUrl(c)}" alt="">`
     : `<div class="tile-photo tile-photo-empty" aria-hidden="true"><span>${escHtml(initial)}</span></div>`;
   const summary = [c.country, c.process, c.roastLevel].filter(Boolean).map(escHtml).join(' · ');
   return `<div class="coffee-card tile-b${c.finishedBag ? ' finished' : ''}" onclick="showCoffeeDetail('${c.id}')">
@@ -2934,7 +2934,7 @@ function renderCoffeesView() {
     const pills = appSettings.coffeeLayout === 'grid'
       ? corePills.join('') + (extraCount ? `<span class="meta-pill meta-more" title="${extraCount} more on the coffee's page">+${extraCount}</span>` : '')
       : corePills.join('') + maslPill;
-    const headerImg = c.labelPhoto ? `<img src="${c.labelPhoto}" style="width:52px;height:52px;border-radius:8px;object-fit:cover;flex-shrink:0;border:1px solid rgba(255,255,255,0.15);cursor:zoom-in" alt="label" onclick="event.stopPropagation();openLightbox('${c.labelPhoto}')">` : '';
+    const headerImg = c.labelPhoto ? `<img src="${photoUrl(c)}" style="width:52px;height:52px;border-radius:8px;object-fit:cover;flex-shrink:0;border:1px solid rgba(255,255,255,0.15);cursor:zoom-in" alt="Bag label" onclick="event.stopPropagation();openLightboxFor('${c.id}')">` : '';
     const cardRating = c.rating > 0 ? `<div class="coffee-card-rating">${c.rating}/10</div>` : '';
     const finishedStyle = '';
     const wrapOpen = `<div class="card-wrap" ontouchstart="startLongPress('${c.id}','coffee')" ontouchend="endLongPress()" ontouchcancel="endLongPress()" oncontextmenu="event.stopPropagation();showEditOverlay('coffee-${c.id}');return false"><div class="card-edit-overlay" data-overlay="coffee-${c.id}"><button class="edit-overlay-btn" onclick="event.stopPropagation();openEditCoffee('${c.id}');hideEditOverlay('coffee-${c.id}')">✏ Edit</button><button class="edit-overlay-btn" onclick="event.stopPropagation();showTrendModal('${c.id}');hideEditOverlay('coffee-${c.id}')">📈 Trends</button><button class="edit-overlay-btn" onclick="event.stopPropagation();hideEditOverlay('coffee-${c.id}');toggleFinishedBag('${c.id}')">${c.finishedBag ? '↺ Reopen' : '✓ Finish'}</button><button class="edit-overlay-btn" onclick="event.stopPropagation();confirmDeleteCoffee('${c.id}')">✕ Delete</button><button class="edit-overlay-btn" onclick="event.stopPropagation();hideEditOverlay('coffee-${c.id}')">Cancel</button></div>`;
@@ -3041,7 +3041,7 @@ function showCoffeeDetail(id) {
     <button class="detail-back" onclick="goBackToCoffees()">← Back</button>
     <div class="detail-hero">
       <div style="display:flex;gap:14px;align-items:flex-start">
-        ${c.labelPhoto?`<img src="${c.labelPhoto}" onclick="openLightbox(this.src)" style="width:72px;height:90px;object-fit:cover;border-radius:10px;flex-shrink:0;border:1px solid rgba(255,255,255,0.15);cursor:zoom-in" alt="bag label">`:''}
+        ${c.labelPhoto?`<img src="${photoUrl(c)}" alt="Bag label" onclick="openLightboxFor('${c.id}')" style="width:72px;height:90px;object-fit:cover;border-radius:10px;flex-shrink:0;border:1px solid rgba(255,255,255,0.15);cursor:zoom-in" alt="bag label">`:''}
         <div style="flex:1">
           <div style="font-family:'Playfair Display',serif;font-size:24px;color:var(--crema-light)">${escHtml(c.name)}</div>
           <div style="font-family:'DM Mono',monospace;font-size:11px;color:rgba(245,237,227,.75);letter-spacing:1px;margin-bottom:14px">${escHtml(c.roaster||'Unknown Roaster')}</div>
@@ -3063,7 +3063,7 @@ function showCoffeeDetail(id) {
     ${bagPanelHtml(c)}${bestBrewHtml(c)}
     <div class="section-title" style="margin-bottom:4px">Brew Log</div>
     <div class="section-subtitle">${recs.length} attempt${recs.length!==1?'s':''}</div>
-    ${recs.length?recs.map(r=>recipeCard(r,true)).join(''):`<div class="empty-state"><div class="empty-icon">📋</div><div class="empty-title">No brews yet</div></div>`}
+    ${recs.length?pagedBrewCards(recs, 'coffee-'+c.id):`<div class="empty-state"><div class="empty-icon">📋</div><div class="empty-title">No brews yet</div></div>`}
     <button type="button" class="btn-delete-coffee" onclick="confirmDeleteCoffee('${c.id}')">Delete coffee</button>
     <div style="height:80px"></div>`;
   renderTrendCharts(id);
@@ -3102,7 +3102,7 @@ function recipeCard(r, showDel=false) {
   const grinderBadge = grinder ? `<span style="display:inline-block;margin-top:4px;font-family:'DM Mono',monospace;font-size:9px;background:rgba(82,121,111,0.1);border:1px solid rgba(82,121,111,0.25);color:var(--crema);border-radius:20px;padding:2px 8px;letter-spacing:.5px">${grinder.type==='manual'?'✋':'⚡'} ${grinder.brand} ${grinder.model}</span>` : '';
   const recipeObj = r.recipeId ? [...Object.values(RECIPES).flat(), ...(state.customRecipes||[])].find(x=>x.id===r.recipeId) : null;
   const recipeBadge = recipeObj ? `<span style="display:inline-block;margin-top:4px;margin-left:4px;font-family:'DM Mono',monospace;font-size:9px;background:rgba(18,60,39,0.08);border:1px solid rgba(18,60,39,0.15);color:var(--espresso);border-radius:20px;padding:2px 8px;letter-spacing:.5px">📋 ${escHtml(recipeObj.name.split('—')[0].trim())}</span>` : '';
-  const thumbHtml = coffee?.labelPhoto ? `<img src="${coffee.labelPhoto}" class="brew-label-thumb" alt="label" onclick="openLightbox('${coffee.labelPhoto}')" style="cursor:zoom-in">` : '';
+  const thumbHtml = coffee?.labelPhoto ? `<img src="${photoUrl(coffee)}" class="brew-label-thumb" alt="Bag label" loading="lazy" onclick="openLightboxFor('${coffee.id}')" style="cursor:zoom-in">` : '';
   return `<div class="card-wrap" ontouchstart="startLongPress('${r.id}','brew')" ontouchend="endLongPress()" ontouchcancel="endLongPress()" oncontextmenu="event.stopPropagation();showEditOverlay('brew-${r.id}');return false"><div class="card-edit-overlay" data-overlay="brew-${r.id}"><button class="edit-overlay-btn" onclick="event.stopPropagation();editBrew('${r.id}');hideEditOverlay('brew-${r.id}')">✏ Edit</button><button class="edit-overlay-btn" onclick="event.stopPropagation();hideEditOverlay('brew-${r.id}');openPlanNext('${r.id}')">↻ Plan next</button><button class="edit-overlay-btn" onclick="event.stopPropagation();confirmDeleteBrew('${r.id}')">✕ Delete</button><button class="edit-overlay-btn" onclick="event.stopPropagation();hideEditOverlay('brew-${r.id}')">Cancel</button></div><div class="recipe-entry">
     <div class="recipe-entry-header">
       <div style="display:flex;gap:10px;align-items:flex-start;flex:1">
@@ -3502,8 +3502,17 @@ function renderTracker() {
     el.innerHTML = '<div class="empty-state"><div class="empty-icon">📋</div><div class="empty-title">No brews match</div><div class="empty-desc">Try adjusting your filters.</div></div>';
     return;
   }
-  el.innerHTML = brews.map(r => recipeCard(r, true)).join('');
+  el.innerHTML = pagedBrewCards(brews, 'tracker');
 }
+// Long brew lists are drawn 30 at a time
+const BREW_PAGE = 30, brewListShown = {};
+function pagedBrewCards(brews, key) {
+  const shown = Math.max(BREW_PAGE, brewListShown[key] || 0);
+  const left = brews.length - shown;
+  return brews.slice(0, shown).map(r => recipeCard(r, true)).join('')
+    + (left > 0 ? `<button type="button" class="btn-secondary" style="width:100%;margin-top:6px" onclick="showMoreBrews('${key}')">Show ${Math.min(BREW_PAGE, left)} more (${left} left)</button>` : '');
+}
+function showMoreBrews(key) { brewListShown[key] = Math.max(BREW_PAGE, brewListShown[key] || 0) + BREW_PAGE; rerenderCurrentView(); }
 
 // ==================== GRINDERS ====================
 function renderGrinders() {
@@ -3933,6 +3942,28 @@ function applyDarkMode() {
 
 
 
+// One short blob: URL per label photo, reused everywhere it's shown. Embedding the full photo data in every
+// card made a 60-brew list tens of megabytes.
+const photoBlobUrls = {};   // coffeeId -> { src: dataURL, url: blobURL }
+function photoUrl(c) {
+  if (!c || !c.labelPhoto) return '';
+  const hit = photoBlobUrls[c.id];
+  if (hit && hit.src === c.labelPhoto) return hit.url;
+  if (hit) { try { URL.revokeObjectURL(hit.url); } catch(e) {} delete photoBlobUrls[c.id]; }
+  try {
+    const comma = c.labelPhoto.indexOf(','), mime = (c.labelPhoto.slice(0, comma).match(/^data:([^;]+);base64$/) || [])[1];
+    if (!mime || !/^image\//.test(mime)) return '';
+    const bin = atob(c.labelPhoto.slice(comma + 1)), bytes = new Uint8Array(bin.length);
+    for (let i = 0; i < bin.length; i++) bytes[i] = bin.charCodeAt(i);
+    const url = URL.createObjectURL(new Blob([bytes], { type: mime }));
+    photoBlobUrls[c.id] = { src: c.labelPhoto, url };
+    return url;
+  } catch(e) { return ''; }
+}
+function openLightboxFor(coffeeId) {
+  const c = state.coffees.find(x => x.id === coffeeId); const url = photoUrl(c);
+  if (url) openLightbox(url);
+}
 function openLightbox(src) {
   const img = document.getElementById('lightbox-img');
   if (img) img.src = src;
