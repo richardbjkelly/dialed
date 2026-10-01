@@ -1,9 +1,10 @@
 // dialed service worker — offline support
 // App page: network-first (always fresh when online, cached copy when offline).
-// Icons/manifest: stale-while-revalidate. Google Fonts: cache-first.
-const CACHE = 'dialed-v2';
+// Icons/manifest/fonts: stale-while-revalidate. version.json: always from the network.
+const CACHE = 'dialed-v3';
 const CORE = ['./', './index.html', './manifest.json',
-  './icon-any-192.png', './icon-any-512.png', './icon-maskable-192.png', './icon-maskable-512.png', './apple-touch-icon.png'];
+  './icon-any-192.png', './icon-any-512.png', './icon-maskable-192.png', './icon-maskable-512.png', './apple-touch-icon.png',
+  './fonts/SpaceGrotesk-var.woff2', './fonts/SpaceMono-Regular.woff2', './fonts/SpaceMono-Bold.woff2'];
 
 self.addEventListener('install', e => {
   e.waitUntil(caches.open(CACHE).then(c => c.addAll(CORE)).then(() => self.skipWaiting()));
@@ -37,15 +38,8 @@ self.addEventListener('fetch', e => {
     return;
   }
 
-  // Google Fonts: cache-first (they never change for a given URL)
-  if (url.hostname === 'fonts.googleapis.com' || url.hostname === 'fonts.gstatic.com') {
-    e.respondWith(caches.open(CACHE).then(async cache => {
-      const hit = await cache.match(req); if (hit) return hit;
-      const res = await fetch(req); if (res && (res.ok || res.type === 'opaque')) cache.put(req, res.clone());
-      return res;
-    }));
-    return;
-  }
+  // Version check must never come from a cache
+  if (url.origin === location.origin && /\/version\.json$/.test(url.pathname)) return;
 
   // Same-origin static files: serve cached, refresh in the background
   if (url.origin === location.origin) {

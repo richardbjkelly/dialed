@@ -3,8 +3,8 @@
   "short_name": "dialed",
   "id": "dialed",
   "description": "Specialty coffee dialling-in tracker",
-  "start_url": "/dialed/",
-  "scope": "/dialed/",
+  "start_url": "./",
+  "scope": "./",
   "display": "standalone",
   "orientation": "any",
   "dir": "ltr",
@@ -12,25 +12,25 @@
   "theme_color": "#123C27",
   "icons": [
     {
-      "src": "https://richardbjkelly.github.io/dialed/icon-any-192.png",
+      "src": "icon-any-192.png",
       "sizes": "192x192",
       "type": "image/png",
       "purpose": "any"
     },
     {
-      "src": "https://richardbjkelly.github.io/dialed/icon-any-512.png",
+      "src": "icon-any-512.png",
       "sizes": "512x512",
       "type": "image/png",
       "purpose": "any"
     },
     {
-      "src": "https://richardbjkelly.github.io/dialed/icon-maskable-192.png",
+      "src": "icon-maskable-192.png",
       "sizes": "192x192",
       "type": "image/png",
       "purpose": "maskable"
     },
     {
-      "src": "https://richardbjkelly.github.io/dialed/icon-maskable-512.png",
+      "src": "icon-maskable-512.png",
       "sizes": "512x512",
       "type": "image/png",
       "purpose": "maskable"

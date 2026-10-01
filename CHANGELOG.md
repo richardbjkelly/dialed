@@ -744,14 +744,70 @@ Specialty coffee dialling-in tracker · Single-file PWA / Android APK
 
 ---
 
+## v3.29
+*1 October 2026*
+
+Fixes from the full audit (32 issues found; see the status list in the session report).
+
+### Your data is safer
+- Damaged or unexpected saved data no longer breaks the app: it is checked on load, a copy of anything unreadable is kept and can be exported, and nothing is overwritten until you choose
+- Import Backup checks the file first, asks before replacing your data, and offers Undo afterwards
+- Backups now include your settings; "Photos in Backups" switch for smaller files; on iPhone Home Screen the share sheet is used
+- Editing a brew of a finished coffee keeps it on that coffee (it used to move to another one)
+- The app asks the browser to keep its storage, and Settings shows whether that was granted
+- A warning appears if a label photo couldn't be saved
+
+### Security
+- All text you type or import (names, notes, recipes) is always shown as text and can never run as code
+- Imported values and ids are validated; duplicate or unsafe ids are regenerated
+- Content policy added: scripts, fonts and images only load from the app itself
+- Fonts are now served by the app instead of Google Fonts; exchange rates are only looked up when you enter a price in another currency
+- Privacy note and app version in Settings › About
+
+### Behaviour
+- Deleting a brew refreshes the page you're on straight away
+- Brew timer keeps running when the sheet is closed, with a pill to return to it; screen wake-lock is released after 15 minutes
+- Phone back button closes Settings; double-tapping Save no longer creates two entries
+- Out-of-range entries (negative dose, 500°C, 99 seconds…) are rejected with a message
+- "colombia", "Colombia " and "COLOMBIA" count as one category; existing spellings are suggested as you type
+- Insights period is a rolling 12 months by default and remembers your choice
+- Brews without a date show "Unknown date" and sort last
+- Logging a brew with only finished bags explains why and offers Add Coffee
+- "Update available — Reload" prompt when a newer version is published
+
+### Speed
+- Label photos are shared across cards instead of being embedded in each one (a 70-brew list was tens of MB)
+- Brew lists show 30 at a time with "Show more"
+
+### Prices
+- The exchange rate and date are stored with each price; editing other details no longer re-converts it
+- "≈" marks £ figures that used an approximate (offline) rate
+
+### Accessibility
+- Tiles, chips and pickers work from a keyboard and are announced as buttons; selected state is announced
+- Sheets are proper dialogs: focus moves in, Tab stays inside, Escape closes, focus returns afterwards
+- Every field has a linked label; icon-only buttons have spoken names; visible focus ring
+- Pinch-zoom is allowed; smallest text raised from 7–10px to 11px
+- Emoji icons replaced with outline icons matching the rest of the app
+
+### Housekeeping
+- Removed dead code, unused settings and references to fonts that were never loaded; fonts set once via variables
+- Manifest and icons use relative paths (the app survives a repo rename or custom domain)
+- New ids are random rather than time-based
+- Automated tests are now in the repo under `/tests` (31 suites) with a one-command runner, run on every push
+- Service worker cache bumped to v3
+
+---
+
 ## Pending / Roadmap
 - Rebuild the APK once to pick up the new cup icon
 - Opt-in pooled data + trained model (see feasibility notes): backend, consent, deletion, ICO registration
 - Google Drive sync (deferred — manual backup/restore and reminder in place)
 - Screenshot showcase for PWABuilder
 - Play Store listing
+- Strict content policy (needs the 160 inline tap handlers moved into script) and splitting the single file into modules — deferred, larger refactors
 - On hold: sharing with friends — start with share links (coffee + best recipe via the phone's share sheet, imported by tapping the link); connected friends/feed later if wanted
 
 ---
 
-*Document maintained automatically. Last updated: v3.28*
+*Document maintained automatically. Last updated: v3.29*

@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>dialed</title>
-<link rel="manifest" href="/dialed/manifest.json">
+<link rel="manifest" href="manifest.json">
 <link rel="icon" type="image/png" sizes="192x192" href="icon-any-192.png">
 <link rel="apple-touch-icon" href="apple-touch-icon.png">
 <meta name="mobile-web-app-capable" content="yes">
@@ -12,9 +12,14 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="dialed">
 <meta name="theme-color" content="#123C27">
-<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; font-src 'self'; connect-src 'self' https://api.frankfurter.dev https://api.frankfurter.app; object-src 'none'; base-uri 'self'; form-action 'none'">
 <style>
+  /* Fonts are served from this site (no third-party requests). SIL Open Font License — see /fonts */
+  @font-face { font-family:'Space Grotesk'; src:url('fonts/SpaceGrotesk-var.woff2') format('woff2'); font-weight:300 700; font-style:normal; font-display:swap; }
+  @font-face { font-family:'Space Mono'; src:url('fonts/SpaceMono-Regular.woff2') format('woff2'); font-weight:400; font-style:normal; font-display:swap; }
+  @font-face { font-family:'Space Mono'; src:url('fonts/SpaceMono-Bold.woff2') format('woff2'); font-weight:700; font-style:normal; font-display:swap; }
+  :root { --font-mono:'Space Mono', ui-monospace, monospace; --font-display:'Space Grotesk', system-ui, sans-serif; }
+
   :root {
     --espresso: #123C27;
     --crema: #52796F;
@@ -46,7 +51,7 @@
   }
   * { box-sizing: border-box; margin: 0; padding: 0; }
   :root { --ui-zoom: 1; }
-  body { font-family: 'DM Sans', sans-serif; background: var(--foam); color: var(--text); min-height: calc(100vh / var(--ui-zoom)); overflow-x: hidden; zoom: var(--ui-zoom); }
+  body { font-family:var(--font-mono); background: var(--foam); color: var(--text); min-height: calc(100vh / var(--ui-zoom)); overflow-x: hidden; zoom: var(--ui-zoom); }
   body::before { content: ''; position: fixed; inset: 0; background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.03'/%3E%3C/svg%3E"); pointer-events: none; z-index: 0; opacity: 0.4; }
 
   .app-header { background: var(--espresso); color: var(--milk); padding: 20px 20px 20px; position: sticky; top: 0; z-index: 100; box-shadow: 0 4px 20px rgba(26,15,10,0.3); }
@@ -55,10 +60,10 @@
   .app-header { overflow:hidden; }
   .header-cup { position:absolute; right:-62px; top:-58px; width:190px; height:190px; pointer-events:none; opacity:.92; }
   .header-top #dark-toggle-btn { position:relative; z-index:1; margin-right:104px; }
-  .app-title { font-family: 'Playfair Display', serif; font-size: 26px; letter-spacing: -0.5px; color: var(--crema); }
-  .app-subtitle { white-space:nowrap; font-size: 11px; color: rgba(245,237,227,0.5); font-family: 'DM Mono', monospace; letter-spacing: 2px; text-transform: uppercase; }
+  .app-title { font-family:var(--font-display); font-size: 26px; letter-spacing: -0.5px; color: var(--crema); }
+  .app-subtitle { white-space:nowrap; font-size: 11px; color: rgba(245,237,227,0.5); font-family:var(--font-mono); letter-spacing: 2px; text-transform: uppercase; }
   .bottom-nav { position:fixed; bottom:0; left:0; right:0; background:var(--espresso); display:flex; z-index:200; border-top:1px solid rgba(255,255,255,0.08); padding-bottom:env(safe-area-inset-bottom); }
-  .nav-tab { flex:1; padding:10px 4px 12px; background:none; border:none; color:rgba(245,237,227,0.4); font-family:'DM Mono',monospace; font-size:11px; letter-spacing:0.5px; text-transform:uppercase; cursor:pointer; border-top:2px solid transparent; transition:all 0.2s; text-align:center; display:flex; flex-direction:column; align-items:center; gap:3px; }
+  .nav-tab { flex:1; padding:10px 4px 12px; background:none; border:none; color:rgba(245,237,227,0.4); font-family:var(--font-mono); font-size:11px; letter-spacing:0.5px; text-transform:uppercase; cursor:pointer; border-top:2px solid transparent; transition:all 0.2s; text-align:center; display:flex; flex-direction:column; align-items:center; gap:3px; }
   .nav-tab.active { color:var(--crema-light); border-top-color:var(--crema); }
   .nav-tab-icon { font-size:18px; line-height:1; display:flex; align-items:center; justify-content:center; }
   .nav-tab-icon svg { stroke:currentColor; }
@@ -67,17 +72,17 @@
 
   .view { display:none; padding:20px; position:relative; z-index:1; padding-bottom:130px; }
   .view.active { display: block; }
-  .section-title { font-family: 'Playfair Display', serif; font-size: 20px; color: var(--espresso); margin-bottom: 4px; }
-  .section-subtitle { font-size: 12px; color: var(--text-muted); font-family: 'DM Mono', monospace; margin-bottom: 20px; }
+  .section-title { font-family:var(--font-display); font-size: 20px; color: var(--espresso); margin-bottom: 4px; }
+  .section-subtitle { font-size: 12px; color: var(--text-muted); font-family:var(--font-mono); margin-bottom: 20px; }
   .card { background: var(--card); border: 1px solid var(--border); border-radius: var(--radius); padding: 20px; margin-bottom: 16px; backdrop-filter: blur(8px); box-shadow: 0 2px 12px rgba(26,15,10,0.06); }
   .form-group { margin-bottom: 14px; }
-  .form-label { display: block; font-family: 'DM Mono', monospace; font-size: 11px; letter-spacing: 1.5px; text-transform: uppercase; color: var(--text); margin-bottom: 6px; opacity: 0.75; }
-  .form-input, .form-select, .form-textarea { width: 100%; padding: 11px 14px; background: var(--foam); border: 1.5px solid var(--border); border-radius: var(--radius-sm); font-family: 'DM Sans', sans-serif; font-size: 14px; color: var(--text); outline: none; transition: border-color 0.2s; -webkit-appearance: none; }
+  .form-label { display: block; font-family:var(--font-mono); font-size: 11px; letter-spacing: 1.5px; text-transform: uppercase; color: var(--text); margin-bottom: 6px; opacity: 0.75; }
+  .form-input, .form-select, .form-textarea { width: 100%; padding: 11px 14px; background: var(--foam); border: 1.5px solid var(--border); border-radius: var(--radius-sm); font-family:var(--font-mono); font-size: 14px; color: var(--text); outline: none; transition: border-color 0.2s; -webkit-appearance: none; }
   .form-input:focus, .form-select:focus, .form-textarea:focus { border-color: var(--crema); background: white; }
   .form-textarea { resize: none; height: 80px; line-height: 1.5; }
   .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
   .extraction-picker { display: flex; gap: 8px; margin-top: 4px; }
-  .extraction-btn { flex: 1; padding: 10px 6px; border: 1.5px solid var(--border); border-radius: var(--radius-sm); background: var(--foam); font-family: 'DM Mono', monospace; font-size: 11px; letter-spacing: 1px; text-transform: uppercase; cursor: pointer; transition: all 0.2s; text-align: center; color: var(--text-muted); }
+  .extraction-btn { flex: 1; padding: 10px 6px; border: 1.5px solid var(--border); border-radius: var(--radius-sm); background: var(--foam); font-family:var(--font-mono); font-size: 11px; letter-spacing: 1px; text-transform: uppercase; cursor: pointer; transition: all 0.2s; text-align: center; color: var(--text-muted); }
   .extraction-btn.under { --btn-color: #4a7ad0; }
   .extraction-btn.good { --btn-color: var(--green-light); }
   .extraction-btn.over { --btn-color: var(--red); }
@@ -85,20 +90,20 @@
   .rating-row { display: flex; gap: 6px; margin-top: 4px; }
   .star-btn { font-size: 24px; background: none; border: none; cursor: pointer; opacity: 0.25; transition: opacity 0.15s, transform 0.15s; padding: 2px; line-height: 1; color: var(--crema); }
   .star-btn.active { opacity: 1; color: var(--crema); }
-  .btn-primary { width: 100%; padding: 14px; background: var(--espresso); color: var(--crema-light); border: none; border-radius: var(--radius-sm); font-family: 'DM Mono', monospace; font-size: 12px; letter-spacing: 2px; text-transform: uppercase; cursor: pointer; transition: background 0.2s, transform 0.1s; margin-top: 8px; }
+  .btn-primary { width: 100%; padding: 14px; background: var(--espresso); color: var(--crema-light); border: none; border-radius: var(--radius-sm); font-family:var(--font-mono); font-size: 12px; letter-spacing: 2px; text-transform: uppercase; cursor: pointer; transition: background 0.2s, transform 0.1s; margin-top: 8px; }
   .btn-primary:active { transform: scale(0.98); }
-  .btn-secondary { background: none; border: 1.5px solid var(--border); color: var(--text-muted); padding: 10px 16px; border-radius: var(--radius-sm); font-family: 'DM Mono', monospace; font-size: 11px; letter-spacing: 1.5px; text-transform: uppercase; cursor: pointer; transition: all 0.2s; }
+  .btn-secondary { background: none; border: 1.5px solid var(--border); color: var(--text-muted); padding: 10px 16px; border-radius: var(--radius-sm); font-family:var(--font-mono); font-size: 11px; letter-spacing: 1.5px; text-transform: uppercase; cursor: pointer; transition: all 0.2s; }
   .coffee-card { background: var(--card); border: 1px solid var(--border); border-radius: var(--radius); overflow: hidden; margin-bottom: 14px; box-shadow: 0 2px 12px rgba(26,15,10,0.06); cursor: pointer; transition: all 0.2s; }
   .coffee-card-header { background: var(--espresso); padding: 14px 18px; display: flex; align-items: center; justify-content: space-between; }
-  .coffee-card-name { font-family: 'Playfair Display', serif; font-size: 16px; color: var(--milk); }
-  .coffee-card-roaster { font-family: 'DM Mono', monospace; font-size: 11px; color: rgba(245,237,227,0.55); letter-spacing: 1px; margin-top: 2px; }
+  .coffee-card-name { font-family:var(--font-display); font-size: 16px; color: var(--milk); }
+  .coffee-card-roaster { font-family:var(--font-mono); font-size: 11px; color: rgba(245,237,227,0.55); letter-spacing: 1px; margin-top: 2px; }
   .coffee-card-body { padding: 14px 18px; }
   .coffee-meta { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 12px; }
-  .meta-pill { font-family: 'DM Mono', monospace; font-size: 11px; padding: 3px 8px; background: rgba(200,135,58,0.1); border: 1px solid rgba(200,135,58,0.2); border-radius: 20px; color: var(--roast); }
-  .recipe-count { font-family: 'DM Mono', monospace; font-size: 11px; color: var(--text-muted); }
+  .meta-pill { font-family:var(--font-mono); font-size: 11px; padding: 3px 8px; background: rgba(200,135,58,0.1); border: 1px solid rgba(200,135,58,0.2); border-radius: 20px; color: var(--roast); }
+  .recipe-count { font-family:var(--font-mono); font-size: 11px; color: var(--text-muted); }
   .recipe-entry { background: var(--card); border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 14px; margin-bottom: 10px; }
   .recipe-entry-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 10px; }
-  .extraction-tag { font-family: 'DM Mono', monospace; font-size: 11px; padding: 2px 8px; border-radius: 20px; letter-spacing: 1px; text-transform: uppercase; white-space: nowrap; }
+  .extraction-tag { font-family:var(--font-mono); font-size: 11px; padding: 2px 8px; border-radius: 20px; letter-spacing: 1px; text-transform: uppercase; white-space: nowrap; }
   .tag-under { background: rgba(74,122,208,0.1); color: #4a7ad0; border: 1px solid rgba(74,122,208,0.25); }
   .tag-good { background: rgba(74,122,40,0.1); color: var(--green-light); border: 1px solid rgba(74,122,40,0.25); }
   .tag-over { background: rgba(139,26,26,0.1); color: var(--red); border: 1px solid rgba(139,26,26,0.25); }
@@ -107,13 +112,13 @@
   body.dark-mode .tag-over  { color:#F2A493 !important; border-color:rgba(242,164,147,0.35) !important; background:rgba(242,164,147,0.08) !important; }
   .recipe-params { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-bottom: 10px; }
   .param-block { text-align: center; background: var(--foam); border-radius: 8px; padding: 8px 4px; }
-  .param-value { font-family: 'Playfair Display', serif; font-size: 18px; color: var(--espresso); line-height: 1; }
-  .param-label { font-family: 'DM Mono', monospace; font-size: 11px; letter-spacing: 1px; color: var(--text-muted); text-transform: uppercase; margin-top: 3px; }
+  .param-value { font-family:var(--font-display); font-size: 18px; color: var(--espresso); line-height: 1; }
+  .param-label { font-family:var(--font-mono); font-size: 11px; letter-spacing: 1px; color: var(--text-muted); text-transform: uppercase; margin-top: 3px; }
   .recipe-notes { font-size: 13px; color: var(--text-muted); line-height: 1.5; font-style: italic; border-top: 1px solid var(--border); padding-top: 10px; margin-top: 4px; }
   .btn-delete { background: none; border: none; color: rgba(139,26,26,0.4); cursor: pointer; font-size: 16px; padding: 4px; }
   .empty-state { text-align: center; padding: 48px 20px; color: var(--text-muted); }
   .empty-icon { font-size: 48px; margin-bottom: 12px; opacity: 0.5; }
-  .empty-title { font-family: 'Playfair Display', serif; font-size: 18px; color: var(--text-muted); margin-bottom: 6px; }
+  .empty-title { font-family:var(--font-display); font-size: 18px; color: var(--text-muted); margin-bottom: 6px; }
   .empty-desc { font-size: 13px; line-height: 1.6; }
   .fab { position:fixed; bottom:82px; right:24px; width: 56px; height: 56px; border-radius: 50%; background: var(--espresso); color: #FFFFFF; border: none; font-size: 26px; cursor: pointer; box-shadow: 0 4px 20px rgba(18,60,39,0.4); display: flex; align-items: center; justify-content: center; transition: all 0.15s; z-index: 200; }
   .modal-overlay { position: fixed; inset: 0; background: rgba(26,15,10,0.6); z-index: 300; display: none; align-items: flex-end; backdrop-filter: blur(2px); }
@@ -121,32 +126,32 @@
   .modal { background: var(--foam); border-radius: 24px 24px 0 0; width: 100%; max-height: calc(92vh / var(--ui-zoom)); overflow-y: auto; padding: 0 20px 40px; animation: slideUp 0.3s cubic-bezier(0.16,1,0.3,1); }
   @keyframes slideUp { from { transform: translateY(100%); } to { transform: translateY(0); } }
   .modal-handle { width: 36px; height: 4px; background: rgba(26,15,10,0.2); border-radius: 2px; margin: 14px auto 20px; }
-  .modal-title { font-family: 'Playfair Display', serif; font-size: 22px; color: var(--espresso); margin-bottom: 4px; }
-  .modal-subtitle { font-family: 'DM Mono', monospace; font-size: 11px; letter-spacing: 1.5px; text-transform: uppercase; color: var(--text-muted); margin-bottom: 24px; }
-  .divider { font-family: 'DM Mono', monospace; font-size: 11px; letter-spacing: 2px; text-transform: uppercase; color: var(--crema); margin: 20px 0 14px; display: flex; align-items: center; gap: 8px; }
+  .modal-title { font-family:var(--font-display); font-size: 22px; color: var(--espresso); margin-bottom: 4px; }
+  .modal-subtitle { font-family:var(--font-mono); font-size: 11px; letter-spacing: 1.5px; text-transform: uppercase; color: var(--text-muted); margin-bottom: 24px; }
+  .divider { font-family:var(--font-mono); font-size: 11px; letter-spacing: 2px; text-transform: uppercase; color: var(--crema); margin: 20px 0 14px; display: flex; align-items: center; gap: 8px; }
   .divider::after { content: ''; flex: 1; height: 1px; background: rgba(82,121,111,0.25); }
-  .toast { position:fixed; top:calc(env(safe-area-inset-top) + 96px); bottom:auto; left: 50%; transform: translateX(-50%) translateY(-12px); z-index:700 !important; background: var(--espresso); color: var(--crema-light); padding: 10px 20px; border-radius: 20px; font-family: 'DM Mono', monospace; font-size: 11px; letter-spacing: 1px; opacity: 0; transition: all 0.3s; z-index: 500; white-space: nowrap; }
+  .toast { position:fixed; top:calc(env(safe-area-inset-top) + 96px); bottom:auto; left: 50%; transform: translateX(-50%) translateY(-12px); z-index:700 !important; background: var(--espresso); color: var(--crema-light); padding: 10px 20px; border-radius: 20px; font-family:var(--font-mono); font-size: 11px; letter-spacing: 1px; opacity: 0; transition: all 0.3s; z-index: 500; white-space: nowrap; }
   .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
   .stats-bar { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-bottom: 20px; }
   .stat-block { background: var(--card); border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 14px 10px; text-align: center; }
-  .stat-value { font-family: 'Playfair Display', serif; font-size: 24px; color: var(--espresso); }
-  .stat-label { font-family: 'DM Mono', monospace; font-size: 11px; letter-spacing: 1.5px; text-transform: uppercase; color: var(--text-muted); margin-top: 3px; }
+  .stat-value { font-family:var(--font-display); font-size: 24px; color: var(--espresso); }
+  .stat-label { font-family:var(--font-mono); font-size: 11px; letter-spacing: 1.5px; text-transform: uppercase; color: var(--text-muted); margin-top: 3px; }
   .coffee-selector { display: flex; flex-direction: column; gap: 8px; margin-bottom: 4px; max-height: 180px; overflow-y: auto; }
   .coffee-selector-item { padding: 10px 14px; border: 1.5px solid var(--border); border-radius: var(--radius-sm); cursor: pointer; transition: all 0.15s; background: var(--foam); }
   .coffee-selector-item.selected { border-color: var(--crema); background: rgba(200,135,58,0.08); }
-  .cs-name { font-family: 'Playfair Display', serif; font-size: 15px; }
-  .cs-sub { font-family: 'DM Mono', monospace; font-size: 11px; color: var(--text-muted); margin-top: 2px; }
+  .cs-name { font-family:var(--font-display); font-size: 15px; }
+  .cs-sub { font-family:var(--font-mono); font-size: 11px; color: var(--text-muted); margin-top: 2px; }
   .method-tabs { display: flex; gap: 6px; flex-wrap: wrap; margin-top: 4px; }
-  .method-tab { padding: 7px 12px; border: 1.5px solid var(--border); border-radius: 20px; font-family: 'DM Mono', monospace; font-size: 11px; letter-spacing: 1px; text-transform: uppercase; cursor: pointer; background: var(--foam); color: var(--text-muted); transition: all 0.15s; }
+  .method-tab { padding: 7px 12px; border: 1.5px solid var(--border); border-radius: 20px; font-family:var(--font-mono); font-size: 11px; letter-spacing: 1px; text-transform: uppercase; cursor: pointer; background: var(--foam); color: var(--text-muted); transition: all 0.15s; }
   .method-tab.selected { background: var(--espresso); border-color: var(--espresso); color: var(--crema-light); }
-  .detail-back { display: flex; align-items: center; gap: 8px; background: none; border: none; font-family: 'DM Mono', monospace; font-size: 11px; letter-spacing: 1px; color: var(--text-muted); cursor: pointer; padding: 0; margin-bottom: 20px; text-transform: uppercase; }
+  .detail-back { display: flex; align-items: center; gap: 8px; background: none; border: none; font-family:var(--font-mono); font-size: 11px; letter-spacing: 1px; color: var(--text-muted); cursor: pointer; padding: 0; margin-bottom: 20px; text-transform: uppercase; }
   .detail-hero { background: var(--espresso); border-radius: var(--radius); padding: 22px; margin-bottom: 20px; }
 
 
   /* Label image upload */
   .label-upload-btn { width:100%; padding:14px; background:var(--foam); border:1.5px dashed rgba(200,135,58,0.4); border-radius:var(--radius-sm); display:flex; flex-direction:column; align-items:center; justify-content:center; gap:6px; cursor:pointer; transition:all 0.2s; }
   .label-upload-btn:hover { border-color:var(--crema); background:rgba(200,135,58,0.04); }
-  .label-upload-btn span { font-family:'DM Mono',monospace; font-size:11px; letter-spacing:1.5px; text-transform:uppercase; color:var(--text-muted); }
+  .label-upload-btn span { font-family:var(--font-mono); font-size:11px; letter-spacing:1.5px; text-transform:uppercase; color:var(--text-muted); }
   .label-preview { width:100%; border-radius:var(--radius-sm); overflow:hidden; position:relative; margin-top:4px; }
   .label-preview img { width:100%; max-height:200px; object-fit:cover; border-radius:var(--radius-sm); display:block; }
   .label-preview-remove { position:absolute; top:6px; right:6px; background:rgba(26,15,10,0.7); color:white; border:none; border-radius:50%; width:24px; height:24px; font-size:14px; cursor:pointer; display:flex; align-items:center; justify-content:center; line-height:1; }
@@ -175,7 +180,7 @@
   .tile-banner { position:relative; height:88px; flex-shrink:0; background:#1c4030; overflow:hidden; }
   .tile-photo { width:100%; height:100%; object-fit:cover; object-position:center 25%; display:block; }
   .tile-photo-empty { background:repeating-linear-gradient(45deg, #1f4633 0 8px, #1a3d2c 8px 16px); display:flex; align-items:center; justify-content:center; }
-  .tile-photo-empty span { font-family:'Space Grotesk',sans-serif !important; font-weight:600; font-size:30px; color:rgba(250,250,247,0.3); }
+  .tile-photo-empty span { font-family:var(--font-display) !important; font-weight:600; font-size:30px; color:rgba(250,250,247,0.3); }
   body:not(.dark-mode) .tile-photo-empty { background:repeating-linear-gradient(45deg, #2a5c44 0 8px, #25533d 8px 16px); }
   .tile-badge { position:absolute; font-size:11px; letter-spacing:1px; border-radius:10px; padding:2px 7px; background:rgba(10,31,20,0.82); color:#FAFAF7; }
   .tile-rating { right:8px; bottom:8px; font-size:11px; letter-spacing:.3px; } .tile-rating b { font-size:12px; }
@@ -183,7 +188,7 @@
   .tile-fin { left:8px; top:8px; font-size:11px; font-weight:700; color:#F6B8AA; }
   .tile-more { position:absolute !important; right:6px; top:4px; color:#FAFAF7 !important; background:rgba(10,31,20,0.55) !important; border-radius:8px; padding:2px 6px 6px !important; font-size:16px !important; }
   .tile-body { padding:10px 12px 11px; display:flex; flex-direction:column; flex:1; min-height:0; }
-  .tile-name { font-family:'Space Grotesk',sans-serif !important; font-size:14px; line-height:1.25; color:var(--text); display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden; }
+  .tile-name { font-family:var(--font-display) !important; font-size:14px; line-height:1.25; color:var(--text); display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden; }
   .tile-roaster { font-size:11px; letter-spacing:1px; color:var(--text-muted); margin-top:3px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
   .tile-summary { margin-top:auto; padding-top:8px; font-size:11px; color:var(--text-muted); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
   .tile-brews { font-size:11px; color:var(--text-muted); margin-top:3px; }
@@ -210,7 +215,7 @@
   .rating-slider input[type=range] { width:100%; height:32px; accent-color:var(--espresso); touch-action:pan-y; }
   body.dark-mode .rating-slider input[type=range] { accent-color:#8FB3A5; }
   .rating-slider input.unset { opacity:.45; }
-  .rating-slider-val { flex:0 0 88px; width:88px; text-align:right; color:var(--text-muted); white-space:nowrap; line-height:1.15; }
+  .rating-slider-val { flex:0 0 104px; width:104px; text-align:right; color:var(--text-muted); white-space:nowrap; line-height:1.15; }
   .rating-slider-val .rs-num { font-size:12px; } .rating-slider-val .rs-num b { font-size:20px; color:var(--text); }
   .rating-slider-val .rs-none { font-size:20px; }
   .rating-slider-val .rs-word { font-size:11px; letter-spacing:.3px; margin-top:2px; overflow:hidden; text-overflow:ellipsis; }
@@ -263,8 +268,8 @@
   #coffees-list.grid .edit-overlay-btn { padding:7px 9px; font-size:11px; }
   .card-edit-overlay { position:absolute; inset:0; background:rgba(18,60,39,0.93); border-radius:var(--radius); display:flex; align-items:center; justify-content:center; gap:10px; opacity:0; pointer-events:none; transition:opacity .15s; z-index:10; flex-wrap:wrap; padding:12px; }
   .card-edit-overlay.visible { opacity:1; pointer-events:all; }
-  .edit-overlay-btn { background:rgba(255,255,255,0.12); border:1px solid rgba(255,255,255,0.3); color:#FAFAF7; font-size:11px; padding:9px 14px; border-radius:8px; cursor:pointer; font-family:'Space Mono',monospace; }
-  .btn-delete-coffee { display:block; width:100%; margin:28px 0 8px; padding:12px; background:none; border:1px solid var(--border); border-radius:10px; color:#A33A2B; font-family:'Space Mono',monospace; font-size:12px; letter-spacing:1px; text-transform:uppercase; cursor:pointer; }
+  .edit-overlay-btn { background:rgba(255,255,255,0.12); border:1px solid rgba(255,255,255,0.3); color:#FAFAF7; font-size:11px; padding:9px 14px; border-radius:8px; cursor:pointer; font-family:var(--font-mono); }
+  .btn-delete-coffee { display:block; width:100%; margin:28px 0 8px; padding:12px; background:none; border:1px solid var(--border); border-radius:10px; color:#A33A2B; font-family:var(--font-mono); font-size:12px; letter-spacing:1px; text-transform:uppercase; cursor:pointer; }
   body.dark-mode .btn-delete-coffee { border-color:var(--dm-border); color:#E08A7C; }
   .edit-overlay-btn:hover { background:rgba(255,255,255,0.22); }
   /* Time inputs */
@@ -340,8 +345,8 @@
   .type-btn.active, .method-tab.selected { color:#FAFAF7 !important; }
   .custom-recipe-card-header .btn-secondary { color:#FAFAF7 !important; border-color:rgba(250,250,247,0.4) !important; background:rgba(250,250,247,0.08) !important; }
   .custom-recipe-card-header .btn-delete { color:rgba(250,250,247,0.7) !important; }
-  .custom-recipe-card-header div[style*="Playfair"], .recipe-lib-title { color:#FAFAF7 !important; }
-  .custom-recipe-card-header div[style*="DM Mono"], .recipe-lib-author { color:rgba(250,250,247,0.7) !important; }
+  .custom-recipe-card-header div[style*="--font-display"], .recipe-lib-title { color:#FAFAF7 !important; }
+  .custom-recipe-card-header div[style*="--font-mono"], .recipe-lib-author { color:rgba(250,250,247,0.7) !important; }
   .meta-pill { background:rgba(82,121,111,0.1) !important; border:1px solid rgba(82,121,111,0.25) !important; color:var(--text) !important; }
   body.dark-mode .meta-pill { color:var(--dm-text) !important; }
 
@@ -349,7 +354,7 @@
   body.dark-mode .btn-primary.fab-recipe-btn { color:var(--dm-text) !important; }
   .text-size-options { display:grid; grid-template-columns:repeat(4, minmax(0,1fr)); gap:6px; }
   .text-size-options button { display:flex; flex-direction:column; align-items:center; justify-content:flex-end; gap:4px; min-height:56px; padding:8px 2px; border:1.5px solid var(--border); border-radius:10px; background:var(--card); color:var(--text); font-size:11px; letter-spacing:.3px; cursor:pointer; line-height:1.1; }
-  .text-size-options button span { font-family:'Space Grotesk',sans-serif !important; font-weight:600; line-height:1; }
+  .text-size-options button span { font-family:var(--font-display) !important; font-weight:600; line-height:1; }
   .text-size-options button.active { background:#123C27; border-color:#123C27; color:#FAFAF7; }
   body.dark-mode .text-size-options button { background:var(--dm-input); border-color:var(--dm-border); }
   body.dark-mode .text-size-options button.active { background:#52796F; border-color:#52796F; color:#FFFFFF; }
@@ -373,9 +378,9 @@
   .detail-hero .meta-pill, .coffee-card-header .meta-pill, .recipe-lib-header .meta-pill, .custom-recipe-card-header .meta-pill { color:#FAFAF7 !important; background:rgba(250,250,247,0.12) !important; border-color:rgba(250,250,247,0.25) !important; }
   /* Brew timer */
   .brew-timer { display:flex; align-items:center; gap:12px; background:var(--espresso); border-radius:var(--radius-sm); padding:12px 14px; margin-bottom:14px; }
-  .brew-timer-display { font-family:'Space Mono',monospace; font-size:30px; font-weight:700; color:#FAFAF7; flex:1; letter-spacing:1px; font-variant-numeric:tabular-nums; }
+  .brew-timer-display { font-family:var(--font-mono); font-size:30px; font-weight:700; color:#FAFAF7; flex:1; letter-spacing:1px; font-variant-numeric:tabular-nums; }
   .brew-timer-display.running { color:#B7E4C7; }
-  .brew-timer-btn { border:none; border-radius:8px; padding:10px 16px; font-family:'Space Mono',monospace; font-size:11px; letter-spacing:1px; text-transform:uppercase; cursor:pointer; }
+  .brew-timer-btn { border:none; border-radius:8px; padding:10px 16px; font-family:var(--font-mono); font-size:11px; letter-spacing:1px; text-transform:uppercase; cursor:pointer; }
   .brew-timer-btn.start { background:#FAFAF7; color:#123C27; }
   .brew-timer-btn.stop { background:#c0564b; color:#fff; }
   .brew-timer-btn.reset { background:rgba(250,250,247,0.12); color:#FAFAF7; }
@@ -384,11 +389,11 @@
   .plan-last strong { color:var(--text); font-weight:600; }
   .plan-tip { font-size:12px; line-height:1.5; color:var(--text); background:rgba(82,121,111,0.1); border-left:3px solid var(--crema); border-radius:6px; padding:10px 12px; margin-bottom:18px; }
   .plan-chips { display:flex; gap:6px; margin-bottom:10px; }
-  .plan-chip { flex:1; padding:10px 4px; border:1.5px solid var(--border); border-radius:var(--radius-sm); background:var(--card); color:var(--text); font-family:'Space Mono',monospace; font-size:11px; letter-spacing:.5px; text-transform:uppercase; cursor:pointer; text-align:center; }
+  .plan-chip { flex:1; padding:10px 4px; border:1.5px solid var(--border); border-radius:var(--radius-sm); background:var(--card); color:var(--text); font-family:var(--font-mono); font-size:11px; letter-spacing:.5px; text-transform:uppercase; cursor:pointer; text-align:center; }
   .plan-chip.selected { background:var(--espresso); border-color:var(--espresso); color:#FAFAF7; }
   body.dark-mode .plan-chip.selected { background:var(--crema); border-color:var(--crema); }
   .plan-slider { margin-bottom:18px; }
-  .plan-slider .plan-val { text-align:center; font-family:'Space Mono',monospace; font-size:14px; color:var(--text); margin-bottom:6px; }
+  .plan-slider .plan-val { text-align:center; font-family:var(--font-mono); font-size:14px; color:var(--text); margin-bottom:6px; }
   .plan-slider .plan-val b { font-size:20px; }
   .plan-slider input[type=range] { width:100%; height:32px; accent-color:var(--espresso); touch-action:pan-y; }
   body.dark-mode .plan-slider input[type=range] { accent-color:#8FB3A5; }
@@ -405,7 +410,7 @@
   .plan-stepper { display:flex; align-items:center; gap:10px; margin-bottom:18px; }
   .plan-stepper button { width:40px; height:40px; border-radius:10px; border:1.5px solid var(--border); background:var(--card); color:var(--text); font-size:20px; cursor:pointer; }
   .plan-stepper button:disabled { opacity:.3; }
-  .plan-stepper .plan-val { flex:1; text-align:center; font-family:'Space Mono',monospace; font-size:14px; color:var(--text); }
+  .plan-stepper .plan-val { flex:1; text-align:center; font-family:var(--font-mono); font-size:14px; color:var(--text); }
   .plan-stepper .plan-val b { font-size:20px; }
   /* Up next cards */
   .upnext-card { background:var(--card); border:1.5px solid var(--crema); border-radius:var(--radius-sm); padding:12px 14px; margin-bottom:10px; }
@@ -469,10 +474,10 @@
   .card-more { background:none; border:none; color:var(--text-muted); font-size:20px; line-height:1; padding:0 4px 6px; cursor:pointer; border-radius:6px; letter-spacing:1px; }
   .coffee-card-header .card-more { color:rgba(250,250,247,0.8); }
   /* Typography: Space Mono throughout, Space Grotesk for headings and names */
-  * { font-family: 'Space Mono', ui-monospace, monospace !important; }
+  * { font-family: var(--font-mono) !important; }
   .app-title, .modal-title, .section-title, .coffee-card-name, .recipe-lib-title, .grinder-detail-name, .grinder-model,
   .upnext-title, .settings-panel-title, .empty-title, .cs-name, h1, h2, h3,
-  [style*="Playfair"] { font-family: 'Space Grotesk', system-ui, sans-serif !important; letter-spacing: -0.3px !important; }
+  [style*="--font-display"] { font-family: var(--font-display) !important; letter-spacing: -0.3px !important; }
   .app-title { font-weight: 700 !important; letter-spacing: -1px !important; }
   .suggest-card { background:rgba(82,121,111,0.1); border:1.5px dashed var(--crema); border-radius:var(--radius-sm); padding:12px 14px; margin:4px 0 6px; }
   .suggest-label { flex:1; font-size:11px; letter-spacing:1px; text-transform:uppercase; color:var(--text-muted); }
@@ -553,17 +558,17 @@
   @media (prefers-reduced-motion: reduce) { .timer-pill .tp-dot { animation:none; } }
   /* GRINDER STYLES */
   .grinder-type-toggle { display: flex; background: rgba(26,15,10,0.06); border-radius: 10px; padding: 3px; margin-bottom: 20px; }
-  .type-btn { flex: 1; padding: 9px 12px; border: none; border-radius: 8px; font-family: 'DM Mono', monospace; font-size: 11px; letter-spacing: 1px; text-transform: uppercase; cursor: pointer; background: none; color: var(--text-muted); transition: all 0.2s; }
+  .type-btn { flex: 1; padding: 9px 12px; border: none; border-radius: 8px; font-family:var(--font-mono); font-size: 11px; letter-spacing: 1px; text-transform: uppercase; cursor: pointer; background: none; color: var(--text-muted); transition: all 0.2s; }
   .type-btn.active { background: var(--espresso); color: var(--crema-light); }
   .grinder-search { position: relative; margin-bottom: 16px; }
-  .grinder-search input { width: 100%; padding: 11px 14px 11px 38px; background: white; border: 1.5px solid var(--border); border-radius: var(--radius-sm); font-family: 'DM Sans', sans-serif; font-size: 14px; color: var(--text); outline: none; }
+  .grinder-search input { width: 100%; padding: 11px 14px 11px 38px; background: white; border: 1.5px solid var(--border); border-radius: var(--radius-sm); font-family:var(--font-mono); font-size: 14px; color: var(--text); outline: none; }
   .grinder-search input:focus { border-color: var(--crema); }
   .grinder-search-icon { position: absolute; left: 12px; top: 50%; transform: translateY(-50%); font-size: 16px; opacity: 0.4; pointer-events: none; }
   .grinder-card { background: var(--card); border: 1px solid var(--border); border-radius: var(--radius); padding: 14px 16px; margin-bottom: 10px; display: flex; align-items: center; justify-content: space-between; cursor: pointer; transition: all 0.15s; }
   .grinder-card.in-compare { border-color: var(--crema); background: rgba(200,135,58,0.05); }
-  .grinder-brand { font-family: 'DM Mono', monospace; font-size: 11px; letter-spacing: 1px; color: var(--text-muted); text-transform: uppercase; }
-  .grinder-model { font-family: 'Playfair Display', serif; font-size: 16px; color: var(--espresso); margin-top: 2px; }
-  .grinder-type-badge { font-family: 'DM Mono', monospace; font-size: 11px; padding: 2px 8px; border-radius: 20px; letter-spacing: 1px; text-transform: uppercase; display: block; margin-bottom: 4px; }
+  .grinder-brand { font-family:var(--font-mono); font-size: 11px; letter-spacing: 1px; color: var(--text-muted); text-transform: uppercase; }
+  .grinder-model { font-family:var(--font-display); font-size: 16px; color: var(--espresso); margin-top: 2px; }
+  .grinder-type-badge { font-family:var(--font-mono); font-size: 11px; padding: 2px 8px; border-radius: 20px; letter-spacing: 1px; text-transform: uppercase; display: block; margin-bottom: 4px; }
   .badge-manual { background: rgba(42,80,128,0.1); color: var(--blue); border: 1px solid rgba(42,80,128,0.2); }
   .badge-electric { background: rgba(92,45,14,0.1); color: var(--roast); border: 1px solid rgba(92,45,14,0.2); }
   .compare-toggle-btn { background: none; border: none; cursor: pointer; font-size: 20px; padding: 4px 6px; line-height: 1; transition: transform 0.15s; }
@@ -573,22 +578,22 @@
   .compare-bar { position:fixed; bottom:145px; left: 16px; right: 16px; background: var(--espresso); border-radius: var(--radius); padding: 12px 16px; display: flex; align-items: center; justify-content: space-between; z-index: 150; box-shadow: 0 8px 30px rgba(26,15,10,0.4); transform: translateY(200px); transition: transform 0.3s cubic-bezier(0.16,1,0.3,1); }
   .compare-bar.visible { transform: translateY(0); }
   .compare-bar:not(.visible) { visibility:hidden; }
-  .compare-bar-text { font-family: 'DM Mono', monospace; font-size: 11px; color: var(--crema-light); letter-spacing: 1px; }
-  .compare-bar-btn { background: var(--crema); color: var(--espresso); border: none; padding: 8px 16px; border-radius: 8px; font-family: 'DM Mono', monospace; font-size: 11px; letter-spacing: 1px; text-transform: uppercase; cursor: pointer; font-weight: 500; }
+  .compare-bar-text { font-family:var(--font-mono); font-size: 11px; color: var(--crema-light); letter-spacing: 1px; }
+  .compare-bar-btn { background: var(--crema); color: var(--espresso); border: none; padding: 8px 16px; border-radius: 8px; font-family:var(--font-mono); font-size: 11px; letter-spacing: 1px; text-transform: uppercase; cursor: pointer; font-weight: 500; }
 
   /* Chart styles */
   .grinder-bar-row { display: flex; align-items: center; gap: 10px; margin-bottom: 6px; }
-  .grinder-bar-name { font-family: 'DM Mono', monospace; font-size: 11px; width: 100px; flex-shrink: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .grinder-bar-name { font-family:var(--font-mono); font-size: 11px; width: 100px; flex-shrink: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
   .grinder-bar-track { flex: 1; height: 26px; position: relative; background: rgba(26,15,10,0.04); border-radius: 6px; }
-  .grinder-bar-fill { position: absolute; top: 3px; height: 20px; border-radius: 4px; display: flex; align-items: center; justify-content: center; font-family: 'DM Mono', monospace; font-size: 11px; color: white; padding: 0 4px; overflow: hidden; white-space: nowrap; }
+  .grinder-bar-fill { position: absolute; top: 3px; height: 20px; border-radius: 4px; display: flex; align-items: center; justify-content: center; font-family:var(--font-mono); font-size: 11px; color: white; padding: 0 4px; overflow: hidden; white-space: nowrap; }
   .grind-axis { display: flex; justify-content: space-between; margin-top: 6px; }
-  .grind-axis-label { font-family: 'DM Mono', monospace; font-size: 11px; color: var(--text-muted); }
+  .grind-axis-label { font-family:var(--font-mono); font-size: 11px; color: var(--text-muted); }
 
   /* Recipe library cards */
   .recipe-lib-card { background:var(--card); border:1px solid var(--border); border-radius:var(--radius); margin-bottom:12px; overflow:hidden; box-shadow:0 2px 8px rgba(26,15,10,0.05); }
   .recipe-lib-header { background:var(--espresso); padding:12px 16px; display:flex; justify-content:space-between; align-items:flex-start; gap:10px; }
   .recipe-lib-title { font-size:15px; color:var(--crema-light); line-height:1.3; flex:1; }
-  .recipe-lib-author { font-family:'DM Mono',monospace; font-size:11px; color:rgba(245,237,227,.45); letter-spacing:.5px; margin-top:2px; }
+  .recipe-lib-author { font-family:var(--font-mono); font-size:11px; color:rgba(245,237,227,.45); letter-spacing:.5px; margin-top:2px; }
   .recipe-lib-body { padding:12px 16px; }
   .recipe-lib-meta { display:flex; flex-wrap:wrap; gap:5px; margin-bottom:10px; }
   .recipe-lib-steps { padding-left:16px; margin:0; }
@@ -598,9 +603,9 @@
   #recipe-method-filter .type-btn { white-space:nowrap; flex-shrink:0; }
 
   .step-row { display:flex; gap:8px; align-items:flex-start; }
-  .step-row textarea { flex:1; min-height:52px; resize:none; font-size:13px; line-height:1.5; padding:8px 12px; background:var(--foam); border:1.5px solid var(--border); border-radius:var(--radius-sm); font-family:'DM Sans',sans-serif; color:var(--text); outline:none; }
+  .step-row textarea { flex:1; min-height:52px; resize:none; font-size:13px; line-height:1.5; padding:8px 12px; background:var(--foam); border:1.5px solid var(--border); border-radius:var(--radius-sm); font-family:var(--font-mono); color:var(--text); outline:none; }
   .step-row textarea:focus { border-color:var(--crema); background:white; }
-  .step-row-num { font-family:'DM Mono',monospace; font-size:11px; color:var(--text-muted); padding-top:10px; min-width:18px; }
+  .step-row-num { font-family:var(--font-mono); font-size:11px; color:var(--text-muted); padding-top:10px; min-width:18px; }
   .step-remove { background:none; border:none; color:rgba(139,26,26,0.4); cursor:pointer; font-size:18px; padding:6px 2px; line-height:1; flex-shrink:0; }
   .step-remove:hover { color:var(--red); }
   /* Custom recipe cards */
@@ -613,7 +618,6 @@
   /* ── Dark mode overrides ── */
   body.dark-mode { background: var(--dm-bg) !important; color: var(--dm-text) !important; }
   body.dark-mode .app-header { background: var(--dm-surface) !important; }
-  body.dark-mode .view { background: var(--dm-bg); }
   body.dark-mode .modal { background: var(--dm-surface) !important; }
   body.dark-mode .modal-overlay { background: rgba(0,0,0,0.7) !important; }
   body.dark-mode .coffee-card, body.dark-mode .recipe-entry, body.dark-mode .custom-recipe-card { background: var(--dm-card) !important; border-color: var(--dm-border) !important; }
@@ -632,7 +636,6 @@
   body.dark-mode .stat-value { color: var(--crema-light) !important; }
   body.dark-mode .step-row textarea { background: var(--dm-input) !important; border-color: var(--dm-border) !important; color: var(--dm-text) !important; }
   body.dark-mode .font-option, body.dark-mode .label-upload-btn { background: var(--dm-input) !important; border-color: var(--dm-border) !important; }
-  body.dark-mode .grinder-card { background: var(--dm-card) !important; border-color: var(--dm-border) !important; }
   body.dark-mode .grinder-card-header { background: var(--dm-surface) !important; }
   body.dark-mode .compare-bar { background: var(--dm-surface) !important; }
   body.dark-mode .detail-hero { background: var(--dm-surface) !important; }
@@ -687,9 +690,13 @@
   .grinder-detail-card { background: var(--espresso); border-radius: var(--radius); padding: 20px; margin-bottom: 16px; }
   .grinder-specs-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 14px; }
   .grinder-spec-block { background: rgba(255,255,255,0.07); border-radius: 10px; padding: 12px; }
-  .grinder-spec-value { font-family: 'Playfair Display', serif; font-size: 18px; color: var(--crema-light); }
-  .grinder-spec-label { font-family: 'DM Mono', monospace; font-size: 11px; letter-spacing: 1px; color: rgba(245,237,227,0.4); text-transform: uppercase; margin-top: 2px; }
+  .grinder-spec-value { font-family:var(--font-display); font-size: 18px; color: var(--crema-light); }
+  .grinder-spec-label { font-family:var(--font-mono); font-size: 11px; letter-spacing: 1px; color: rgba(245,237,227,0.4); text-transform: uppercase; margin-top: 2px; }
 
+  .update-banner { position:fixed; left:12px; right:12px; top:calc(env(safe-area-inset-top, 0px) + 10px); z-index:700; display:flex; align-items:center; gap:10px; background:#123C27; color:#FAFAF7; border:1px solid rgba(250,250,247,0.25); border-radius:12px; padding:10px 12px; font-size:12px; box-shadow:0 6px 24px rgba(0,0,0,0.3); }
+  .update-banner[hidden] { display:none; }
+  .update-banner .ub-text { flex:1; }
+  .update-banner button { background:rgba(250,250,247,0.14); color:#FAFAF7; border:1px solid rgba(250,250,247,0.3); border-radius:8px; padding:6px 12px; font-size:11px; letter-spacing:1px; text-transform:uppercase; cursor:pointer; }
   /* Accessibility */
   .ico { vertical-align:-0.15em; flex-shrink:0; }
   .empty-icon { line-height:0; }
@@ -936,7 +943,7 @@
     </div>
     <div class="form-row">
       <div class="form-group"><label class="form-label">Price</label><input type="number" class="form-input" id="c-price" placeholder="e.g. 14.50" min="0" step="0.01" inputmode="decimal" oninput="updatePricePreview()"></div>
-      <div class="form-group"><label class="form-label">Currency</label><select class="form-select" id="c-currency" onchange="updatePricePreview()"><option value="GBP">GBP</option><option value="EUR">EUR</option><option value="USD">USD</option><option value="AUD">AUD</option><option value="CAD">CAD</option><option value="NZD">NZD</option><option value="JPY">JPY</option><option value="CHF">CHF</option><option value="SEK">SEK</option><option value="NOK">NOK</option><option value="DKK">DKK</option><option value="HKD">HKD</option><option value="SGD">SGD</option><option value="KRW">KRW</option><option value="CNY">CNY</option></select></div>
+      <div class="form-group"><label class="form-label">Currency</label><select class="form-select" id="c-currency" onchange="updatePricePreview();fxFor(this.value)"><option value="GBP">GBP</option><option value="EUR">EUR</option><option value="USD">USD</option><option value="AUD">AUD</option><option value="CAD">CAD</option><option value="NZD">NZD</option><option value="JPY">JPY</option><option value="CHF">CHF</option><option value="SEK">SEK</option><option value="NOK">NOK</option><option value="DKK">DKK</option><option value="HKD">HKD</option><option value="SGD">SGD</option><option value="KRW">KRW</option><option value="CNY">CNY</option></select></div>
     </div>
     <div id="c-price-preview" style="font-size:11px;color:var(--text-muted);margin:-6px 0 14px"></div>
     <div class="form-group"><label class="form-label">Tasting Notes (from bag)</label><input type="text" class="form-input" id="c-notes" placeholder="e.g. Blueberry, jasmine, dark chocolate"></div>
@@ -946,7 +953,7 @@
         <button class="coffee-rating-btn" data-val="1" onclick="setCoffeeRating(1)"><svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 14 14" width="14" height="14"><g><path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" d="M2 4h8.5v5c0 0.53043 -0.2107 1.0391 -0.58579 1.4142C9.53914 10.7893 9.03043 11 8.5 11h-5c-0.53043 0 -1.03914 -0.2107 -1.41421 -0.5858C1.71071 10.0391 1.5 9.53043 1.5 9V4.5c0 -0.13261 0.05268 -0.25979 0.14645 -0.35355C1.74021 4.05268 1.86739 4 2 4Z" stroke-width="1"></path><path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" d="M0.5 13.5h13" stroke-width="1"></path><path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" d="M10.5 4h1c0.5304 0 1.0391 0.21071 1.4142 0.58579 0.3751 0.37507 0.5858 0.88378 0.5858 1.41421s-0.2107 1.03914 -0.5858 1.41421C12.5391 7.78929 12.0304 8 11.5 8h-1" stroke-width="1"></path><path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" d="M3 0.5v1" stroke-width="1"></path><path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" d="M8 0.5v1" stroke-width="1"></path><path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" d="M5.5 0.5v1" stroke-width="1"></path></g></svg></button><button class="coffee-rating-btn" data-val="2" onclick="setCoffeeRating(2)"><svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 14 14" width="14" height="14"><g><path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" d="M2 4h8.5v5c0 0.53043 -0.2107 1.0391 -0.58579 1.4142C9.53914 10.7893 9.03043 11 8.5 11h-5c-0.53043 0 -1.03914 -0.2107 -1.41421 -0.5858C1.71071 10.0391 1.5 9.53043 1.5 9V4.5c0 -0.13261 0.05268 -0.25979 0.14645 -0.35355C1.74021 4.05268 1.86739 4 2 4Z" stroke-width="1"></path><path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" d="M0.5 13.5h13" stroke-width="1"></path><path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" d="M10.5 4h1c0.5304 0 1.0391 0.21071 1.4142 0.58579 0.3751 0.37507 0.5858 0.88378 0.5858 1.41421s-0.2107 1.03914 -0.5858 1.41421C12.5391 7.78929 12.0304 8 11.5 8h-1" stroke-width="1"></path><path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" d="M3 0.5v1" stroke-width="1"></path><path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" d="M8 0.5v1" stroke-width="1"></path><path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" d="M5.5 0.5v1" stroke-width="1"></path></g></svg></button><button class="coffee-rating-btn" data-val="3" onclick="setCoffeeRating(3)"><svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 14 14" width="14" height="14"><g><path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" d="M2 4h8.5v5c0 0.53043 -0.2107 1.0391 -0.58579 1.4142C9.53914 10.7893 9.03043 11 8.5 11h-5c-0.53043 0 -1.03914 -0.2107 -1.41421 -0.5858C1.71071 10.0391 1.5 9.53043 1.5 9V4.5c0 -0.13261 0.05268 -0.25979 0.14645 -0.35355C1.74021 4.05268 1.86739 4 2 4Z" stroke-width="1"></path><path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" d="M0.5 13.5h13" stroke-width="1"></path><path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" d="M10.5 4h1c0.5304 0 1.0391 0.21071 1.4142 0.58579 0.3751 0.37507 0.5858 0.88378 0.5858 1.41421s-0.2107 1.03914 -0.5858 1.41421C12.5391 7.78929 12.0304 8 11.5 8h-1" stroke-width="1"></path><path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" d="M3 0.5v1" stroke-width="1"></path><path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" d="M8 0.5v1" stroke-width="1"></path><path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" d="M5.5 0.5v1" stroke-width="1"></path></g></svg></button><button class="coffee-rating-btn" data-val="4" onclick="setCoffeeRating(4)"><svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 14 14" width="14" height="14"><g><path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" d="M2 4h8.5v5c0 0.53043 -0.2107 1.0391 -0.58579 1.4142C9.53914 10.7893 9.03043 11 8.5 11h-5c-0.53043 0 -1.03914 -0.2107 -1.41421 -0.5858C1.71071 10.0391 1.5 9.53043 1.5 9V4.5c0 -0.13261 0.05268 -0.25979 0.14645 -0.35355C1.74021 4.05268 1.86739 4 2 4Z" stroke-width="1"></path><path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" d="M0.5 13.5h13" stroke-width="1"></path><path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" d="M10.5 4h1c0.5304 0 1.0391 0.21071 1.4142 0.58579 0.3751 0.37507 0.5858 0.88378 0.5858 1.41421s-0.2107 1.03914 -0.5858 1.41421C12.5391 7.78929 12.0304 8 11.5 8h-1" stroke-width="1"></path><path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" d="M3 0.5v1" stroke-width="1"></path><path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" d="M8 0.5v1" stroke-width="1"></path><path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" d="M5.5 0.5v1" stroke-width="1"></path></g></svg></button><button class="coffee-rating-btn" data-val="5" onclick="setCoffeeRating(5)"><svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 14 14" width="14" height="14"><g><path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" d="M2 4h8.5v5c0 0.53043 -0.2107 1.0391 -0.58579 1.4142C9.53914 10.7893 9.03043 11 8.5 11h-5c-0.53043 0 -1.03914 -0.2107 -1.41421 -0.5858C1.71071 10.0391 1.5 9.53043 1.5 9V4.5c0 -0.13261 0.05268 -0.25979 0.14645 -0.35355C1.74021 4.05268 1.86739 4 2 4Z" stroke-width="1"></path><path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" d="M0.5 13.5h13" stroke-width="1"></path><path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" d="M10.5 4h1c0.5304 0 1.0391 0.21071 1.4142 0.58579 0.3751 0.37507 0.5858 0.88378 0.5858 1.41421s-0.2107 1.03914 -0.5858 1.41421C12.5391 7.78929 12.0304 8 11.5 8h-1" stroke-width="1"></path><path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" d="M3 0.5v1" stroke-width="1"></path><path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" d="M8 0.5v1" stroke-width="1"></path><path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" d="M5.5 0.5v1" stroke-width="1"></path></g></svg></button><button class="coffee-rating-btn" data-val="6" onclick="setCoffeeRating(6)"><svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 14 14" width="14" height="14"><g><path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" d="M2 4h8.5v5c0 0.53043 -0.2107 1.0391 -0.58579 1.4142C9.53914 10.7893 9.03043 11 8.5 11h-5c-0.53043 0 -1.03914 -0.2107 -1.41421 -0.5858C1.71071 10.0391 1.5 9.53043 1.5 9V4.5c0 -0.13261 0.05268 -0.25979 0.14645 -0.35355C1.74021 4.05268 1.86739 4 2 4Z" stroke-width="1"></path><path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" d="M0.5 13.5h13" stroke-width="1"></path><path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" d="M10.5 4h1c0.5304 0 1.0391 0.21071 1.4142 0.58579 0.3751 0.37507 0.5858 0.88378 0.5858 1.41421s-0.2107 1.03914 -0.5858 1.41421C12.5391 7.78929 12.0304 8 11.5 8h-1" stroke-width="1"></path><path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" d="M3 0.5v1" stroke-width="1"></path><path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" d="M8 0.5v1" stroke-width="1"></path><path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" d="M5.5 0.5v1" stroke-width="1"></path></g></svg></button><button class="coffee-rating-btn" data-val="7" onclick="setCoffeeRating(7)"><svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 14 14" width="14" height="14"><g><path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" d="M2 4h8.5v5c0 0.53043 -0.2107 1.0391 -0.58579 1.4142C9.53914 10.7893 9.03043 11 8.5 11h-5c-0.53043 0 -1.03914 -0.2107 -1.41421 -0.5858C1.71071 10.0391 1.5 9.53043 1.5 9V4.5c0 -0.13261 0.05268 -0.25979 0.14645 -0.35355C1.74021 4.05268 1.86739 4 2 4Z" stroke-width="1"></path><path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" d="M0.5 13.5h13" stroke-width="1"></path><path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" d="M10.5 4h1c0.5304 0 1.0391 0.21071 1.4142 0.58579 0.3751 0.37507 0.5858 0.88378 0.5858 1.41421s-0.2107 1.03914 -0.5858 1.41421C12.5391 7.78929 12.0304 8 11.5 8h-1" stroke-width="1"></path><path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" d="M3 0.5v1" stroke-width="1"></path><path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" d="M8 0.5v1" stroke-width="1"></path><path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" d="M5.5 0.5v1" stroke-width="1"></path></g></svg></button><button class="coffee-rating-btn" data-val="8" onclick="setCoffeeRating(8)"><svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 14 14" width="14" height="14"><g><path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" d="M2 4h8.5v5c0 0.53043 -0.2107 1.0391 -0.58579 1.4142C9.53914 10.7893 9.03043 11 8.5 11h-5c-0.53043 0 -1.03914 -0.2107 -1.41421 -0.5858C1.71071 10.0391 1.5 9.53043 1.5 9V4.5c0 -0.13261 0.05268 -0.25979 0.14645 -0.35355C1.74021 4.05268 1.86739 4 2 4Z" stroke-width="1"></path><path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" d="M0.5 13.5h13" stroke-width="1"></path><path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" d="M10.5 4h1c0.5304 0 1.0391 0.21071 1.4142 0.58579 0.3751 0.37507 0.5858 0.88378 0.5858 1.41421s-0.2107 1.03914 -0.5858 1.41421C12.5391 7.78929 12.0304 8 11.5 8h-1" stroke-width="1"></path><path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" d="M3 0.5v1" stroke-width="1"></path><path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" d="M8 0.5v1" stroke-width="1"></path><path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" d="M5.5 0.5v1" stroke-width="1"></path></g></svg></button><button class="coffee-rating-btn" data-val="9" onclick="setCoffeeRating(9)"><svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 14 14" width="14" height="14"><g><path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" d="M2 4h8.5v5c0 0.53043 -0.2107 1.0391 -0.58579 1.4142C9.53914 10.7893 9.03043 11 8.5 11h-5c-0.53043 0 -1.03914 -0.2107 -1.41421 -0.5858C1.71071 10.0391 1.5 9.53043 1.5 9V4.5c0 -0.13261 0.05268 -0.25979 0.14645 -0.35355C1.74021 4.05268 1.86739 4 2 4Z" stroke-width="1"></path><path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" d="M0.5 13.5h13" stroke-width="1"></path><path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" d="M10.5 4h1c0.5304 0 1.0391 0.21071 1.4142 0.58579 0.3751 0.37507 0.5858 0.88378 0.5858 1.41421s-0.2107 1.03914 -0.5858 1.41421C12.5391 7.78929 12.0304 8 11.5 8h-1" stroke-width="1"></path><path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" d="M3 0.5v1" stroke-width="1"></path><path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" d="M8 0.5v1" stroke-width="1"></path><path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" d="M5.5 0.5v1" stroke-width="1"></path></g></svg></button><button class="coffee-rating-btn" data-val="10" onclick="setCoffeeRating(10)"><svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 14 14" width="14" height="14"><g><path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" d="M2 4h8.5v5c0 0.53043 -0.2107 1.0391 -0.58579 1.4142C9.53914 10.7893 9.03043 11 8.5 11h-5c-0.53043 0 -1.03914 -0.2107 -1.41421 -0.5858C1.71071 10.0391 1.5 9.53043 1.5 9V4.5c0 -0.13261 0.05268 -0.25979 0.14645 -0.35355C1.74021 4.05268 1.86739 4 2 4Z" stroke-width="1"></path><path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" d="M0.5 13.5h13" stroke-width="1"></path><path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" d="M10.5 4h1c0.5304 0 1.0391 0.21071 1.4142 0.58579 0.3751 0.37507 0.5858 0.88378 0.5858 1.41421s-0.2107 1.03914 -0.5858 1.41421C12.5391 7.78929 12.0304 8 11.5 8h-1" stroke-width="1"></path><path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" d="M3 0.5v1" stroke-width="1"></path><path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" d="M8 0.5v1" stroke-width="1"></path><path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" d="M5.5 0.5v1" stroke-width="1"></path></g></svg></button>
       </div>
       <input type="hidden" id="c-rating" value="0">
-      <div style="font-family:'DM Mono',monospace;font-size:11px;color:var(--text-muted);margin-top:4px;letter-spacing:1px" id="c-rating-label">Not rated</div>
+      <div style="font-family:var(--font-mono);font-size:11px;color:var(--text-muted);margin-top:4px;letter-spacing:1px" id="c-rating-label">Not rated</div>
     </div>
     <div class="form-group">
       <label class="form-label">Bag Label Photo</label>
@@ -1122,7 +1129,7 @@
     </div>
 
     <div class="divider">Steps</div>
-    <div style="font-family:'DM Mono',monospace;font-size:11px;color:var(--text-muted);letter-spacing:1px;margin-bottom:10px">Add each step on its own line</div>
+    <div style="font-family:var(--font-mono);font-size:11px;color:var(--text-muted);letter-spacing:1px;margin-bottom:10px">Add each step on its own line</div>
     <div id="cr-steps-list" style="display:flex;flex-direction:column;gap:8px;margin-bottom:10px"></div>
     <button class="btn-secondary" style="width:100%" onclick="addRecipeStep()">+ Add Step</button>
 
@@ -2151,7 +2158,7 @@ function openRecipeModal() {
   gs.innerHTML = '';
   const none = document.createElement('div');
   none.className = 'coffee-selector-item' + (!state.selectedGrinderId?' selected':'');
-  none.innerHTML = '<div class="cs-name" style="font-size:13px;font-family:\'DM Sans\'">No grinder / unspecified</div>';
+  none.innerHTML = '<div class="cs-name" style="font-size:13px;font-family:var(--font-mono)">No grinder / unspecified</div>';
   none.onclick = () => { state.selectedGrinderId=null; gs.querySelectorAll('.coffee-selector-item').forEach(x=>x.classList.remove('selected')); none.classList.add('selected'); };
   gs.appendChild(none);
   function makeGrinderItem(g) {
@@ -2167,12 +2174,12 @@ function openRecipeModal() {
   const otherGrinders = GRINDERS.filter(g => g.id !== state.favouriteGrinderId);
   if (favGrinders.length) {
     const hdr = document.createElement('div');
-    hdr.style.cssText = "font-family:'DM Mono',monospace;font-size:11px;letter-spacing:1.5px;text-transform:uppercase;color:var(--crema);padding:6px 2px 4px;";
+    hdr.style.cssText = "font-family:var(--font-mono);font-size:11px;letter-spacing:1.5px;text-transform:uppercase;color:var(--crema);padding:6px 2px 4px;";
     hdr.textContent = 'Favourite';
     gs.appendChild(hdr);
     favGrinders.forEach(g => gs.appendChild(makeGrinderItem(g)));
     const sep = document.createElement('div');
-    sep.style.cssText = "font-family:'DM Mono',monospace;font-size:11px;letter-spacing:1.5px;text-transform:uppercase;color:var(--text-muted);padding:8px 2px 4px;border-top:1px solid var(--border);margin-top:4px;";
+    sep.style.cssText = "font-family:var(--font-mono);font-size:11px;letter-spacing:1.5px;text-transform:uppercase;color:var(--text-muted);padding:8px 2px 4px;border-top:1px solid var(--border);margin-top:4px;";
     sep.textContent = 'All Grinders';
     gs.appendChild(sep);
   }
@@ -2334,7 +2341,7 @@ function renderBuiltinRecipes() {
     const list = RECIPES[method] || [];
     if (!list.length) return;
     if (activeRecipeMethod === 'all') {
-      html += `<div style="font-family:'DM Mono',monospace;font-size:11px;letter-spacing:2px;text-transform:uppercase;color:var(--text-muted);margin:16px 0 8px;padding-bottom:6px;border-bottom:1px solid var(--border)">${method}</div>`;
+      html += `<div style="font-family:var(--font-mono);font-size:11px;letter-spacing:2px;text-transform:uppercase;color:var(--text-muted);margin:16px 0 8px;padding-bottom:6px;border-bottom:1px solid var(--border)">${method}</div>`;
     }
     list.forEach(r => {
       const pourMeta = r.pours ? `${r.pours} pour${r.pours>1?'s':''}${r.bloomRatio&&r.bloomRatio!=='N/A'?' · bloom '+r.bloomRatio:''}${r.totalTime?' · '+r.totalTime:''}` : '';
@@ -2507,8 +2514,8 @@ function renderMyRecipes() {
     <div class="custom-recipe-card">
       <div class="custom-recipe-card-header">
         <div>
-          <div style="font-family:'Playfair Display',serif;font-size:16px;color:var(--crema-light)">${escHtml(r.name)}</div>
-          <div style="font-family:'DM Mono',monospace;font-size:11px;color:rgba(245,237,227,.6);letter-spacing:1px;margin-top:2px">${r.author?escHtml(r.author)+' · ':''}${escHtml(r.method)}</div>
+          <div style="font-family:var(--font-display);font-size:16px;color:var(--crema-light)">${escHtml(r.name)}</div>
+          <div style="font-family:var(--font-mono);font-size:11px;color:rgba(245,237,227,.6);letter-spacing:1px;margin-top:2px">${r.author?escHtml(r.author)+' · ':''}${escHtml(r.method)}</div>
         </div>
         <div style="display:flex;gap:8px;align-items:center">
           <button class="btn-secondary" style="padding:5px 10px;font-size:11px" onclick="openEditCustomRecipe('${r.id}')">Edit</button>
@@ -2539,8 +2546,8 @@ function renderRecipeCard(method, recipeId) {
   card.style.display = 'block';
   card.innerHTML = `
     <div style="background:var(--espresso);border-radius:var(--radius-sm);padding:14px;margin-top:10px">
-      <div style="font-family:'Playfair Display',serif;font-size:15px;color:var(--crema-light);margin-bottom:2px">${escHtml(recipe.name)}</div>
-      <div style="font-family:'DM Mono',monospace;font-size:11px;color:rgba(245,237,227,.45);letter-spacing:1px;margin-bottom:12px">${recipe.dose}g · ${recipe.water}ml · ${recipe.temp}°C · ${escHtml(recipe.ratio)}${recipe.grindHint?' · '+escHtml(recipe.grindHint):''}${recipe.pours?' · '+recipe.pours+' pours':''}${recipe.totalTime?' · '+recipe.totalTime:''}</div>
+      <div style="font-family:var(--font-display);font-size:15px;color:var(--crema-light);margin-bottom:2px">${escHtml(recipe.name)}</div>
+      <div style="font-family:var(--font-mono);font-size:11px;color:rgba(245,237,227,.45);letter-spacing:1px;margin-bottom:12px">${recipe.dose}g · ${recipe.water}ml · ${recipe.temp}°C · ${escHtml(recipe.ratio)}${recipe.grindHint?' · '+escHtml(recipe.grindHint):''}${recipe.pours?' · '+recipe.pours+' pours':''}${recipe.totalTime?' · '+recipe.totalTime:''}</div>
       <ol style="padding-left:16px;margin:0">
         ${recipe.steps.map(s => `<li style="font-size:12px;color:rgba(245,237,227,.75);line-height:1.5;margin-bottom:5px">${escHtml(s)}</li>`).join('')}
       </ol>
@@ -2592,8 +2599,8 @@ function setCoffeeRating(n) {
 // Units of each currency per £1. Approximate fallback; refreshed from ECB rates (via Frankfurter) when online.
 const FX_FALLBACK = { GBP:1, EUR:1.17, USD:1.33, AUD:2.02, CAD:1.83, NZD:2.22, JPY:195, CHF:1.10, SEK:13.9, NOK:14.3, DKK:8.7, HKD:10.4, SGD:1.72, KRW:1830, CNY:9.6 };
 const CUR_SYMBOL = { GBP:'£', EUR:'€', USD:'$', AUD:'A$', CAD:'C$', NZD:'NZ$', JPY:'¥', CHF:'CHF ', SEK:'kr ', NOK:'kr ', DKK:'kr ', HKD:'HK$', SGD:'S$', KRW:'₩', CNY:'¥' };
-let fxRates = { ...FX_FALLBACK }, fxLive = false;
-try { const cached = JSON.parse(localStorage.getItem('dialed_fx')||'null'); if (cached && cached.rates) { fxRates = { ...FX_FALLBACK, ...cached.rates, GBP:1 }; fxLive = true; } } catch(e) {}
+let fxRates = { ...FX_FALLBACK }, fxLive = false, fxAt = null;
+try { const cached = JSON.parse(localStorage.getItem('dialed_fx')||'null'); if (cached && cached.rates) { fxRates = { ...FX_FALLBACK, ...cached.rates, GBP:1 }; fxLive = true; fxAt = cached.at || null; } } catch(e) {}
 async function refreshFx() {
   try {
     const cached = JSON.parse(localStorage.getItem('dialed_fx')||'null');
@@ -2601,27 +2608,38 @@ async function refreshFx() {
     let r = await fetch('https://api.frankfurter.dev/v1/latest?base=GBP').catch(()=>null);
     if (!r || !r.ok) r = await fetch('https://api.frankfurter.app/latest?from=GBP');
     const d = await r.json();
-    if (d && d.rates) { fxRates = { ...FX_FALLBACK, ...d.rates, GBP:1 }; fxLive = true; localStorage.setItem('dialed_fx', JSON.stringify({ at: Date.now(), rates: d.rates })); }
+    if (d && d.rates) { fxRates = { ...FX_FALLBACK, ...d.rates, GBP:1 }; fxLive = true; fxAt = Date.now(); localStorage.setItem('dialed_fx', JSON.stringify({ at: fxAt, rates: d.rates })); }
   } catch(e) { /* offline: keep cached or fallback rates */ }
 }
 function toGBP(amount, cur) { const r = fxRates[cur] || FX_FALLBACK[cur]; return r ? amount / r : null; }
-function buildPriceData() {
+// Exchange rates are only fetched when a price in another currency is actually in use
+function needsFx() { return (state.coffees || []).some(c => c.price > 0 && c.currency && c.currency !== 'GBP' && !(c.priceGBP > 0)); }
+function fxFor(cur) { if (cur && cur !== 'GBP') refreshFx().then(() => { try { updatePricePreview(); } catch(e) {} }); }
+function buildPriceData(prev) {
   const price = parseFloat(document.getElementById('c-price').value);
   const weight = parseFloat(document.getElementById('c-weight').value);
   const currency = document.getElementById('c-currency').value || 'GBP';
-  if (!(price > 0)) return { price:null, currency, weight: weight>0?weight:null, priceGBP:null };
+  const w = weight > 0 ? weight : null;
+  if (!(price > 0)) return { price:null, currency, weight:w, priceGBP:null, fxRate:null, fxDate:null, fxApprox:false };
   appSettings.lastCurrency = currency; saveSettings();
-  const g = toGBP(price, currency);
-  return { price, currency, weight: weight>0?weight:null, priceGBP: g!=null ? Math.round(g*100)/100 : null };
+  // Price and currency untouched: keep the £ value from the day it was bought rather than re-converting at today's rate
+  if (prev && prev.priceGBP > 0 && Number(prev.price) === price && (prev.currency || 'GBP') === currency)
+    return { price, currency, weight:w, priceGBP: prev.priceGBP, fxRate: prev.fxRate ?? null, fxDate: prev.fxDate ?? null, fxApprox: !!prev.fxApprox };
+  const g = toGBP(price, currency), foreign = currency !== 'GBP';
+  return { price, currency, weight:w, priceGBP: g!=null ? Math.round(g*100)/100 : null,
+    fxRate: foreign ? (fxRates[currency] || FX_FALLBACK[currency] || null) : null,
+    fxDate: foreign ? new Date(fxLive && fxAt ? fxAt : Date.now()).toISOString().slice(0, 10) : null,
+    fxApprox: foreign && !fxLive };
 }
 function showCosts() { return appSettings.showCosts !== false; }
 function per100g(cf) { return (showCosts() && cf && cf.priceGBP > 0 && cf.weight > 0) ? cf.priceGBP / cf.weight * 100 : null; }
 function priceLabel(cf) {
   if (!showCosts() || !cf || !(cf.price > 0)) return '';
   const whole = cf.currency==='JPY' || cf.currency==='KRW';
-  const orig = (CUR_SYMBOL[cf.currency] || cf.currency+' ') + (whole ? Math.round(cf.price) : Number(cf.price).toFixed(2));
+  const cur = cf.currency || 'GBP';
+  const orig = (CUR_SYMBOL[cur] || cur+' ') + (whole ? Math.round(cf.price) : Number(cf.price).toFixed(2));
   const parts = [orig + (cf.weight ? ' · ' + cf.weight + 'g' : '')];
-  if (per100g(cf) != null) parts.push('£' + per100g(cf).toFixed(2) + '/100g');
+  if (per100g(cf) != null) parts.push((cf.fxApprox ? '≈£' : '£') + per100g(cf).toFixed(2) + '/100g');
   return parts.join(' · ');
 }
 function updatePricePreview() {
@@ -2766,7 +2784,7 @@ function saveCoffee() {
     process: getProcessValue(),
     roastLevel: document.getElementById('c-roast').value,
     roastDate: document.getElementById('c-roastdate').value,
-    ...buildPriceData(),
+    ...buildPriceData(editId ? state.coffees.find(x => x.id === editId) : null),
     notes: document.getElementById('c-notes').value.trim(),
     labelPhoto: pendingLabelDataUrl || null,
     rating: pendingCoffeeRating || 0,
@@ -2778,7 +2796,7 @@ function saveCoffee() {
     if (idx >= 0) state.coffees[idx] = { ...state.coffees[idx], ...coffeeData };
     showToast('Coffee updated ✓');
   } else {
-    state.coffees.unshift({ id: Date.now().toString(), createdAt: new Date().toISOString(), ...coffeeData });
+    state.coffees.unshift({ id: newId(), createdAt: new Date().toISOString(), ...coffeeData });
     showToast('Coffee added ✓');
   }
   save(); closeModal('modal-coffee');
@@ -2819,7 +2837,7 @@ function saveRecipe() {
   }
   let newBrewId = null;
   if (!editBrewId) {
-    newBrewId = Date.now().toString();
+    newBrewId = newId();
     state.recipes.unshift({id:newBrewId, createdAt:new Date().toISOString(), ...brewData});
   }
   const planId = document.getElementById('r-plan-id')?.value || '';
@@ -2861,15 +2879,15 @@ function renderDashboard() {
   if (favEl) favEl.innerHTML = favG
     ? `<div style="display:flex;align-items:center;gap:8px;background:rgba(82,121,111,0.1);border:1px solid rgba(82,121,111,0.3);border-radius:10px;padding:10px 14px;margin-bottom:20px;cursor:pointer;color:var(--text)" onclick="showView('grinders')">
         <span style="line-height:0;color:var(--crema)"><svg class="ico" width="20" height="20" viewBox="0 0 24 24" fill="currentColor" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M12 3.5l2.6 5.4 5.9.8-4.3 4.1 1 5.8L12 16.9 6.8 19.6l1-5.8L3.5 9.7l5.9-.8z"/></svg></span>
-        <div><div style="font-family:'Playfair Display',serif;font-size:14px">${favG.brand} ${favG.model}</div><div style="font-family:'DM Mono',monospace;font-size:11px;color:var(--text-muted);letter-spacing:1px;margin-top:2px">${favG.type==='manual'?'Manual':'Electric'} · DEFAULT GRINDER</div></div>
+        <div><div style="font-family:var(--font-display);font-size:14px">${favG.brand} ${favG.model}</div><div style="font-family:var(--font-mono);font-size:11px;color:var(--text-muted);letter-spacing:1px;margin-top:2px">${favG.type==='manual'?'Manual':'Electric'} · DEFAULT GRINDER</div></div>
       </div>`
-    : `<div style="font-family:'DM Mono',monospace;font-size:11px;color:var(--text-muted);margin-bottom:16px;letter-spacing:.5px">No default grinder set — <span style="color:var(--crema);cursor:pointer" onclick="showView('grinders')">Browse grinders →</span></div>`;
+    : `<div style="font-family:var(--font-mono);font-size:11px;color:var(--text-muted);margin-bottom:16px;letter-spacing:.5px">No default grinder set — <span style="color:var(--crema);cursor:pointer" onclick="showView('grinders')">Browse grinders →</span></div>`;
   const el = document.getElementById('recent-brews');
   const recent = state.recipes.slice(0,5);
   const hasMore = state.recipes.length > 5;
   const divEl = el.previousElementSibling;
   if (divEl && divEl.classList.contains('divider')) {
-    divEl.innerHTML = `<span>Recent brews</span>${hasMore?`<button onclick="showAllBrews()" style="background:none;border:none;font-family:'DM Mono',monospace;font-size:11px;color:var(--crema);cursor:pointer;letter-spacing:1px;text-transform:uppercase;margin-left:8px">View all (${state.recipes.length}) →</button>`:''}`;
+    divEl.innerHTML = `<span>Recent brews</span>${hasMore?`<button onclick="showAllBrews()" style="background:none;border:none;font-family:var(--font-mono);font-size:11px;color:var(--crema);cursor:pointer;letter-spacing:1px;text-transform:uppercase;margin-left:8px">View all (${state.recipes.length}) →</button>`:''}`;
   }
 
   renderStatsDashboard();
@@ -3043,13 +3061,13 @@ function showCoffeeDetail(id) {
       <div style="display:flex;gap:14px;align-items:flex-start">
         ${c.labelPhoto?`<img src="${photoUrl(c)}" alt="Bag label" onclick="openLightboxFor('${c.id}')" style="width:72px;height:90px;object-fit:cover;border-radius:10px;flex-shrink:0;border:1px solid rgba(255,255,255,0.15);cursor:zoom-in" alt="bag label">`:''}
         <div style="flex:1">
-          <div style="font-family:'Playfair Display',serif;font-size:24px;color:var(--crema-light)">${escHtml(c.name)}</div>
-          <div style="font-family:'DM Mono',monospace;font-size:11px;color:rgba(245,237,227,.75);letter-spacing:1px;margin-bottom:14px">${escHtml(c.roaster||'Unknown Roaster')}</div>
+          <div style="font-family:var(--font-display);font-size:24px;color:var(--crema-light)">${escHtml(c.name)}</div>
+          <div style="font-family:var(--font-mono);font-size:11px;color:rgba(245,237,227,.75);letter-spacing:1px;margin-bottom:14px">${escHtml(c.roaster||'Unknown Roaster')}</div>
           <div class="coffee-meta">${pills||'<span style="opacity:.5;font-size:12px">No details added</span>'}</div>
-          ${c.roastDate?`<div style="font-family:'DM Mono',monospace;font-size:11px;color:rgba(245,237,227,.7);margin-top:10px">${formatDate(c.roastDate)}</div>`:''}
+          ${c.roastDate?`<div style="font-family:var(--font-mono);font-size:11px;color:rgba(245,237,227,.7);margin-top:10px">${formatDate(c.roastDate)}</div>`:''}
           ${c.rating>0?`<div class="detail-rating">Rating <b>${c.rating}/10</b></div>`:''}
-          ${locationStr?`<div style="font-family:'DM Mono',monospace;font-size:11px;color:rgba(245,237,227,.6);margin-top:8px"><svg class="ico" width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M12 21s-6-5.5-6-10a6 6 0 0 1 12 0c0 4.5-6 10-6 10z"/><circle cx="12" cy="11" r="2"/></svg> ${escHtml(locationStr)}</div>`:''}
-          ${producerStr?`<div style="font-family:'DM Mono',monospace;font-size:11px;color:rgba(245,237,227,.6);margin-top:4px">${escHtml(producerStr)}</div>`:''}
+          ${locationStr?`<div style="font-family:var(--font-mono);font-size:11px;color:rgba(245,237,227,.6);margin-top:8px"><svg class="ico" width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M12 21s-6-5.5-6-10a6 6 0 0 1 12 0c0 4.5-6 10-6 10z"/><circle cx="12" cy="11" r="2"/></svg> ${escHtml(locationStr)}</div>`:''}
+          ${producerStr?`<div style="font-family:var(--font-mono);font-size:11px;color:rgba(245,237,227,.6);margin-top:4px">${escHtml(producerStr)}</div>`:''}
           ${c.notes?`<div style="font-size:13px;color:rgba(245,237,227,.9);margin-top:12px;font-style:italic">"${escHtml(c.notes)}"</div>`:''}
         </div>
       </div>
@@ -3093,23 +3111,22 @@ function recipeCard(r, showDel=false) {
   const grinder = r.grinderId ? GRINDERS.find(g=>g.id===r.grinderId) : null;
   const date = fmtDate(r.createdAt);
   const exTag = r.extraction ? `<span class="extraction-tag tag-${r.extraction}">${r.extraction==='good'?'✓ Good':r.extraction}</span>` : '';
-  const stars = r.rating>0 ? `<span style="display:inline-flex;align-items:center;gap:2px;color:var(--crema)"><svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 14 14" width="11" height="11"><g><path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" d="M2 4h8.5v5c0 0.53043 -0.2107 1.0391 -0.58579 1.4142C9.53914 10.7893 9.03043 11 8.5 11h-5c-0.53043 0 -1.03914 -0.2107 -1.41421 -0.5858C1.71071 10.0391 1.5 9.53043 1.5 9V4.5c0 -0.13261 0.05268 -0.25979 0.14645 -0.35355C1.74021 4.05268 1.86739 4 2 4Z" stroke-width="1"></path><path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" d="M0.5 13.5h13" stroke-width="1"></path><path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" d="M10.5 4h1c0.5304 0 1.0391 0.21071 1.4142 0.58579 0.3751 0.37507 0.5858 0.88378 0.5858 1.41421s-0.2107 1.03914 -0.5858 1.41421C12.5391 7.78929 12.0304 8 11.5 8h-1" stroke-width="1"></path><path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" d="M3 0.5v1" stroke-width="1"></path><path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" d="M8 0.5v1" stroke-width="1"></path><path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" d="M5.5 0.5v1" stroke-width="1"></path></g></svg><span style="font-size:11px;margin-left:2px">${r.rating}/10</span></span>` : '';
   
   const isEsp = isEspressoMethod(r.method||'Espresso');
   const ratio = ratioStr(r); const dayOff = daysOffRoast(r, coffee); const cupCost = costPerCup(r, coffee);
   const yieldLabel = isEsp ? 'Yield' : 'Water';
   const yieldUnit = isEsp ? 'g' : 'ml';
-  const grinderBadge = grinder ? `<span style="display:inline-block;margin-top:4px;font-family:'DM Mono',monospace;font-size:11px;background:rgba(82,121,111,0.1);border:1px solid rgba(82,121,111,0.25);color:var(--crema);border-radius:20px;padding:2px 8px;letter-spacing:.5px">${grinder.brand} ${grinder.model}</span>` : '';
+  const grinderBadge = grinder ? `<span style="display:inline-block;margin-top:4px;font-family:var(--font-mono);font-size:11px;background:rgba(82,121,111,0.1);border:1px solid rgba(82,121,111,0.25);color:var(--crema);border-radius:20px;padding:2px 8px;letter-spacing:.5px">${grinder.brand} ${grinder.model}</span>` : '';
   const recipeObj = r.recipeId ? [...Object.values(RECIPES).flat(), ...(state.customRecipes||[])].find(x=>x.id===r.recipeId) : null;
-  const recipeBadge = recipeObj ? `<span style="display:inline-block;margin-top:4px;margin-left:4px;font-family:'DM Mono',monospace;font-size:11px;background:rgba(18,60,39,0.08);border:1px solid rgba(18,60,39,0.15);color:var(--espresso);border-radius:20px;padding:2px 8px;letter-spacing:.5px"><svg class="ico" width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M9 5H6a1 1 0 0 0-1 1v14a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1V6a1 1 0 0 0-1-1h-3"/><path d="M9 3.5h6v3H9z"/><path d="M9 12h6M9 16h6"/></svg> ${escHtml(recipeObj.name.split('—')[0].trim())}</span>` : '';
+  const recipeBadge = recipeObj ? `<span style="display:inline-block;margin-top:4px;margin-left:4px;font-family:var(--font-mono);font-size:11px;background:rgba(18,60,39,0.08);border:1px solid rgba(18,60,39,0.15);color:var(--espresso);border-radius:20px;padding:2px 8px;letter-spacing:.5px"><svg class="ico" width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M9 5H6a1 1 0 0 0-1 1v14a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1V6a1 1 0 0 0-1-1h-3"/><path d="M9 3.5h6v3H9z"/><path d="M9 12h6M9 16h6"/></svg> ${escHtml(recipeObj.name.split('—')[0].trim())}</span>` : '';
   const thumbHtml = coffee?.labelPhoto ? `<img src="${photoUrl(coffee)}" class="brew-label-thumb" alt="Bag label" loading="lazy" onclick="openLightboxFor('${coffee.id}')" style="cursor:zoom-in">` : '';
   return `<div class="card-wrap" ontouchstart="startLongPress('${r.id}','brew')" ontouchend="endLongPress()" ontouchcancel="endLongPress()" oncontextmenu="event.stopPropagation();showEditOverlay('brew-${r.id}');return false"><div class="card-edit-overlay" data-overlay="brew-${r.id}"><button class="edit-overlay-btn" onclick="event.stopPropagation();editBrew('${r.id}');hideEditOverlay('brew-${r.id}')"><svg class="ico" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M4 20h4L19 9l-4-4L4 16v4z"/><path d="M13.5 6.5l4 4"/></svg> Edit</button><button class="edit-overlay-btn" onclick="event.stopPropagation();hideEditOverlay('brew-${r.id}');openPlanNext('${r.id}')">↻ Plan next</button><button class="edit-overlay-btn" onclick="event.stopPropagation();confirmDeleteBrew('${r.id}')">✕ Delete</button><button class="edit-overlay-btn" onclick="event.stopPropagation();hideEditOverlay('brew-${r.id}')">Cancel</button></div><div class="recipe-entry">
     <div class="recipe-entry-header">
       <div style="display:flex;gap:10px;align-items:flex-start;flex:1">
         ${thumbHtml}
         <div style="flex:1;min-width:0">
-          <div style="font-family:'Playfair Display',serif;font-size:14px">${escHtml(coffee?.name||'Unknown Coffee')}</div>
-          <div style="font-family:'DM Mono',monospace;font-size:11px;color:var(--text-muted)">${escHtml(coffee?.roaster||'')}${coffee?.roaster&&r.method?' · ':''}${escHtml(r.method||'')}</div>
+          <div style="font-family:var(--font-display);font-size:14px">${escHtml(coffee?.name||'Unknown Coffee')}</div>
+          <div style="font-family:var(--font-mono);font-size:11px;color:var(--text-muted)">${escHtml(coffee?.roaster||'')}${coffee?.roaster&&r.method?' · ':''}${escHtml(r.method||'')}</div>
           ${grinderBadge}
         </div>
       </div>
@@ -3357,9 +3374,9 @@ function renderStatsDashboard() {
       ${(() => { const priced = coffees.filter(cf => per100g(cf) != null);
         if (!priced.length) return '';
         const avg = priced.reduce((s,cf) => s + per100g(cf), 0) / priced.length;
-        const spent = coffees.filter(cf => cf.priceGBP > 0).reduce((s,cf) => s + cf.priceGBP, 0);
-        return `<div class="stats-card"><div class="stats-card-label">Avg Price</div><div class="stats-card-value">£${avg.toFixed(2)}</div><div class="stats-card-sub">per 100g</div></div>
-                <div class="stats-card"><div class="stats-card-label">Spent</div><div class="stats-card-value">£${spent.toFixed(2)}</div><div class="stats-card-sub">on beans</div></div>`; })()}
+        const bought = coffees.filter(cf => cf.priceGBP > 0), spent = bought.reduce((s,cf) => s + cf.priceGBP, 0), approx = bought.some(cf => cf.fxApprox) ? '≈' : '';
+        return `<div class="stats-card"><div class="stats-card-label">Avg Price</div><div class="stats-card-value">${approx}£${avg.toFixed(2)}</div><div class="stats-card-sub">per 100g</div></div>
+                <div class="stats-card"><div class="stats-card-label">Spent</div><div class="stats-card-value">${approx}£${spent.toFixed(2)}</div><div class="stats-card-sub">on beans</div></div>`; })()}
     </div>
 
     ${(() => {
@@ -3535,9 +3552,9 @@ function renderGrinders() {
     const isFav = state.favouriteGrinderId === g.id;
     return `<div class="grinder-card ${inCmp?'in-compare':''}" style="${isFav?'border-color:var(--crema);background:rgba(200,135,58,0.04);':''}" onclick="showGrinderDetail('${g.id}')">
       <div style="flex:1">
-        <div class="grinder-brand">${g.brand}${isFav?' <span style="font-size:11px;color:var(--crema);font-family:DM Mono,monospace;letter-spacing:1px;text-transform:uppercase"><svg class="ico" width="10" height="10" viewBox="0 0 24 24" fill="currentColor" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M12 3.5l2.6 5.4 5.9.8-4.3 4.1 1 5.8L12 16.9 6.8 19.6l1-5.8L3.5 9.7l5.9-.8z"/></svg> Default</span>':''}</div>
+        <div class="grinder-brand">${g.brand}${isFav?' <span style="font-size:11px;color:var(--crema);font-family:var(--font-mono);letter-spacing:1px;text-transform:uppercase"><svg class="ico" width="10" height="10" viewBox="0 0 24 24" fill="currentColor" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M12 3.5l2.6 5.4 5.9.8-4.3 4.1 1 5.8L12 16.9 6.8 19.6l1-5.8L3.5 9.7l5.9-.8z"/></svg> Default</span>':''}</div>
         <div class="grinder-model">${g.model}</div>
-        <div style="font-family:'DM Mono',monospace;font-size:11px;color:var(--text-muted);margin-top:4px">${g.min}–${g.max}µm · ${grinderRangeLabel(g)}</div>
+        <div style="font-family:var(--font-mono);font-size:11px;color:var(--text-muted);margin-top:4px">${g.min}–${g.max}µm · ${grinderRangeLabel(g)}</div>
       </div>
       <div style="display:flex;flex-direction:column;align-items:flex-end;gap:6px">
         <span class="grinder-type-badge badge-${g.type}">${g.type==='manual'?'Manual':'Electric'}</span>
@@ -3604,7 +3621,7 @@ function showGrinderDetail(gid) {
     const left=pct(m.min), width=pct(m.max)-left;
     const compat = g.min<=m.max && g.max>=m.min;
     return `<div style="position:absolute;top:${i*(rowHeight+3)}px;left:${left}%;width:${width}%;height:${rowHeight}px;background:${m.color};border-radius:3px;opacity:${compat?0.85:0.15};display:flex;align-items:center;padding:0 4px">
-      <span style="font-family:'DM Mono',monospace;font-size:11px;color:white;white-space:nowrap;overflow:hidden">${m.name}</span></div>`;
+      <span style="font-family:var(--font-mono);font-size:11px;color:white;white-space:nowrap;overflow:hidden">${m.name}</span></div>`;
   }).join('');
 
   // Grinder range overlay
@@ -3612,10 +3629,10 @@ function showGrinderDetail(gid) {
 
   document.getElementById('grinder-detail-content').innerHTML = `
     <div class="grinder-detail-card">
-      <div style="font-family:'Playfair Display',serif;font-size:22px;color:var(--crema-light)">${g.model}</div>
+      <div style="font-family:var(--font-display);font-size:22px;color:var(--crema-light)">${g.model}</div>
       <div style="display:flex;align-items:center;gap:8px;margin-bottom:14px">
-        <span style="font-family:'DM Mono',monospace;font-size:11px;color:rgba(245,237,227,.5);letter-spacing:1px">${g.brand} · ${g.type==='manual'?'Manual':'Electric'}</span>
-        ${isFav?'<span style="font-family:\'DM Mono\',monospace;font-size:11px;background:rgba(200,135,58,0.25);color:var(--crema-light);border-radius:20px;padding:2px 8px;letter-spacing:1px"><svg class="ico" width="10" height="10" viewBox="0 0 24 24" fill="currentColor" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M12 3.5l2.6 5.4 5.9.8-4.3 4.1 1 5.8L12 16.9 6.8 19.6l1-5.8L3.5 9.7l5.9-.8z"/></svg> DEFAULT GRINDER</span>':''}
+        <span style="font-family:var(--font-mono);font-size:11px;color:rgba(245,237,227,.5);letter-spacing:1px">${g.brand} · ${g.type==='manual'?'Manual':'Electric'}</span>
+        ${isFav?'<span style="font-family:var(--font-mono);font-size:11px;background:rgba(200,135,58,0.25);color:var(--crema-light);border-radius:20px;padding:2px 8px;letter-spacing:1px"><svg class="ico" width="10" height="10" viewBox="0 0 24 24" fill="currentColor" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M12 3.5l2.6 5.4 5.9.8-4.3 4.1 1 5.8L12 16.9 6.8 19.6l1-5.8L3.5 9.7l5.9-.8z"/></svg> DEFAULT GRINDER</span>':''}
       </div>
       <div class="grinder-specs-grid">
         <div class="grinder-spec-block"><div class="grinder-spec-value">${g.clickMin!==undefined?g.clickMin+'–'+g.clickMax:g.settings}</div><div class="grinder-spec-label">${g.stepless?(g.clickMin!==undefined?'Dial · stepless':'Stepless'):(g.clickMin!==undefined?'Click Range':'Settings')}</div></div>
@@ -3634,14 +3651,14 @@ function showGrinderDetail(gid) {
       <div style="font-size:11px;color:var(--text-muted);margin-top:8px">Approximate — based on published ranges; individual grinders vary.</div>
     </div>
 
-    <div style="margin-bottom:6px;font-family:'Playfair Display',serif;font-size:16px">Compatible Brew Methods</div>
+    <div style="margin-bottom:6px;font-family:var(--font-display);font-size:16px">Compatible Brew Methods</div>
     <div style="display:flex;flex-wrap:wrap;margin-bottom:20px">
-      ${covered.map(m=>`<span style="display:inline-flex;align-items:center;gap:4px;padding:4px 10px;border-radius:20px;font-family:'DM Mono',monospace;font-size:11px;letter-spacing:1px;text-transform:uppercase;margin:3px;background:${m.color}18;border:1px solid ${m.color}40;color:${m.color}">${m.name}</span>`).join('')}
+      ${covered.map(m=>`<span style="display:inline-flex;align-items:center;gap:4px;padding:4px 10px;border-radius:20px;font-family:var(--font-mono);font-size:11px;letter-spacing:1px;text-transform:uppercase;margin:3px;background:${m.color}18;border:1px solid ${m.color}40;color:${m.color}">${m.name}</span>`).join('')}
       ${covered.length===0?'<span style="font-size:13px;color:var(--text-muted)">Highly specialised grinder</span>':''}
     </div>
 
-    <div style="margin-bottom:8px;font-family:'Playfair Display',serif;font-size:16px">Grind Range vs Brew Methods</div>
-    <div style="font-family:'DM Mono',monospace;font-size:11px;color:var(--text-muted);margin-bottom:12px">Highlighted = compatible. Amber overlay = this grinder's range.</div>
+    <div style="margin-bottom:8px;font-family:var(--font-display);font-size:16px">Grind Range vs Brew Methods</div>
+    <div style="font-family:var(--font-mono);font-size:11px;color:var(--text-muted);margin-bottom:12px">Highlighted = compatible. Amber overlay = this grinder's range.</div>
     <div style="background:white;border-radius:var(--radius);padding:16px;border:1px solid var(--border);margin-bottom:20px">
       <div style="position:relative;height:${chartH}px;margin-bottom:8px">
         ${methodRows}
@@ -3653,7 +3670,7 @@ function showGrinderDetail(gid) {
       </div>
       <div style="display:flex;align-items:center;gap:6px;margin-top:8px">
         <div style="width:16px;height:10px;background:rgba(200,135,58,0.22);border:1.5px solid var(--crema);border-radius:2px"></div>
-        <span style="font-family:'DM Mono',monospace;font-size:11px;color:var(--text-muted)">This grinder's range</span>
+        <span style="font-family:var(--font-mono);font-size:11px;color:var(--text-muted)">This grinder's range</span>
       </div>
     </div>
 
@@ -3700,8 +3717,8 @@ function renderCompare(containerId='view-compare') {
     }).join('');
     return `<div style="display:flex;align-items:center;justify-content:space-between;padding:10px 14px;border-bottom:1px solid var(--border)">
       <div>
-        <div style="font-family:'DM Mono',monospace;font-size:11px;letter-spacing:.5px">${m.name}</div>
-        <div style="font-family:'DM Mono',monospace;font-size:11px;color:var(--text-muted)">${m.min}–${m.max}µm</div>
+        <div style="font-family:var(--font-mono);font-size:11px;letter-spacing:.5px">${m.name}</div>
+        <div style="font-family:var(--font-mono);font-size:11px;color:var(--text-muted)">${m.min}–${m.max}µm</div>
       </div>
       <div style="display:flex;align-items:center">${dots}</div>
     </div>`;
@@ -3712,8 +3729,8 @@ function renderCompare(containerId='view-compare') {
     <div style="padding:12px;border:1px solid ${COMPARE_COLORS[i]}30;border-left:3px solid ${COMPARE_COLORS[i]};border-radius:10px;margin-bottom:8px">
       <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
         <div>
-          <div style="font-family:'Playfair Display',serif;font-size:15px">${g.model}</div>
-          <div style="font-family:'DM Mono',monospace;font-size:11px;color:var(--text-muted);letter-spacing:.5px">${g.brand}</div>
+          <div style="font-family:var(--font-display);font-size:15px">${g.model}</div>
+          <div style="font-family:var(--font-mono);font-size:11px;color:var(--text-muted);letter-spacing:.5px">${g.brand}</div>
         </div>
         <span class="grinder-type-badge badge-${g.type}">${g.type==='manual'?'Manual':'Electric'}</span>
       </div>
@@ -3722,7 +3739,7 @@ function renderCompare(containerId='view-compare') {
         <div class="param-block" style="flex:2"><div class="param-value" style="font-size:12px">${g.min}–${g.max}µm</div><div class="param-label">Grind Range</div></div>
       </div>
       ${g.notes?`<div style="font-size:11px;color:var(--text-muted);font-style:italic;line-height:1.5">${g.notes}</div>`:''}
-      <button style="margin-top:8px;background:none;border:1px solid rgba(139,26,26,0.2);color:var(--red);border-radius:8px;padding:4px 12px;font-family:'DM Mono',monospace;font-size:11px;letter-spacing:1px;cursor:pointer" onclick="toggleCompare('${g.id}');renderCompare()">✕ Remove</button>
+      <button style="margin-top:8px;background:none;border:1px solid rgba(139,26,26,0.2);color:var(--red);border-radius:8px;padding:4px 12px;font-family:var(--font-mono);font-size:11px;letter-spacing:1px;cursor:pointer" onclick="toggleCompare('${g.id}');renderCompare()">✕ Remove</button>
     </div>`).join('');
 
   el.innerHTML = `
@@ -3734,18 +3751,18 @@ function renderCompare(containerId='view-compare') {
         <span class="grind-axis-label">750</span><span class="grind-axis-label">1125</span><span class="grind-axis-label">1500µm</span>
       </div>
       <div style="margin-top:12px">
-        ${grinders.map((g,i)=>`<div style="display:flex;align-items:center;gap:6px;margin-bottom:3px"><span style="display:inline-block;width:12px;height:8px;border-radius:2px;background:${COMPARE_COLORS[i]}"></span><span style="font-family:'DM Mono',monospace;font-size:11px;color:var(--text-muted)">${g.brand} ${g.model}</span></div>`).join('')}
+        ${grinders.map((g,i)=>`<div style="display:flex;align-items:center;gap:6px;margin-bottom:3px"><span style="display:inline-block;width:12px;height:8px;border-radius:2px;background:${COMPARE_COLORS[i]}"></span><span style="font-family:var(--font-mono);font-size:11px;color:var(--text-muted)">${g.brand} ${g.model}</span></div>`).join('')}
       </div>
     </div>
 
     <div class="card" style="padding:0;overflow:hidden">
       <div style="padding:14px 16px 12px;background:var(--espresso)">
-        <div style="font-family:'Playfair Display',serif;font-size:16px;color:var(--crema-light)">Brew Compatibility Matrix</div>
-        <div style="font-family:'DM Mono',monospace;font-size:11px;color:rgba(245,237,227,.4);letter-spacing:1px;margin-top:4px;text-transform:uppercase">Filled dot = grinder can reach this method</div>
+        <div style="font-family:var(--font-display);font-size:16px;color:var(--crema-light)">Brew Compatibility Matrix</div>
+        <div style="font-family:var(--font-mono);font-size:11px;color:rgba(245,237,227,.4);letter-spacing:1px;margin-top:4px;text-transform:uppercase">Filled dot = grinder can reach this method</div>
       </div>
       <div style="background:white;padding:6px 0">
         <div style="display:flex;padding:8px 14px 6px">
-          ${grinders.map((g,i)=>`<div style="display:flex;align-items:center;gap:4px;margin-right:12px"><span style="display:inline-block;width:10px;height:10px;border-radius:50%;background:${COMPARE_COLORS[i]}"></span><span style="font-family:'DM Mono',monospace;font-size:11px;color:var(--text-muted)">${g.model}</span></div>`).join('')}
+          ${grinders.map((g,i)=>`<div style="display:flex;align-items:center;gap:4px;margin-right:12px"><span style="display:inline-block;width:10px;height:10px;border-radius:50%;background:${COMPARE_COLORS[i]}"></span><span style="font-family:var(--font-mono);font-size:11px;color:var(--text-muted)">${g.model}</span></div>`).join('')}
         </div>
         ${matrixHTML}
       </div>
@@ -3768,13 +3785,14 @@ function showToast(msg) { const t=document.getElementById('toast'); t.textConten
 document.querySelectorAll('.modal-overlay').forEach(o => o.addEventListener('click', e => { if(e.target===o) closeModal(o.id); }));
 
 
-let appSettings = { paletteId: 'terracotta', displayFontId: 'inter', monoFontId: 'inter', darkMode: false, suggestedStart: true, showCosts: true, textSize: 'default', overviewCategories: ['country','process','roaster','roasterCountry'] };
+let appSettings = { darkMode: false, suggestedStart: true, showCosts: true, textSize: 'default', overviewCategories: ['country','process','roaster','roasterCountry'] };
 
 function loadSettings() {
   try {
     const s = localStorage.getItem('dialin_settings');
     const parsed = s ? JSON.parse(s) : null;
     if (isObj(parsed)) appSettings = { ...appSettings, ...parsed };
+  ['paletteId', 'displayFontId', 'monoFontId'].forEach(k => delete appSettings[k]);   // leftovers from early versions
   } catch(e) {}
   if (['year', '6m', '3m', 'month', 'all'].includes(appSettings.statsPeriod)) {
     statsPeriod = appSettings.statsPeriod;
@@ -4263,10 +4281,6 @@ function readTaste() {
   const t = {}; TASTE_KEYS.forEach(([k]) => { const inp = document.getElementById('taste-' + k); if (inp && inp.dataset.set) t[k] = parseInt(inp.value); });
   return Object.keys(t).length ? t : null;
 }
-function tasteLine(t) {
-  if (!t) return '';
-  return TASTE_KEYS.filter(([k]) => t[k] !== undefined).map(([k, l]) => `${l} ${t[k]}`).join(' · ');
-}
 
 // ---- Guided recipe steps on the timer ----
 let lastGuideIdx = -1;
@@ -4731,19 +4745,6 @@ function setPlanDir(kind, dir) {
   }
   syncPlanChips(kind); renderPlanValues();
 }
-function nudgePlan(kind, delta) {
-  const d = planDraft; if (!d) return;
-  if (kind === 'grind') {
-    if (d.grindBase === null) return;
-    d.grind = roundTo(Math.max(0, d.grind + delta*d.grindStepSize), d.grindStepSize);
-    d.grindDir = d.grind < d.grindBase ? 'finer' : d.grind > d.grindBase ? 'coarser' : 'same';
-  } else {
-    if (d.tempBase === null) return;
-    d.temp = Math.min(100, Math.max(60, d.temp + delta));
-    d.tempDir = d.temp > d.tempBase ? 'hotter' : d.temp < d.tempBase ? 'cooler' : 'same';
-  }
-  syncPlanChips(kind); renderPlanValues();
-}
 function slidePlan(kind, val) {
   const d = planDraft; if (!d) return;
   const v = parseFloat(val);
@@ -5061,7 +5062,7 @@ function renderTrendCharts(coffeeId) {
 // ==================== SETTINGS PANEL ====================
 function openSettings() {
   renderOverviewCategoryOptions(); syncSuggestedStartSwitch(); applyTextSize();
-  renderStorageInfo();
+  renderStorageInfo(); renderAbout();
   document.getElementById('settings-panel').classList.add('open');
   document.getElementById('settings-panel').inert = false;
   try { a11yOpened('settings-panel'); } catch(e) {}
@@ -5104,6 +5105,30 @@ function closeSettings() {
 }
 
 
+
+// ==================== VERSION & UPDATES ====================
+const APP_VERSION = '3.29';
+// The app page is fetched fresh when online, but on a slow connection the saved copy is used instead.
+// version.json is tiny and never cached, so we can tell when a newer version is waiting.
+async function checkForUpdate() {
+  if (!location.protocol.startsWith('http')) return;
+  try {
+    const r = await fetch('version.json?t=' + Date.now(), { cache: 'no-store' }); if (!r.ok) return;
+    const v = (await r.json()).version;
+    const el = document.getElementById('update-banner');
+    if (el && typeof v === 'string' && v !== APP_VERSION) { el.querySelector('.ub-text').textContent = 'Update available (v' + v + ')'; el.hidden = false; }
+  } catch(e) {}
+}
+async function reloadForUpdate() {
+  try { const reg = await navigator.serviceWorker?.getRegistration(); if (reg) await reg.update(); } catch(e) {}
+  location.reload();
+}
+function renderAbout() {
+  const el = document.getElementById('settings-about'); if (!el) return;
+  el.querySelector('.about-version').textContent = 'Version ' + APP_VERSION;
+  const ts = document.getElementById('text-size-row');
+  if (ts && !(window.CSS && CSS.supports && CSS.supports('zoom', '1.1'))) ts.style.display = 'none';   // older Firefox ignores zoom
+}
 
 // ==================== ACCESSIBILITY ====================
 // Anything tappable that isn't a real button gets a button role, a tab stop and Enter/Space;
@@ -5207,14 +5232,15 @@ load();
 loadSettings();
 showLoadProblem();
 requestPersistence();
-refreshFx();
+if (showCosts() && needsFx()) refreshFx();
 loadPhotos();
 renderDashboard();
 updateCompareBar();
 try { history.replaceState({view:'dashboard'}, '', ''); } catch(e) {}
 // Offline support (only over http/https — e.g. GitHub Pages)
 if ('serviceWorker' in navigator && location.protocol.startsWith('http')) {
-  window.addEventListener('load', () => navigator.serviceWorker.register('sw.js').catch(e => console.warn('SW registration failed', e)));
+  window.addEventListener('load', () => { navigator.serviceWorker.register('sw.js').catch(e => console.warn('SW registration failed', e)); checkForUpdate(); });
+  document.addEventListener('visibilitychange', () => { if (!document.hidden) checkForUpdate(); });
 }
 </script>
 
@@ -5282,7 +5308,7 @@ if ('serviceWorker' in navigator && location.protocol.startsWith('http')) {
       </button>
     </div>
 
-    <div class="settings-toggle-row" style="flex-direction:column;align-items:stretch;gap:10px">
+    <div class="settings-toggle-row" id="text-size-row" style="flex-direction:column;align-items:stretch;gap:10px">
       <div>
         <div class="settings-toggle-label">Text Size</div>
         <div class="settings-toggle-sub">Scales text, buttons and spacing across the app</div>
@@ -5327,10 +5353,17 @@ if ('serviceWorker' in navigator && location.protocol.startsWith('http')) {
       </div>
     </div>
 
+    <div class="settings-section-header">About</div>
+    <div id="settings-about" style="padding:12px 20px;font-size:11px;line-height:1.6;color:var(--text-muted);background:var(--card);border-bottom:1px solid var(--border)">
+      <div class="about-version" style="color:var(--text)"></div>
+      <div style="margin-top:6px"><b>Privacy.</b> Everything you enter stays on this device; there is no account and nothing is uploaded. The only outside request is an exchange-rate lookup (frankfurter.dev, European Central Bank rates) when you enter a price in a currency other than GBP. It sends no coffee data, but like any web request it reveals your IP address. Backups are plain, unencrypted files.</div>
+    </div>
+
     <div style="height:40px"></div>
   </div>
 </div>
 
+<div id="update-banner" class="update-banner" role="status" hidden><span class="ub-text">Update available</span><button type="button" onclick="reloadForUpdate()">Reload</button><button type="button" aria-label="Dismiss" onclick="this.parentElement.hidden=true">✕</button></div>
 <datalist id="dl-roaster"></datalist><datalist id="dl-roasterCity"></datalist><datalist id="dl-roasterCountry"></datalist><datalist id="dl-producer"></datalist><datalist id="dl-farm"></datalist><datalist id="dl-country"></datalist><datalist id="dl-region"></datalist><datalist id="dl-varietal"></datalist>
 <input type="file" id="restore-input" accept=".json,application/json" style="display:none" onchange="restoreData(this)">
 <button type="button" class="timer-pill" id="timer-pill" hidden onclick="reopenBrewSheet()" aria-label="Brew timer running. Return to Log Brew"><span class="tp-dot" aria-hidden="true"></span>Brewing <span class="tp-time">0:00</span></button>
