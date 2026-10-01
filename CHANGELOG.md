@@ -718,6 +718,18 @@ Specialty coffee dialling-in tracker · Single-file PWA / Android APK
 
 ---
 
+## v3.27
+*1 October 2026*
+
+### Brew log cards
+- Clearer text hierarchy below the Grind / Dose / Time boxes: date and days off roast small and quiet; recipe numbers (water, ratio, temperature, cost) in full-strength text with units and separators dimmed
+- Taste scores in one segmented bubble — number on top, short label below (Sweet / Acid / Body / Bitter), with roomy cells; only the scores you set are shown
+- Rating on the right as 9/10; notes in larger text with a terracotta opening quote
+- DECAF badge next to the result tag for decaf coffees
+- Same look on Overview, Insights and each coffee's Brew Log, in light and dark mode and at every text size
+
+---
+
 ## Pending / Roadmap
 - Rebuild the APK once to pick up the new cup icon
 - Opt-in pooled data + trained model (see feasibility notes): backend, consent, deletion, ICO registration
@@ -728,4 +740,4 @@ Specialty coffee dialling-in tracker · Single-file PWA / Android APK
 
 ---
 
-*Document maintained automatically. Last updated: v3.26*
+*Document maintained automatically. Last updated: v3.27*

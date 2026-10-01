@@ -433,6 +433,20 @@
   .taste-head { display:flex; align-items:baseline; justify-content:space-between; margin-bottom:8px; }
   .taste-clear-all { background:none; border:none; padding:4px 0 4px 8px; font-size:10px; letter-spacing:1px; text-transform:uppercase; color:var(--text-muted); text-decoration:underline; text-underline-offset:3px; cursor:pointer; }
   .taste-line { font-size:11px; color:var(--text-muted); margin-top:6px; }
+  .brew-date { font-size:10px; letter-spacing:.5px; color:var(--text-muted); margin:2px 0 6px; }
+  .brew-spec { font-size:12px; color:var(--text); }
+  .brew-spec .sp { white-space:nowrap; } .brew-spec .u { color:var(--text-muted); } .brew-spec .sep { color:var(--text-muted); opacity:.5; margin:0 7px; }
+  .brew-taste-row { display:flex; align-items:center; justify-content:space-between; gap:10px; margin-top:9px; }
+  .brew-rating { margin-left:auto; font-size:11px; color:var(--text-muted); white-space:nowrap; } .brew-rating b { font-size:15px; color:var(--text); }
+  .taste-seg { display:inline-flex; border-radius:12px; overflow:hidden; background:rgba(18,60,39,.06); border:1px solid rgba(18,60,39,.12); }
+  .taste-seg .ts-cell { display:flex; flex-direction:column; align-items:center; min-width:44px; padding:4px 14px; font-size:9px; letter-spacing:.3px; color:var(--text-muted); line-height:1.2; }
+  .taste-seg .ts-cell + .ts-cell { border-left:1px solid rgba(18,60,39,.12); }
+  .taste-seg .ts-cell b { font-size:13px; color:var(--text); }
+  body.dark-mode .taste-seg { background:rgba(159,204,191,.12); border-color:rgba(159,204,191,.18); }
+  body.dark-mode .taste-seg .ts-cell { color:#B9D6CB; } body.dark-mode .taste-seg .ts-cell + .ts-cell { border-color:rgba(159,204,191,.18); }
+  body.dark-mode .taste-seg .ts-cell b { color:#FFFFFF; }
+  .brew-note { margin-top:10px; font-size:13px; line-height:1.5; color:var(--text); }
+  .brew-note::before { content:'\201C'; color:#C95A37; font-size:20px; line-height:0; margin-right:3px; vertical-align:-6px; }
   .card-more { background:none; border:none; color:var(--text-muted); font-size:20px; line-height:1; padding:0 4px 6px; cursor:pointer; border-radius:6px; letter-spacing:1px; }
   .coffee-card-header .card-more { color:rgba(250,250,247,0.8); }
   /* Typography: Space Mono throughout, Space Grotesk for headings and names */
@@ -2844,6 +2858,22 @@ function showCoffeeDetail(id) {
 }
 
 // ==================== RECIPES ====================
+// Brew card pieces: recipe numbers bright with units dimmed; taste as one segmented bubble
+function brewSpecHtml(r, ratio, cupCost, yieldUnit, yieldLabel) {
+  const parts = [];
+  if (r.yield) parts.push(`${escHtml(r.yield)}<span class="u">${yieldUnit} ${yieldLabel.toLowerCase()}</span>`);
+  if (ratio) parts.push(ratio);
+  if (r.temp) parts.push(`${escHtml(r.temp)}<span class="u">°C</span>`);
+  if (cupCost != null) parts.push(`<span class="u">£</span>${cupCost.toFixed(2)}`);
+  return parts.length ? `<div class="brew-spec">${parts.map((p, i) => `<span class="sp">${i ? '<span class="sep">|</span>' : ''}${p}</span>`).join('')}</div>` : '';
+}
+const TASTE_SHORT = { sweetness:'Sweet', acidity:'Acid', body:'Body', bitterness:'Bitter' };
+function brewTasteHtml(t) {
+  if (!t) return '';
+  const cells = TASTE_KEYS.filter(([k]) => t[k] !== undefined && t[k] !== null)
+    .map(([k, l]) => `<span class="ts-cell" title="${l} ${t[k]} of 5"><b>${t[k]}</b>${TASTE_SHORT[k]}</span>`);
+  return cells.length ? `<span class="taste-seg" aria-label="Taste: ${TASTE_KEYS.filter(([k]) => t[k] != null).map(([k,l]) => l + ' ' + t[k]).join(', ')}">${cells.join('')}</span>` : '';
+}
 function recipeCard(r, showDel=false) {
   const coffee = state.coffees.find(c=>c.id===r.coffeeId);
   const grinder = r.grinderId ? GRINDERS.find(g=>g.id===r.grinderId) : null;
@@ -2869,19 +2899,17 @@ function recipeCard(r, showDel=false) {
           ${grinderBadge}
         </div>
       </div>
-      <div style="display:flex;align-items:center;gap:6px;flex-shrink:0">${exTag}<button class="card-more" aria-label="More options" onclick="event.stopPropagation();showEditOverlay('brew-${r.id}')">⋯</button></div>
+      <div style="display:flex;align-items:center;gap:6px;flex-shrink:0">${coffee?.decaf ? '<span class="decaf-label">Decaf</span>' : ''}${exTag}<button class="card-more" aria-label="More options" onclick="event.stopPropagation();showEditOverlay('brew-${r.id}')">⋯</button></div>
     </div>
     <div class="recipe-params">
       <div class="param-block"><div class="param-value">${r.grind||'—'}</div><div class="param-label">Grind${brewMicrons(r)?' · <span class="unit">'+brewMicrons(r)+'µm</span>':''}</div></div>
       <div class="param-block"><div class="param-value">${r.dose?r.dose+'g':'—'}</div><div class="param-label">Dose</div></div>
       <div class="param-block"><div class="param-value">${formatBrewTime(r.time,r.method)}</div><div class="param-label">Time</div></div>
     </div>
-    <div style="display:flex;justify-content:space-between;align-items:center">
-      <div style="font-family:'DM Mono',monospace;font-size:10px;color:var(--text-muted)">${date}${dayOff!==null?' · Day '+dayOff:''}${r.yield?' · '+r.yield+yieldUnit+' '+yieldLabel.toLowerCase():''}${ratio?' · '+ratio:''}${r.temp?' · '+r.temp+'°C':''}${cupCost!=null?' · £'+cupCost.toFixed(2):''}</div>
-      ${stars}
-    </div>
-    ${r.taste?`<div class="taste-line">${tasteLine(r.taste)}</div>`:''}
-    ${r.notes?`<div class="recipe-notes">${r.notes}</div>`:''}
+    <div class="brew-date">${date}${dayOff!==null?' · Day '+dayOff:''}</div>
+    ${brewSpecHtml(r, ratio, cupCost, yieldUnit, yieldLabel)}
+    ${(r.taste || r.rating>0) ? `<div class="brew-taste-row">${brewTasteHtml(r.taste)}${r.rating>0 ? `<span class="brew-rating"><b>${r.rating}</b>/10</span>` : ''}</div>` : ''}
+    ${r.notes?`<div class="brew-note">${escHtml(r.notes)}</div>`:''}
   </div></div>`;
 }
 
