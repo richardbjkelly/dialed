@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>dialed</title>
 <link rel="manifest" href="/dialed/manifest.json">
 <link rel="icon" type="image/png" sizes="192x192" href="icon-any-192.png">
@@ -56,9 +56,9 @@
   .header-cup { position:absolute; right:-62px; top:-58px; width:190px; height:190px; pointer-events:none; opacity:.92; }
   .header-top #dark-toggle-btn { position:relative; z-index:1; margin-right:104px; }
   .app-title { font-family: 'Playfair Display', serif; font-size: 26px; letter-spacing: -0.5px; color: var(--crema); }
-  .app-subtitle { white-space:nowrap; font-size: 9px; color: rgba(245,237,227,0.5); font-family: 'DM Mono', monospace; letter-spacing: 2px; text-transform: uppercase; }
+  .app-subtitle { white-space:nowrap; font-size: 11px; color: rgba(245,237,227,0.5); font-family: 'DM Mono', monospace; letter-spacing: 2px; text-transform: uppercase; }
   .bottom-nav { position:fixed; bottom:0; left:0; right:0; background:var(--espresso); display:flex; z-index:200; border-top:1px solid rgba(255,255,255,0.08); padding-bottom:env(safe-area-inset-bottom); }
-  .nav-tab { flex:1; padding:10px 4px 12px; background:none; border:none; color:rgba(245,237,227,0.4); font-family:'DM Mono',monospace; font-size:9px; letter-spacing:0.5px; text-transform:uppercase; cursor:pointer; border-top:2px solid transparent; transition:all 0.2s; text-align:center; display:flex; flex-direction:column; align-items:center; gap:3px; }
+  .nav-tab { flex:1; padding:10px 4px 12px; background:none; border:none; color:rgba(245,237,227,0.4); font-family:'DM Mono',monospace; font-size:11px; letter-spacing:0.5px; text-transform:uppercase; cursor:pointer; border-top:2px solid transparent; transition:all 0.2s; text-align:center; display:flex; flex-direction:column; align-items:center; gap:3px; }
   .nav-tab.active { color:var(--crema-light); border-top-color:var(--crema); }
   .nav-tab-icon { font-size:18px; line-height:1; display:flex; align-items:center; justify-content:center; }
   .nav-tab-icon svg { stroke:currentColor; }
@@ -71,13 +71,13 @@
   .section-subtitle { font-size: 12px; color: var(--text-muted); font-family: 'DM Mono', monospace; margin-bottom: 20px; }
   .card { background: var(--card); border: 1px solid var(--border); border-radius: var(--radius); padding: 20px; margin-bottom: 16px; backdrop-filter: blur(8px); box-shadow: 0 2px 12px rgba(26,15,10,0.06); }
   .form-group { margin-bottom: 14px; }
-  .form-label { display: block; font-family: 'DM Mono', monospace; font-size: 10px; letter-spacing: 1.5px; text-transform: uppercase; color: var(--text); margin-bottom: 6px; opacity: 0.75; }
+  .form-label { display: block; font-family: 'DM Mono', monospace; font-size: 11px; letter-spacing: 1.5px; text-transform: uppercase; color: var(--text); margin-bottom: 6px; opacity: 0.75; }
   .form-input, .form-select, .form-textarea { width: 100%; padding: 11px 14px; background: var(--foam); border: 1.5px solid var(--border); border-radius: var(--radius-sm); font-family: 'DM Sans', sans-serif; font-size: 14px; color: var(--text); outline: none; transition: border-color 0.2s; -webkit-appearance: none; }
   .form-input:focus, .form-select:focus, .form-textarea:focus { border-color: var(--crema); background: white; }
   .form-textarea { resize: none; height: 80px; line-height: 1.5; }
   .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
   .extraction-picker { display: flex; gap: 8px; margin-top: 4px; }
-  .extraction-btn { flex: 1; padding: 10px 6px; border: 1.5px solid var(--border); border-radius: var(--radius-sm); background: var(--foam); font-family: 'DM Mono', monospace; font-size: 10px; letter-spacing: 1px; text-transform: uppercase; cursor: pointer; transition: all 0.2s; text-align: center; color: var(--text-muted); }
+  .extraction-btn { flex: 1; padding: 10px 6px; border: 1.5px solid var(--border); border-radius: var(--radius-sm); background: var(--foam); font-family: 'DM Mono', monospace; font-size: 11px; letter-spacing: 1px; text-transform: uppercase; cursor: pointer; transition: all 0.2s; text-align: center; color: var(--text-muted); }
   .extraction-btn.under { --btn-color: #4a7ad0; }
   .extraction-btn.good { --btn-color: var(--green-light); }
   .extraction-btn.over { --btn-color: var(--red); }
@@ -87,18 +87,18 @@
   .star-btn.active { opacity: 1; color: var(--crema); }
   .btn-primary { width: 100%; padding: 14px; background: var(--espresso); color: var(--crema-light); border: none; border-radius: var(--radius-sm); font-family: 'DM Mono', monospace; font-size: 12px; letter-spacing: 2px; text-transform: uppercase; cursor: pointer; transition: background 0.2s, transform 0.1s; margin-top: 8px; }
   .btn-primary:active { transform: scale(0.98); }
-  .btn-secondary { background: none; border: 1.5px solid var(--border); color: var(--text-muted); padding: 10px 16px; border-radius: var(--radius-sm); font-family: 'DM Mono', monospace; font-size: 10px; letter-spacing: 1.5px; text-transform: uppercase; cursor: pointer; transition: all 0.2s; }
+  .btn-secondary { background: none; border: 1.5px solid var(--border); color: var(--text-muted); padding: 10px 16px; border-radius: var(--radius-sm); font-family: 'DM Mono', monospace; font-size: 11px; letter-spacing: 1.5px; text-transform: uppercase; cursor: pointer; transition: all 0.2s; }
   .coffee-card { background: var(--card); border: 1px solid var(--border); border-radius: var(--radius); overflow: hidden; margin-bottom: 14px; box-shadow: 0 2px 12px rgba(26,15,10,0.06); cursor: pointer; transition: all 0.2s; }
   .coffee-card-header { background: var(--espresso); padding: 14px 18px; display: flex; align-items: center; justify-content: space-between; }
   .coffee-card-name { font-family: 'Playfair Display', serif; font-size: 16px; color: var(--milk); }
-  .coffee-card-roaster { font-family: 'DM Mono', monospace; font-size: 10px; color: rgba(245,237,227,0.55); letter-spacing: 1px; margin-top: 2px; }
+  .coffee-card-roaster { font-family: 'DM Mono', monospace; font-size: 11px; color: rgba(245,237,227,0.55); letter-spacing: 1px; margin-top: 2px; }
   .coffee-card-body { padding: 14px 18px; }
   .coffee-meta { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 12px; }
-  .meta-pill { font-family: 'DM Mono', monospace; font-size: 10px; padding: 3px 8px; background: rgba(200,135,58,0.1); border: 1px solid rgba(200,135,58,0.2); border-radius: 20px; color: var(--roast); }
+  .meta-pill { font-family: 'DM Mono', monospace; font-size: 11px; padding: 3px 8px; background: rgba(200,135,58,0.1); border: 1px solid rgba(200,135,58,0.2); border-radius: 20px; color: var(--roast); }
   .recipe-count { font-family: 'DM Mono', monospace; font-size: 11px; color: var(--text-muted); }
   .recipe-entry { background: var(--card); border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 14px; margin-bottom: 10px; }
   .recipe-entry-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 10px; }
-  .extraction-tag { font-family: 'DM Mono', monospace; font-size: 10px; padding: 2px 8px; border-radius: 20px; letter-spacing: 1px; text-transform: uppercase; white-space: nowrap; }
+  .extraction-tag { font-family: 'DM Mono', monospace; font-size: 11px; padding: 2px 8px; border-radius: 20px; letter-spacing: 1px; text-transform: uppercase; white-space: nowrap; }
   .tag-under { background: rgba(74,122,208,0.1); color: #4a7ad0; border: 1px solid rgba(74,122,208,0.25); }
   .tag-good { background: rgba(74,122,40,0.1); color: var(--green-light); border: 1px solid rgba(74,122,40,0.25); }
   .tag-over { background: rgba(139,26,26,0.1); color: var(--red); border: 1px solid rgba(139,26,26,0.25); }
@@ -108,7 +108,7 @@
   .recipe-params { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-bottom: 10px; }
   .param-block { text-align: center; background: var(--foam); border-radius: 8px; padding: 8px 4px; }
   .param-value { font-family: 'Playfair Display', serif; font-size: 18px; color: var(--espresso); line-height: 1; }
-  .param-label { font-family: 'DM Mono', monospace; font-size: 9px; letter-spacing: 1px; color: var(--text-muted); text-transform: uppercase; margin-top: 3px; }
+  .param-label { font-family: 'DM Mono', monospace; font-size: 11px; letter-spacing: 1px; color: var(--text-muted); text-transform: uppercase; margin-top: 3px; }
   .recipe-notes { font-size: 13px; color: var(--text-muted); line-height: 1.5; font-style: italic; border-top: 1px solid var(--border); padding-top: 10px; margin-top: 4px; }
   .btn-delete { background: none; border: none; color: rgba(139,26,26,0.4); cursor: pointer; font-size: 16px; padding: 4px; }
   .empty-state { text-align: center; padding: 48px 20px; color: var(--text-muted); }
@@ -122,22 +122,22 @@
   @keyframes slideUp { from { transform: translateY(100%); } to { transform: translateY(0); } }
   .modal-handle { width: 36px; height: 4px; background: rgba(26,15,10,0.2); border-radius: 2px; margin: 14px auto 20px; }
   .modal-title { font-family: 'Playfair Display', serif; font-size: 22px; color: var(--espresso); margin-bottom: 4px; }
-  .modal-subtitle { font-family: 'DM Mono', monospace; font-size: 10px; letter-spacing: 1.5px; text-transform: uppercase; color: var(--text-muted); margin-bottom: 24px; }
-  .divider { font-family: 'DM Mono', monospace; font-size: 9px; letter-spacing: 2px; text-transform: uppercase; color: var(--crema); margin: 20px 0 14px; display: flex; align-items: center; gap: 8px; }
+  .modal-subtitle { font-family: 'DM Mono', monospace; font-size: 11px; letter-spacing: 1.5px; text-transform: uppercase; color: var(--text-muted); margin-bottom: 24px; }
+  .divider { font-family: 'DM Mono', monospace; font-size: 11px; letter-spacing: 2px; text-transform: uppercase; color: var(--crema); margin: 20px 0 14px; display: flex; align-items: center; gap: 8px; }
   .divider::after { content: ''; flex: 1; height: 1px; background: rgba(82,121,111,0.25); }
   .toast { position:fixed; top:calc(env(safe-area-inset-top) + 96px); bottom:auto; left: 50%; transform: translateX(-50%) translateY(-12px); z-index:700 !important; background: var(--espresso); color: var(--crema-light); padding: 10px 20px; border-radius: 20px; font-family: 'DM Mono', monospace; font-size: 11px; letter-spacing: 1px; opacity: 0; transition: all 0.3s; z-index: 500; white-space: nowrap; }
   .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
   .stats-bar { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-bottom: 20px; }
   .stat-block { background: var(--card); border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 14px 10px; text-align: center; }
   .stat-value { font-family: 'Playfair Display', serif; font-size: 24px; color: var(--espresso); }
-  .stat-label { font-family: 'DM Mono', monospace; font-size: 9px; letter-spacing: 1.5px; text-transform: uppercase; color: var(--text-muted); margin-top: 3px; }
+  .stat-label { font-family: 'DM Mono', monospace; font-size: 11px; letter-spacing: 1.5px; text-transform: uppercase; color: var(--text-muted); margin-top: 3px; }
   .coffee-selector { display: flex; flex-direction: column; gap: 8px; margin-bottom: 4px; max-height: 180px; overflow-y: auto; }
   .coffee-selector-item { padding: 10px 14px; border: 1.5px solid var(--border); border-radius: var(--radius-sm); cursor: pointer; transition: all 0.15s; background: var(--foam); }
   .coffee-selector-item.selected { border-color: var(--crema); background: rgba(200,135,58,0.08); }
   .cs-name { font-family: 'Playfair Display', serif; font-size: 15px; }
-  .cs-sub { font-family: 'DM Mono', monospace; font-size: 10px; color: var(--text-muted); margin-top: 2px; }
+  .cs-sub { font-family: 'DM Mono', monospace; font-size: 11px; color: var(--text-muted); margin-top: 2px; }
   .method-tabs { display: flex; gap: 6px; flex-wrap: wrap; margin-top: 4px; }
-  .method-tab { padding: 7px 12px; border: 1.5px solid var(--border); border-radius: 20px; font-family: 'DM Mono', monospace; font-size: 10px; letter-spacing: 1px; text-transform: uppercase; cursor: pointer; background: var(--foam); color: var(--text-muted); transition: all 0.15s; }
+  .method-tab { padding: 7px 12px; border: 1.5px solid var(--border); border-radius: 20px; font-family: 'DM Mono', monospace; font-size: 11px; letter-spacing: 1px; text-transform: uppercase; cursor: pointer; background: var(--foam); color: var(--text-muted); transition: all 0.15s; }
   .method-tab.selected { background: var(--espresso); border-color: var(--espresso); color: var(--crema-light); }
   .detail-back { display: flex; align-items: center; gap: 8px; background: none; border: none; font-family: 'DM Mono', monospace; font-size: 11px; letter-spacing: 1px; color: var(--text-muted); cursor: pointer; padding: 0; margin-bottom: 20px; text-transform: uppercase; }
   .detail-hero { background: var(--espresso); border-radius: var(--radius); padding: 22px; margin-bottom: 20px; }
@@ -146,7 +146,7 @@
   /* Label image upload */
   .label-upload-btn { width:100%; padding:14px; background:var(--foam); border:1.5px dashed rgba(200,135,58,0.4); border-radius:var(--radius-sm); display:flex; flex-direction:column; align-items:center; justify-content:center; gap:6px; cursor:pointer; transition:all 0.2s; }
   .label-upload-btn:hover { border-color:var(--crema); background:rgba(200,135,58,0.04); }
-  .label-upload-btn span { font-family:'DM Mono',monospace; font-size:10px; letter-spacing:1.5px; text-transform:uppercase; color:var(--text-muted); }
+  .label-upload-btn span { font-family:'DM Mono',monospace; font-size:11px; letter-spacing:1.5px; text-transform:uppercase; color:var(--text-muted); }
   .label-preview { width:100%; border-radius:var(--radius-sm); overflow:hidden; position:relative; margin-top:4px; }
   .label-preview img { width:100%; max-height:200px; object-fit:cover; border-radius:var(--radius-sm); display:block; }
   .label-preview-remove { position:absolute; top:6px; right:6px; background:rgba(26,15,10,0.7); color:white; border:none; border-radius:50%; width:24px; height:24px; font-size:14px; cursor:pointer; display:flex; align-items:center; justify-content:center; line-height:1; }
@@ -177,16 +177,16 @@
   .tile-photo-empty { background:repeating-linear-gradient(45deg, #1f4633 0 8px, #1a3d2c 8px 16px); display:flex; align-items:center; justify-content:center; }
   .tile-photo-empty span { font-family:'Space Grotesk',sans-serif !important; font-weight:600; font-size:30px; color:rgba(250,250,247,0.3); }
   body:not(.dark-mode) .tile-photo-empty { background:repeating-linear-gradient(45deg, #2a5c44 0 8px, #25533d 8px 16px); }
-  .tile-badge { position:absolute; font-size:9px; letter-spacing:1px; border-radius:10px; padding:2px 7px; background:rgba(10,31,20,0.82); color:#FAFAF7; }
-  .tile-rating { right:8px; bottom:8px; font-size:10px; letter-spacing:.3px; } .tile-rating b { font-size:12px; }
-  .tile-decaf { left:8px; bottom:8px; color:#E0B98A; border:1px solid rgba(224,185,138,0.45); border-radius:4px; font-size:8px; letter-spacing:1.5px; }
-  .tile-fin { left:8px; top:8px; font-size:8px; font-weight:700; color:#F6B8AA; }
+  .tile-badge { position:absolute; font-size:11px; letter-spacing:1px; border-radius:10px; padding:2px 7px; background:rgba(10,31,20,0.82); color:#FAFAF7; }
+  .tile-rating { right:8px; bottom:8px; font-size:11px; letter-spacing:.3px; } .tile-rating b { font-size:12px; }
+  .tile-decaf { left:8px; bottom:8px; color:#E0B98A; border:1px solid rgba(224,185,138,0.45); border-radius:4px; font-size:11px; letter-spacing:1.5px; }
+  .tile-fin { left:8px; top:8px; font-size:11px; font-weight:700; color:#F6B8AA; }
   .tile-more { position:absolute !important; right:6px; top:4px; color:#FAFAF7 !important; background:rgba(10,31,20,0.55) !important; border-radius:8px; padding:2px 6px 6px !important; font-size:16px !important; }
   .tile-body { padding:10px 12px 11px; display:flex; flex-direction:column; flex:1; min-height:0; }
   .tile-name { font-family:'Space Grotesk',sans-serif !important; font-size:14px; line-height:1.25; color:var(--text); display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden; }
-  .tile-roaster { font-size:9px; letter-spacing:1px; color:var(--text-muted); margin-top:3px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
-  .tile-summary { margin-top:auto; padding-top:8px; font-size:9px; color:var(--text-muted); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
-  .tile-brews { font-size:10px; color:var(--text-muted); margin-top:3px; }
+  .tile-roaster { font-size:11px; letter-spacing:1px; color:var(--text-muted); margin-top:3px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+  .tile-summary { margin-top:auto; padding-top:8px; font-size:11px; color:var(--text-muted); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+  .tile-brews { font-size:11px; color:var(--text-muted); margin-top:3px; }
   .coffee-card.tile-b.finished .tile-photo, .coffee-card.tile-b.finished .tile-body { opacity:.5; filter:grayscale(.4); }
   #coffees-list.grid .card-wrap { min-height:212px; }
   /* Frosted glass: photo fills the tile, text sits on a blurred dark-green panel over its lower part */
@@ -213,7 +213,7 @@
   .rating-slider-val { flex:0 0 88px; width:88px; text-align:right; color:var(--text-muted); white-space:nowrap; line-height:1.15; }
   .rating-slider-val .rs-num { font-size:12px; } .rating-slider-val .rs-num b { font-size:20px; color:var(--text); }
   .rating-slider-val .rs-none { font-size:20px; }
-  .rating-slider-val .rs-word { font-size:10px; letter-spacing:.3px; margin-top:2px; overflow:hidden; text-overflow:ellipsis; }
+  .rating-slider-val .rs-word { font-size:11px; letter-spacing:.3px; margin-top:2px; overflow:hidden; text-overflow:ellipsis; }
   .finish-rating { display:grid; grid-template-columns:repeat(10, minmax(0,1fr)); gap:4px; }
   .finish-rating button { height:38px; border:1.5px solid var(--border); border-radius:8px; background:var(--card); color:var(--text); font-size:13px; cursor:pointer; padding:0; }
   .finish-rating button.on { background:#123C27; border-color:#123C27; color:#FAFAF7; }
@@ -225,10 +225,10 @@
   body.dark-mode .finish-tick input { accent-color:#8FB3A5; }
   .finish-line { font-size:12px; color:var(--text-muted); margin:-8px 0 16px; line-height:1.6; }
   .finish-line b { color:var(--text); }
-  .finished-badge { margin-left:6px; font-size:8px; background:#FAFAF7; color:#8b1a1a; font-weight:700; border-radius:10px; padding:2px 6px; letter-spacing:1px; vertical-align:middle; white-space:nowrap; }
+  .finished-badge { margin-left:6px; font-size:11px; background:#FAFAF7; color:#8b1a1a; font-weight:700; border-radius:10px; padding:2px 6px; letter-spacing:1px; vertical-align:middle; white-space:nowrap; }
   body.dark-mode .finished-badge { background:rgba(242,164,147,0.2); color:#F6B8AA; }
   .card-foot { display:flex; align-items:center; justify-content:space-between; gap:8px; }
-  .decaf-label { font-size:9px; letter-spacing:1.5px; text-transform:uppercase; color:#8A5A2B; border:1px solid rgba(138,90,43,0.35); border-radius:4px; padding:1px 5px; flex-shrink:0; }
+  .decaf-label { font-size:11px; letter-spacing:1.5px; text-transform:uppercase; color:#8A5A2B; border:1px solid rgba(138,90,43,0.35); border-radius:4px; padding:1px 5px; flex-shrink:0; }
   body.dark-mode .decaf-label { color:#E0B98A; border-color:rgba(224,185,138,0.4); }
   .lib-sub-row { display:flex; align-items:center; justify-content:space-between; gap:10px; margin:2px 0 14px; }
   .layout-toggle { display:flex; border:1px solid var(--border); border-radius:8px; overflow:hidden; flex-shrink:0; }
@@ -248,7 +248,7 @@
   #coffees-list.grid .coffee-card { margin-bottom:0; }
   #coffees-list.grid .coffee-card-header { padding:11px 12px; align-items:flex-start; }
   #coffees-list.grid .coffee-card-name { font-size:14px; line-height:1.25; overflow-wrap:anywhere; }
-  #coffees-list.grid .coffee-card-roaster { font-size:9px; }
+  #coffees-list.grid .coffee-card-roaster { font-size:11px; }
   #coffees-list.grid .coffee-card-header img { width:34px !important; height:34px !important; }
   #coffees-list.grid .coffee-card-header .card-more { padding:0 2px 4px; }
   #coffees-list.grid .coffee-card-body { padding:10px 12px; }
@@ -257,10 +257,10 @@
   #coffees-list.grid .meta-pill { max-width:100%; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; box-sizing:border-box; }
   #coffees-list.grid .coffee-card-header > div:first-child { flex:1; min-width:0; }
   #coffees-list.grid .coffee-card-header > div:last-child { flex-shrink:0; gap:4px !important; }
-  #coffees-list.grid .meta-pill { font-size:9px; padding:2px 6px; }
-  #coffees-list.grid .recipe-count { font-size:10px; }
+  #coffees-list.grid .meta-pill { font-size:11px; padding:2px 6px; }
+  #coffees-list.grid .recipe-count { font-size:11px; }
   #coffees-list.grid .card-edit-overlay { gap:6px; padding:8px; }
-  #coffees-list.grid .edit-overlay-btn { padding:7px 9px; font-size:10px; }
+  #coffees-list.grid .edit-overlay-btn { padding:7px 9px; font-size:11px; }
   .card-edit-overlay { position:absolute; inset:0; background:rgba(18,60,39,0.93); border-radius:var(--radius); display:flex; align-items:center; justify-content:center; gap:10px; opacity:0; pointer-events:none; transition:opacity .15s; z-index:10; flex-wrap:wrap; padding:12px; }
   .card-edit-overlay.visible { opacity:1; pointer-events:all; }
   .edit-overlay-btn { background:rgba(255,255,255,0.12); border:1px solid rgba(255,255,255,0.3); color:#FAFAF7; font-size:11px; padding:9px 14px; border-radius:8px; cursor:pointer; font-family:'Space Mono',monospace; }
@@ -275,16 +275,16 @@
   /* Coffee Stats Dashboard */
   .stats-section { margin-bottom: 24px; }
   .stats-period-bar { display:flex; gap:6px; margin-bottom:16px; overflow-x:auto; padding-bottom:2px; }
-  .stats-period-bar .type-btn { white-space:nowrap; flex-shrink:0; font-size:9px; padding:6px 10px; }
+  .stats-period-bar .type-btn { white-space:nowrap; flex-shrink:0; font-size:11px; padding:6px 10px; }
   .stats-grid { display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-bottom:12px; }
   .stats-card { background:var(--card); border:1px solid var(--border); border-radius:var(--radius-sm); padding:12px 14px; }
-  .stats-card-label { font-size:9px; letter-spacing:1.5px; text-transform:uppercase; color:var(--text-muted); margin-bottom:6px; }
+  .stats-card-label { font-size:11px; letter-spacing:1.5px; text-transform:uppercase; color:var(--text-muted); margin-bottom:6px; }
   .stats-card-value { font-size:20px; font-weight:700; color:var(--espresso); line-height:1; }
-  .stats-card-sub { font-size:10px; color:var(--text-muted); margin-top:3px; }
+  .stats-card-sub { font-size:11px; color:var(--text-muted); margin-top:3px; }
   .stats-bar-chart { margin-bottom:8px; }
   .stats-bar-item { margin-bottom:8px; }
   .stats-bar-item-header { display:flex; justify-content:space-between; font-size:11px; margin-bottom:3px; color:var(--text); }
-  .stats-bar-item-count { color:var(--text-muted); font-size:10px; }
+  .stats-bar-item-count { color:var(--text-muted); font-size:11px; }
   .stats-bar-track { height:8px; background:var(--border); border-radius:4px; overflow:hidden; }
   .stats-bar-fill { height:100%; background:var(--crema); border-radius:4px; transition:width .4s; }
   /* dark mode stats */
@@ -319,7 +319,7 @@
   .settings-nav-label { font-size:15px; font-weight:600; color:var(--text); flex:1; }
   .settings-nav-sub { font-size:11px; color:var(--text-muted); margin-top:2px; }
   .settings-nav-arrow { color:var(--text-muted); font-size:16px; }
-  .settings-section-header { padding:16px 20px 8px; font-size:9px; letter-spacing:2px; text-transform:uppercase; color:var(--text-muted); background:var(--foam); }
+  .settings-section-header { padding:16px 20px 8px; font-size:11px; letter-spacing:2px; text-transform:uppercase; color:var(--text-muted); background:var(--foam); }
   .settings-toggle-row { display:flex; align-items:center; justify-content:space-between; padding:16px 20px; border-bottom:1px solid var(--border); background:var(--card); }
   .settings-toggle-label { font-size:15px; font-weight:600; color:var(--text); }
   .settings-toggle-sub { font-size:11px; color:var(--text-muted); margin-top:2px; }
@@ -348,7 +348,7 @@
   .btn-primary.fab-recipe-btn { background:transparent !important; color:var(--text) !important; border:1.5px solid var(--crema) !important; }
   body.dark-mode .btn-primary.fab-recipe-btn { color:var(--dm-text) !important; }
   .text-size-options { display:grid; grid-template-columns:repeat(4, minmax(0,1fr)); gap:6px; }
-  .text-size-options button { display:flex; flex-direction:column; align-items:center; justify-content:flex-end; gap:4px; min-height:56px; padding:8px 2px; border:1.5px solid var(--border); border-radius:10px; background:var(--card); color:var(--text); font-size:9px; letter-spacing:.3px; cursor:pointer; line-height:1.1; }
+  .text-size-options button { display:flex; flex-direction:column; align-items:center; justify-content:flex-end; gap:4px; min-height:56px; padding:8px 2px; border:1.5px solid var(--border); border-radius:10px; background:var(--card); color:var(--text); font-size:11px; letter-spacing:.3px; cursor:pointer; line-height:1.1; }
   .text-size-options button span { font-family:'Space Grotesk',sans-serif !important; font-weight:600; line-height:1; }
   .text-size-options button.active { background:#123C27; border-color:#123C27; color:#FAFAF7; }
   body.dark-mode .text-size-options button { background:var(--dm-input); border-color:var(--dm-border); }
@@ -384,7 +384,7 @@
   .plan-last strong { color:var(--text); font-weight:600; }
   .plan-tip { font-size:12px; line-height:1.5; color:var(--text); background:rgba(82,121,111,0.1); border-left:3px solid var(--crema); border-radius:6px; padding:10px 12px; margin-bottom:18px; }
   .plan-chips { display:flex; gap:6px; margin-bottom:10px; }
-  .plan-chip { flex:1; padding:10px 4px; border:1.5px solid var(--border); border-radius:var(--radius-sm); background:var(--card); color:var(--text); font-family:'Space Mono',monospace; font-size:10px; letter-spacing:.5px; text-transform:uppercase; cursor:pointer; text-align:center; }
+  .plan-chip { flex:1; padding:10px 4px; border:1.5px solid var(--border); border-radius:var(--radius-sm); background:var(--card); color:var(--text); font-family:'Space Mono',monospace; font-size:11px; letter-spacing:.5px; text-transform:uppercase; cursor:pointer; text-align:center; }
   .plan-chip.selected { background:var(--espresso); border-color:var(--espresso); color:#FAFAF7; }
   body.dark-mode .plan-chip.selected { background:var(--crema); border-color:var(--crema); }
   .plan-slider { margin-bottom:18px; }
@@ -400,8 +400,8 @@
   .upnext-handle:active { cursor:grabbing; }
   .upnext-card.dragging { position:relative; z-index:5; box-shadow:0 10px 28px rgba(18,60,39,.28); transform:scale(1.02); transition:box-shadow .15s, transform .15s; }
   .upnext-card.drag-shift { transition:transform .18s ease; }
-  .upnext-hint { font-size:10px; color:var(--text-muted); margin:-6px 0 10px; letter-spacing:.5px; }
-  .plan-range-ends { display:flex; justify-content:space-between; font-size:10px; color:var(--text-muted); margin-top:-2px; }
+  .upnext-hint { font-size:11px; color:var(--text-muted); margin:-6px 0 10px; letter-spacing:.5px; }
+  .plan-range-ends { display:flex; justify-content:space-between; font-size:11px; color:var(--text-muted); margin-top:-2px; }
   .plan-stepper { display:flex; align-items:center; gap:10px; margin-bottom:18px; }
   .plan-stepper button { width:40px; height:40px; border-radius:10px; border:1.5px solid var(--border); background:var(--card); color:var(--text); font-size:20px; cursor:pointer; }
   .plan-stepper button:disabled { opacity:.3; }
@@ -418,7 +418,7 @@
   .brew-live { font-size:12px; color:var(--text-muted); margin:-4px 0 12px; min-height:16px; }
   .brew-live b { color:var(--text); }
   .brew-guide { background:rgba(82,121,111,0.12); border-radius:10px; padding:10px 12px; margin:-6px 0 14px; }
-  .guide-label { font-size:9px; letter-spacing:1.5px; text-transform:uppercase; color:var(--text-muted); }
+  .guide-label { font-size:11px; letter-spacing:1.5px; text-transform:uppercase; color:var(--text-muted); }
   .guide-now { font-size:14px; font-weight:600; color:var(--text); margin:2px 0 4px; line-height:1.35; }
   .guide-next { font-size:11px; color:var(--text-muted); }
   .taste-row { display:flex; align-items:center; gap:10px; margin-bottom:6px; }
@@ -431,13 +431,13 @@
   .taste-row .tv.set:active { transform:scale(.92); }
   body.dark-mode .taste-row .tv.set { border-color:var(--dm-border); }
   .taste-head { display:flex; align-items:baseline; justify-content:space-between; margin-bottom:8px; }
-  .taste-clear-all { background:none; border:none; padding:4px 0 4px 8px; font-size:10px; letter-spacing:1px; text-transform:uppercase; color:var(--text-muted); text-decoration:underline; text-underline-offset:3px; cursor:pointer; }
+  .taste-clear-all { background:none; border:none; padding:4px 0 4px 8px; font-size:11px; letter-spacing:1px; text-transform:uppercase; color:var(--text-muted); text-decoration:underline; text-underline-offset:3px; cursor:pointer; }
   .taste-line { font-size:11px; color:var(--text-muted); margin-top:6px; }
   /* Log Brew: last & best */
   .bh { margin:20px 0; }
   .bh-strip { width:100%; display:flex; align-items:center; gap:8px; padding:9px 12px; border-radius:12px; border:1px solid var(--border); background:rgba(18,60,39,.04); color:var(--text); font-size:11px; text-align:left; cursor:pointer; }
   body.dark-mode .bh-strip { border-color:var(--dm-border); background:rgba(159,204,191,.06); }
-  .bh-sk { font-size:9px; letter-spacing:1px; text-transform:uppercase; color:var(--text-muted); flex-shrink:0; }
+  .bh-sk { font-size:11px; letter-spacing:1px; text-transform:uppercase; color:var(--text-muted); flex-shrink:0; }
   .bh-sum { flex:1; min-width:0; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
   .bh-chev { color:var(--text-muted); flex-shrink:0; }
   .bh-cols { display:grid; grid-template-columns:repeat(2, minmax(0,1fr)); gap:8px; margin-top:8px; }
@@ -446,19 +446,19 @@
   body.dark-mode .bh-col { border-color:var(--dm-border); }
   .bh-col.best { border-color:#52796F; background:rgba(82,121,111,.10); }
   .bh-col .u { color:var(--text-muted); }
-  .bh-k { display:flex; justify-content:space-between; align-items:center; gap:4px; font-size:9px; letter-spacing:1px; text-transform:uppercase; color:var(--text-muted); }
-  .bh-k .extraction-tag { font-size:8px; padding:1px 6px; }
-  .bh-recipe { font-size:10px; line-height:1.35; color:var(--text-muted); display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden; margin:2px 0 3px; }
+  .bh-k { display:flex; justify-content:space-between; align-items:center; gap:4px; font-size:11px; letter-spacing:1px; text-transform:uppercase; color:var(--text-muted); }
+  .bh-k .extraction-tag { font-size:11px; padding:1px 6px; }
+  .bh-recipe { font-size:11px; line-height:1.35; color:var(--text-muted); display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden; margin:2px 0 3px; }
   .bh-foot { display:flex; justify-content:space-between; align-items:center; margin-top:2px; }
-  .bh-use { border:1px solid var(--border); background:none; color:var(--text); border-radius:8px; padding:3px 10px; font-size:9px; letter-spacing:1px; text-transform:uppercase; cursor:pointer; }
+  .bh-use { border:1px solid var(--border); background:none; color:var(--text); border-radius:8px; padding:3px 10px; font-size:11px; letter-spacing:1px; text-transform:uppercase; cursor:pointer; }
   body.dark-mode .bh-use { border-color:var(--dm-border); }
-  .brew-date { font-size:10px; letter-spacing:.5px; color:var(--text-muted); margin:2px 0 6px; }
+  .brew-date { font-size:11px; letter-spacing:.5px; color:var(--text-muted); margin:2px 0 6px; }
   .brew-spec { font-size:12px; color:var(--text); }
   .brew-spec .sp { white-space:nowrap; } .brew-spec .u { color:var(--text-muted); } .brew-spec .sep { color:var(--text-muted); opacity:.5; margin:0 7px; }
   .brew-taste-row { display:flex; align-items:center; justify-content:space-between; gap:10px; margin-top:9px; }
   .brew-rating { margin-left:auto; font-size:11px; color:var(--text-muted); white-space:nowrap; } .brew-rating b { font-size:15px; color:var(--text); }
   .taste-seg { display:inline-flex; border-radius:12px; overflow:hidden; background:rgba(18,60,39,.06); border:1px solid rgba(18,60,39,.12); }
-  .taste-seg .ts-cell { display:flex; flex-direction:column; align-items:center; min-width:44px; padding:4px 14px; font-size:9px; letter-spacing:.3px; color:var(--text-muted); line-height:1.2; }
+  .taste-seg .ts-cell { display:flex; flex-direction:column; align-items:center; min-width:44px; padding:4px 14px; font-size:11px; letter-spacing:.3px; color:var(--text-muted); line-height:1.2; }
   .taste-seg .ts-cell + .ts-cell { border-left:1px solid rgba(18,60,39,.12); }
   .taste-seg .ts-cell b { font-size:13px; color:var(--text); }
   body.dark-mode .taste-seg { background:rgba(159,204,191,.12); border-color:rgba(159,204,191,.18); }
@@ -475,8 +475,8 @@
   [style*="Playfair"] { font-family: 'Space Grotesk', system-ui, sans-serif !important; letter-spacing: -0.3px !important; }
   .app-title { font-weight: 700 !important; letter-spacing: -1px !important; }
   .suggest-card { background:rgba(82,121,111,0.1); border:1.5px dashed var(--crema); border-radius:var(--radius-sm); padding:12px 14px; margin:4px 0 6px; }
-  .suggest-label { flex:1; font-size:10px; letter-spacing:1px; text-transform:uppercase; color:var(--text-muted); }
-  .suggest-apply { background:#123C27; color:#FAFAF7; border:none; border-radius:8px; padding:7px 14px; font-size:10px; letter-spacing:1px; text-transform:uppercase; cursor:pointer; }
+  .suggest-label { flex:1; font-size:11px; letter-spacing:1px; text-transform:uppercase; color:var(--text-muted); }
+  .suggest-apply { background:#123C27; color:#FAFAF7; border:none; border-radius:8px; padding:7px 14px; font-size:11px; letter-spacing:1px; text-transform:uppercase; cursor:pointer; }
   body.dark-mode .suggest-apply { background:var(--crema); }
   .suggest-main { font-size:13px; color:var(--text); line-height:1.5; }
   .suggest-main b { font-weight:700; }
@@ -553,7 +553,7 @@
   @media (prefers-reduced-motion: reduce) { .timer-pill .tp-dot { animation:none; } }
   /* GRINDER STYLES */
   .grinder-type-toggle { display: flex; background: rgba(26,15,10,0.06); border-radius: 10px; padding: 3px; margin-bottom: 20px; }
-  .type-btn { flex: 1; padding: 9px 12px; border: none; border-radius: 8px; font-family: 'DM Mono', monospace; font-size: 10px; letter-spacing: 1px; text-transform: uppercase; cursor: pointer; background: none; color: var(--text-muted); transition: all 0.2s; }
+  .type-btn { flex: 1; padding: 9px 12px; border: none; border-radius: 8px; font-family: 'DM Mono', monospace; font-size: 11px; letter-spacing: 1px; text-transform: uppercase; cursor: pointer; background: none; color: var(--text-muted); transition: all 0.2s; }
   .type-btn.active { background: var(--espresso); color: var(--crema-light); }
   .grinder-search { position: relative; margin-bottom: 16px; }
   .grinder-search input { width: 100%; padding: 11px 14px 11px 38px; background: white; border: 1.5px solid var(--border); border-radius: var(--radius-sm); font-family: 'DM Sans', sans-serif; font-size: 14px; color: var(--text); outline: none; }
@@ -561,9 +561,9 @@
   .grinder-search-icon { position: absolute; left: 12px; top: 50%; transform: translateY(-50%); font-size: 16px; opacity: 0.4; pointer-events: none; }
   .grinder-card { background: var(--card); border: 1px solid var(--border); border-radius: var(--radius); padding: 14px 16px; margin-bottom: 10px; display: flex; align-items: center; justify-content: space-between; cursor: pointer; transition: all 0.15s; }
   .grinder-card.in-compare { border-color: var(--crema); background: rgba(200,135,58,0.05); }
-  .grinder-brand { font-family: 'DM Mono', monospace; font-size: 10px; letter-spacing: 1px; color: var(--text-muted); text-transform: uppercase; }
+  .grinder-brand { font-family: 'DM Mono', monospace; font-size: 11px; letter-spacing: 1px; color: var(--text-muted); text-transform: uppercase; }
   .grinder-model { font-family: 'Playfair Display', serif; font-size: 16px; color: var(--espresso); margin-top: 2px; }
-  .grinder-type-badge { font-family: 'DM Mono', monospace; font-size: 9px; padding: 2px 8px; border-radius: 20px; letter-spacing: 1px; text-transform: uppercase; display: block; margin-bottom: 4px; }
+  .grinder-type-badge { font-family: 'DM Mono', monospace; font-size: 11px; padding: 2px 8px; border-radius: 20px; letter-spacing: 1px; text-transform: uppercase; display: block; margin-bottom: 4px; }
   .badge-manual { background: rgba(42,80,128,0.1); color: var(--blue); border: 1px solid rgba(42,80,128,0.2); }
   .badge-electric { background: rgba(92,45,14,0.1); color: var(--roast); border: 1px solid rgba(92,45,14,0.2); }
   .compare-toggle-btn { background: none; border: none; cursor: pointer; font-size: 20px; padding: 4px 6px; line-height: 1; transition: transform 0.15s; }
@@ -574,21 +574,21 @@
   .compare-bar.visible { transform: translateY(0); }
   .compare-bar:not(.visible) { visibility:hidden; }
   .compare-bar-text { font-family: 'DM Mono', monospace; font-size: 11px; color: var(--crema-light); letter-spacing: 1px; }
-  .compare-bar-btn { background: var(--crema); color: var(--espresso); border: none; padding: 8px 16px; border-radius: 8px; font-family: 'DM Mono', monospace; font-size: 10px; letter-spacing: 1px; text-transform: uppercase; cursor: pointer; font-weight: 500; }
+  .compare-bar-btn { background: var(--crema); color: var(--espresso); border: none; padding: 8px 16px; border-radius: 8px; font-family: 'DM Mono', monospace; font-size: 11px; letter-spacing: 1px; text-transform: uppercase; cursor: pointer; font-weight: 500; }
 
   /* Chart styles */
   .grinder-bar-row { display: flex; align-items: center; gap: 10px; margin-bottom: 6px; }
-  .grinder-bar-name { font-family: 'DM Mono', monospace; font-size: 9px; width: 100px; flex-shrink: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .grinder-bar-name { font-family: 'DM Mono', monospace; font-size: 11px; width: 100px; flex-shrink: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
   .grinder-bar-track { flex: 1; height: 26px; position: relative; background: rgba(26,15,10,0.04); border-radius: 6px; }
-  .grinder-bar-fill { position: absolute; top: 3px; height: 20px; border-radius: 4px; display: flex; align-items: center; justify-content: center; font-family: 'DM Mono', monospace; font-size: 8px; color: white; padding: 0 4px; overflow: hidden; white-space: nowrap; }
+  .grinder-bar-fill { position: absolute; top: 3px; height: 20px; border-radius: 4px; display: flex; align-items: center; justify-content: center; font-family: 'DM Mono', monospace; font-size: 11px; color: white; padding: 0 4px; overflow: hidden; white-space: nowrap; }
   .grind-axis { display: flex; justify-content: space-between; margin-top: 6px; }
-  .grind-axis-label { font-family: 'DM Mono', monospace; font-size: 8px; color: var(--text-muted); }
+  .grind-axis-label { font-family: 'DM Mono', monospace; font-size: 11px; color: var(--text-muted); }
 
   /* Recipe library cards */
   .recipe-lib-card { background:var(--card); border:1px solid var(--border); border-radius:var(--radius); margin-bottom:12px; overflow:hidden; box-shadow:0 2px 8px rgba(26,15,10,0.05); }
   .recipe-lib-header { background:var(--espresso); padding:12px 16px; display:flex; justify-content:space-between; align-items:flex-start; gap:10px; }
   .recipe-lib-title { font-size:15px; color:var(--crema-light); line-height:1.3; flex:1; }
-  .recipe-lib-author { font-family:'DM Mono',monospace; font-size:9px; color:rgba(245,237,227,.45); letter-spacing:.5px; margin-top:2px; }
+  .recipe-lib-author { font-family:'DM Mono',monospace; font-size:11px; color:rgba(245,237,227,.45); letter-spacing:.5px; margin-top:2px; }
   .recipe-lib-body { padding:12px 16px; }
   .recipe-lib-meta { display:flex; flex-wrap:wrap; gap:5px; margin-bottom:10px; }
   .recipe-lib-steps { padding-left:16px; margin:0; }
@@ -688,7 +688,15 @@
   .grinder-specs-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 14px; }
   .grinder-spec-block { background: rgba(255,255,255,0.07); border-radius: 10px; padding: 12px; }
   .grinder-spec-value { font-family: 'Playfair Display', serif; font-size: 18px; color: var(--crema-light); }
-  .grinder-spec-label { font-family: 'DM Mono', monospace; font-size: 9px; letter-spacing: 1px; color: rgba(245,237,227,0.4); text-transform: uppercase; margin-top: 2px; }
+  .grinder-spec-label { font-family: 'DM Mono', monospace; font-size: 11px; letter-spacing: 1px; color: rgba(245,237,227,0.4); text-transform: uppercase; margin-top: 2px; }
+
+  /* Accessibility */
+  .ico { vertical-align:-0.15em; flex-shrink:0; }
+  .empty-icon { line-height:0; }
+  [role="button"]:focus-visible, button:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible, textarea:focus-visible, [tabindex]:focus-visible { outline:2px solid #52796F; outline-offset:2px; }
+  body.dark-mode :focus-visible { outline-color:#9FCCBF; }
+  [role="dialog"]:focus { outline:none; }
+  @supports (-webkit-touch-callout: none) { input, select, textarea { font-size:16px !important; } }  /* stops iPhone zooming in when a field is tapped */
 </style>
 </head>
 <body>
@@ -700,7 +708,7 @@
       <div class="app-title">dialed</div>
       <div class="app-subtitle" id="app-subtitle">Coffee Tracker</div>
     </div>
-    <button class="dark-toggle" id="dark-toggle-btn" onclick="toggleDarkMode()" title="Toggle dark mode"><svg xmlns="http://www.w3.org/2000/svg" viewBox="-0.5 -0.5 16 16" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" width="18" height="18"><path d="M13.125 7.9937499999999995A5.625 5.625 0 1 1 7.0062500000000005 1.875 4.375 4.375 0 0 0 13.125 7.9937499999999995z" stroke-width="1"></path></svg></button>
+    <button class="dark-toggle" id="dark-toggle-btn" aria-label="Toggle dark mode" onclick="toggleDarkMode()" title="Toggle dark mode"><svg xmlns="http://www.w3.org/2000/svg" viewBox="-0.5 -0.5 16 16" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" width="18" height="18"><path d="M13.125 7.9937499999999995A5.625 5.625 0 1 1 7.0062500000000005 1.875 4.375 4.375 0 0 0 13.125 7.9937499999999995z" stroke-width="1"></path></svg></button>
   </div>
 </header>
 
@@ -780,7 +788,7 @@
   <div id="recipe-panel-custom" style="display:none">
     <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px">
       <div class="section-subtitle" style="margin:0">Your custom recipes</div>
-      <button class="btn-secondary" onclick="openNewCustomRecipe()" style="font-size:9px;padding:6px 12px;color:var(--text);border-color:var(--border)">+ New Recipe</button>
+      <button class="btn-secondary" onclick="openNewCustomRecipe()" style="font-size:11px;padding:6px 12px;color:var(--text);border-color:var(--border)">+ New Recipe</button>
     </div>
     <div id="myrecipes-list"></div>
   </div>
@@ -833,7 +841,7 @@
 
   <!-- Sort bar -->
   <div style="display:flex;gap:6px;margin-bottom:14px;overflow-x:auto;padding-bottom:2px">
-    <span style="font-size:9px;letter-spacing:1px;text-transform:uppercase;color:var(--text-muted);align-self:center;flex-shrink:0">Sort:</span>
+    <span style="font-size:11px;letter-spacing:1px;text-transform:uppercase;color:var(--text-muted);align-self:center;flex-shrink:0">Sort:</span>
     <button class="type-btn active" id="sort-btn-date" onclick="setTrackerSort('date',this)">Newest</button>
     <button class="type-btn" id="sort-btn-rating" onclick="setTrackerSort('rating',this)">Rating</button>
     <button class="type-btn" id="sort-btn-coffee" onclick="setTrackerSort('coffee',this)">Coffee</button>
@@ -848,7 +856,7 @@
   <div id="grinder-compare-section" style="display:none;margin-bottom:24px">
     <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
       <div class="section-title">Comparison</div>
-      <button class="btn-secondary" style="font-size:9px;padding:5px 10px" onclick="document.getElementById('grinder-compare-section').style.display='none'">✕ Close</button>
+      <button class="btn-secondary" style="font-size:11px;padding:5px 10px" onclick="document.getElementById('grinder-compare-section').style.display='none'">✕ Close</button>
     </div>
     <div id="grinder-compare-inner"></div>
   </div>
@@ -857,11 +865,11 @@
   <div class="section-subtitle">Browse 50+ manual & electric grinders</div>
   <div class="grinder-type-toggle">
     <button class="type-btn active" onclick="filterGrinders('all',this)">All</button>
-    <button class="type-btn" onclick="filterGrinders('manual',this)">✋ Manual</button>
-    <button class="type-btn" onclick="filterGrinders('electric',this)">⚡ Electric</button>
+    <button class="type-btn" onclick="filterGrinders('manual',this)">Manual</button>
+    <button class="type-btn" onclick="filterGrinders('electric',this)">Electric</button>
   </div>
   <div class="grinder-search">
-    <span class="grinder-search-icon">🔍</span>
+    <span class="grinder-search-icon"><svg class="ico" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></svg></span>
     <input type="text" id="grinder-search-input" placeholder="Search brand or model…" oninput="renderGrinders()">
   </div>
   <div id="grinders-list"></div>
@@ -938,14 +946,14 @@
         <button class="coffee-rating-btn" data-val="1" onclick="setCoffeeRating(1)"><svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 14 14" width="14" height="14"><g><path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" d="M2 4h8.5v5c0 0.53043 -0.2107 1.0391 -0.58579 1.4142C9.53914 10.7893 9.03043 11 8.5 11h-5c-0.53043 0 -1.03914 -0.2107 -1.41421 -0.5858C1.71071 10.0391 1.5 9.53043 1.5 9V4.5c0 -0.13261 0.05268 -0.25979 0.14645 -0.35355C1.74021 4.05268 1.86739 4 2 4Z" stroke-width="1"></path><path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" d="M0.5 13.5h13" stroke-width="1"></path><path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" d="M10.5 4h1c0.5304 0 1.0391 0.21071 1.4142 0.58579 0.3751 0.37507 0.5858 0.88378 0.5858 1.41421s-0.2107 1.03914 -0.5858 1.41421C12.5391 7.78929 12.0304 8 11.5 8h-1" stroke-width="1"></path><path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" d="M3 0.5v1" stroke-width="1"></path><path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" d="M8 0.5v1" stroke-width="1"></path><path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" d="M5.5 0.5v1" stroke-width="1"></path></g></svg></button><button class="coffee-rating-btn" data-val="2" onclick="setCoffeeRating(2)"><svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 14 14" width="14" height="14"><g><path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" d="M2 4h8.5v5c0 0.53043 -0.2107 1.0391 -0.58579 1.4142C9.53914 10.7893 9.03043 11 8.5 11h-5c-0.53043 0 -1.03914 -0.2107 -1.41421 -0.5858C1.71071 10.0391 1.5 9.53043 1.5 9V4.5c0 -0.13261 0.05268 -0.25979 0.14645 -0.35355C1.74021 4.05268 1.86739 4 2 4Z" stroke-width="1"></path><path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" d="M0.5 13.5h13" stroke-width="1"></path><path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" d="M10.5 4h1c0.5304 0 1.0391 0.21071 1.4142 0.58579 0.3751 0.37507 0.5858 0.88378 0.5858 1.41421s-0.2107 1.03914 -0.5858 1.41421C12.5391 7.78929 12.0304 8 11.5 8h-1" stroke-width="1"></path><path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" d="M3 0.5v1" stroke-width="1"></path><path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" d="M8 0.5v1" stroke-width="1"></path><path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" d="M5.5 0.5v1" stroke-width="1"></path></g></svg></button><button class="coffee-rating-btn" data-val="3" onclick="setCoffeeRating(3)"><svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 14 14" width="14" height="14"><g><path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" d="M2 4h8.5v5c0 0.53043 -0.2107 1.0391 -0.58579 1.4142C9.53914 10.7893 9.03043 11 8.5 11h-5c-0.53043 0 -1.03914 -0.2107 -1.41421 -0.5858C1.71071 10.0391 1.5 9.53043 1.5 9V4.5c0 -0.13261 0.05268 -0.25979 0.14645 -0.35355C1.74021 4.05268 1.86739 4 2 4Z" stroke-width="1"></path><path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" d="M0.5 13.5h13" stroke-width="1"></path><path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" d="M10.5 4h1c0.5304 0 1.0391 0.21071 1.4142 0.58579 0.3751 0.37507 0.5858 0.88378 0.5858 1.41421s-0.2107 1.03914 -0.5858 1.41421C12.5391 7.78929 12.0304 8 11.5 8h-1" stroke-width="1"></path><path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" d="M3 0.5v1" stroke-width="1"></path><path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" d="M8 0.5v1" stroke-width="1"></path><path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" d="M5.5 0.5v1" stroke-width="1"></path></g></svg></button><button class="coffee-rating-btn" data-val="4" onclick="setCoffeeRating(4)"><svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 14 14" width="14" height="14"><g><path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" d="M2 4h8.5v5c0 0.53043 -0.2107 1.0391 -0.58579 1.4142C9.53914 10.7893 9.03043 11 8.5 11h-5c-0.53043 0 -1.03914 -0.2107 -1.41421 -0.5858C1.71071 10.0391 1.5 9.53043 1.5 9V4.5c0 -0.13261 0.05268 -0.25979 0.14645 -0.35355C1.74021 4.05268 1.86739 4 2 4Z" stroke-width="1"></path><path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" d="M0.5 13.5h13" stroke-width="1"></path><path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" d="M10.5 4h1c0.5304 0 1.0391 0.21071 1.4142 0.58579 0.3751 0.37507 0.5858 0.88378 0.5858 1.41421s-0.2107 1.03914 -0.5858 1.41421C12.5391 7.78929 12.0304 8 11.5 8h-1" stroke-width="1"></path><path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" d="M3 0.5v1" stroke-width="1"></path><path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" d="M8 0.5v1" stroke-width="1"></path><path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" d="M5.5 0.5v1" stroke-width="1"></path></g></svg></button><button class="coffee-rating-btn" data-val="5" onclick="setCoffeeRating(5)"><svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 14 14" width="14" height="14"><g><path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" d="M2 4h8.5v5c0 0.53043 -0.2107 1.0391 -0.58579 1.4142C9.53914 10.7893 9.03043 11 8.5 11h-5c-0.53043 0 -1.03914 -0.2107 -1.41421 -0.5858C1.71071 10.0391 1.5 9.53043 1.5 9V4.5c0 -0.13261 0.05268 -0.25979 0.14645 -0.35355C1.74021 4.05268 1.86739 4 2 4Z" stroke-width="1"></path><path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" d="M0.5 13.5h13" stroke-width="1"></path><path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" d="M10.5 4h1c0.5304 0 1.0391 0.21071 1.4142 0.58579 0.3751 0.37507 0.5858 0.88378 0.5858 1.41421s-0.2107 1.03914 -0.5858 1.41421C12.5391 7.78929 12.0304 8 11.5 8h-1" stroke-width="1"></path><path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" d="M3 0.5v1" stroke-width="1"></path><path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" d="M8 0.5v1" stroke-width="1"></path><path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" d="M5.5 0.5v1" stroke-width="1"></path></g></svg></button><button class="coffee-rating-btn" data-val="6" onclick="setCoffeeRating(6)"><svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 14 14" width="14" height="14"><g><path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" d="M2 4h8.5v5c0 0.53043 -0.2107 1.0391 -0.58579 1.4142C9.53914 10.7893 9.03043 11 8.5 11h-5c-0.53043 0 -1.03914 -0.2107 -1.41421 -0.5858C1.71071 10.0391 1.5 9.53043 1.5 9V4.5c0 -0.13261 0.05268 -0.25979 0.14645 -0.35355C1.74021 4.05268 1.86739 4 2 4Z" stroke-width="1"></path><path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" d="M0.5 13.5h13" stroke-width="1"></path><path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" d="M10.5 4h1c0.5304 0 1.0391 0.21071 1.4142 0.58579 0.3751 0.37507 0.5858 0.88378 0.5858 1.41421s-0.2107 1.03914 -0.5858 1.41421C12.5391 7.78929 12.0304 8 11.5 8h-1" stroke-width="1"></path><path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" d="M3 0.5v1" stroke-width="1"></path><path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" d="M8 0.5v1" stroke-width="1"></path><path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" d="M5.5 0.5v1" stroke-width="1"></path></g></svg></button><button class="coffee-rating-btn" data-val="7" onclick="setCoffeeRating(7)"><svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 14 14" width="14" height="14"><g><path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" d="M2 4h8.5v5c0 0.53043 -0.2107 1.0391 -0.58579 1.4142C9.53914 10.7893 9.03043 11 8.5 11h-5c-0.53043 0 -1.03914 -0.2107 -1.41421 -0.5858C1.71071 10.0391 1.5 9.53043 1.5 9V4.5c0 -0.13261 0.05268 -0.25979 0.14645 -0.35355C1.74021 4.05268 1.86739 4 2 4Z" stroke-width="1"></path><path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" d="M0.5 13.5h13" stroke-width="1"></path><path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" d="M10.5 4h1c0.5304 0 1.0391 0.21071 1.4142 0.58579 0.3751 0.37507 0.5858 0.88378 0.5858 1.41421s-0.2107 1.03914 -0.5858 1.41421C12.5391 7.78929 12.0304 8 11.5 8h-1" stroke-width="1"></path><path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" d="M3 0.5v1" stroke-width="1"></path><path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" d="M8 0.5v1" stroke-width="1"></path><path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" d="M5.5 0.5v1" stroke-width="1"></path></g></svg></button><button class="coffee-rating-btn" data-val="8" onclick="setCoffeeRating(8)"><svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 14 14" width="14" height="14"><g><path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" d="M2 4h8.5v5c0 0.53043 -0.2107 1.0391 -0.58579 1.4142C9.53914 10.7893 9.03043 11 8.5 11h-5c-0.53043 0 -1.03914 -0.2107 -1.41421 -0.5858C1.71071 10.0391 1.5 9.53043 1.5 9V4.5c0 -0.13261 0.05268 -0.25979 0.14645 -0.35355C1.74021 4.05268 1.86739 4 2 4Z" stroke-width="1"></path><path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" d="M0.5 13.5h13" stroke-width="1"></path><path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" d="M10.5 4h1c0.5304 0 1.0391 0.21071 1.4142 0.58579 0.3751 0.37507 0.5858 0.88378 0.5858 1.41421s-0.2107 1.03914 -0.5858 1.41421C12.5391 7.78929 12.0304 8 11.5 8h-1" stroke-width="1"></path><path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" d="M3 0.5v1" stroke-width="1"></path><path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" d="M8 0.5v1" stroke-width="1"></path><path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" d="M5.5 0.5v1" stroke-width="1"></path></g></svg></button><button class="coffee-rating-btn" data-val="9" onclick="setCoffeeRating(9)"><svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 14 14" width="14" height="14"><g><path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" d="M2 4h8.5v5c0 0.53043 -0.2107 1.0391 -0.58579 1.4142C9.53914 10.7893 9.03043 11 8.5 11h-5c-0.53043 0 -1.03914 -0.2107 -1.41421 -0.5858C1.71071 10.0391 1.5 9.53043 1.5 9V4.5c0 -0.13261 0.05268 -0.25979 0.14645 -0.35355C1.74021 4.05268 1.86739 4 2 4Z" stroke-width="1"></path><path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" d="M0.5 13.5h13" stroke-width="1"></path><path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" d="M10.5 4h1c0.5304 0 1.0391 0.21071 1.4142 0.58579 0.3751 0.37507 0.5858 0.88378 0.5858 1.41421s-0.2107 1.03914 -0.5858 1.41421C12.5391 7.78929 12.0304 8 11.5 8h-1" stroke-width="1"></path><path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" d="M3 0.5v1" stroke-width="1"></path><path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" d="M8 0.5v1" stroke-width="1"></path><path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" d="M5.5 0.5v1" stroke-width="1"></path></g></svg></button><button class="coffee-rating-btn" data-val="10" onclick="setCoffeeRating(10)"><svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 14 14" width="14" height="14"><g><path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" d="M2 4h8.5v5c0 0.53043 -0.2107 1.0391 -0.58579 1.4142C9.53914 10.7893 9.03043 11 8.5 11h-5c-0.53043 0 -1.03914 -0.2107 -1.41421 -0.5858C1.71071 10.0391 1.5 9.53043 1.5 9V4.5c0 -0.13261 0.05268 -0.25979 0.14645 -0.35355C1.74021 4.05268 1.86739 4 2 4Z" stroke-width="1"></path><path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" d="M0.5 13.5h13" stroke-width="1"></path><path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" d="M10.5 4h1c0.5304 0 1.0391 0.21071 1.4142 0.58579 0.3751 0.37507 0.5858 0.88378 0.5858 1.41421s-0.2107 1.03914 -0.5858 1.41421C12.5391 7.78929 12.0304 8 11.5 8h-1" stroke-width="1"></path><path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" d="M3 0.5v1" stroke-width="1"></path><path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" d="M8 0.5v1" stroke-width="1"></path><path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" d="M5.5 0.5v1" stroke-width="1"></path></g></svg></button>
       </div>
       <input type="hidden" id="c-rating" value="0">
-      <div style="font-family:'DM Mono',monospace;font-size:9px;color:var(--text-muted);margin-top:4px;letter-spacing:1px" id="c-rating-label">Not rated</div>
+      <div style="font-family:'DM Mono',monospace;font-size:11px;color:var(--text-muted);margin-top:4px;letter-spacing:1px" id="c-rating-label">Not rated</div>
     </div>
     <div class="form-group">
       <label class="form-label">Bag Label Photo</label>
       <input type="file" id="c-label-input" accept="image/*" capture="environment" style="display:none" onchange="handleLabelPhoto(this)">
       <div id="c-label-preview-wrap">
         <div class="label-upload-btn" onclick="document.getElementById('c-label-input').click()">
-          <span style="font-size:28px">📷</span>
+          <span style="line-height:0"><svg class="ico" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M4 8h3l2-3h6l2 3h3a1 1 0 0 1 1 1v9a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V9a1 1 0 0 1 1-1z"/><circle cx="12" cy="13" r="3.5"/></svg></span>
           <span>Tap to take photo or upload</span>
         </div>
       </div>
@@ -1065,11 +1073,11 @@
     <div class="modal-handle"></div>
     <div class="modal-title" style="margin-bottom:20px">What would you like to add?</div>
     <div style="display:flex;gap:12px">
-      <button class="btn-primary" style="flex:1;padding:18px 10px" onclick="closeModal('modal-fab');resetCoffeeModal();openModal('modal-coffee')">📦 New Coffee</button>
-      <button class="btn-primary" style="flex:1;padding:18px 10px;background:var(--crema);color:var(--espresso)" onclick="closeModal('modal-fab');openRecipeModal()">☕ Log Brew</button>
+      <button class="btn-primary" style="flex:1;padding:18px 10px" onclick="closeModal('modal-fab');resetCoffeeModal();openModal('modal-coffee')"><svg class="ico" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M21 8l-9-5-9 5v8l9 5 9-5V8z"/><path d="M3 8l9 5 9-5"/><path d="M12 13v8"/></svg> New Coffee</button>
+      <button class="btn-primary" style="flex:1;padding:18px 10px;background:var(--crema);color:var(--espresso)" onclick="closeModal('modal-fab');openRecipeModal()"><svg class="ico" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M5 8h12v6a5 5 0 0 1-5 5h-2a5 5 0 0 1-5-5V8z"/><path d="M17 10h1.5a2.5 2.5 0 0 1 0 5H17"/><path d="M8 3v2M12 3v2"/></svg> Log Brew</button>
     </div>
     <div style="height:12px"></div>
-    <button class="btn-primary fab-recipe-btn" style="width:100%" onclick="closeModal('modal-fab');showView('recipes');setTimeout(()=>{const b=document.querySelector('#recipe-tab-bar .type-btn:last-child');switchRecipeTab('custom',b);openNewCustomRecipe();},100)">📋 New Custom Recipe</button>
+    <button class="btn-primary fab-recipe-btn" style="width:100%" onclick="closeModal('modal-fab');showView('recipes');setTimeout(()=>{const b=document.querySelector('#recipe-tab-bar .type-btn:last-child');switchRecipeTab('custom',b);openNewCustomRecipe();},100)"><svg class="ico" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M9 5H6a1 1 0 0 0-1 1v14a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1V6a1 1 0 0 0-1-1h-3"/><path d="M9 3.5h6v3H9z"/><path d="M9 12h6M9 16h6"/></svg> New Custom Recipe</button>
     <div style="height:12px"></div>
     <button class="btn-secondary" style="width:100%" onclick="closeModal('modal-fab')">Cancel</button>
   </div>
@@ -1114,7 +1122,7 @@
     </div>
 
     <div class="divider">Steps</div>
-    <div style="font-family:'DM Mono',monospace;font-size:9px;color:var(--text-muted);letter-spacing:1px;margin-bottom:10px">Add each step on its own line</div>
+    <div style="font-family:'DM Mono',monospace;font-size:11px;color:var(--text-muted);letter-spacing:1px;margin-bottom:10px">Add each step on its own line</div>
     <div id="cr-steps-list" style="display:flex;flex-direction:column;gap:8px;margin-bottom:10px"></div>
     <button class="btn-secondary" style="width:100%" onclick="addRecipeStep()">+ Add Step</button>
 
@@ -2093,12 +2101,14 @@ function openModal(id) {
   const el = document.getElementById(id); if (!el) return;
   clearTimeout(closingTimers[id]); el.classList.remove('closing');
   el.classList.add('open');
+  try { a11yOpened(id); } catch(e) {}
   if (id === 'modal-fab') document.querySelector('.fab')?.classList.add('fab-open');
   if (id === 'modal-recipe') { try { renderTimerPill(); } catch(e) {} }
 }
 function closeModal(id) {
   const el = document.getElementById(id); if (!el || !el.classList.contains('open')) return;
   el.classList.remove('open');
+  try { a11yClosed(id); } catch(e) {}
   if (id === 'modal-fab') document.querySelector('.fab')?.classList.remove('fab-open');
   if (id === 'modal-recipe') { try { renderTimerPill(); } catch(e) {} }
   if (reduceMotion()) return;
@@ -2148,7 +2158,7 @@ function openRecipeModal() {
     const d = document.createElement('div');
     d.className = 'coffee-selector-item' + (state.selectedGrinderId===g.id?' selected':'');
     const isFav = state.favouriteGrinderId === g.id;
-    d.innerHTML = `<div class="cs-name" style="font-size:14px">${isFav?'⭐ ':''}${g.model}</div><div class="cs-sub">${g.brand} · ${g.type==='manual'?'✋ Manual':'⚡ Electric'}${isFav?' · Default':''}</div>`;
+    d.innerHTML = `<div class="cs-name" style="font-size:14px">${g.model}</div><div class="cs-sub">${g.brand} · ${g.type==='manual'?'Manual':'Electric'}${isFav?' · Default':''}</div>`;
     d.onclick = () => { state.selectedGrinderId=g.id; gs.querySelectorAll('.coffee-selector-item').forEach(x=>x.classList.remove('selected')); d.classList.add('selected'); };
     return d;
   }
@@ -2157,12 +2167,12 @@ function openRecipeModal() {
   const otherGrinders = GRINDERS.filter(g => g.id !== state.favouriteGrinderId);
   if (favGrinders.length) {
     const hdr = document.createElement('div');
-    hdr.style.cssText = "font-family:'DM Mono',monospace;font-size:9px;letter-spacing:1.5px;text-transform:uppercase;color:var(--crema);padding:6px 2px 4px;";
-    hdr.textContent = '⭐ Favourite';
+    hdr.style.cssText = "font-family:'DM Mono',monospace;font-size:11px;letter-spacing:1.5px;text-transform:uppercase;color:var(--crema);padding:6px 2px 4px;";
+    hdr.textContent = 'Favourite';
     gs.appendChild(hdr);
     favGrinders.forEach(g => gs.appendChild(makeGrinderItem(g)));
     const sep = document.createElement('div');
-    sep.style.cssText = "font-family:'DM Mono',monospace;font-size:9px;letter-spacing:1.5px;text-transform:uppercase;color:var(--text-muted);padding:8px 2px 4px;border-top:1px solid var(--border);margin-top:4px;";
+    sep.style.cssText = "font-family:'DM Mono',monospace;font-size:11px;letter-spacing:1.5px;text-transform:uppercase;color:var(--text-muted);padding:8px 2px 4px;border-top:1px solid var(--border);margin-top:4px;";
     sep.textContent = 'All Grinders';
     gs.appendChild(sep);
   }
@@ -2324,7 +2334,7 @@ function renderBuiltinRecipes() {
     const list = RECIPES[method] || [];
     if (!list.length) return;
     if (activeRecipeMethod === 'all') {
-      html += `<div style="font-family:'DM Mono',monospace;font-size:9px;letter-spacing:2px;text-transform:uppercase;color:var(--text-muted);margin:16px 0 8px;padding-bottom:6px;border-bottom:1px solid var(--border)">${method}</div>`;
+      html += `<div style="font-family:'DM Mono',monospace;font-size:11px;letter-spacing:2px;text-transform:uppercase;color:var(--text-muted);margin:16px 0 8px;padding-bottom:6px;border-bottom:1px solid var(--border)">${method}</div>`;
     }
     list.forEach(r => {
       const pourMeta = r.pours ? `${r.pours} pour${r.pours>1?'s':''}${r.bloomRatio&&r.bloomRatio!=='N/A'?' · bloom '+r.bloomRatio:''}${r.totalTime?' · '+r.totalTime:''}` : '';
@@ -2349,12 +2359,12 @@ function renderBuiltinRecipes() {
           </ol>
         </div>
         <div class="recipe-lib-actions">
-          <button class="btn-secondary" style="flex:1;font-size:10px;padding:8px" onclick="duplicateRecipe('${r.id}','${method}')">⧉ Duplicate &amp; Edit</button>
+          <button class="btn-secondary" style="flex:1;font-size:11px;padding:8px" onclick="duplicateRecipe('${r.id}','${method}')">⧉ Duplicate &amp; Edit</button>
         </div>
       </div>`;
     });
   });
-  el.innerHTML = html || `<div class="empty-state"><div class="empty-icon">📋</div><div class="empty-title">No recipes for this method</div></div>`;
+  el.innerHTML = html || `<div class="empty-state"><div class="empty-icon"><svg class="ico" width="44" height="44" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M9 5H6a1 1 0 0 0-1 1v14a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1V6a1 1 0 0 0-1-1h-3"/><path d="M9 3.5h6v3H9z"/><path d="M9 12h6M9 16h6"/></svg></div><div class="empty-title">No recipes for this method</div></div>`;
 }
 
 function duplicateRecipe(recipeId, method) {
@@ -2490,7 +2500,7 @@ function renderMyRecipes() {
   if (!el) return;
   const recipes = state.customRecipes||[];
   if (!recipes.length) {
-    el.innerHTML = `<div class="empty-state"><div class="empty-icon">📋</div><div class="empty-title">No custom recipes yet</div><div class="empty-desc">Tap + New Recipe, or duplicate a built-in recipe from the Built-in tab to start customising.</div></div>`;
+    el.innerHTML = `<div class="empty-state"><div class="empty-icon"><svg class="ico" width="44" height="44" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M9 5H6a1 1 0 0 0-1 1v14a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1V6a1 1 0 0 0-1-1h-3"/><path d="M9 3.5h6v3H9z"/><path d="M9 12h6M9 16h6"/></svg></div><div class="empty-title">No custom recipes yet</div><div class="empty-desc">Tap + New Recipe, or duplicate a built-in recipe from the Built-in tab to start customising.</div></div>`;
     return;
   }
   el.innerHTML = recipes.map(r => `
@@ -2498,10 +2508,10 @@ function renderMyRecipes() {
       <div class="custom-recipe-card-header">
         <div>
           <div style="font-family:'Playfair Display',serif;font-size:16px;color:var(--crema-light)">${escHtml(r.name)}</div>
-          <div style="font-family:'DM Mono',monospace;font-size:10px;color:rgba(245,237,227,.6);letter-spacing:1px;margin-top:2px">${r.author?escHtml(r.author)+' · ':''}${escHtml(r.method)}</div>
+          <div style="font-family:'DM Mono',monospace;font-size:11px;color:rgba(245,237,227,.6);letter-spacing:1px;margin-top:2px">${r.author?escHtml(r.author)+' · ':''}${escHtml(r.method)}</div>
         </div>
         <div style="display:flex;gap:8px;align-items:center">
-          <button class="btn-secondary" style="padding:5px 10px;font-size:9px" onclick="openEditCustomRecipe('${r.id}')">Edit</button>
+          <button class="btn-secondary" style="padding:5px 10px;font-size:11px" onclick="openEditCustomRecipe('${r.id}')">Edit</button>
           <button class="btn-delete" onclick="confirmDeleteCustomRecipe('${r.id}')">✕</button>
         </div>
       </div>
@@ -2530,7 +2540,7 @@ function renderRecipeCard(method, recipeId) {
   card.innerHTML = `
     <div style="background:var(--espresso);border-radius:var(--radius-sm);padding:14px;margin-top:10px">
       <div style="font-family:'Playfair Display',serif;font-size:15px;color:var(--crema-light);margin-bottom:2px">${escHtml(recipe.name)}</div>
-      <div style="font-family:'DM Mono',monospace;font-size:9px;color:rgba(245,237,227,.45);letter-spacing:1px;margin-bottom:12px">${recipe.dose}g · ${recipe.water}ml · ${recipe.temp}°C · ${escHtml(recipe.ratio)}${recipe.grindHint?' · '+escHtml(recipe.grindHint):''}${recipe.pours?' · '+recipe.pours+' pours':''}${recipe.totalTime?' · '+recipe.totalTime:''}</div>
+      <div style="font-family:'DM Mono',monospace;font-size:11px;color:rgba(245,237,227,.45);letter-spacing:1px;margin-bottom:12px">${recipe.dose}g · ${recipe.water}ml · ${recipe.temp}°C · ${escHtml(recipe.ratio)}${recipe.grindHint?' · '+escHtml(recipe.grindHint):''}${recipe.pours?' · '+recipe.pours+' pours':''}${recipe.totalTime?' · '+recipe.totalTime:''}</div>
       <ol style="padding-left:16px;margin:0">
         ${recipe.steps.map(s => `<li style="font-size:12px;color:rgba(245,237,227,.75);line-height:1.5;margin-bottom:5px">${escHtml(s)}</li>`).join('')}
       </ol>
@@ -2561,7 +2571,7 @@ function removeLabelPhoto() {
   document.getElementById('c-label-input').value = '';
   document.getElementById('c-label-preview-wrap').innerHTML = `
     <div class="label-upload-btn" onclick="document.getElementById('c-label-input').click()">
-      <span style="font-size:28px">📷</span>
+      <span style="line-height:0"><svg class="ico" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M4 8h3l2-3h6l2 3h3a1 1 0 0 1 1 1v9a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V9a1 1 0 0 1 1-1z"/><circle cx="12" cy="13" r="3.5"/></svg></span>
       <span>Tap to take photo or upload</span>
     </div>`;
 }
@@ -2681,7 +2691,7 @@ function resetCoffeeModal() {
   document.getElementById('c-rating-label').textContent='Not rated';
   pendingLabelDataUrl=null;
   document.getElementById('c-label-input').value='';
-  document.getElementById('c-label-preview-wrap').innerHTML='<div class="label-upload-btn" onclick="document.getElementById(\'c-label-input\').click()"><span style="font-size:28px">📷</span><span>Tap to take photo or upload</span></div>';
+  document.getElementById('c-label-preview-wrap').innerHTML='<div class="label-upload-btn" onclick="document.getElementById(\'c-label-input\').click()"><span style="line-height:0"><svg class="ico" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M4 8h3l2-3h6l2 3h3a1 1 0 0 1 1 1v9a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V9a1 1 0 0 1 1-1z"/><circle cx="12" cy="13" r="3.5"/></svg></span><span>Tap to take photo or upload</span></div>';
 }
 
 function openEditCoffee(id) {
@@ -2834,16 +2844,6 @@ function saveRecipe() {
 }
 
 // ==================== DASHBOARD ====================
-function getGreeting() {
-  const h = new Date().getHours();
-  if (h < 5)  return 'burning the midnight oil ☽';
-  if (h < 9)  return 'good morning ☀';
-  if (h < 12) return 'morning brew time ☕';
-  if (h < 14) return 'midday refuel ☕';
-  if (h < 17) return 'afternoon pick-me-up ☕';
-  if (h < 20) return 'evening cup ☕';
-  return 'winding down ☽';
-}
 
 function showAllBrews() {
   showView('tracker');
@@ -2860,22 +2860,22 @@ function renderDashboard() {
   const favEl = document.getElementById('dashboard-fav-grinder');
   if (favEl) favEl.innerHTML = favG
     ? `<div style="display:flex;align-items:center;gap:8px;background:rgba(82,121,111,0.1);border:1px solid rgba(82,121,111,0.3);border-radius:10px;padding:10px 14px;margin-bottom:20px;cursor:pointer;color:var(--text)" onclick="showView('grinders')">
-        <span style="font-size:20px">⭐</span>
-        <div><div style="font-family:'Playfair Display',serif;font-size:14px">${favG.brand} ${favG.model}</div><div style="font-family:'DM Mono',monospace;font-size:9px;color:var(--text-muted);letter-spacing:1px;margin-top:2px">${favG.type==='manual'?'✋ Manual':'⚡ Electric'} · DEFAULT GRINDER</div></div>
+        <span style="line-height:0;color:var(--crema)"><svg class="ico" width="20" height="20" viewBox="0 0 24 24" fill="currentColor" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M12 3.5l2.6 5.4 5.9.8-4.3 4.1 1 5.8L12 16.9 6.8 19.6l1-5.8L3.5 9.7l5.9-.8z"/></svg></span>
+        <div><div style="font-family:'Playfair Display',serif;font-size:14px">${favG.brand} ${favG.model}</div><div style="font-family:'DM Mono',monospace;font-size:11px;color:var(--text-muted);letter-spacing:1px;margin-top:2px">${favG.type==='manual'?'Manual':'Electric'} · DEFAULT GRINDER</div></div>
       </div>`
-    : `<div style="font-family:'DM Mono',monospace;font-size:10px;color:var(--text-muted);margin-bottom:16px;letter-spacing:.5px">No default grinder set — <span style="color:var(--crema);cursor:pointer" onclick="showView('grinders')">Browse grinders →</span></div>`;
+    : `<div style="font-family:'DM Mono',monospace;font-size:11px;color:var(--text-muted);margin-bottom:16px;letter-spacing:.5px">No default grinder set — <span style="color:var(--crema);cursor:pointer" onclick="showView('grinders')">Browse grinders →</span></div>`;
   const el = document.getElementById('recent-brews');
   const recent = state.recipes.slice(0,5);
   const hasMore = state.recipes.length > 5;
   const divEl = el.previousElementSibling;
   if (divEl && divEl.classList.contains('divider')) {
-    divEl.innerHTML = `<span>Recent brews</span>${hasMore?`<button onclick="showAllBrews()" style="background:none;border:none;font-family:'DM Mono',monospace;font-size:9px;color:var(--crema);cursor:pointer;letter-spacing:1px;text-transform:uppercase;margin-left:8px">View all (${state.recipes.length}) →</button>`:''}`;
+    divEl.innerHTML = `<span>Recent brews</span>${hasMore?`<button onclick="showAllBrews()" style="background:none;border:none;font-family:'DM Mono',monospace;font-size:11px;color:var(--crema);cursor:pointer;letter-spacing:1px;text-transform:uppercase;margin-left:8px">View all (${state.recipes.length}) →</button>`:''}`;
   }
 
   renderStatsDashboard();
   renderUpNext();
   renderBackupReminder();
-  el.innerHTML = recent.length ? recent.map(r=>recipeCard(r,false)).join('') : `<div class="empty-state"><div class="empty-icon">🫘</div><div class="empty-title">Nothing brewed yet</div><div class="empty-desc">Tap + to log your first coffee.</div></div>`;
+  el.innerHTML = recent.length ? recent.map(r=>recipeCard(r,false)).join('') : `<div class="empty-state"><div class="empty-icon"><svg class="ico" width="44" height="44" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M12 3c4 0 6 4 6 9s-2 9-6 9-6-4-6-9 2-9 6-9z"/><path d="M12 3c-2 4 2 6 0 9s2 5 0 9"/></svg></div><div class="empty-title">Nothing brewed yet</div><div class="empty-desc">Tap + to log your first coffee.</div></div>`;
 }
 
 // ==================== COFFEES ====================
@@ -2921,7 +2921,7 @@ function renderCoffeesView() {
   const layout = appSettings.coffeeLayout === 'grid' ? 'grid' : 'list';
   el.classList.toggle('grid', layout === 'grid' && state.coffees.length > 0);
   document.querySelectorAll('.layout-toggle button').forEach(b => { const on = b.dataset.layout === layout; b.classList.toggle('active', on); b.setAttribute('aria-pressed', on); });
-  if (!state.coffees.length) { el.innerHTML=`<div class="empty-state"><div class="empty-icon">📦</div><div class="empty-title">No coffees yet</div><div class="empty-desc">Tap + to add your first coffee.</div></div>`; return; }
+  if (!state.coffees.length) { el.innerHTML=`<div class="empty-state"><div class="empty-icon"><svg class="ico" width="44" height="44" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M21 8l-9-5-9 5v8l9 5 9-5V8z"/><path d="M3 8l9 5 9-5"/><path d="M12 13v8"/></svg></div><div class="empty-title">No coffees yet</div><div class="empty-desc">Tap + to add your first coffee.</div></div>`; return; }
   el.innerHTML = libraryOrder().map(c => {
     const rc = state.recipes.filter(r=>r.coffeeId===c.id).length;
     const maslPill = (c.masl ? `<span class="meta-pill">${c.masl}m</span>` : '') + (per100g(c)!=null ? `<span class="meta-pill">£${per100g(c).toFixed(2)}/100g</span>` : '') + (gramsLeft(c)!=null && !c.finishedBag ? `<span class="meta-pill">${Math.round(gramsLeft(c))}g left</span>` : '') + (roastAgeToday(c)!=null && !c.finishedBag ? `<span class="meta-pill">${roastAgeToday(c)}d off roast</span>` : ''); const isGrid = appSettings.coffeeLayout === 'grid';
@@ -2937,7 +2937,7 @@ function renderCoffeesView() {
     const headerImg = c.labelPhoto ? `<img src="${photoUrl(c)}" style="width:52px;height:52px;border-radius:8px;object-fit:cover;flex-shrink:0;border:1px solid rgba(255,255,255,0.15);cursor:zoom-in" alt="Bag label" onclick="event.stopPropagation();openLightboxFor('${c.id}')">` : '';
     const cardRating = c.rating > 0 ? `<div class="coffee-card-rating">${c.rating}/10</div>` : '';
     const finishedStyle = '';
-    const wrapOpen = `<div class="card-wrap" ontouchstart="startLongPress('${c.id}','coffee')" ontouchend="endLongPress()" ontouchcancel="endLongPress()" oncontextmenu="event.stopPropagation();showEditOverlay('coffee-${c.id}');return false"><div class="card-edit-overlay" data-overlay="coffee-${c.id}"><button class="edit-overlay-btn" onclick="event.stopPropagation();openEditCoffee('${c.id}');hideEditOverlay('coffee-${c.id}')">✏ Edit</button><button class="edit-overlay-btn" onclick="event.stopPropagation();showTrendModal('${c.id}');hideEditOverlay('coffee-${c.id}')">📈 Trends</button><button class="edit-overlay-btn" onclick="event.stopPropagation();hideEditOverlay('coffee-${c.id}');toggleFinishedBag('${c.id}')">${c.finishedBag ? '↺ Reopen' : '✓ Finish'}</button><button class="edit-overlay-btn" onclick="event.stopPropagation();confirmDeleteCoffee('${c.id}')">✕ Delete</button><button class="edit-overlay-btn" onclick="event.stopPropagation();hideEditOverlay('coffee-${c.id}')">Cancel</button></div>`;
+    const wrapOpen = `<div class="card-wrap" ontouchstart="startLongPress('${c.id}','coffee')" ontouchend="endLongPress()" ontouchcancel="endLongPress()" oncontextmenu="event.stopPropagation();showEditOverlay('coffee-${c.id}');return false"><div class="card-edit-overlay" data-overlay="coffee-${c.id}"><button class="edit-overlay-btn" onclick="event.stopPropagation();openEditCoffee('${c.id}');hideEditOverlay('coffee-${c.id}')"><svg class="ico" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M4 20h4L19 9l-4-4L4 16v4z"/><path d="M13.5 6.5l4 4"/></svg> Edit</button><button class="edit-overlay-btn" onclick="event.stopPropagation();showTrendModal('${c.id}');hideEditOverlay('coffee-${c.id}')"><svg class="ico" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M3 17l6-6 4 4 8-8"/><path d="M15 7h6v6"/></svg> Trends</button><button class="edit-overlay-btn" onclick="event.stopPropagation();hideEditOverlay('coffee-${c.id}');toggleFinishedBag('${c.id}')">${c.finishedBag ? '↺ Reopen' : '✓ Finish'}</button><button class="edit-overlay-btn" onclick="event.stopPropagation();confirmDeleteCoffee('${c.id}')">✕ Delete</button><button class="edit-overlay-btn" onclick="event.stopPropagation();hideEditOverlay('coffee-${c.id}')">Cancel</button></div>`;
     if (isGrid) return wrapOpen + coffeeTileGrid(c, rc) + `</div>`;
     return wrapOpen + `<div class="coffee-card${c.finishedBag ? ' finished' : ''}" onclick="showCoffeeDetail('${c.id}')" style="${finishedStyle}"><div class="coffee-card-header"><div><div class="coffee-card-name">${escHtml(c.name)}${c.finishedBag?'<span class="finished-badge">FINISHED</span>':''}</div><div class="coffee-card-roaster">${escHtml(c.roaster||'Unknown Roaster')}</div>${cardRating}</div><div style="display:flex;align-items:flex-start;gap:8px">${headerImg}<button class="card-more" aria-label="More options" onclick="event.stopPropagation();showEditOverlay('coffee-${c.id}')">⋯</button></div></div><div class="coffee-card-body">${pills?`<div class="coffee-meta">${pills}</div>`:''}  <div class="card-foot"><div class="recipe-count">${rc} brew${rc!==1?'s':''} logged</div>${c.decaf ? '<span class="decaf-label">Decaf</span>' : ''}</div></div></div>` + `</div>`;
   }).join('');
@@ -3035,7 +3035,7 @@ function showCoffeeDetail(id) {
   const locationStr = [c.roasterCity,c.roasterCountry].filter(Boolean).join(', ');
   const producerStr = [c.producer?'Producer: '+c.producer:'', c.farm?'Farm: '+c.farm:''].filter(Boolean).join(' · ');
   const recs = state.recipes.filter(r=>r.coffeeId===id);
-  const maslPill2 = (c.masl ? `<span class="meta-pill">⛰ ${c.masl} masl</span>` : '') + (priceLabel(c) ? `<span class="meta-pill">${priceLabel(c)}</span>` : ''); const pills = [c.country,c.region,c.varietal,c.process,c.roastLevel].filter(Boolean).map(p=>`<span class="meta-pill">${escHtml(p)}</span>`).join('') + maslPill2;
+  const maslPill2 = (c.masl ? `<span class="meta-pill"><svg class="ico" width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M3 19l6-11 4 7 2-3 6 7H3z"/></svg> ${c.masl} masl</span>` : '') + (priceLabel(c) ? `<span class="meta-pill">${priceLabel(c)}</span>` : ''); const pills = [c.country,c.region,c.varietal,c.process,c.roastLevel].filter(Boolean).map(p=>`<span class="meta-pill">${escHtml(p)}</span>`).join('') + maslPill2;
   document.getElementById('view-coffees').innerHTML = `
     <div style="height:20px"></div>
     <button class="detail-back" onclick="goBackToCoffees()">← Back</button>
@@ -3046,24 +3046,24 @@ function showCoffeeDetail(id) {
           <div style="font-family:'Playfair Display',serif;font-size:24px;color:var(--crema-light)">${escHtml(c.name)}</div>
           <div style="font-family:'DM Mono',monospace;font-size:11px;color:rgba(245,237,227,.75);letter-spacing:1px;margin-bottom:14px">${escHtml(c.roaster||'Unknown Roaster')}</div>
           <div class="coffee-meta">${pills||'<span style="opacity:.5;font-size:12px">No details added</span>'}</div>
-          ${c.roastDate?`<div style="font-family:'DM Mono',monospace;font-size:10px;color:rgba(245,237,227,.7);margin-top:10px">${formatDate(c.roastDate)}</div>`:''}
+          ${c.roastDate?`<div style="font-family:'DM Mono',monospace;font-size:11px;color:rgba(245,237,227,.7);margin-top:10px">${formatDate(c.roastDate)}</div>`:''}
           ${c.rating>0?`<div class="detail-rating">Rating <b>${c.rating}/10</b></div>`:''}
-          ${locationStr?`<div style="font-family:'DM Mono',monospace;font-size:10px;color:rgba(245,237,227,.6);margin-top:8px">📍 ${escHtml(locationStr)}</div>`:''}
-          ${producerStr?`<div style="font-family:'DM Mono',monospace;font-size:10px;color:rgba(245,237,227,.6);margin-top:4px">${escHtml(producerStr)}</div>`:''}
+          ${locationStr?`<div style="font-family:'DM Mono',monospace;font-size:11px;color:rgba(245,237,227,.6);margin-top:8px"><svg class="ico" width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M12 21s-6-5.5-6-10a6 6 0 0 1 12 0c0 4.5-6 10-6 10z"/><circle cx="12" cy="11" r="2"/></svg> ${escHtml(locationStr)}</div>`:''}
+          ${producerStr?`<div style="font-family:'DM Mono',monospace;font-size:11px;color:rgba(245,237,227,.6);margin-top:4px">${escHtml(producerStr)}</div>`:''}
           ${c.notes?`<div style="font-size:13px;color:rgba(245,237,227,.9);margin-top:12px;font-style:italic">"${escHtml(c.notes)}"</div>`:''}
         </div>
       </div>
     </div>
     <div style="display:flex;gap:8px;margin-bottom:20px">
-      <button class="btn-secondary" style="flex:1" onclick="openEditCoffee('${c.id}')">✏ Edit</button>
-      <button class="btn-secondary" style="flex:1" onclick="showTrendModal('${c.id}')">📈 Trends</button>
+      <button class="btn-secondary" style="flex:1" onclick="openEditCoffee('${c.id}')"><svg class="ico" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M4 20h4L19 9l-4-4L4 16v4z"/><path d="M13.5 6.5l4 4"/></svg> Edit</button>
+      <button class="btn-secondary" style="flex:1" onclick="showTrendModal('${c.id}')"><svg class="ico" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M3 17l6-6 4 4 8-8"/><path d="M15 7h6v6"/></svg> Trends</button>
       <button class="btn-secondary" style="flex:1" onclick="toggleFinishedBag('${c.id}')">${c.finishedBag?'↺ Reopen':'Finish bag'}</button>
     </div>
     ${c.finishedBag ? finishSummaryHtml(c) : ''}
     ${bagPanelHtml(c)}${bestBrewHtml(c)}
     <div class="section-title" style="margin-bottom:4px">Brew Log</div>
     <div class="section-subtitle">${recs.length} attempt${recs.length!==1?'s':''}</div>
-    ${recs.length?pagedBrewCards(recs, 'coffee-'+c.id):`<div class="empty-state"><div class="empty-icon">📋</div><div class="empty-title">No brews yet</div></div>`}
+    ${recs.length?pagedBrewCards(recs, 'coffee-'+c.id):`<div class="empty-state"><div class="empty-icon"><svg class="ico" width="44" height="44" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M9 5H6a1 1 0 0 0-1 1v14a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1V6a1 1 0 0 0-1-1h-3"/><path d="M9 3.5h6v3H9z"/><path d="M9 12h6M9 16h6"/></svg></div><div class="empty-title">No brews yet</div></div>`}
     <button type="button" class="btn-delete-coffee" onclick="confirmDeleteCoffee('${c.id}')">Delete coffee</button>
     <div style="height:80px"></div>`;
   renderTrendCharts(id);
@@ -3093,23 +3093,23 @@ function recipeCard(r, showDel=false) {
   const grinder = r.grinderId ? GRINDERS.find(g=>g.id===r.grinderId) : null;
   const date = fmtDate(r.createdAt);
   const exTag = r.extraction ? `<span class="extraction-tag tag-${r.extraction}">${r.extraction==='good'?'✓ Good':r.extraction}</span>` : '';
-  const stars = r.rating>0 ? `<span style="display:inline-flex;align-items:center;gap:2px;color:var(--crema)"><svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 14 14" width="11" height="11"><g><path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" d="M2 4h8.5v5c0 0.53043 -0.2107 1.0391 -0.58579 1.4142C9.53914 10.7893 9.03043 11 8.5 11h-5c-0.53043 0 -1.03914 -0.2107 -1.41421 -0.5858C1.71071 10.0391 1.5 9.53043 1.5 9V4.5c0 -0.13261 0.05268 -0.25979 0.14645 -0.35355C1.74021 4.05268 1.86739 4 2 4Z" stroke-width="1"></path><path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" d="M0.5 13.5h13" stroke-width="1"></path><path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" d="M10.5 4h1c0.5304 0 1.0391 0.21071 1.4142 0.58579 0.3751 0.37507 0.5858 0.88378 0.5858 1.41421s-0.2107 1.03914 -0.5858 1.41421C12.5391 7.78929 12.0304 8 11.5 8h-1" stroke-width="1"></path><path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" d="M3 0.5v1" stroke-width="1"></path><path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" d="M8 0.5v1" stroke-width="1"></path><path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" d="M5.5 0.5v1" stroke-width="1"></path></g></svg><span style="font-size:10px;margin-left:2px">${r.rating}/10</span></span>` : '';
+  const stars = r.rating>0 ? `<span style="display:inline-flex;align-items:center;gap:2px;color:var(--crema)"><svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 14 14" width="11" height="11"><g><path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" d="M2 4h8.5v5c0 0.53043 -0.2107 1.0391 -0.58579 1.4142C9.53914 10.7893 9.03043 11 8.5 11h-5c-0.53043 0 -1.03914 -0.2107 -1.41421 -0.5858C1.71071 10.0391 1.5 9.53043 1.5 9V4.5c0 -0.13261 0.05268 -0.25979 0.14645 -0.35355C1.74021 4.05268 1.86739 4 2 4Z" stroke-width="1"></path><path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" d="M0.5 13.5h13" stroke-width="1"></path><path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" d="M10.5 4h1c0.5304 0 1.0391 0.21071 1.4142 0.58579 0.3751 0.37507 0.5858 0.88378 0.5858 1.41421s-0.2107 1.03914 -0.5858 1.41421C12.5391 7.78929 12.0304 8 11.5 8h-1" stroke-width="1"></path><path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" d="M3 0.5v1" stroke-width="1"></path><path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" d="M8 0.5v1" stroke-width="1"></path><path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" d="M5.5 0.5v1" stroke-width="1"></path></g></svg><span style="font-size:11px;margin-left:2px">${r.rating}/10</span></span>` : '';
   
   const isEsp = isEspressoMethod(r.method||'Espresso');
   const ratio = ratioStr(r); const dayOff = daysOffRoast(r, coffee); const cupCost = costPerCup(r, coffee);
   const yieldLabel = isEsp ? 'Yield' : 'Water';
   const yieldUnit = isEsp ? 'g' : 'ml';
-  const grinderBadge = grinder ? `<span style="display:inline-block;margin-top:4px;font-family:'DM Mono',monospace;font-size:9px;background:rgba(82,121,111,0.1);border:1px solid rgba(82,121,111,0.25);color:var(--crema);border-radius:20px;padding:2px 8px;letter-spacing:.5px">${grinder.type==='manual'?'✋':'⚡'} ${grinder.brand} ${grinder.model}</span>` : '';
+  const grinderBadge = grinder ? `<span style="display:inline-block;margin-top:4px;font-family:'DM Mono',monospace;font-size:11px;background:rgba(82,121,111,0.1);border:1px solid rgba(82,121,111,0.25);color:var(--crema);border-radius:20px;padding:2px 8px;letter-spacing:.5px">${grinder.brand} ${grinder.model}</span>` : '';
   const recipeObj = r.recipeId ? [...Object.values(RECIPES).flat(), ...(state.customRecipes||[])].find(x=>x.id===r.recipeId) : null;
-  const recipeBadge = recipeObj ? `<span style="display:inline-block;margin-top:4px;margin-left:4px;font-family:'DM Mono',monospace;font-size:9px;background:rgba(18,60,39,0.08);border:1px solid rgba(18,60,39,0.15);color:var(--espresso);border-radius:20px;padding:2px 8px;letter-spacing:.5px">📋 ${escHtml(recipeObj.name.split('—')[0].trim())}</span>` : '';
+  const recipeBadge = recipeObj ? `<span style="display:inline-block;margin-top:4px;margin-left:4px;font-family:'DM Mono',monospace;font-size:11px;background:rgba(18,60,39,0.08);border:1px solid rgba(18,60,39,0.15);color:var(--espresso);border-radius:20px;padding:2px 8px;letter-spacing:.5px"><svg class="ico" width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M9 5H6a1 1 0 0 0-1 1v14a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1V6a1 1 0 0 0-1-1h-3"/><path d="M9 3.5h6v3H9z"/><path d="M9 12h6M9 16h6"/></svg> ${escHtml(recipeObj.name.split('—')[0].trim())}</span>` : '';
   const thumbHtml = coffee?.labelPhoto ? `<img src="${photoUrl(coffee)}" class="brew-label-thumb" alt="Bag label" loading="lazy" onclick="openLightboxFor('${coffee.id}')" style="cursor:zoom-in">` : '';
-  return `<div class="card-wrap" ontouchstart="startLongPress('${r.id}','brew')" ontouchend="endLongPress()" ontouchcancel="endLongPress()" oncontextmenu="event.stopPropagation();showEditOverlay('brew-${r.id}');return false"><div class="card-edit-overlay" data-overlay="brew-${r.id}"><button class="edit-overlay-btn" onclick="event.stopPropagation();editBrew('${r.id}');hideEditOverlay('brew-${r.id}')">✏ Edit</button><button class="edit-overlay-btn" onclick="event.stopPropagation();hideEditOverlay('brew-${r.id}');openPlanNext('${r.id}')">↻ Plan next</button><button class="edit-overlay-btn" onclick="event.stopPropagation();confirmDeleteBrew('${r.id}')">✕ Delete</button><button class="edit-overlay-btn" onclick="event.stopPropagation();hideEditOverlay('brew-${r.id}')">Cancel</button></div><div class="recipe-entry">
+  return `<div class="card-wrap" ontouchstart="startLongPress('${r.id}','brew')" ontouchend="endLongPress()" ontouchcancel="endLongPress()" oncontextmenu="event.stopPropagation();showEditOverlay('brew-${r.id}');return false"><div class="card-edit-overlay" data-overlay="brew-${r.id}"><button class="edit-overlay-btn" onclick="event.stopPropagation();editBrew('${r.id}');hideEditOverlay('brew-${r.id}')"><svg class="ico" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M4 20h4L19 9l-4-4L4 16v4z"/><path d="M13.5 6.5l4 4"/></svg> Edit</button><button class="edit-overlay-btn" onclick="event.stopPropagation();hideEditOverlay('brew-${r.id}');openPlanNext('${r.id}')">↻ Plan next</button><button class="edit-overlay-btn" onclick="event.stopPropagation();confirmDeleteBrew('${r.id}')">✕ Delete</button><button class="edit-overlay-btn" onclick="event.stopPropagation();hideEditOverlay('brew-${r.id}')">Cancel</button></div><div class="recipe-entry">
     <div class="recipe-entry-header">
       <div style="display:flex;gap:10px;align-items:flex-start;flex:1">
         ${thumbHtml}
         <div style="flex:1;min-width:0">
           <div style="font-family:'Playfair Display',serif;font-size:14px">${escHtml(coffee?.name||'Unknown Coffee')}</div>
-          <div style="font-family:'DM Mono',monospace;font-size:10px;color:var(--text-muted)">${escHtml(coffee?.roaster||'')}${coffee?.roaster&&r.method?' · ':''}${escHtml(r.method||'')}</div>
+          <div style="font-family:'DM Mono',monospace;font-size:11px;color:var(--text-muted)">${escHtml(coffee?.roaster||'')}${coffee?.roaster&&r.method?' · ':''}${escHtml(r.method||'')}</div>
           ${grinderBadge}
         </div>
       </div>
@@ -3227,20 +3227,20 @@ function renderStackedBar(items, total, opts = {}) {
     if (!hasMembers) return `
     <div style="display:flex;align-items:center;gap:6px;margin-bottom:3px">${swatch}
       <span class="stack-legend-label" style="font-size:11px;flex:1">${escHtml(label)}</span>
-      <span style="font-size:10px;color:var(--text-muted)">${count}</span>
+      <span style="font-size:11px;color:var(--text-muted)">${count}</span>
     </div>`;
-    const list = members.slice().sort((a,b)=>b[1]-a[1]).map(([m,n]) => `<div style="display:flex;justify-content:space-between;font-size:10px;color:var(--text-muted);padding:1px 0 1px 16px"><span>${escHtml(m)}</span><span>${n}</span></div>`).join('');
+    const list = members.slice().sort((a,b)=>b[1]-a[1]).map(([m,n]) => `<div style="display:flex;justify-content:space-between;font-size:11px;color:var(--text-muted);padding:1px 0 1px 16px"><span>${escHtml(m)}</span><span>${n}</span></div>`).join('');
     return `
     <details class="stack-group" style="margin-bottom:3px">
       <summary style="display:flex;align-items:center;gap:6px;cursor:pointer;list-style:none">${swatch}
         <span class="stack-legend-label" style="font-size:11px;flex:1">${escHtml(label)} <span style="color:var(--text-muted)">· ${members.length} ${members.length === 1 ? unit[0] : unit[1]} ▾</span></span>
-        <span style="font-size:10px;color:var(--text-muted)">${count}</span>
+        <span style="font-size:11px;color:var(--text-muted)">${count}</span>
       </summary>
       <div style="margin:2px 0 6px">${list}</div>
     </details>`;
   }).join('');
   return `
-    ${opts.note ? `<div style="font-size:10px;color:var(--text-muted);margin:-6px 0 8px">${opts.note}</div>` : ''}
+    ${opts.note ? `<div style="font-size:11px;color:var(--text-muted);margin:-6px 0 8px">${opts.note}</div>` : ''}
     <div class="chart-sweep" style="height:12px;border-radius:5px;overflow:hidden;display:flex;gap:2px;margin-bottom:10px">${segments}</div>
     <div>${legend}</div>`;
 }
@@ -3448,7 +3448,7 @@ function renderSuggestions(coffeeId) {
         ${s.avgTemp  ? '<span class="meta-pill">Temp ~'+s.avgTemp+'°C</span>'  : ''}
         <span class="meta-pill">Based on ${s.count} brew${s.count!==1?'s':''}</span>
       </div>
-      <div style="font-size:10px;color:var(--text-muted)">Matched by ${escHtml(s.reasons.join(', '))}</div>
+      <div style="font-size:11px;color:var(--text-muted)">Matched by ${escHtml(s.reasons.join(', '))}</div>
     </div>`).join('');
 }
 
@@ -3499,7 +3499,7 @@ function renderTracker() {
   if (countEl) countEl.textContent = `${brews.length} brew${brews.length!==1?'s':''} ${brews.length !== state.recipes.length ? '(filtered)' : ''}`;
 
   if (!brews.length) {
-    el.innerHTML = '<div class="empty-state"><div class="empty-icon">📋</div><div class="empty-title">No brews match</div><div class="empty-desc">Try adjusting your filters.</div></div>';
+    el.innerHTML = '<div class="empty-state"><div class="empty-icon"><svg class="ico" width="44" height="44" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M9 5H6a1 1 0 0 0-1 1v14a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1V6a1 1 0 0 0-1-1h-3"/><path d="M9 3.5h6v3H9z"/><path d="M9 12h6M9 16h6"/></svg></div><div class="empty-title">No brews match</div><div class="empty-desc">Try adjusting your filters.</div></div>';
     return;
   }
   el.innerHTML = pagedBrewCards(brews, 'tracker');
@@ -3523,7 +3523,7 @@ function renderGrinders() {
     const matchSearch = !search || (g.brand+' '+g.model).toLowerCase().includes(search);
     return matchType && matchSearch;
   });
-  if (!filtered.length) { el.innerHTML=`<div class="empty-state"><div class="empty-icon">🔍</div><div class="empty-title">No grinders found</div></div>`; return; }
+  if (!filtered.length) { el.innerHTML=`<div class="empty-state"><div class="empty-icon"><svg class="ico" width="44" height="44" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></svg></div><div class="empty-title">No grinders found</div></div>`; return; }
   // Favourite grinder always first
   const favFirst = [...filtered].sort((a,b) => {
     if (a.id === state.favouriteGrinderId) return -1;
@@ -3535,15 +3535,15 @@ function renderGrinders() {
     const isFav = state.favouriteGrinderId === g.id;
     return `<div class="grinder-card ${inCmp?'in-compare':''}" style="${isFav?'border-color:var(--crema);background:rgba(200,135,58,0.04);':''}" onclick="showGrinderDetail('${g.id}')">
       <div style="flex:1">
-        <div class="grinder-brand">${g.brand}${isFav?' <span style="font-size:9px;color:var(--crema);font-family:DM Mono,monospace;letter-spacing:1px;text-transform:uppercase">★ Default</span>':''}</div>
+        <div class="grinder-brand">${g.brand}${isFav?' <span style="font-size:11px;color:var(--crema);font-family:DM Mono,monospace;letter-spacing:1px;text-transform:uppercase"><svg class="ico" width="10" height="10" viewBox="0 0 24 24" fill="currentColor" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M12 3.5l2.6 5.4 5.9.8-4.3 4.1 1 5.8L12 16.9 6.8 19.6l1-5.8L3.5 9.7l5.9-.8z"/></svg> Default</span>':''}</div>
         <div class="grinder-model">${g.model}</div>
-        <div style="font-family:'DM Mono',monospace;font-size:9px;color:var(--text-muted);margin-top:4px">${g.min}–${g.max}µm · ${grinderRangeLabel(g)}</div>
+        <div style="font-family:'DM Mono',monospace;font-size:11px;color:var(--text-muted);margin-top:4px">${g.min}–${g.max}µm · ${grinderRangeLabel(g)}</div>
       </div>
       <div style="display:flex;flex-direction:column;align-items:flex-end;gap:6px">
-        <span class="grinder-type-badge badge-${g.type}">${g.type==='manual'?'✋ Manual':'⚡ Electric'}</span>
+        <span class="grinder-type-badge badge-${g.type}">${g.type==='manual'?'Manual':'Electric'}</span>
         <div style="display:flex;gap:2px">
-          <button class="compare-toggle-btn" onclick="event.stopPropagation();toggleFavourite('${g.id}')" title="${isFav?'Remove favourite':'Set as favourite'}" style="font-size:18px">${isFav?'⭐':'☆'}</button>
-          <button class="compare-toggle-btn" onclick="event.stopPropagation();toggleCompare('${g.id}')" title="Add to compare">${inCmp?'✅':'⊕'}</button>
+          <button class="compare-toggle-btn" onclick="event.stopPropagation();toggleFavourite('${g.id}')" aria-label="${isFav?'Remove as default grinder':'Set as default grinder'}" aria-pressed="${isFav}" title="${isFav?'Remove favourite':'Set as favourite'}" style="line-height:0;color:var(--crema)">${isFav?`<svg class="ico" width="18" height="18" viewBox="0 0 24 24" fill="currentColor" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M12 3.5l2.6 5.4 5.9.8-4.3 4.1 1 5.8L12 16.9 6.8 19.6l1-5.8L3.5 9.7l5.9-.8z"/></svg>`:`<svg class="ico" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M12 3.5l2.6 5.4 5.9.8-4.3 4.1 1 5.8L12 16.9 6.8 19.6l1-5.8L3.5 9.7l5.9-.8z"/></svg>`}</button>
+          <button class="compare-toggle-btn" onclick="event.stopPropagation();toggleCompare('${g.id}')" aria-label="${inCmp?'Remove from compare':'Add to compare'}" aria-pressed="${inCmp}" title="Add to compare" style="line-height:0">${inCmp?`<svg class="ico" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><circle cx="12" cy="12" r="9"/><path d="M8 12.5l2.5 2.5L16 9.5"/></svg>`:`<svg class="ico" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><circle cx="12" cy="12" r="9"/><path d="M12 8v8M8 12h8"/></svg>`}</button>
         </div>
       </div>
     </div>`;
@@ -3604,7 +3604,7 @@ function showGrinderDetail(gid) {
     const left=pct(m.min), width=pct(m.max)-left;
     const compat = g.min<=m.max && g.max>=m.min;
     return `<div style="position:absolute;top:${i*(rowHeight+3)}px;left:${left}%;width:${width}%;height:${rowHeight}px;background:${m.color};border-radius:3px;opacity:${compat?0.85:0.15};display:flex;align-items:center;padding:0 4px">
-      <span style="font-family:'DM Mono',monospace;font-size:7px;color:white;white-space:nowrap;overflow:hidden">${m.name}</span></div>`;
+      <span style="font-family:'DM Mono',monospace;font-size:11px;color:white;white-space:nowrap;overflow:hidden">${m.name}</span></div>`;
   }).join('');
 
   // Grinder range overlay
@@ -3614,8 +3614,8 @@ function showGrinderDetail(gid) {
     <div class="grinder-detail-card">
       <div style="font-family:'Playfair Display',serif;font-size:22px;color:var(--crema-light)">${g.model}</div>
       <div style="display:flex;align-items:center;gap:8px;margin-bottom:14px">
-        <span style="font-family:'DM Mono',monospace;font-size:11px;color:rgba(245,237,227,.5);letter-spacing:1px">${g.brand} · ${g.type==='manual'?'✋ Manual':'⚡ Electric'}</span>
-        ${isFav?'<span style="font-family:\'DM Mono\',monospace;font-size:9px;background:rgba(200,135,58,0.25);color:var(--crema-light);border-radius:20px;padding:2px 8px;letter-spacing:1px">★ DEFAULT GRINDER</span>':''}
+        <span style="font-family:'DM Mono',monospace;font-size:11px;color:rgba(245,237,227,.5);letter-spacing:1px">${g.brand} · ${g.type==='manual'?'Manual':'Electric'}</span>
+        ${isFav?'<span style="font-family:\'DM Mono\',monospace;font-size:11px;background:rgba(200,135,58,0.25);color:var(--crema-light);border-radius:20px;padding:2px 8px;letter-spacing:1px"><svg class="ico" width="10" height="10" viewBox="0 0 24 24" fill="currentColor" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M12 3.5l2.6 5.4 5.9.8-4.3 4.1 1 5.8L12 16.9 6.8 19.6l1-5.8L3.5 9.7l5.9-.8z"/></svg> DEFAULT GRINDER</span>':''}
       </div>
       <div class="grinder-specs-grid">
         <div class="grinder-spec-block"><div class="grinder-spec-value">${g.clickMin!==undefined?g.clickMin+'–'+g.clickMax:g.settings}</div><div class="grinder-spec-label">${g.stepless?(g.clickMin!==undefined?'Dial · stepless':'Stepless'):(g.clickMin!==undefined?'Click Range':'Settings')}</div></div>
@@ -3631,17 +3631,17 @@ function showGrinderDetail(gid) {
       <input type="number" step="any" inputmode="decimal" class="form-input" id="conv-setting" placeholder="Enter a setting, e.g. ${micronsToSetting(g, 560) ?? ''}" oninput="updateGrinderConverter('${g.id}')">
       <div id="conv-out" class="brew-live" style="margin:8px 0 0"></div>
       ${methodSettingsGuide(g)}
-      <div style="font-size:10px;color:var(--text-muted);margin-top:8px">Approximate — based on published ranges; individual grinders vary.</div>
+      <div style="font-size:11px;color:var(--text-muted);margin-top:8px">Approximate — based on published ranges; individual grinders vary.</div>
     </div>
 
     <div style="margin-bottom:6px;font-family:'Playfair Display',serif;font-size:16px">Compatible Brew Methods</div>
     <div style="display:flex;flex-wrap:wrap;margin-bottom:20px">
-      ${covered.map(m=>`<span style="display:inline-flex;align-items:center;gap:4px;padding:4px 10px;border-radius:20px;font-family:'DM Mono',monospace;font-size:9px;letter-spacing:1px;text-transform:uppercase;margin:3px;background:${m.color}18;border:1px solid ${m.color}40;color:${m.color}">${m.name}</span>`).join('')}
+      ${covered.map(m=>`<span style="display:inline-flex;align-items:center;gap:4px;padding:4px 10px;border-radius:20px;font-family:'DM Mono',monospace;font-size:11px;letter-spacing:1px;text-transform:uppercase;margin:3px;background:${m.color}18;border:1px solid ${m.color}40;color:${m.color}">${m.name}</span>`).join('')}
       ${covered.length===0?'<span style="font-size:13px;color:var(--text-muted)">Highly specialised grinder</span>':''}
     </div>
 
     <div style="margin-bottom:8px;font-family:'Playfair Display',serif;font-size:16px">Grind Range vs Brew Methods</div>
-    <div style="font-family:'DM Mono',monospace;font-size:10px;color:var(--text-muted);margin-bottom:12px">Highlighted = compatible. Amber overlay = this grinder's range.</div>
+    <div style="font-family:'DM Mono',monospace;font-size:11px;color:var(--text-muted);margin-bottom:12px">Highlighted = compatible. Amber overlay = this grinder's range.</div>
     <div style="background:white;border-radius:var(--radius);padding:16px;border:1px solid var(--border);margin-bottom:20px">
       <div style="position:relative;height:${chartH}px;margin-bottom:8px">
         ${methodRows}
@@ -3653,12 +3653,12 @@ function showGrinderDetail(gid) {
       </div>
       <div style="display:flex;align-items:center;gap:6px;margin-top:8px">
         <div style="width:16px;height:10px;background:rgba(200,135,58,0.22);border:1.5px solid var(--crema);border-radius:2px"></div>
-        <span style="font-family:'DM Mono',monospace;font-size:9px;color:var(--text-muted)">This grinder's range</span>
+        <span style="font-family:'DM Mono',monospace;font-size:11px;color:var(--text-muted)">This grinder's range</span>
       </div>
     </div>
 
-    <button class="btn-primary" style="background:${isFav?'#8b1a1a':'var(--espresso)'}" onclick="toggleFavourite('${g.id}');showGrinderDetail('${g.id}');showToast('${isFav?'Removed as default':'Set as default grinder ⭐'}')">
-      ${isFav?'✕ Remove as Default Grinder':'⭐ Set as Default Grinder'}
+    <button class="btn-primary" style="background:${isFav?'#8b1a1a':'var(--espresso)'}" onclick="toggleFavourite('${g.id}');showGrinderDetail('${g.id}');showToast('${isFav?'Removed as default':'Set as default grinder'}')">
+      ${isFav?'✕ Remove as Default Grinder':'Set as Default Grinder'}
     </button>
     <div style="height:10px"></div>
     <button class="btn-primary" style="background:${inCmp?'#8b1a1a':'var(--crema)'};color:${inCmp?'white':'var(--espresso)'}" onclick="toggleCompare('${g.id}');renderGrinders();closeModal('modal-grinder-detail');showToast('${inCmp?'Removed from':'Added to'} compare')">
@@ -3674,7 +3674,7 @@ function showGrinderDetail(gid) {
 function renderCompare(containerId='view-compare') {
   const el = document.getElementById('compare-content');
   if (!state.compareIds.length) {
-    el.innerHTML=`<div class="empty-state"><div class="empty-icon">⚖️</div><div class="empty-title">No grinders selected</div><div class="empty-desc">Go to Grinders and tap ⊕ to add up to 5 grinders to compare.</div></div>`;
+    el.innerHTML=`<div class="empty-state"><div class="empty-icon"><svg class="ico" width="44" height="44" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M12 4v16M7 20h10M5 7h14"/><path d="M5 7l-3 7a3 3 0 0 0 6 0L5 7zM19 7l-3 7a3 3 0 0 0 6 0l-3-7z"/></svg></div><div class="empty-title">No grinders selected</div><div class="empty-desc">Go to Grinders and tap ⊕ to add up to 5 grinders to compare.</div></div>`;
     return;
   }
   const grinders = state.compareIds.map(id=>GRINDERS.find(g=>g.id===id)).filter(Boolean);
@@ -3701,7 +3701,7 @@ function renderCompare(containerId='view-compare') {
     return `<div style="display:flex;align-items:center;justify-content:space-between;padding:10px 14px;border-bottom:1px solid var(--border)">
       <div>
         <div style="font-family:'DM Mono',monospace;font-size:11px;letter-spacing:.5px">${m.name}</div>
-        <div style="font-family:'DM Mono',monospace;font-size:9px;color:var(--text-muted)">${m.min}–${m.max}µm</div>
+        <div style="font-family:'DM Mono',monospace;font-size:11px;color:var(--text-muted)">${m.min}–${m.max}µm</div>
       </div>
       <div style="display:flex;align-items:center">${dots}</div>
     </div>`;
@@ -3713,16 +3713,16 @@ function renderCompare(containerId='view-compare') {
       <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
         <div>
           <div style="font-family:'Playfair Display',serif;font-size:15px">${g.model}</div>
-          <div style="font-family:'DM Mono',monospace;font-size:9px;color:var(--text-muted);letter-spacing:.5px">${g.brand}</div>
+          <div style="font-family:'DM Mono',monospace;font-size:11px;color:var(--text-muted);letter-spacing:.5px">${g.brand}</div>
         </div>
-        <span class="grinder-type-badge badge-${g.type}">${g.type==='manual'?'✋ Manual':'⚡ Electric'}</span>
+        <span class="grinder-type-badge badge-${g.type}">${g.type==='manual'?'Manual':'Electric'}</span>
       </div>
       <div style="display:flex;gap:8px;margin-bottom:8px">
         <div class="param-block" style="flex:1"><div class="param-value" style="font-size:16px">${g.settings}</div><div class="param-label">Settings</div></div>
         <div class="param-block" style="flex:2"><div class="param-value" style="font-size:12px">${g.min}–${g.max}µm</div><div class="param-label">Grind Range</div></div>
       </div>
       ${g.notes?`<div style="font-size:11px;color:var(--text-muted);font-style:italic;line-height:1.5">${g.notes}</div>`:''}
-      <button style="margin-top:8px;background:none;border:1px solid rgba(139,26,26,0.2);color:var(--red);border-radius:8px;padding:4px 12px;font-family:'DM Mono',monospace;font-size:9px;letter-spacing:1px;cursor:pointer" onclick="toggleCompare('${g.id}');renderCompare()">✕ Remove</button>
+      <button style="margin-top:8px;background:none;border:1px solid rgba(139,26,26,0.2);color:var(--red);border-radius:8px;padding:4px 12px;font-family:'DM Mono',monospace;font-size:11px;letter-spacing:1px;cursor:pointer" onclick="toggleCompare('${g.id}');renderCompare()">✕ Remove</button>
     </div>`).join('');
 
   el.innerHTML = `
@@ -3734,18 +3734,18 @@ function renderCompare(containerId='view-compare') {
         <span class="grind-axis-label">750</span><span class="grind-axis-label">1125</span><span class="grind-axis-label">1500µm</span>
       </div>
       <div style="margin-top:12px">
-        ${grinders.map((g,i)=>`<div style="display:flex;align-items:center;gap:6px;margin-bottom:3px"><span style="display:inline-block;width:12px;height:8px;border-radius:2px;background:${COMPARE_COLORS[i]}"></span><span style="font-family:'DM Mono',monospace;font-size:9px;color:var(--text-muted)">${g.brand} ${g.model}</span></div>`).join('')}
+        ${grinders.map((g,i)=>`<div style="display:flex;align-items:center;gap:6px;margin-bottom:3px"><span style="display:inline-block;width:12px;height:8px;border-radius:2px;background:${COMPARE_COLORS[i]}"></span><span style="font-family:'DM Mono',monospace;font-size:11px;color:var(--text-muted)">${g.brand} ${g.model}</span></div>`).join('')}
       </div>
     </div>
 
     <div class="card" style="padding:0;overflow:hidden">
       <div style="padding:14px 16px 12px;background:var(--espresso)">
         <div style="font-family:'Playfair Display',serif;font-size:16px;color:var(--crema-light)">Brew Compatibility Matrix</div>
-        <div style="font-family:'DM Mono',monospace;font-size:9px;color:rgba(245,237,227,.4);letter-spacing:1px;margin-top:4px;text-transform:uppercase">Filled dot = grinder can reach this method</div>
+        <div style="font-family:'DM Mono',monospace;font-size:11px;color:rgba(245,237,227,.4);letter-spacing:1px;margin-top:4px;text-transform:uppercase">Filled dot = grinder can reach this method</div>
       </div>
       <div style="background:white;padding:6px 0">
         <div style="display:flex;padding:8px 14px 6px">
-          ${grinders.map((g,i)=>`<div style="display:flex;align-items:center;gap:4px;margin-right:12px"><span style="display:inline-block;width:10px;height:10px;border-radius:50%;background:${COMPARE_COLORS[i]}"></span><span style="font-family:'DM Mono',monospace;font-size:9px;color:var(--text-muted)">${g.model}</span></div>`).join('')}
+          ${grinders.map((g,i)=>`<div style="display:flex;align-items:center;gap:4px;margin-right:12px"><span style="display:inline-block;width:10px;height:10px;border-radius:50%;background:${COMPARE_COLORS[i]}"></span><span style="font-family:'DM Mono',monospace;font-size:11px;color:var(--text-muted)">${g.model}</span></div>`).join('')}
         </div>
         ${matrixHTML}
       </div>
@@ -4169,7 +4169,7 @@ function bestBrewHtml(cf) {
   const parts = [b.grind ? 'Grind ' + b.grind : '', b.dose ? b.dose + 'g' : '', ratioStr(b), b.temp ? b.temp + '°C' : '', b.time ? formatBrewTime(b.time, b.method) : ''].filter(Boolean);
   return `<div class="card" style="padding:14px 16px;border:1.5px solid var(--crema)">
     <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px">
-      <span style="font-size:10px;letter-spacing:1.5px;text-transform:uppercase;color:var(--text-muted)">★ Best brew so far</span>
+      <span style="font-size:11px;letter-spacing:1.5px;text-transform:uppercase;color:var(--text-muted)"><svg class="ico" width="10" height="10" viewBox="0 0 24 24" fill="currentColor" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M12 3.5l2.6 5.4 5.9.8-4.3 4.1 1 5.8L12 16.9 6.8 19.6l1-5.8L3.5 9.7l5.9-.8z"/></svg> Best brew so far</span>
       <span style="font-size:12px;color:var(--text);font-weight:600">${b.rating}/10</span>
     </div>
     <div style="font-size:14px;color:var(--text);font-weight:600;margin-bottom:2px">${escHtml(b.method)}</div>
@@ -4526,7 +4526,7 @@ function renderBrewSuggestion() {
   const parts = [grindText, temp && method !== 'Cold Brew' ? `<b>${temp}°C</b>` : ''].filter(Boolean);
   el.innerHTML = `<div class="suggest-card">
     <div style="display:flex;align-items:center;gap:8px;margin-bottom:6px">
-      <span class="suggest-label">💡 ${label}</span>
+      <span class="suggest-label"><svg class="ico" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M9 18h6M10 21h4"/><path d="M12 3a6 6 0 0 0-4 10.5c.7.7 1 1.5 1 2.5h6c0-1 .3-1.8 1-2.5A6 6 0 0 0 12 3z"/></svg> ${label}</span>
       <button type="button" class="suggest-apply" onclick="applyBrewSuggestion()">Apply</button>
     </div>
     <div class="suggest-main">${parts.join(' · ')}${!rec && ratioText ? ` · <b>${ratioText}</b>` : ''}</div>
@@ -4577,7 +4577,7 @@ function methodSettingsGuide(g) {
     const a = micronsToSetting(g, Math.max(m.min, g.min)), b = micronsToSetting(g, Math.min(m.max, g.max));
     return `<div style="display:flex;justify-content:space-between;padding:4px 0;border-bottom:1px solid var(--border)"><span>${m.name}</span><b>${a === b ? a : a + '–' + b}</b></div>`;
   });
-  return rows.length ? `<div style="font-size:12px;color:var(--text);margin-top:12px"><div style="font-size:10px;letter-spacing:1px;text-transform:uppercase;color:var(--text-muted);margin-bottom:4px">Where to start on this grinder</div>${rows.join('')}</div>` : '';
+  return rows.length ? `<div style="font-size:12px;color:var(--text);margin-top:12px"><div style="font-size:11px;letter-spacing:1px;text-transform:uppercase;color:var(--text-muted);margin-bottom:4px">Where to start on this grinder</div>${rows.join('')}</div>` : '';
 }
 
 
@@ -4608,7 +4608,7 @@ function planStepHint(d) {
   const g = d.from.grinderId ? GRINDERS.find(x => x.id === d.from.grinderId) : null;
   const sc = grinderScale(g); if (!sc || d.grindBase === null) return '';
   const um = Math.round(d.grindStepSize * sc.per);
-  return `<div style="font-size:10px;color:var(--text-muted);margin-top:2px">${sc.stepless ? 'Stepless' : 'Stepped'} · slider moves in ${d.grindStepSize}${sc.stepless ? '' : d.grindStepSize === 1 ? ' click' : ' clicks'} (≈${um}µm)</div>`;
+  return `<div style="font-size:11px;color:var(--text-muted);margin-top:2px">${sc.stepless ? 'Stepless' : 'Stepped'} · slider moves in ${d.grindStepSize}${sc.stepless ? '' : d.grindStepSize === 1 ? ' click' : ' clicks'} (≈${um}µm)</div>`;
 }
 
 function playEnter(el, cls) {
@@ -4872,7 +4872,7 @@ function renderUpNext() {
       <div class="upnext-sub">${escHtml(p.method)}${rec ? ' · '+escHtml(rec.name) : ''}</div>
       </div>${plans.length > 1 ? `<button type="button" class="upnext-handle" aria-label="Drag to reorder ${escHtml(cf.name)}" onpointerdown="startPlanDrag(event, this)" onkeydown="keyMovePlan(event, '${p.id}')"><svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor" aria-hidden="true"><circle cx="5.5" cy="3.5" r="1.3"/><circle cx="10.5" cy="3.5" r="1.3"/><circle cx="5.5" cy="8" r="1.3"/><circle cx="10.5" cy="8" r="1.3"/><circle cx="5.5" cy="12.5" r="1.3"/><circle cx="10.5" cy="12.5" r="1.3"/></svg></button>` : ''}</div>
       <div class="upnext-changes">${chg.join('')}</div>
-      ${p.note ? `<div class="upnext-sub" style="margin:-4px 0 10px">📝 ${escHtml(p.note)}</div>` : ''}
+      ${p.note ? `<div class="upnext-sub" style="margin:-4px 0 10px"><svg class="ico" width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M5 4h14v12l-4 4H5z"/><path d="M15 20v-4h4M8 9h8M8 13h5"/></svg> ${escHtml(p.note)}</div>` : ''}
       <div class="upnext-actions">
         <button class="btn-primary" style="flex:1" onclick="brewPlan('${p.id}')">Brew now</button>
         <button class="btn-secondary" onclick="dismissPlan('${p.id}')" aria-label="Dismiss">✕</button>
@@ -4955,7 +4955,7 @@ function renderTrendCharts(coffeeId) {
   const dateRow = (() => {
     const items = scorePointsWithX.map(p => {
       const pct = ((p.x - PAD_L) / CW * 100).toFixed(1);
-      return `<span style="position:absolute;left:${pct}%;transform:translateX(-50%);font-size:9px;color:var(--text-muted);white-space:nowrap">${p.date}</span>`;
+      return `<span style="position:absolute;left:${pct}%;transform:translateX(-50%);font-size:11px;color:var(--text-muted);white-space:nowrap">${p.date}</span>`;
     }).join('');
     return `<div style="position:relative;height:16px;margin-top:4px;margin-left:${PAD_L}px;margin-right:${PAD_R}px">${items}</div>`;
   })();
@@ -4986,17 +4986,17 @@ function renderTrendCharts(coffeeId) {
   // ── Legend ────────────────────────────────────────────────────────────
   const legend = `
     <div style="display:flex;gap:14px;margin-bottom:10px;flex-wrap:wrap">
-      <span style="font-size:10px;color:var(--text-muted);display:flex;align-items:center;gap:4px">
+      <span style="font-size:11px;color:var(--text-muted);display:flex;align-items:center;gap:4px">
         <svg width="20" height="8"><line x1="0" y1="4" x2="20" y2="4" stroke="#52796F" stroke-width="2"/></svg>
         Taste Score
       </span>
-      <span style="font-size:10px;color:var(--text-muted);display:flex;align-items:center;gap:4px">
+      <span style="font-size:11px;color:var(--text-muted);display:flex;align-items:center;gap:4px">
         Temp (°C)
       </span>
-      <span style="font-size:10px;color:var(--text-muted);display:flex;align-items:center;gap:4px">
+      <span style="font-size:11px;color:var(--text-muted);display:flex;align-items:center;gap:4px">
         Grind
       </span>
-      <span style="font-size:10px;color:var(--text-muted);display:flex;align-items:center;gap:4px">
+      <span style="font-size:11px;color:var(--text-muted);display:flex;align-items:center;gap:4px">
         <svg width="8" height="8"><circle cx="4" cy="4" r="3" fill="#52796F"/></svg>
         Good &nbsp;
         <svg width="8" height="8"><circle cx="4" cy="4" r="3" fill="#4a7ad0"/></svg>
@@ -5026,7 +5026,7 @@ function renderTrendCharts(coffeeId) {
     ).join('');
     timeChart = `
       <div style="margin-top:8px">
-        <div style="font-size:10px;color:var(--text-muted);margin-bottom:4px;letter-spacing:.5px">BREW TIME</div>
+        <div style="font-size:11px;color:var(--text-muted);margin-bottom:4px;letter-spacing:.5px">BREW TIME</div>
         <svg viewBox="0 0 ${W} ${TH}" style="width:100%;overflow:visible">
           <path class="chart-fade" d="${timeLine}" stroke="#8aab9e" stroke-width="1.5" fill="none" stroke-linecap="round" stroke-linejoin="round" stroke-dasharray="4,3"/>
           ${timeDots}
@@ -5063,6 +5063,8 @@ function openSettings() {
   renderOverviewCategoryOptions(); syncSuggestedStartSwitch(); applyTextSize();
   renderStorageInfo();
   document.getElementById('settings-panel').classList.add('open');
+  document.getElementById('settings-panel').inert = false;
+  try { a11yOpened('settings-panel'); } catch(e) {}
   document.getElementById('settings-backdrop').classList.add('open');
 }
 
@@ -5096,9 +5098,109 @@ function toggleOverviewCategory(key, on) {
 }
 function closeSettings() {
   document.getElementById('settings-panel').classList.remove('open');
+  try { a11yClosed('settings-panel'); } catch(e) {}
+  document.getElementById('settings-panel').inert = true;   // off-screen controls can't be tabbed to
   document.getElementById('settings-backdrop').classList.remove('open');
 }
 
+
+
+// ==================== ACCESSIBILITY ====================
+// Anything tappable that isn't a real button gets a button role, a tab stop and Enter/Space;
+// icon-only buttons get a spoken name; every field gets a linked label.
+const A11Y_NAMES = { '✕':'Close', '×':'Close', '⋯':'More options', '···':'More options', '+':'Add', '←':'Back', '‹':'Back' };
+const PRESSABLE = '.method-tab, .extraction-btn, .plan-chip';
+let a11ySeq = 0;
+function a11yEnhance(root) {
+  root = root || document;
+  root.querySelectorAll('[onclick]:not(button):not(a):not(input):not(select):not(textarea):not(label):not(.modal-overlay):not(.settings-backdrop):not([role])').forEach(el => {
+    el.setAttribute('role', 'button');
+    if (!el.hasAttribute('tabindex')) el.tabIndex = 0;
+    if (el.tagName === 'IMG' && !el.getAttribute('aria-label')) el.setAttribute('aria-label', 'View ' + (el.alt || 'photo').toLowerCase());
+  });
+  root.querySelectorAll(PRESSABLE).forEach(el => {
+    const on = String(el.classList.contains('selected') || el.classList.contains('active'));
+    if (el.getAttribute('aria-pressed') !== on) el.setAttribute('aria-pressed', on);
+  });
+  root.querySelectorAll('button:not([aria-label])').forEach(b => {
+    const t = b.textContent.trim();
+    if (A11Y_NAMES[t]) b.setAttribute('aria-label', A11Y_NAMES[t]);
+    else if (!t && b.title) b.setAttribute('aria-label', b.title);
+  });
+  const CTRL = 'input:not([type=hidden]):not([type=file]), select, textarea';
+  root.querySelectorAll('label:not([for])').forEach(l => {
+    if (l.querySelector(CTRL)) return;                       // already wraps its field
+    let c = null, n = l.nextElementSibling;
+    for (let i = 0; n && i < 3 && !c; i++, n = n.nextElementSibling) c = n.matches(CTRL) ? n : n.querySelector(CTRL);
+    if (!c && l.parentElement) c = l.parentElement.querySelector(CTRL);
+    if (!c || c.getAttribute('aria-labelledby') || (c.labels && c.labels.length)) return;
+    if (!c.id) c.id = 'fld-' + (++a11ySeq);
+    if (l.querySelector('[onclick], button')) { if (!l.id) l.id = 'lbl-' + (++a11ySeq); c.setAttribute('aria-labelledby', l.id); }
+    else l.htmlFor = c.id;
+  });
+  root.querySelectorAll(CTRL).forEach(c => {
+    if (c.getAttribute('aria-label') || c.getAttribute('aria-labelledby') || (c.labels && c.labels.length)) return;
+    const name = c.placeholder || c.title || (c.id || '').replace(/^[a-z]{1,2}-/, '').replace(/[-_]/g, ' ');
+    if (name) c.setAttribute('aria-label', name);
+  });
+}
+function a11ySetupDialogs() {
+  document.querySelectorAll('.modal-overlay').forEach(ov => {
+    const dlg = ov.querySelector('.modal') || ov;
+    dlg.setAttribute('role', 'dialog'); dlg.setAttribute('aria-modal', 'true'); dlg.tabIndex = -1;
+    const title = dlg.querySelector('.modal-title, [id$="-title"]');
+    if (title) { if (!title.id) title.id = ov.id + '-heading'; dlg.setAttribute('aria-labelledby', title.id); }
+    else dlg.setAttribute('aria-label', ov.id === 'modal-lightbox' ? 'Bag label photo' : 'Dialog');
+  });
+  const sp = document.getElementById('settings-panel');
+  if (sp) { sp.setAttribute('role', 'dialog'); sp.setAttribute('aria-modal', 'true'); sp.setAttribute('aria-label', 'Settings'); sp.tabIndex = -1; sp.inert = !sp.classList.contains('open'); }
+}
+const modalStack = [], modalReturnFocus = {};
+function dialogEl(id) { const ov = document.getElementById(id); return ov && (ov.matches('[role="dialog"]') ? ov : ov.querySelector('[role="dialog"]') || ov); }
+function a11yOpened(id) {
+  const d = dialogEl(id); if (!d) return;
+  const i = modalStack.indexOf(id); if (i >= 0) modalStack.splice(i, 1);
+  modalStack.push(id);
+  const a = document.activeElement;
+  if (!d.contains(a)) { modalReturnFocus[id] = a; try { d.focus({ preventScroll: true }); } catch(e) {} }
+}
+function a11yClosed(id) {
+  const i = modalStack.indexOf(id); if (i >= 0) modalStack.splice(i, 1);
+  const back = modalReturnFocus[id]; delete modalReturnFocus[id];
+  const d = dialogEl(id);
+  if (!d || !d.contains(document.activeElement)) return;      // focus has already moved on
+  try { document.activeElement.blur(); } catch(e) {}
+  // Never put focus back into a text field: on a phone that would pop the keyboard up
+  if (back && back.isConnected && !/^(INPUT|TEXTAREA|SELECT)$/.test(back.tagName) && back !== document.body) { try { back.focus({ preventScroll: true }); } catch(e) {} }
+}
+function topDialogId() {
+  for (let i = modalStack.length - 1; i >= 0; i--) {
+    const el = document.getElementById(modalStack[i]);
+    if (el && el.classList.contains('open')) return modalStack[i];
+  }
+  return null;
+}
+document.addEventListener('keydown', e => {
+  const t = e.target;
+  if ((e.key === 'Enter' || e.key === ' ') && t && t.getAttribute && t.getAttribute('role') === 'button' && !/^(BUTTON|A|INPUT|SELECT|TEXTAREA)$/.test(t.tagName)) {
+    e.preventDefault(); t.click(); return;
+  }
+  const id = topDialogId(); if (!id) return;
+  if (e.key === 'Escape') { e.preventDefault(); if (id === 'settings-panel') closeSettings(); else closeModal(id); return; }
+  if (e.key !== 'Tab') return;
+  const d = dialogEl(id);
+  const f = [...d.querySelectorAll('button, [href], input:not([type=hidden]), select, textarea, [tabindex]:not([tabindex="-1"])')].filter(el => !el.disabled && el.offsetParent !== null);
+  if (!f.length) { e.preventDefault(); return; }
+  const first = f[0], last = f[f.length - 1], a = document.activeElement;
+  if (!d.contains(a) || a === d) { e.preventDefault(); (e.shiftKey ? last : first).focus(); }
+  else if (e.shiftKey && a === first) { e.preventDefault(); last.focus(); }
+  else if (!e.shiftKey && a === last) { e.preventDefault(); first.focus(); }
+});
+let a11yQueued = false;
+function a11yQueue() { if (a11yQueued) return; a11yQueued = true; setTimeout(() => { a11yQueued = false; try { a11yEnhance(); } catch(e) {} }, 0); }
+a11ySetupDialogs(); a11yEnhance();
+document.addEventListener('DOMContentLoaded', () => { a11ySetupDialogs(); a11yEnhance(); });   // the settings panel and tab bar come later in the page
+new MutationObserver(a11yQueue).observe(document.body, { childList: true, subtree: true, attributes: true, attributeFilter: ['class'] });
 
 // ==================== INIT (runs last, after every declaration) ====================
 load();
@@ -5126,7 +5228,7 @@ if ('serviceWorker' in navigator && location.protocol.startsWith('http')) {
 <div class="settings-panel" id="settings-panel">
   <div class="settings-panel-header">
     <div class="settings-panel-title">Settings</div>
-    <button class="settings-panel-close" onclick="closeSettings()">✕</button>
+    <button class="settings-panel-close" aria-label="Close settings" onclick="closeSettings()">✕</button>
   </div>
   <div class="settings-panel-body">
 
@@ -5175,7 +5277,7 @@ if ('serviceWorker' in navigator && location.protocol.startsWith('http')) {
         <div class="settings-toggle-label">Dark Mode</div>
         <div class="settings-toggle-sub">Easy on the eyes</div>
       </div>
-      <button class="dark-toggle" id="settings-dark-btn" onclick="toggleDarkMode()" style="margin:0">
+      <button class="dark-toggle" id="settings-dark-btn" aria-label="Toggle dark mode" onclick="toggleDarkMode()" style="margin:0">
         <svg xmlns="http://www.w3.org/2000/svg" viewBox="-0.5 -0.5 16 16" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" width="18" height="18"><path d="M13.125 7.9937499999999995A5.625 5.625 0 1 1 7.0062500000000005 1.875 4.375 4.375 0 0 0 13.125 7.9937499999999995z" stroke-width="1"></path></svg>
       </button>
     </div>
