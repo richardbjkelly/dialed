@@ -730,6 +730,19 @@ Specialty coffee dialling-in tracker · Single-file PWA / Android APK
 
 ---
 
+## v3.28
+*1 October 2026*
+
+### Log Brew: last & best brew
+- When the selected coffee has brews, Log Brew shows a one-line summary of your last brew that opens into Last and Best side by side (best highlighted)
+- Each side shows the date, Over / Good / Under, the recipe and method used (e.g. "Hoffmann · Ultimate AeroPress"), grind with grinder, dose → water, temperature, time and rating
+- "Use" on either side fills the form with that brew's coffee, method, recipe, grinder, grind, dose, water and temperature, keeping a running timer and any notes
+- Follows the coffee you pick and updates as soon as you switch; one brew shows a single "Last & best" card; unrated brews show "Last" only
+- Collapsing it is remembered; hidden while editing a brew
+- Replaces Suggested Start for coffees you've already brewed (Suggested Start still covers new coffees)
+
+---
+
 ## Pending / Roadmap
 - Rebuild the APK once to pick up the new cup icon
 - Opt-in pooled data + trained model (see feasibility notes): backend, consent, deletion, ICO registration
@@ -740,4 +753,4 @@ Specialty coffee dialling-in tracker · Single-file PWA / Android APK
 
 ---
 
-*Document maintained automatically. Last updated: v3.27*
+*Document maintained automatically. Last updated: v3.28*

@@ -433,6 +433,25 @@
   .taste-head { display:flex; align-items:baseline; justify-content:space-between; margin-bottom:8px; }
   .taste-clear-all { background:none; border:none; padding:4px 0 4px 8px; font-size:10px; letter-spacing:1px; text-transform:uppercase; color:var(--text-muted); text-decoration:underline; text-underline-offset:3px; cursor:pointer; }
   .taste-line { font-size:11px; color:var(--text-muted); margin-top:6px; }
+  /* Log Brew: last & best */
+  .bh { margin:2px 0 14px; }
+  .bh-strip { width:100%; display:flex; align-items:center; gap:8px; padding:9px 12px; border-radius:12px; border:1px solid var(--border); background:rgba(18,60,39,.04); color:var(--text); font-size:11px; text-align:left; cursor:pointer; }
+  body.dark-mode .bh-strip { border-color:var(--dm-border); background:rgba(159,204,191,.06); }
+  .bh-sk { font-size:9px; letter-spacing:1px; text-transform:uppercase; color:var(--text-muted); flex-shrink:0; }
+  .bh-sum { flex:1; min-width:0; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+  .bh-chev { color:var(--text-muted); flex-shrink:0; }
+  .bh-cols { display:grid; grid-template-columns:repeat(2, minmax(0,1fr)); gap:8px; margin-top:8px; }
+  .bh-cols.one { grid-template-columns:minmax(0,1fr); }
+  .bh-col { border:1px solid var(--border); border-radius:10px; padding:8px 10px; font-size:11px; color:var(--text); line-height:1.6; min-width:0; }
+  body.dark-mode .bh-col { border-color:var(--dm-border); }
+  .bh-col.best { border-color:#52796F; background:rgba(82,121,111,.10); }
+  .bh-col .u { color:var(--text-muted); }
+  .bh-k { display:flex; justify-content:space-between; align-items:center; gap:4px; font-size:9px; letter-spacing:1px; text-transform:uppercase; color:var(--text-muted); }
+  .bh-k .extraction-tag { font-size:8px; padding:1px 6px; }
+  .bh-recipe { font-size:10px; line-height:1.35; color:var(--text-muted); display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden; margin:2px 0 3px; }
+  .bh-foot { display:flex; justify-content:space-between; align-items:center; margin-top:2px; }
+  .bh-use { border:1px solid var(--border); background:none; color:var(--text); border-radius:8px; padding:3px 10px; font-size:9px; letter-spacing:1px; text-transform:uppercase; cursor:pointer; }
+  body.dark-mode .bh-use { border-color:var(--dm-border); }
   .brew-date { font-size:10px; letter-spacing:.5px; color:var(--text-muted); margin:2px 0 6px; }
   .brew-spec { font-size:12px; color:var(--text); }
   .brew-spec .sp { white-space:nowrap; } .brew-spec .u { color:var(--text-muted); } .brew-spec .sep { color:var(--text-muted); opacity:.5; margin:0 7px; }
@@ -961,6 +980,7 @@
       </div>
       <div id="r-recipe-card"></div>
     </div>
+    <div id="brew-history"></div>
     <div id="brew-suggestion"></div>
     <div class="divider">Grind & Dose</div>
     <div class="form-row">
@@ -1953,7 +1973,7 @@ function openRecipeModal() {
     const d = document.createElement('div');
     d.className = 'coffee-selector-item' + (state.selectedCoffeeId===c.id?' selected':'');
     d.innerHTML = `<div class="cs-name">${c.name}</div><div class="cs-sub">${c.roaster||''}</div>`;
-    d.onclick = () => { state.selectedCoffeeId=c.id; cs.querySelectorAll('.coffee-selector-item').forEach(x=>x.classList.remove('selected')); d.classList.add('selected'); };
+    d.onclick = () => { state.selectedCoffeeId=c.id; cs.querySelectorAll('.coffee-selector-item').forEach(x=>x.classList.remove('selected')); d.classList.add('selected'); renderBrewHistory(); renderBrewSuggestion(); };
     cs.appendChild(d);
   });
   const activeCoffees = state.coffees.filter(c=>!c.finishedBag);
@@ -2012,7 +2032,7 @@ function openRecipeModal() {
   renderBrewTimer();
   resetTaste();
   updateBrewLive();
-  suggestionSuppressed = false; renderBrewSuggestion(); updateGrindMicrons();
+  suggestionSuppressed = false; renderBrewHistory(); renderBrewSuggestion(); updateGrindMicrons();
   openModal('modal-recipe');
 }
 
@@ -3759,7 +3779,7 @@ function fillBrewModal(r, opts={}) {
   state.selectedGrinderId = r.grinderId || null;
   state.selectedMethod = r.method || 'Espresso';
   state.selectedRecipeId = r.recipeId || null;
-  if (!opts.keepResult) resetBrewTimer();
+  if (!opts.keepResult && !opts.keepTimer) resetBrewTimer();
   openRecipeModal();
   suggestionSuppressed = true; renderBrewSuggestion();
   if (opts.editId) document.getElementById('r-edit-id').value = opts.editId;
@@ -3780,7 +3800,7 @@ function fillBrewModal(r, opts={}) {
     state.selectedExtraction=''; document.querySelectorAll('.extraction-btn').forEach(b=>b.classList.remove('selected'));
     setRating(0);
   }
-  updateBrewLive(); updateGrindMicrons();
+  updateBrewLive(); updateGrindMicrons(); renderBrewHistory();
 }
 
 
@@ -3851,6 +3871,58 @@ function bestBrewHtml(cf) {
     <button class="btn-primary" style="margin-top:0;padding:11px" onclick="repeatBrew('${b.id}')">↻ Repeat this brew</button>
   </div>`;
 }
+// ---- Log Brew: last and best brew for the selected coffee ----
+// "James Hoffmann — Ultimate AeroPress" -> "Hoffmann · Ultimate AeroPress"; method added only when the title doesn't say it
+function brewRecipeLabel(r) {
+  const method = r.method || '';
+  const rec = r.recipeId ? getAllRecipesForMethod(method).find(x => x.id === r.recipeId) : null;
+  if (!rec) return escHtml(method ? method + ' · Custom' : 'Custom');
+  const [who, title] = rec.name.includes('—') ? rec.name.split(/\s*—\s*/) : ['', rec.name];
+  const surname = who ? who.trim().split(/\s+/).pop() : '';
+  const label = [surname, title].filter(Boolean).join(' · ');
+  return escHtml(method && !label.toLowerCase().includes(method.toLowerCase()) ? method + ' · ' + label : label);
+}
+function brewHistCol(r, label, cls) {
+  const g = r.grinderId ? GRINDERS.find(x => x.id === r.grinderId) : null;
+  const isEsp = isEspressoMethod(r.method || 'Espresso');
+  const d = new Date(r.createdAt).toLocaleDateString('en-GB', { day:'numeric', month:'short' });
+  const tag = r.extraction ? `<span class="extraction-tag tag-${r.extraction}">${r.extraction === 'good' ? '✓ Good' : r.extraction}</span>` : '';
+  const line2 = [r.dose ? `${escHtml(r.dose)}<span class="u">g</span>` : '', r.yield ? `${escHtml(r.yield)}<span class="u">${isEsp ? 'g' : 'ml'}</span>` : ''].filter(Boolean).join(' → ');
+  const line3 = [r.temp ? `${escHtml(r.temp)}<span class="u">°C</span>` : '', r.time ? formatBrewTime(r.time, r.method) : ''].filter(Boolean).join(' · ');
+  return `<div class="bh-col ${cls}">
+    <div class="bh-k"><span>${label} · ${d}</span>${tag}</div>
+    <div class="bh-recipe">${brewRecipeLabel(r)}</div>
+    <div>Grind <b>${escHtml(r.grind || '—')}</b>${g ? ` <span class="u">${escHtml(g.model)}</span>` : ''}</div>
+    ${line2 ? `<div>${line2}</div>` : ''}${line3 ? `<div>${line3}</div>` : ''}
+    <div class="bh-foot">${r.rating > 0 ? `<span><b>${r.rating}</b><span class="u">/10</span></span>` : '<span class="u">Not rated</span>'}
+      <button type="button" class="bh-use" onclick="useBrewSettings('${r.id}')">Use</button></div>
+  </div>`;
+}
+function renderBrewHistory() {
+  const el = document.getElementById('brew-history'); if (!el) return;
+  const editing = !!document.getElementById('r-edit-id')?.value;
+  const brews = state.selectedCoffeeId ? brewsFor(state.selectedCoffeeId).slice().sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt)) : [];
+  if (editing || !brews.length) { el.innerHTML = ''; return; }
+  const last = brews[0], best = bestBrew(state.selectedCoffeeId);
+  const same = !best || best.id === last.id;
+  const open = appSettings.brewHistoryOpen !== false;
+  const sumBits = [last.rating > 0 ? `${last.rating}/10` : '', last.extraction ? (last.extraction === 'good' ? 'Good' : last.extraction[0].toUpperCase() + last.extraction.slice(1)) : '', last.grind ? `Grind ${escHtml(last.grind)}` : '', last.temp ? `${escHtml(last.temp)}°C` : ''].filter(Boolean).join(' · ');
+  el.innerHTML = `<div class="bh">
+    <button type="button" class="bh-strip" aria-expanded="${open}" onclick="toggleBrewHistory()">
+      <span class="bh-sk">${same ? (best ? 'Last & best' : 'Last') : 'Last'}</span><span class="bh-sum">${sumBits || brewRecipeLabel(last)}</span><span class="bh-chev">${open ? '▴' : '▾'}</span>
+    </button>
+    ${open ? `<div class="bh-cols${same ? ' one' : ''}">${brewHistCol(last, same && best ? 'Last & best' : 'Last', same && best ? 'best' : '')}${same ? '' : brewHistCol(best, 'Best', 'best')}</div>` : ''}
+  </div>`;
+}
+function toggleBrewHistory() { appSettings.brewHistoryOpen = appSettings.brewHistoryOpen === false; saveSettings(); renderBrewHistory(); }
+function useBrewSettings(id) {
+  const r = state.recipes.find(x => x.id === id); if (!r) return;
+  const notes = document.getElementById('r-notes').value;
+  fillBrewModal({ coffeeId: r.coffeeId, grinderId: r.grinderId, method: r.method, recipeId: r.recipeId, grind: r.grind, dose: r.dose, yield: r.yield, temp: r.temp }, { title: 'Log Brew', keepTimer: true });
+  document.getElementById('r-notes').value = notes;
+  showToast('Settings filled in from that brew');
+}
+
 function repeatBrew(id) {
   const r = state.recipes.find(x => x.id === id); if (!r) return;
   fillBrewModal(r, { title: 'Log Brew · Repeat' });
@@ -4114,7 +4186,7 @@ let suggestionSuppressed = false, lastSuggestion = null;
 function renderBrewSuggestion() {
   const el = document.getElementById('brew-suggestion'); if (!el) return;
   const editing = !!document.getElementById('r-edit-id')?.value;
-  if (appSettings.suggestedStart === false || suggestionSuppressed || editing || !state.selectedCoffeeId) { el.innerHTML = ''; lastSuggestion = null; return; }
+  if (appSettings.suggestedStart === false || suggestionSuppressed || editing || !state.selectedCoffeeId || brewsFor(state.selectedCoffeeId).length) { el.innerHTML = ''; lastSuggestion = null; return; }
   const method = state.selectedMethod;
   const cf = state.coffees.find(c => c.id === state.selectedCoffeeId);
   const s = computeSuggestion(state.selectedCoffeeId, method);
