@@ -544,6 +544,13 @@
     .chart-sweep, .chart-fade, .brew-guide.guide-pulse { animation: none; }
     .chart-draw { animation: none; stroke-dasharray: none; stroke-dashoffset: 0; }
   }
+  .timer-pill { position:fixed; left:50%; transform:translateX(-50%); bottom:calc(env(safe-area-inset-bottom) + 76px); z-index:250; display:flex; align-items:center; gap:8px; padding:9px 16px; border:none; border-radius:22px; background:#123C27; color:#FAFAF7; font-size:12px; letter-spacing:.5px; box-shadow:0 6px 20px rgba(0,0,0,.3); cursor:pointer; }
+  .timer-pill[hidden] { display:none; }
+  .timer-pill .tp-time { font-weight:700; font-variant-numeric:tabular-nums; }
+  .timer-pill .tp-dot { width:8px; height:8px; border-radius:50%; background:#F2A493; animation:tpBlink 1.2s ease-in-out infinite; }
+  body.dark-mode .timer-pill { background:#52796F; }
+  @keyframes tpBlink { 50% { opacity:.25; } }
+  @media (prefers-reduced-motion: reduce) { .timer-pill .tp-dot { animation:none; } }
   /* GRINDER STYLES */
   .grinder-type-toggle { display: flex; background: rgba(26,15,10,0.06); border-radius: 10px; padding: 3px; margin-bottom: 20px; }
   .type-btn { flex: 1; padding: 9px 12px; border: none; border-radius: 8px; font-family: 'DM Mono', monospace; font-size: 10px; letter-spacing: 1px; text-transform: uppercase; cursor: pointer; background: none; color: var(--text-muted); transition: all 0.2s; }
@@ -708,6 +715,13 @@
   <div id="save-error-banner" style="display:none;background:#8b1a1a;color:#fff;border-radius:10px;padding:12px 14px;margin-bottom:14px;font-size:12px;line-height:1.5">
     <b>Couldn't save your latest change.</b> Your phone's storage for the app is full. Open Settings → Export Backup now so nothing is lost, then remove some label photos.
   </div>
+  <div id="photo-error-banner" style="display:none;background:#8b1a1a;color:#fff;border-radius:10px;padding:12px 14px;margin-bottom:14px;font-size:12px;line-height:1.5" role="alert">
+    <b>A photo wasn't saved.</b> <span class="pe-text"></span>
+    <div style="display:flex;gap:8px;margin-top:10px">
+      <button type="button" onclick="document.getElementById('photo-error-banner').style.display='none'; save()" style="flex:1;padding:8px;border-radius:8px;border:1px solid rgba(255,255,255,.5);background:none;color:#fff;font-size:11px">Try again</button>
+      <button type="button" onclick="document.getElementById('photo-error-banner').style.display='none'" style="flex:1;padding:8px;border-radius:8px;border:1px solid rgba(255,255,255,.5);background:none;color:#fff;font-size:11px">Dismiss</button>
+    </div>
+  </div>
   <div id="load-error-banner" style="display:none;background:#8b1a1a;color:#fff;border-radius:10px;padding:12px 14px;margin-bottom:14px;font-size:12px;line-height:1.5" role="alert">
     <b>There was a problem with your saved data.</b> <span class="lp-text"></span>
     <div class="lp-actions" style="display:none;gap:8px;margin-top:10px">
@@ -781,11 +795,11 @@
   <div class="divider" style="margin-top:4px">Coffee stats</div>
   <div class="stats-section">
     <div class="stats-period-bar" id="stats-period-bar">
-      <button class="type-btn active" onclick="setStatsPeriod('year',this)">This Year</button>
-      <button class="type-btn" onclick="setStatsPeriod('6m',this)">6 Months</button>
-      <button class="type-btn" onclick="setStatsPeriod('3m',this)">3 Months</button>
-      <button class="type-btn" onclick="setStatsPeriod('month',this)">This Month</button>
-      <button class="type-btn" onclick="setStatsPeriod('all',this)">All Time</button>
+      <button class="type-btn active" data-period="year" onclick="setStatsPeriod('year',this)">12 Months</button>
+      <button class="type-btn" data-period="6m" onclick="setStatsPeriod('6m',this)">6 Months</button>
+      <button class="type-btn" data-period="3m" onclick="setStatsPeriod('3m',this)">3 Months</button>
+      <button class="type-btn" data-period="month" onclick="setStatsPeriod('month',this)">This Month</button>
+      <button class="type-btn" data-period="all" onclick="setStatsPeriod('all',this)">All Time</button>
     </div>
     <div id="stats-dashboard"></div>
   </div>
@@ -882,21 +896,21 @@
       <input type="checkbox" id="c-decaf" style="width:18px;height:18px;accent-color:var(--crema);cursor:pointer" onclick="event.stopPropagation()">
       <label for="c-decaf" style="font-size:14px;color:var(--text);cursor:pointer;flex:1;margin:0">Decaf</label>
     </div>
-    <div class="form-group"><label class="form-label">Roaster</label><input type="text" class="form-input" id="c-roaster" placeholder="e.g. Square Mile Coffee"></div>
+    <div class="form-group"><label class="form-label">Roaster</label><input type="text" class="form-input" id="c-roaster" list="dl-roaster" autocomplete="off" placeholder="e.g. Square Mile Coffee"></div>
     <div class="form-row">
-      <div class="form-group"><label class="form-label">Roaster City</label><input type="text" class="form-input" id="c-roaster-city" placeholder="e.g. London"></div>
-      <div class="form-group"><label class="form-label">Roaster Country</label><input type="text" class="form-input" id="c-roaster-country" placeholder="e.g. UK"></div>
+      <div class="form-group"><label class="form-label">Roaster City</label><input type="text" class="form-input" id="c-roaster-city" list="dl-roasterCity" autocomplete="off" placeholder="e.g. London"></div>
+      <div class="form-group"><label class="form-label">Roaster Country</label><input type="text" class="form-input" id="c-roaster-country" list="dl-roasterCountry" autocomplete="off" placeholder="e.g. UK"></div>
     </div>
     <div class="form-row">
-      <div class="form-group"><label class="form-label">Country</label><input type="text" class="form-input" id="c-country" placeholder="e.g. Ethiopia"></div>
-      <div class="form-group"><label class="form-label">Region</label><input type="text" class="form-input" id="c-region" placeholder="e.g. Guji"></div>
+      <div class="form-group"><label class="form-label">Country</label><input type="text" class="form-input" id="c-country" list="dl-country" autocomplete="off" placeholder="e.g. Ethiopia"></div>
+      <div class="form-group"><label class="form-label">Region</label><input type="text" class="form-input" id="c-region" list="dl-region" autocomplete="off" placeholder="e.g. Guji"></div>
     </div>
     <div class="form-row">
-      <div class="form-group"><label class="form-label">Producer</label><input type="text" class="form-input" id="c-producer" placeholder="e.g. Yilma Nigusse"></div>
-      <div class="form-group"><label class="form-label">Farm</label><input type="text" class="form-input" id="c-farm" placeholder="e.g. Dumerso"></div>
+      <div class="form-group"><label class="form-label">Producer</label><input type="text" class="form-input" id="c-producer" list="dl-producer" autocomplete="off" placeholder="e.g. Yilma Nigusse"></div>
+      <div class="form-group"><label class="form-label">Farm</label><input type="text" class="form-input" id="c-farm" list="dl-farm" autocomplete="off" placeholder="e.g. Dumerso"></div>
     </div>
     <div class="form-row">
-      <div class="form-group"><label class="form-label">Varietal</label><input type="text" class="form-input" id="c-varietal" placeholder="e.g. Heirloom"></div>
+      <div class="form-group"><label class="form-label">Varietal</label><input type="text" class="form-input" id="c-varietal" list="dl-varietal" autocomplete="off" placeholder="e.g. Heirloom"></div>
       <div class="form-group"><label class="form-label">Process</label>
         <select class="form-select" id="c-process" onchange="toggleCustomProcess(this)"><option value="">Select…</option><option>Washed</option><option>Natural</option><option>Honey</option><option>Anaerobic</option><option>Wet Hulled</option><option>Carbonic Maceration</option><option>Extended Fermentation</option><option>Other…</option></select>
         <input type="text" class="form-input" id="c-process-custom" placeholder="Describe the process…" style="display:none;margin-top:6px">
@@ -981,7 +995,7 @@
     <div class="divider">Grind & Dose</div>
     <div class="form-row">
       <div class="form-group"><label class="form-label">Grind Setting</label><input type="number" class="form-input" id="r-grind" placeholder="e.g. 8" step="any" inputmode="decimal" oninput="updateGrindMicrons()"></div>
-      <div class="form-group"><label class="form-label">Dose (g)</label><input type="number" class="form-input" id="r-dose" placeholder="e.g. 18" step="0.1" oninput="updateBrewLive()"></div>
+      <div class="form-group"><label class="form-label">Dose (g)</label><input type="number" class="form-input" id="r-dose" min="0" max="500" placeholder="e.g. 18" step="0.1" oninput="updateBrewLive()"></div>
     </div>
     <div id="r-grind-um" class="brew-live" style="margin-top:-8px"></div>
     <div class="brew-timer">
@@ -991,7 +1005,7 @@
     </div>
     <div id="brew-step-guide" class="brew-guide" style="display:none"></div>
     <div class="form-row">
-      <div class="form-group"><label class="form-label" id="r-yield-label">Yield (g)</label><input type="number" class="form-input" id="r-yield" placeholder="e.g. 36" step="0.1" oninput="updateBrewLive()"></div>
+      <div class="form-group"><label class="form-label" id="r-yield-label">Yield (g)</label><input type="number" class="form-input" id="r-yield" min="0" max="5000" placeholder="e.g. 36" step="0.1" oninput="updateBrewLive()"></div>
       <div class="form-group">
         <label class="form-label">Time</label>
         <div class="time-row" id="r-time-esp">
@@ -999,15 +1013,15 @@
           <span style="color:var(--text-muted);font-size:12px">sec</span>
         </div>
         <div class="time-row" id="r-time-filter" style="display:none">
-          <input type="number" class="form-input" id="r-time-mins" placeholder="3" min="0" style="width:60px">
+          <input type="number" class="form-input" id="r-time-mins" min="0" placeholder="3" style="width:60px">
           <span style="font-size:16px;font-weight:700;color:var(--text-muted)">:</span>
-          <input type="number" class="form-input" id="r-time-secs" placeholder="30" min="0" max="59" style="width:60px">
+          <input type="number" class="form-input" id="r-time-secs" min="0" max="59" placeholder="30" style="width:60px">
           <span style="font-size:11px;color:var(--text-muted)">m : s</span>
         </div>
       </div>
     </div>
     <div id="r-ratio-live" class="brew-live"></div>
-    <div class="form-group"><label class="form-label">Water Temp (°C)</label><input type="number" class="form-input" id="r-temp" placeholder="e.g. 93" style="width:50%"></div>
+    <div class="form-group"><label class="form-label">Water Temp (°C)</label><input type="number" class="form-input" id="r-temp" min="0" max="100" placeholder="e.g. 93" style="width:50%"></div>
     <div class="divider">Extraction</div>
     <div class="form-group">
       <label class="form-label">Extraction Result</label>
@@ -1845,7 +1859,13 @@ function syncPhotos() {
   if (!writes.length && !deletes.length) return;
   idbDo('readwrite', st => { writes.forEach(([id, url]) => st.put(url, id)); deletes.forEach(id => st.delete(id)); })
     .then(() => { writes.forEach(([id, url]) => savedPhotos[id] = url); deletes.forEach(id => delete savedPhotos[id]); })
-    .catch(e => { console.error('Photo save failed', e); if (!saveFailedWarned) { saveFailedWarned = true; showSaveError(); } });
+    .catch(e => {
+      console.error('Photo save failed', e);
+      const names = writes.map(([id]) => (state.coffees.find(c => c.id === id) || {}).name).filter(Boolean);
+      const el = document.getElementById('photo-error-banner');
+      if (el && names.length) { el.style.display = 'block'; el.querySelector('.pe-text').textContent = `The label photo for ${names.join(', ')} couldn't be stored and will be lost when the app closes. Free up space or try a smaller photo.`; }
+      else if (!saveFailedWarned) { saveFailedWarned = true; showSaveError(); }
+    });
 }
 async function loadPhotos() {
   try {
@@ -1865,8 +1885,13 @@ async function loadPhotos() {
 }
 function rerenderCurrentView() {
   renderDashboard();
-  if (state.currentView === 'coffees' && document.getElementById('coffees-list')) renderCoffeesView();
+  if (state.currentView === 'coffees') {
+    if (typeof detailShownId !== 'undefined' && detailShownId && state.coffees.some(c => c.id === detailShownId)) showCoffeeDetail(detailShownId);
+    else if (document.getElementById('coffees-list')) renderCoffeesView();
+    else restoreCoffeeList();
+  }
   if (state.currentView === 'tracker') renderTracker();
+  if (state.currentView === 'recipes') renderRecipes();
 }
 
 // ---- Photo compression: long edge 900px, JPEG ~0.8 (a phone photo drops from ~4MB to ~100KB) ----
@@ -1898,7 +1923,8 @@ async function renderStorageInfo() {
   const pct = Math.min(100, Math.round(ls / (5*1048576) * 100));
   const last = appSettings.lastBackupAt ? new Date(appSettings.lastBackupAt).toLocaleDateString('en-GB',{day:'numeric',month:'short',year:'numeric'}) : 'never';
   let hasPrev = !!restoreUndo; try { hasPrev = hasPrev || !!localStorage.getItem('dialin_v2_prev'); } catch(e) {}
-  el.innerHTML = `Data ${kb(ls)} of ~5 MB (${pct}%) · ${n} photo${n!==1?'s':''} ${kb(photos)} stored separately<br>Last backup: ${last}`
+  const safety = storageSafetyLine();
+  el.innerHTML = `Data ${kb(ls)} of ~5 MB (${pct}%) · ${n} photo${n!==1?'s':''} ${kb(photos)} stored separately<br>Last backup: ${last}` + (safety ? `<br>${safety}` : '')
     + (hasPrev ? `<br><button type="button" class="taste-clear-all" style="padding:6px 0 0" onclick="confirmAction({title:'Undo last restore?', text:'Brings back the data that the last restore replaced.${restoreUndo ? '' : ' Label photos from before the restore can no longer be recovered.'}', button:'Undo restore', onYes:undoRestore})">Undo last restore</button>` : '');
 }
 // ==================== DATA VALIDATION ====================
@@ -1978,6 +2004,21 @@ function fmtDate(iso, opts = { day:'numeric', month:'short', year:'numeric' }) {
 }
 
 let loadProblem = null, blockSave = false;
+let storagePersisted = null;   // true / false / null (unknown)
+async function requestPersistence() {
+  try {
+    if (!navigator.storage || !navigator.storage.persist) return;
+    storagePersisted = await navigator.storage.persisted();
+    if (!storagePersisted) storagePersisted = await navigator.storage.persist();
+  } catch(e) {}
+}
+function storageSafetyLine() {
+  const iosSafariTab = /iP(hone|ad|od)/.test(navigator.userAgent) && navigator.standalone !== true;
+  if (iosSafariTab) return 'On iPhone, Safari can clear this data after 7 days unused. Use Share › Add to Home Screen to keep it.';
+  if (storagePersisted === true) return 'Storage is protected: the browser won’t clear it automatically.';
+  if (storagePersisted === false) return 'The browser may clear this data if the device runs low on space. Export a backup now and then.';
+  return '';
+}
 function load() {
   let s = null;
   try { s = localStorage.getItem('dialin_v2'); } catch(e) { loadProblem = 'storage'; return; }
@@ -2033,7 +2074,7 @@ let lastBackTime = 0;
 window.addEventListener('popstate', function(e) {
   const openModal = document.querySelector('.modal-overlay.open');
   if (openModal) { closeModal(openModal.id); history.pushState({view:state.currentView},'',''); return; }
-  const settingsOpen = document.getElementById('settings-drawer')?.classList.contains('open');
+  const settingsOpen = document.getElementById('settings-panel')?.classList.contains('open');
   if (settingsOpen) { closeSettings && closeSettings(); history.pushState({view:state.currentView},'',''); return; }
   if (state.currentView !== 'dashboard') {
     showView('dashboard', false);
@@ -2053,11 +2094,13 @@ function openModal(id) {
   clearTimeout(closingTimers[id]); el.classList.remove('closing');
   el.classList.add('open');
   if (id === 'modal-fab') document.querySelector('.fab')?.classList.add('fab-open');
+  if (id === 'modal-recipe') { try { renderTimerPill(); } catch(e) {} }
 }
 function closeModal(id) {
   const el = document.getElementById(id); if (!el || !el.classList.contains('open')) return;
   el.classList.remove('open');
   if (id === 'modal-fab') document.querySelector('.fab')?.classList.remove('fab-open');
+  if (id === 'modal-recipe') { try { renderTimerPill(); } catch(e) {} }
   if (reduceMotion()) return;
   // Stays visible (and ignores taps) while it slides away; a timer guarantees it always finishes
   el.classList.add('closing');
@@ -2071,6 +2114,11 @@ function openRecipeModal() {
   if (!state.coffees.length) { showToast('Add a coffee first!'); return; }
   const keepId = editKeepCoffeeId; editKeepCoffeeId = null;
   const selectable = c => !c.finishedBag || c.id === keepId;
+  if (!state.coffees.some(selectable)) {
+    confirmAction({ title: 'No open bags', text: 'All your coffees are marked finished. Add a new coffee, or reopen one from its ⋯ menu in the Coffee Library.',
+      button: 'Add a coffee', neutral: true, onYes: () => { resetCoffeeModal(); openModal('modal-coffee'); } });
+    return;
+  }
   // Always reset edit state when opening fresh
   const reid = document.getElementById('r-edit-id'); if(reid) reid.value = '';
   const rtitle = document.getElementById('r-modal-title'); if(rtitle) rtitle.textContent = 'Log Brew';
@@ -2604,7 +2652,18 @@ function getProcessValue() {
   return sel.value;
 }
 
+const SUGGEST_FIELDS = ['roaster', 'roasterCity', 'roasterCountry', 'producer', 'farm', 'country', 'region', 'varietal'];
+function canonicalSpelling(key, value, exceptId) {
+  const k = String(value).trim().toLowerCase().replace(/\s+/g, ' ');
+  const hit = topN(state.coffees.filter(c => c.id !== exceptId), key).find(([v]) => v.toLowerCase().replace(/\s+/g, ' ') === k);
+  return hit ? hit[0] : String(value).trim();
+}
+// Existing values offered as you type
+function fillCoffeeSuggestions() {
+  SUGGEST_FIELDS.forEach(k => { const dl = document.getElementById('dl-' + k); if (dl) dl.innerHTML = topN(state.coffees, k).slice(0, 40).map(([v]) => `<option value="${escHtml(v)}"></option>`).join(''); });
+}
 function resetCoffeeModal() {
+  fillCoffeeSuggestions();
   document.getElementById('c-modal-title').textContent = 'Add Coffee';
   document.getElementById('c-edit-id').value = '';
   ['c-name','c-roaster','c-roaster-city','c-roaster-country','c-producer','c-farm',
@@ -2626,6 +2685,7 @@ function resetCoffeeModal() {
 }
 
 function openEditCoffee(id) {
+  fillCoffeeSuggestions();
   const coffee = state.coffees.find(x=>x.id===id);
   if (!coffee) return;
   // Always close any open modal first, then reset, to avoid stale state
@@ -2675,6 +2735,11 @@ function openEditCoffee(id) {
 function saveCoffee() {
   const name = document.getElementById('c-name').value.trim();
   if (!name) { showToast('Enter a coffee name'); return; }
+  const cw = document.getElementById('c-weight').value, cp = document.getElementById('c-price').value, cm = document.getElementById('c-masl').value;
+  if (cw !== '' && !(parseFloat(cw) > 0)) { showToast('Bag weight should be more than 0g'); return; }
+  if (cp !== '' && !(parseFloat(cp) >= 0)) { showToast("Price can't be negative"); return; }
+  if (cm !== '' && !(parseFloat(cm) >= 0 && parseFloat(cm) <= 4000)) { showToast('Altitude should be between 0 and 4000m'); return; }
+  if (!tapOnce('saveCoffee')) return;
   const editId = document.getElementById('c-edit-id').value;
   const coffeeData = {
     name,
@@ -2696,6 +2761,8 @@ function saveCoffee() {
     labelPhoto: pendingLabelDataUrl || null,
     rating: pendingCoffeeRating || 0,
   };
+  // Reuse the spelling already used for the same value (e.g. "colombia" -> "Colombia") so categories don't split
+  SUGGEST_FIELDS.forEach(k => { if (coffeeData[k]) coffeeData[k] = canonicalSpelling(k, coffeeData[k], editId); });
   if (editId) {
     const idx = state.coffees.findIndex(x=>x.id===editId);
     if (idx >= 0) state.coffees[idx] = { ...state.coffees[idx], ...coffeeData };
@@ -2712,8 +2779,27 @@ function saveCoffee() {
 }
 
 // ==================== SAVE RECIPE ====================
+// Ignore a second tap that lands before the first save has finished closing the sheet
+const busyUntil = {};
+function tapOnce(key, ms = 700) { const now = Date.now(); if (busyUntil[key] && now < busyUntil[key]) return false; busyUntil[key] = now + ms; return true; }
+function brewInputProblem() {
+  const val = id => { const el = document.getElementById(id); return el && el.value !== '' ? parseFloat(el.value) : null; };
+  const isEsp = isEspressoMethod(state.selectedMethod || 'Espresso');
+  const dose = val('r-dose'), out = val('r-yield'), temp = val('r-temp'), grind = val('r-grind');
+  if (dose !== null && !(dose > 0 && dose <= 500)) return 'Dose should be between 0 and 500g';
+  if (out !== null && !(out > 0 && out <= 5000)) return (isEsp ? 'Yield' : 'Water') + ' should be more than 0';
+  if (temp !== null && !(temp >= 0 && temp <= 100)) return 'Temperature should be between 0 and 100°C';
+  if (grind !== null && grind < 0) return "Grind setting can't be negative";
+  if (isEsp) { const t = val('r-time'); if (t !== null && !(t >= 0 && t <= 600)) return 'Time should be between 0 and 600 seconds'; }
+  else { const m = val('r-time-mins'), sec = val('r-time-secs');
+    if (m !== null && !(m >= 0 && m <= 1440)) return "Minutes can't be negative";
+    if (sec !== null && !(sec >= 0 && sec <= 59)) return 'Seconds should be between 0 and 59'; }
+  return '';
+}
 function saveRecipe() {
   if (!state.selectedCoffeeId) { showToast('Select a coffee'); return; }
+  const problem = brewInputProblem(); if (problem) { showToast(problem); return; }
+  if (!tapOnce('saveRecipe')) return;
   if (brewTimer.startedAt) stopBrewTimer();
   const editBrewId = document.getElementById('r-edit-id')?.value||'';
   const brewData = {coffeeId:state.selectedCoffeeId, grinderId:state.selectedGrinderId||null, recipeId:state.selectedRecipeId||null, method:state.selectedMethod||'Espresso', grind:document.getElementById('r-grind').value, dose:document.getElementById('r-dose').value, yield:document.getElementById('r-yield').value, time:getBrewTimeSecs(), temp:document.getElementById('r-temp').value, extraction:state.selectedExtraction, rating:state.selectedRating, notes:document.getElementById('r-notes').value.trim(), taste:readTaste(), grindUm: settingToMicrons(selectedGrinder(), document.getElementById('r-grind').value)};
@@ -2736,8 +2822,7 @@ function saveRecipe() {
   state.selectedExtraction=''; state.selectedRating=0;
   document.querySelectorAll('.extraction-btn').forEach(b=>b.classList.remove('selected'));
   setRating(0);
-  showToast(editBrewId ? 'Brew updated ✓' : 'Brew logged ✓'); renderDashboard(); if(state.currentView==='recipes') renderRecipes();
-  if (state.currentView==='tracker') renderTracker();
+  showToast(editBrewId ? 'Brew updated ✓' : 'Brew logged ✓'); rerenderCurrentView();
   const bagCf = state.coffees.find(x => x.id === brewData.coffeeId);
   const finishTick = document.getElementById('r-finish-bag');
   const finishNow = !!(finishTick && finishTick.checked); if (finishTick) finishTick.checked = false;
@@ -2910,6 +2995,7 @@ function setFinishAgain(v) {
 }
 function saveFinishBag() {
   const d = finishDraft; if (!d) return;
+  if (!tapOnce('saveFinish')) return;
   const c = state.coffees.find(x=>x.id===d.id); if (!c) return;
   c.finishedBag = true;
   c.finishedAt = new Date().toISOString();
@@ -3043,7 +3129,8 @@ function recipeCard(r, showDel=false) {
 
 function deleteRecipe(id) {
   state.recipes = state.recipes.filter(r=>r.id!==id);
-  save(); showToast('Brew deleted'); renderDashboard(); if(state.currentView==='recipes') renderRecipes();
+  state.plannedBrews = (state.plannedBrews || []).map(p => p.basedOn === id ? { ...p, basedOn: null } : p);
+  save(); showToast('Brew deleted'); rerenderCurrentView();
 }
 
 
@@ -3064,15 +3151,15 @@ let statsPeriod = 'year';
 
 function setStatsPeriod(period, btn) {
   statsPeriod = period;
-  document.querySelectorAll('#stats-period-bar .type-btn').forEach(b => b.classList.remove('active'));
-  if (btn) btn.classList.add('active');
+  document.querySelectorAll('#stats-period-bar .type-btn').forEach(b => b.classList.toggle('active', b.dataset.period === period));
+  if (appSettings.statsPeriod !== period) { appSettings.statsPeriod = period; saveSettings(); }
   renderStatsDashboard();
 }
 
 function getPeriodCoffees() {
   const now = new Date();
   let from;
-  if (statsPeriod === 'year')  from = new Date(now.getFullYear(), 0, 1);
+  if (statsPeriod === 'year')  from = new Date(now.getTime() - 365*24*60*60*1000);   // rolling 12 months, so January isn't empty
   else if (statsPeriod === '6m') from = new Date(now.getTime() - 183*24*60*60*1000);
   else if (statsPeriod === '3m') from = new Date(now.getTime() - 91*24*60*60*1000);
   else if (statsPeriod === 'month') from = new Date(now.getFullYear(), now.getMonth(), 1);
@@ -3088,12 +3175,16 @@ function getPeriodCoffees() {
 }
 
 function topN(arr, key, n=Infinity) {   // all values, most common first; the bar groups the tail into Other
-  const counts = {};
+  // "Colombia", "colombia " and "COLOMBIA" count as one; the most common spelling is shown
+  const groups = {};
   arr.forEach(item => {
-    const val = item[key];
-    if (val) counts[val] = (counts[val]||0) + 1;
+    const val = item[key] == null ? '' : String(item[key]).trim();
+    if (!val) return;
+    const k = val.toLowerCase().replace(/\s+/g, ' ');
+    const g = groups[k] || (groups[k] = { n: 0, spell: {} });
+    g.n++; g.spell[val] = (g.spell[val] || 0) + 1;
   });
-  return Object.entries(counts).sort((a,b)=>b[1]-a[1]).slice(0,n);
+  return Object.values(groups).map(g => [Object.entries(g.spell).sort((a, b) => b[1] - a[1])[0][0], g.n]).sort((a,b)=>b[1]-a[1]).slice(0,n);
 }
 
 // Stacked bar colours (up to 8 segments)
@@ -3673,8 +3764,13 @@ let appSettings = { paletteId: 'terracotta', displayFontId: 'inter', monoFontId:
 function loadSettings() {
   try {
     const s = localStorage.getItem('dialin_settings');
-    if (s) appSettings = { ...appSettings, ...JSON.parse(s) };
+    const parsed = s ? JSON.parse(s) : null;
+    if (isObj(parsed)) appSettings = { ...appSettings, ...parsed };
   } catch(e) {}
+  if (['year', '6m', '3m', 'month', 'all'].includes(appSettings.statsPeriod)) {
+    statsPeriod = appSettings.statsPeriod;
+    document.querySelectorAll('#stats-period-bar .type-btn').forEach(b => b.classList.toggle('active', b.dataset.period === statsPeriod));
+  }
   applySettings();
   applyDarkMode();
 }
@@ -3725,12 +3821,12 @@ async function backupData() {
 }
 
 // Generic confirm sheet (shares the delete-confirm markup)
-function confirmAction({ title, text, button = 'Yes', onYes }) {
+function confirmAction({ title, text, button = 'Yes', onYes, neutral = false }) {
   hideAllOverlays();
   setDeleteTitle(title);
   const sub = document.getElementById('confirm-delete-subtitle'); if (sub) sub.textContent = text;
   const btn = document.getElementById('confirm-delete-btn');
-  if (btn) { btn.textContent = button; btn.onclick = () => { closeModal('modal-confirm-delete'); onYes(); }; }
+  if (btn) { btn.textContent = button; btn.style.background = neutral ? '' : '#8b1a1a'; btn.onclick = () => { closeModal('modal-confirm-delete'); onYes(); }; }
   openModal('modal-confirm-delete');
 }
 
@@ -3842,7 +3938,7 @@ function openLightbox(src) {
   if (img) img.src = src;
   openModal('modal-lightbox');
 }
-function resetConfirmBtn() { const b = document.getElementById('confirm-delete-btn'); if (b) b.textContent = 'Yes, Delete'; }
+function resetConfirmBtn() { const b = document.getElementById('confirm-delete-btn'); if (b) { b.textContent = 'Yes, Delete'; b.style.background = '#8b1a1a'; } }
 function setDeleteTitle(t) { const el = document.getElementById('confirm-delete-title'); if (el) el.textContent = t; }
 function confirmDeleteCustomRecipe(id) {
   setDeleteTitle('Delete Recipe?'); resetConfirmBtn();
@@ -4507,7 +4603,20 @@ function renderBrewTimer() {
   t.className = 'brew-timer-btn ' + (running ? 'stop' : 'start');
   rs.style.display = (!running && s) ? '' : 'none';
   renderStepGuide();
+  // Keeping the screen awake is only useful for a normal brew: let it sleep again after 20 minutes
+  if (running && s >= WAKE_LOCK_MAX_SECS && brewTimer.wakeLock) { try { brewTimer.wakeLock.release(); } catch(e) {} brewTimer.wakeLock = null; }
+  renderTimerPill();
 }
+const WAKE_LOCK_MAX_SECS = 20 * 60;
+// A running timer stays visible on every screen while Log Brew is closed
+function renderTimerPill() {
+  const pill = document.getElementById('timer-pill'); if (!pill) return;
+  const running = !!brewTimer.startedAt, sheetOpen = document.getElementById('modal-recipe')?.classList.contains('open');
+  const show = running && !sheetOpen;
+  pill.hidden = !show;
+  if (show) { const s = brewTimerSecs(); pill.querySelector('.tp-time').textContent = Math.floor(s/60) + ':' + String(s%60).padStart(2,'0'); }
+}
+function reopenBrewSheet() { openModal('modal-recipe'); renderTimerPill(); }
 async function toggleBrewTimer() {
   if (brewTimer.startedAt) { stopBrewTimer(); return; }
   brewTimer.startedAt = Date.now();
@@ -4516,6 +4625,7 @@ async function toggleBrewTimer() {
   if (navigator.vibrate) navigator.vibrate(20);
   renderBrewTimer();
   try { if (navigator.wakeLock) brewTimer.wakeLock = await navigator.wakeLock.request('screen'); } catch(e) {}
+  if (!brewTimer.startedAt && brewTimer.wakeLock) { try { brewTimer.wakeLock.release(); } catch(e) {} brewTimer.wakeLock = null; }   // stopped while the lock was being granted
 }
 function stopBrewTimer() {
   if (brewTimer.startedAt) { brewTimer.elapsed += Date.now() - brewTimer.startedAt; brewTimer.startedAt = null; }
@@ -4537,7 +4647,7 @@ document.addEventListener('visibilitychange', async () => {
   if (document.hidden) return;
   renderBrewTimer();
   // Wake locks are released when the app is hidden; re-acquire if still brewing
-  if (brewTimer.startedAt && navigator.wakeLock) { try { brewTimer.wakeLock = await navigator.wakeLock.request('screen'); } catch(e) {} }
+  if (brewTimer.startedAt && navigator.wakeLock && brewTimerSecs() < WAKE_LOCK_MAX_SECS) { try { brewTimer.wakeLock = await navigator.wakeLock.request('screen'); } catch(e) {} }
 });
 
 // ==================== PLAN NEXT BREW ====================
@@ -4634,6 +4744,7 @@ function renderPlanValues(fromSlider) {
 }
 function savePlan() {
   const d = planDraft; if (!d) return;
+  if (!tapOnce('savePlan')) return;
   const r = d.from;
   if (!state.plannedBrews) state.plannedBrews = [];
   // One plan per coffee + method: a newer plan replaces the older one in the same place; otherwise it joins the end of the queue
@@ -4962,6 +5073,7 @@ function closeSettings() {
 load();
 loadSettings();
 showLoadProblem();
+requestPersistence();
 refreshFx();
 loadPhotos();
 renderDashboard();
@@ -5086,7 +5198,9 @@ if ('serviceWorker' in navigator && location.protocol.startsWith('http')) {
   </div>
 </div>
 
+<datalist id="dl-roaster"></datalist><datalist id="dl-roasterCity"></datalist><datalist id="dl-roasterCountry"></datalist><datalist id="dl-producer"></datalist><datalist id="dl-farm"></datalist><datalist id="dl-country"></datalist><datalist id="dl-region"></datalist><datalist id="dl-varietal"></datalist>
 <input type="file" id="restore-input" accept=".json,application/json" style="display:none" onchange="restoreData(this)">
+<button type="button" class="timer-pill" id="timer-pill" hidden onclick="reopenBrewSheet()" aria-label="Brew timer running. Return to Log Brew"><span class="tp-dot" aria-hidden="true"></span>Brewing <span class="tp-time">0:00</span></button>
 <nav class="bottom-nav">
   <button class="nav-tab active" onclick="showView('dashboard')">
     <span class="nav-tab-icon"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><path d="M3 9.5L12 3l9 6.5V20a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V9.5z"/><path d="M9 21V12h6v9"/></svg></span>Overview
