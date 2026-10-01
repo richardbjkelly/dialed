@@ -708,6 +708,13 @@
   <div id="save-error-banner" style="display:none;background:#8b1a1a;color:#fff;border-radius:10px;padding:12px 14px;margin-bottom:14px;font-size:12px;line-height:1.5">
     <b>Couldn't save your latest change.</b> Your phone's storage for the app is full. Open Settings → Export Backup now so nothing is lost, then remove some label photos.
   </div>
+  <div id="load-error-banner" style="display:none;background:#8b1a1a;color:#fff;border-radius:10px;padding:12px 14px;margin-bottom:14px;font-size:12px;line-height:1.5" role="alert">
+    <b>There was a problem with your saved data.</b> <span class="lp-text"></span>
+    <div class="lp-actions" style="display:none;gap:8px;margin-top:10px">
+      <button type="button" onclick="exportUnreadable()" style="flex:1;padding:8px;border-radius:8px;border:1px solid rgba(255,255,255,.5);background:none;color:#fff;font-size:11px">Export the copy</button>
+      <button type="button" onclick="dismissLoadProblem()" style="flex:1;padding:8px;border-radius:8px;border:1px solid rgba(255,255,255,.5);background:none;color:#fff;font-size:11px">Start fresh</button>
+    </div>
+  </div>
   <div id="backup-reminder"></div>
   <div id="dashboard-fav-grinder"></div>
   <div id="upnext-section" style="margin-bottom:8px"></div>
@@ -1806,6 +1813,7 @@ let currentGrinderFilter = 'all';
 // Photos are stripped from the localStorage copy and re-attached from IndexedDB on start-up.
 let saveFailedWarned = false;
 function save() {
+  if (blockSave) return;   // unreadable data is still in storage and couldn't be copied: don't overwrite it
   try {
     localStorage.setItem('dialin_v2', JSON.stringify(state, (k, v) => k === 'labelPhoto' ? undefined : v));
     saveFailedWarned = false;
@@ -1900,9 +1908,93 @@ async function renderStorageInfo() {
   const kb = b => b > 1048576 ? (b/1048576).toFixed(1)+' MB' : Math.max(1, Math.round(b/1024))+' KB';
   const pct = Math.min(100, Math.round(ls / (5*1048576) * 100));
   const last = appSettings.lastBackupAt ? new Date(appSettings.lastBackupAt).toLocaleDateString('en-GB',{day:'numeric',month:'short',year:'numeric'}) : 'never';
-  el.innerHTML = `Data ${kb(ls)} of ~5 MB (${pct}%) · ${n} photo${n!==1?'s':''} ${kb(photos)} stored separately<br>Last backup: ${last}`;
+  let hasPrev = !!restoreUndo; try { hasPrev = hasPrev || !!localStorage.getItem('dialin_v2_prev'); } catch(e) {}
+  el.innerHTML = `Data ${kb(ls)} of ~5 MB (${pct}%) · ${n} photo${n!==1?'s':''} ${kb(photos)} stored separately<br>Last backup: ${last}`
+    + (hasPrev ? `<br><button type="button" class="taste-clear-all" style="padding:6px 0 0" onclick="confirmAction({title:'Undo last restore?', text:'Brings back the data that the last restore replaced.${restoreUndo ? '' : ' Label photos from before the restore can no longer be recovered.'}', button:'Undo restore', onYes:undoRestore})">Undo last restore</button>` : '');
 }
-function load() { try { const s = localStorage.getItem('dialin_v2'); if(s) { const p = JSON.parse(s); state = {...state, ...p}; } } catch(e){} }
+// ==================== DATA VALIDATION ====================
+// Everything read from storage or a backup file passes through sanitizeState(), so a bad value can never
+// crash start-up, and ids are safe to place in the page.
+const SAFE_ID = /^[A-Za-z0-9_-]{1,64}$/;
+const isObj = v => !!v && typeof v === 'object' && !Array.isArray(v);
+function newId(prefix = '') {
+  const rnd = (window.crypto && crypto.randomUUID) ? crypto.randomUUID().replace(/-/g, '').slice(0, 16) : Date.now().toString(36) + Math.random().toString(36).slice(2, 10);
+  return prefix + rnd;
+}
+function sanitizeState(raw) {
+  if (!isObj(raw)) throw new Error('Not a dialed data file');
+  ['coffees', 'recipes', 'plannedBrews', 'customRecipes'].forEach(k => { if (raw[k] != null && !Array.isArray(raw[k])) throw new Error(`"${k}" is not a list`); });
+  const idMap = {}, seen = new Set();
+  const fixId = (id, pfx) => {
+    const old = String(id == null ? '' : id);
+    if (SAFE_ID.test(old) && !seen.has(old)) { seen.add(old); return old; }
+    const n = newId(pfx); if (old && !(old in idMap)) idMap[old] = n; seen.add(n); return n;
+  };
+  const safeRef = v => { const t = String(v == null ? '' : v); return idMap[t] || (SAFE_ID.test(t) ? t : null); };
+  const num010 = v => { const n = Math.round(Number(v)); return n >= 1 && n <= 10 ? n : 0; };
+  const out = {};
+  out.coffees = (raw.coffees || []).filter(isObj).map(c => {
+    const o = { ...c, id: fixId(c.id, 'c'), name: String(c.name == null || c.name === '' ? 'Unnamed coffee' : c.name) };
+    if (typeof o.labelPhoto !== 'string' || !o.labelPhoto.startsWith('data:image/')) delete o.labelPhoto;
+    if (o.rating != null) o.rating = num010(o.rating);
+    o.finishedBag = !!o.finishedBag; o.decaf = !!o.decaf;
+    return o;
+  });
+  out.customRecipes = (raw.customRecipes || []).filter(isObj).map(r => ({ ...r, id: fixId(r.id, 'cr'), name: String(r.name == null ? 'Recipe' : r.name),
+    steps: Array.isArray(r.steps) ? r.steps.map(x => String(x)) : [] }));
+  out.recipes = (raw.recipes || []).filter(isObj).map(r => {
+    const o = { ...r, id: fixId(r.id, 'b'), coffeeId: safeRef(r.coffeeId) || '', grinderId: safeRef(r.grinderId), recipeId: safeRef(r.recipeId) };
+    if (o.rating != null) o.rating = num010(o.rating);
+    if (o.taste != null && !isObj(o.taste)) delete o.taste;
+    if (!['under', 'good', 'over', ''].includes(o.extraction || '')) o.extraction = '';
+    return o;
+  });
+  out.plannedBrews = (raw.plannedBrews || []).filter(isObj).map(p => ({ ...p, id: fixId(p.id, 'plan-'), coffeeId: safeRef(p.coffeeId) || '', grinderId: safeRef(p.grinderId), recipeId: safeRef(p.recipeId), basedOn: safeRef(p.basedOn) }));
+  out.compareIds = Array.isArray(raw.compareIds) ? raw.compareIds.map(safeRef).filter(Boolean) : [];
+  out.favouriteGrinderId = safeRef(raw.favouriteGrinderId);
+  out.selectedGrinderId = safeRef(raw.selectedGrinderId);
+  out.selectedRecipeId = safeRef(raw.selectedRecipeId);
+  out.selectedCoffeeId = safeRef(raw.selectedCoffeeId);
+  if (typeof raw.selectedMethod === 'string' && raw.selectedMethod.length < 40) out.selectedMethod = raw.selectedMethod;
+  return out;
+}
+function tsOf(x) { const t = x && x.createdAt ? Date.parse(x.createdAt) : NaN; return isNaN(t) ? 0 : t; }
+function fmtDate(iso, opts = { day:'numeric', month:'short', year:'numeric' }) {
+  const t = iso ? Date.parse(iso) : NaN;
+  return isNaN(t) ? 'Unknown date' : new Date(t).toLocaleDateString('en-GB', opts);
+}
+
+let loadProblem = null, blockSave = false;
+function load() {
+  let s = null;
+  try { s = localStorage.getItem('dialin_v2'); } catch(e) { loadProblem = 'storage'; return; }
+  if (!s) return;
+  try { state = { ...state, ...sanitizeState(JSON.parse(s)) }; }
+  catch(e) {
+    // Never throw unreadable data away: keep a copy, and don't save over the original unless the copy was made
+    console.error('Saved data could not be read', e);
+    loadProblem = 'corrupt';
+    try { localStorage.setItem('dialin_v2_corrupt', s); } catch(_) { blockSave = true; }
+  }
+}
+function showLoadProblem() {
+  const el = document.getElementById('load-error-banner'); if (!el || !loadProblem) return;
+  el.style.display = 'block';
+  el.querySelector('.lp-text').textContent = loadProblem === 'storage'
+    ? "This browser is blocking the app's storage, so nothing can be saved. Check you're not in private browsing."
+    : blockSave ? "Your saved data couldn't be read, and there wasn't room to keep a copy. Nothing new will be saved until you export the unreadable data and start fresh."
+                : "Your saved data couldn't be read, so the app has started empty. A copy of the unreadable data has been kept.";
+  el.querySelector('.lp-actions').style.display = loadProblem === 'corrupt' ? 'flex' : 'none';
+}
+function exportUnreadable() {
+  let raw = null; try { raw = localStorage.getItem('dialin_v2_corrupt') || localStorage.getItem('dialin_v2'); } catch(e) {}
+  if (!raw) { showToast('Nothing to export'); return; }
+  downloadText(raw, `dialed-unreadable-${new Date().toISOString().slice(0,10)}.txt`, 'text/plain');
+}
+function dismissLoadProblem() {
+  if (blockSave) { blockSave = false; }
+  loadProblem = null; const el = document.getElementById('load-error-banner'); if (el) el.style.display = 'none';
+}
 
 // ==================== NAVIGATION ====================
 function showView(name, pushState=true) {
@@ -1961,22 +2053,25 @@ function closeModal(id) {
 }
 function openFab() { openModal('modal-fab'); }
 
+let editKeepCoffeeId = null;   // set by fillBrewModal when editing: that coffee stays selectable even if its bag is finished
 function openRecipeModal() {
   if (!state.coffees.length) { showToast('Add a coffee first!'); return; }
+  const keepId = editKeepCoffeeId; editKeepCoffeeId = null;
+  const selectable = c => !c.finishedBag || c.id === keepId;
   // Always reset edit state when opening fresh
   const reid = document.getElementById('r-edit-id'); if(reid) reid.value = '';
   const rtitle = document.getElementById('r-modal-title'); if(rtitle) rtitle.textContent = 'Log Brew';
   // Coffee selector
   const cs = document.getElementById('coffee-selector');
   cs.innerHTML = '';
-  state.coffees.filter(c=>!c.finishedBag).forEach(c => {
+  state.coffees.filter(selectable).forEach(c => {
     const d = document.createElement('div');
     d.className = 'coffee-selector-item' + (state.selectedCoffeeId===c.id?' selected':'');
     d.innerHTML = `<div class="cs-name">${c.name}</div><div class="cs-sub">${c.roaster||''}</div>`;
     d.onclick = () => { state.selectedCoffeeId=c.id; cs.querySelectorAll('.coffee-selector-item').forEach(x=>x.classList.remove('selected')); d.classList.add('selected'); renderBrewHistory(); renderBrewSuggestion(); };
     cs.appendChild(d);
   });
-  const activeCoffees = state.coffees.filter(c=>!c.finishedBag);
+  const activeCoffees = state.coffees.filter(selectable);
   if (!state.selectedCoffeeId || !activeCoffees.find(c=>c.id===state.selectedCoffeeId)) { if(activeCoffees.length){state.selectedCoffeeId=activeCoffees[0].id; cs.children[0]?.classList.add('selected');} }
   // Default grinder to favourite if none previously selected
   if (!state.selectedGrinderId && state.favouriteGrinderId) { state.selectedGrinderId = state.favouriteGrinderId; }
@@ -2897,7 +2992,7 @@ function brewTasteHtml(t) {
 function recipeCard(r, showDel=false) {
   const coffee = state.coffees.find(c=>c.id===r.coffeeId);
   const grinder = r.grinderId ? GRINDERS.find(g=>g.id===r.grinderId) : null;
-  const date = new Date(r.createdAt).toLocaleDateString('en-GB',{day:'numeric',month:'short',year:'numeric'});
+  const date = fmtDate(r.createdAt);
   const exTag = r.extraction ? `<span class="extraction-tag tag-${r.extraction}">${r.extraction==='good'?'✓ Good':r.extraction}</span>` : '';
   const stars = r.rating>0 ? `<span style="display:inline-flex;align-items:center;gap:2px;color:var(--crema)"><svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 14 14" width="11" height="11"><g><path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" d="M2 4h8.5v5c0 0.53043 -0.2107 1.0391 -0.58579 1.4142C9.53914 10.7893 9.03043 11 8.5 11h-5c-0.53043 0 -1.03914 -0.2107 -1.41421 -0.5858C1.71071 10.0391 1.5 9.53043 1.5 9V4.5c0 -0.13261 0.05268 -0.25979 0.14645 -0.35355C1.74021 4.05268 1.86739 4 2 4Z" stroke-width="1"></path><path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" d="M0.5 13.5h13" stroke-width="1"></path><path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" d="M10.5 4h1c0.5304 0 1.0391 0.21071 1.4142 0.58579 0.3751 0.37507 0.5858 0.88378 0.5858 1.41421s-0.2107 1.03914 -0.5858 1.41421C12.5391 7.78929 12.0304 8 11.5 8h-1" stroke-width="1"></path><path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" d="M3 0.5v1" stroke-width="1"></path><path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" d="M8 0.5v1" stroke-width="1"></path><path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" d="M5.5 0.5v1" stroke-width="1"></path></g></svg><span style="font-size:10px;margin-left:2px">${r.rating}/10</span></span>` : '';
   
@@ -3288,7 +3383,7 @@ function renderTracker() {
   if (extraction)  brews = brews.filter(r => r.extraction === extraction);
 
   // Apply sort
-  if (trackerSort === 'date')   brews.sort((a,b) => new Date(b.createdAt) - new Date(a.createdAt));
+  if (trackerSort === 'date')   brews.sort((a,b) => tsOf(b) - tsOf(a));
   if (trackerSort === 'rating') brews.sort((a,b) => (b.rating||0) - (a.rating||0));
   if (trackerSort === 'coffee') brews.sort((a,b) => {
     const ca = state.coffees.find(c=>c.id===a.coffeeId)?.name||'';
@@ -3591,30 +3686,97 @@ function applySettings() {
 }
 
 // ==================== BACKUP / RESTORE ====================
-function backupData() {
-  const data = { state, customRecipes: state.customRecipes||[], exportedAt: new Date().toISOString(), version: 'dialin_v2' };
-  const blob = new Blob([JSON.stringify(data, null, 2)], {type:'application/json'});
+const TRANSIENT_KEYS = ['currentView', 'selectedExtraction', 'selectedRating', 'selectedCoffeeId'];
+function downloadText(text, name, type) {
+  const blob = new Blob([text], { type });
   const url = URL.createObjectURL(blob);
-  const a = document.createElement('a');
-  a.href = url; a.download = `dialed-backup-${new Date().toISOString().slice(0,10)}.json`;
-  a.click(); URL.revokeObjectURL(url);
+  const a = document.createElement('a'); a.href = url; a.download = name; document.body.appendChild(a); a.click(); a.remove();
+  setTimeout(() => URL.revokeObjectURL(url), 2000);
+}
+async function backupData() {
+  const withPhotos = appSettings.backupPhotos !== false;
+  const st = JSON.parse(JSON.stringify(state, (k, v) => (TRANSIENT_KEYS.includes(k) || (!withPhotos && k === 'labelPhoto')) ? undefined : v));
+  const { lastBackupAt, backupSnoozeUntil, ...settings } = appSettings;
+  const data = { app: 'dialed', version: 3, exportedAt: new Date().toISOString(), photosIncluded: withPhotos, state: st, settings };
+  const text = JSON.stringify(data, null, 2), name = `dialed-backup-${new Date().toISOString().slice(0,10)}.json`;
+  let done = false;
+  // An app added to the iPhone Home Screen can't download files; hand the file to the share sheet instead
+  if (navigator.standalone === true && navigator.canShare) {
+    try { const file = new File([text], name, { type: 'application/json' });
+      if (navigator.canShare({ files: [file] })) { await navigator.share({ files: [file], title: 'dialed backup' }); done = true; } }
+    catch(e) { if (e && e.name === 'AbortError') return; }
+  }
+  if (!done) downloadText(text, name, 'application/json');
   showToast('Backup exported ✓');
   appSettings.lastBackupAt = Date.now(); saveSettings(); renderDashboard(); renderStorageInfo();
 }
 
+// Generic confirm sheet (shares the delete-confirm markup)
+function confirmAction({ title, text, button = 'Yes', onYes }) {
+  hideAllOverlays();
+  setDeleteTitle(title);
+  const sub = document.getElementById('confirm-delete-subtitle'); if (sub) sub.textContent = text;
+  const btn = document.getElementById('confirm-delete-btn');
+  if (btn) { btn.textContent = button; btn.onclick = () => { closeModal('modal-confirm-delete'); onYes(); }; }
+  openModal('modal-confirm-delete');
+}
+
+let restoreUndo = null;   // in-memory snapshot (with photos) of what a restore replaced
 function restoreData(input) {
-  const file = input.files[0]; if(!file) return;
+  const file = input.files[0]; if (!file) return;
   const reader = new FileReader();
   reader.onload = e => {
+    let data, clean;
     try {
-      const data = JSON.parse(e.target.result);
-      if (!data.state) { showToast('Invalid backup file'); return; }
-      state = { ...state, ...data.state };
-      save(); renderDashboard(); showToast('Backup restored ✓');
-    } catch(err) { showToast('Could not read file'); }
+      data = JSON.parse(e.target.result);
+      if (!isObj(data) || !isObj(data.state)) throw new Error('No "state" in file');
+      clean = sanitizeState(data.state);
+    } catch(err) { console.warn('Restore rejected', err); showToast("That file isn't a valid dialed backup — nothing was changed"); return; }
+    const n = a => a.length;
+    confirmAction({
+      title: 'Replace your data?',
+      text: `This backup has ${n(clean.coffees)} coffee${n(clean.coffees)!==1?'s':''} and ${n(clean.recipes)} brew${n(clean.recipes)!==1?'s':''}`
+        + (data.exportedAt ? ` from ${fmtDate(data.exportedAt)}` : '') + `. It will replace the ${n(state.coffees)} coffee${n(state.coffees)!==1?'s':''} and ${n(state.recipes)} brew${n(state.recipes)!==1?'s':''} on this device.`
+        + (data.photosIncluded === false ? ' The backup has no label photos.' : '') + ' You can undo this until you close the app.',
+      button: 'Replace',
+      onYes: () => applyRestore(clean, isObj(data.settings) ? data.settings : null)
+    });
   };
+  reader.onerror = () => showToast('Could not read that file');
   reader.readAsText(file);
   input.value = '';
+}
+const SETTING_KEYS = ['darkMode', 'suggestedStart', 'showCosts', 'textSize', 'overviewCategories', 'coffeeLayout', 'brewHistoryOpen', 'lastCurrency', 'backupPhotos'];
+function applyRestore(clean, settings) {
+  restoreUndo = { state: JSON.parse(JSON.stringify(state)), settings: { ...appSettings } };
+  try { localStorage.setItem('dialin_v2_prev', JSON.stringify(state, (k, v) => k === 'labelPhoto' ? undefined : v)); } catch(e) {}
+  setWholeState(clean, settings);
+  showToast('Backup restored ✓');
+  renderStorageInfo();
+}
+function setWholeState(next, settings) {
+  state = { coffees: [], recipes: [], selectedCoffeeId: null, selectedGrinderId: null, selectedMethod: 'Espresso', selectedExtraction: '', selectedRating: 0,
+            currentView: 'dashboard', compareIds: [], favouriteGrinderId: null, selectedRecipeId: null, customRecipes: [], plannedBrews: [], ...next, currentView: 'dashboard' };
+  if (settings) { SETTING_KEYS.forEach(k => { if (settings[k] !== undefined) appSettings[k] = settings[k]; }); saveSettings(); applySettings(); }
+  detailShownId = null;
+  save();
+  if (document.getElementById('view-coffees')) restoreCoffeeList();
+  showView('dashboard', false);
+  try { updateCompareBar(); } catch(e) {}
+}
+function undoRestore() {
+  if (restoreUndo) { const u = restoreUndo; restoreUndo = null; setWholeState(sanitizeState(u.state), u.settings); }
+  else {
+    let prev = null; try { prev = JSON.parse(localStorage.getItem('dialin_v2_prev') || 'null'); } catch(e) {}
+    if (!prev) { showToast('Nothing to undo'); return; }
+    try { setWholeState(sanitizeState(prev), null); } catch(e) { showToast('The previous data could not be read'); return; }
+  }
+  try { localStorage.removeItem('dialin_v2_prev'); } catch(e) {}
+  showToast('Restore undone'); renderStorageInfo();
+}
+function toggleBackupPhotos() {
+  appSettings.backupPhotos = appSettings.backupPhotos === false;
+  saveSettings(); syncSuggestedStartSwitch();
 }
 
 function toggleSuggestedStart() {
@@ -3626,6 +3788,8 @@ function syncSuggestedStartSwitch() {
   if (b) b.setAttribute('aria-checked', appSettings.suggestedStart === false ? 'false' : 'true');
   const c = document.getElementById('settings-costs-switch');
   if (c) c.setAttribute('aria-checked', showCosts() ? 'true' : 'false');
+  const bp = document.getElementById('settings-backupphotos-switch');
+  if (bp) bp.setAttribute('aria-checked', appSettings.backupPhotos === false ? 'false' : 'true');
 }
 function toggleShowCosts() {
   appSettings.showCosts = !showCosts();
@@ -3665,9 +3829,10 @@ function openLightbox(src) {
   if (img) img.src = src;
   openModal('modal-lightbox');
 }
+function resetConfirmBtn() { const b = document.getElementById('confirm-delete-btn'); if (b) b.textContent = 'Yes, Delete'; }
 function setDeleteTitle(t) { const el = document.getElementById('confirm-delete-title'); if (el) el.textContent = t; }
 function confirmDeleteCustomRecipe(id) {
-  setDeleteTitle('Delete Recipe?');
+  setDeleteTitle('Delete Recipe?'); resetConfirmBtn();
   const r = (state.customRecipes||[]).find(x=>x.id===id);
   const sub = document.getElementById('confirm-delete-subtitle');
   if (sub) sub.textContent = r ? 'Delete recipe "' + r.name + '"?' : 'This cannot be undone.';
@@ -3677,7 +3842,7 @@ function confirmDeleteCustomRecipe(id) {
 }
 
 function confirmDeleteCoffee(id) {
-  hideAllOverlays(); setDeleteTitle('Delete Coffee?');
+  hideAllOverlays(); setDeleteTitle('Delete Coffee?'); resetConfirmBtn();
   const c = state.coffees.find(x=>x.id===id); if (!c) return;
   const n = state.recipes.filter(r=>r.coffeeId===id).length;
   const sub = document.getElementById('confirm-delete-subtitle');
@@ -3698,7 +3863,7 @@ function deleteCoffee(id) {
 }
 
 function confirmDeleteBrew(id) {
-  hideAllOverlays(); setDeleteTitle('Delete Brew?');
+  hideAllOverlays(); setDeleteTitle('Delete Brew?'); resetConfirmBtn();
   const r = state.recipes.find(x=>x.id===id);
   const coffee = r ? state.coffees.find(c=>c.id===r.coffeeId) : null;
   const sub = document.getElementById('confirm-delete-subtitle');
@@ -3780,6 +3945,7 @@ function fillBrewModal(r, opts={}) {
   state.selectedMethod = r.method || 'Espresso';
   state.selectedRecipeId = r.recipeId || null;
   if (!opts.keepResult && !opts.keepTimer) resetBrewTimer();
+  editKeepCoffeeId = opts.editId ? r.coffeeId : null;
   openRecipeModal();
   suggestionSuppressed = true; renderBrewSuggestion();
   if (opts.editId) document.getElementById('r-edit-id').value = opts.editId;
@@ -3832,7 +3998,7 @@ function avgDose(cf) { const ds = brewsFor(cf.id).map(r => parseFloat(r.dose)).f
 function bestBrew(cfId) {
   const rated = brewsFor(cfId).filter(r => r.rating > 0);
   if (!rated.length) return null;
-  return rated.sort((a, b) => (b.rating - a.rating) || ((b.extraction === 'good') - (a.extraction === 'good')) || (new Date(b.createdAt) - new Date(a.createdAt)))[0];
+  return rated.sort((a, b) => (b.rating - a.rating) || ((b.extraction === 'good') - (a.extraction === 'good')) || (tsOf(b) - tsOf(a)))[0];
 }
 function bagPanelHtml(cf) {
   const left = gramsLeft(cf), used = gramsUsed(cf), ad = avgDose(cf);
@@ -3885,7 +4051,7 @@ function brewRecipeLabel(r) {
 function brewHistCol(r, label, cls) {
   const g = r.grinderId ? GRINDERS.find(x => x.id === r.grinderId) : null;
   const isEsp = isEspressoMethod(r.method || 'Espresso');
-  const d = new Date(r.createdAt).toLocaleDateString('en-GB', { day:'numeric', month:'short' });
+  const d = fmtDate(r.createdAt, { day:'numeric', month:'short' });
   const tag = r.extraction ? `<span class="extraction-tag tag-${r.extraction}">${r.extraction === 'good' ? '✓ Good' : r.extraction}</span>` : '';
   const line2 = [r.dose ? `${escHtml(r.dose)}<span class="u">g</span>` : '', r.yield ? `${escHtml(r.yield)}<span class="u">${isEsp ? 'g' : 'ml'}</span>` : ''].filter(Boolean).join(' → ');
   const line3 = [r.temp ? `${escHtml(r.temp)}<span class="u">°C</span>` : '', r.time ? formatBrewTime(r.time, r.method) : ''].filter(Boolean).join(' · ');
@@ -3901,7 +4067,7 @@ function brewHistCol(r, label, cls) {
 function renderBrewHistory() {
   const el = document.getElementById('brew-history'); if (!el) return;
   const editing = !!document.getElementById('r-edit-id')?.value;
-  const brews = state.selectedCoffeeId ? brewsFor(state.selectedCoffeeId).slice().sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt)) : [];
+  const brews = state.selectedCoffeeId ? brewsFor(state.selectedCoffeeId).slice().sort((a, b) => tsOf(b) - tsOf(a)) : [];
   if (editing || !brews.length) { el.innerHTML = ''; return; }
   const last = brews[0], best = bestBrew(state.selectedCoffeeId);
   const same = !best || best.id === last.id;
@@ -4149,12 +4315,12 @@ function computeSuggestion(cfId, method) {
   const cf = state.coffees.find(c => c.id === cfId);
   const isGood = r => r.extraction === 'good' || (r.rating >= 7 && r.extraction !== 'under' && r.extraction !== 'over');
   // 1. This coffee already dialled in with this method -> use its best
-  const own = brewsFor(cfId).filter(r => r.method === method && isGood(r)).sort((a, b) => (b.rating || 0) - (a.rating || 0) || new Date(b.createdAt) - new Date(a.createdAt))[0];
+  const own = brewsFor(cfId).filter(r => r.method === method && isGood(r)).sort((a, b) => (b.rating || 0) - (a.rating || 0) || (tsOf(b) - tsOf(a)))[0];
   if (own) {
     const d = parseFloat(own.dose), y = parseFloat(own.yield);
     return { source: 'coffee', um: brewMicrons(own), grindRaw: own.grind, grinderId: own.grinderId, temp: parseFloat(own.temp) || null,
       ratio: d > 0 && y > 0 ? y / d : null, recipeId: own.recipeId || null,
-      reasons: [`Your ${own.rating ? own.rating + '/10 ' : ''}brew of this coffee on ${new Date(own.createdAt).toLocaleDateString('en-GB', {day:'numeric', month:'short'})}`] };
+      reasons: [`Your ${own.rating ? own.rating + '/10 ' : ''}brew of this coffee on ${fmtDate(own.createdAt, {day:'numeric', month:'short'})}`] };
   }
   // 2. Rules, shifted by the user's own good brews on other coffees (similarity-weighted)
   const rule = ruleSuggestion(cf, method);
@@ -4566,7 +4732,7 @@ function renderTrendCharts(coffeeId) {
   if (!container) return;
   const brews = state.recipes
     .filter(r => r.coffeeId === coffeeId && r.createdAt)
-    .sort((a, b) => new Date(a.createdAt) - new Date(b.createdAt));
+    .sort((a, b) => tsOf(a) - tsOf(b));
 
   if (brews.length < 2) {
     container.innerHTML = '<div style="font-size:12px;color:var(--text-muted);padding:8px 0">Log at least 2 brews to see trends.</div>';
@@ -4579,7 +4745,7 @@ function renderTrendCharts(coffeeId) {
     score:  parseFloat(r.rating) || null,
     temp:   parseFloat(r.temp)   || null,
     grind:  parseFloat(r.grind)  || null,
-    date:   new Date(r.createdAt).toLocaleDateString('en-GB', {day:'numeric', month:'short'}),
+    date:   fmtDate(r.createdAt, {day:'numeric', month:'short'}),
     extr:   r.extraction || '',
   }));
 
@@ -4782,6 +4948,7 @@ function closeSettings() {
 // ==================== INIT (runs last, after every declaration) ====================
 load();
 loadSettings();
+showLoadProblem();
 refreshFx();
 loadPhotos();
 renderDashboard();
@@ -4882,8 +5049,16 @@ if ('serviceWorker' in navigator && location.protocol.startsWith('http')) {
       <span class="settings-nav-icon"><svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 15V4M7.5 8.5 12 4l4.5 4.5"/><path d="M5 14v5a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1v-5"/></svg></span>
       <div style="flex:1">
         <div class="settings-nav-label">Export Backup</div>
-        <div class="settings-nav-sub">Download all your data as JSON</div>
+        <div class="settings-nav-sub">Save all your data as a file (not encrypted)</div>
       </div>
+    </div>
+
+    <div class="settings-toggle-row">
+      <div style="flex:1;padding-right:12px">
+        <div class="settings-toggle-label">Photos in Backups</div>
+        <div class="settings-toggle-sub">Include label photos (larger file)</div>
+      </div>
+      <button type="button" class="switch" id="settings-backupphotos-switch" role="switch" aria-checked="true" aria-label="Include photos in backups" onclick="toggleBackupPhotos()"><span class="switch-knob"></span></button>
     </div>
 
     <div class="settings-nav-item" onclick="document.getElementById('restore-input').click();closeSettings()">
@@ -4898,7 +5073,7 @@ if ('serviceWorker' in navigator && location.protocol.startsWith('http')) {
   </div>
 </div>
 
-<input type="file" id="restore-input" accept=".json" style="display:none" onchange="restoreData(this)">
+<input type="file" id="restore-input" accept=".json,application/json" style="display:none" onchange="restoreData(this)">
 <nav class="bottom-nav">
   <button class="nav-tab active" onclick="showView('dashboard')">
     <span class="nav-tab-icon"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><path d="M3 9.5L12 3l9 6.5V20a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V9.5z"/><path d="M9 21V12h6v9"/></svg></span>Overview
