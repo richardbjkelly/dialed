@@ -15,10 +15,10 @@ with sync_playwright() as p:
     g=pg.locator('#plan-grind-range'); print('sculptor range', g.get_attribute('min'), g.get_attribute('max'), g.get_attribute('step'), 'value', g.input_value())
     assert g.get_attribute('step')=='0.1' and g.input_value()=='8.3'
     pg.screenshot(path='shots/plan_sculptor.png')
-    pg.evaluate("const r=document.getElementById('plan-grind-range'); r.value='7.9'; r.dispatchEvent(new Event('input'))")
+    pg.evaluate("const r=document.getElementById('plan-grind-range'); r.value='7.9'; r.dispatchEvent(new Event('input',{bubbles:true}))")
     t=pg.locator('#plan-temp-range'); print('temp', t.get_attribute('min'), t.get_attribute('max'), t.get_attribute('step'), t.input_value())
     assert (t.get_attribute('min'),t.get_attribute('max'),t.get_attribute('step'))==('80','100','1')
-    pg.evaluate("const r=document.getElementById('plan-temp-range'); r.value='97'; r.dispatchEvent(new Event('input'))")
+    pg.evaluate("const r=document.getElementById('plan-temp-range'); r.value='97'; r.dispatchEvent(new Event('input',{bubbles:true}))")
     print('vals:', pg.inner_text('#plan-grind-val').replace('\n',' | '), '||', pg.inner_text('#plan-temp-val'))
     pg.evaluate("savePlan()"); pg.wait_for_timeout(300)
     # Stepped Comandante
@@ -30,7 +30,7 @@ with sync_playwright() as p:
     # No grind/temp logged
     pg.evaluate("openPlanNext('r3')"); pg.wait_for_timeout(400)
     assert pg.locator('#plan-grind-range').is_disabled()
-    pg.evaluate("const r=document.getElementById('plan-temp-range'); r.value='85'; r.dispatchEvent(new Event('input'))")
+    pg.evaluate("const r=document.getElementById('plan-temp-range'); r.value='85'; r.dispatchEvent(new Event('input',{bubbles:true}))")
     pg.evaluate("savePlan()"); pg.wait_for_timeout(300)
     st=json.loads(pg.evaluate("localStorage.getItem('dialin_v2')"))
     print('plans', [(x['coffeeId'],x['grind'],x['temp']) for x in st['plannedBrews']])

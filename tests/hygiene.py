@@ -4,9 +4,27 @@ ROOT=os.environ.get('DIALED_ROOT', os.path.dirname(os.path.dirname(os.path.abspa
 errs=[]; res=[]; cons=[]; ext=[]
 def ok(n,c,i=''):
     res.append(bool(c)); print(('ok  ' if c else 'FAIL'), n, '' if c else i)
-src=open(ROOT+'/index.html',encoding='utf8').read()
+import glob
+html=open(ROOT+'/index.html',encoding='utf8').read()
+src=html+''.join(open(f,encoding='utf8').read() for f in sorted(glob.glob(ROOT+'/js/*.js')+glob.glob(ROOT+'/css/*.css')))
+sw=open(ROOT+'/sw.js',encoding='utf8').read()
 ver=re.search(r"const APP_VERSION = '([^']+)'",src).group(1)
 ok('version.json matches the app version', json.load(open(ROOT+'/version.json'))['version']==ver)
+ok('service worker and asset links carry the same version', re.search(r"const VERSION = '([^']+)'",sw).group(1)==ver and set(re.findall(r'\?v=([\d.]+)',html))=={ver} and len(re.findall(r'\?v=',html))==7)
+ok('no inline scripts, handlers or script-like links in the page', not re.search(r'<script(?![^>]*\ssrc=)|\son[a-z]+\s*=\s*["\\]|javascript:',src), re.findall(r'.{20}\son[a-z]+\s*=\s*["\\].{20}',src)[:3])
+csp=re.search(r'Content-Security-Policy" content="([^"]*)"',html).group(1)
+ok('content policy: scripts only from the app itself', "script-src 'self';" in csp and 'unsafe-eval' not in csp, csp)
+# every handler in the markup uses the small action grammar and a listed action
+acts=set(re.search(r'const ACTIONS = \{([^}]*)\}',src).group(1).replace(' ','').split(','))
+ARG=r"(?:'[^']*'|-?\d+(?:\.\d+)?|null|true|false|this|event|this\.value|this\.checked|this\.src|\$\{[^}]*\})"
+badh=[]
+for m in re.finditer(r'\sdata-on-[a-z]+=(\\?")(.*?)\1',src):
+    c=re.sub(r"'[^']*\$\{(?:[^{}]|'[^']*')*\}[^']*'","'T'",m.group(2).replace("\\'","'"))
+    for st in [x.strip() for x in c.split(';') if x.strip()]:
+        if st in ('return false','event.stopPropagation()'): continue
+        mm=re.fullmatch(r"([A-Za-z_]\w*)\(\s*((?:"+ARG+r"(?:\s*,\s*"+ARG+r")*)?)\s*\)",st)
+        if not mm or mm.group(1) not in acts: badh.append(st)
+ok('every handler is a listed action with plain values', not badh, badh[:5])
 ok('changelog has an entry for this version', f'## v{ver}' in open(ROOT+'/CHANGELOG.md',encoding='utf8').read(), ver)
 ok('no Google Fonts / dead font names left', not re.search(r'googleapis|gstatic|Playfair|DM Mono|DM Sans',src))
 mf=json.load(open(ROOT+'/manifest.json'))
@@ -32,6 +50,11 @@ with sync_playwright() as p:
     ok('service worker registers', pg.evaluate("navigator.serviceWorker.ready.then(r=>!!r.active)"))
     viol=[c for c in cons if 'Content Security Policy' in c or 'Refused to' in c]
     ok('L6 nothing blocked by the policy', not viol, viol[:3])
+    ok('all listed actions exist', pg.evaluate("Object.entries(ACTIONS).filter(([k,v])=>typeof v!=='function').map(x=>x[0])")==[])
+    pg.evaluate("window.__x=0; const d=document.createElement('div'); d.innerHTML='<img src=x onerror=\"window.__x=1\"><button id=evil onclick=\"window.__x=2\">x</button>'; document.body.appendChild(d); document.getElementById('evil').click(); const sc=document.createElement('script'); sc.textContent='window.__x=3'; document.body.appendChild(sc)"); pg.wait_for_timeout(400)
+    ok('strict policy: injected inline script and handlers do not run', pg.evaluate("window.__x")==0, pg.evaluate("window.__x"))
+    pg.evaluate("const e=document.createElement('button'); e.id='evil2'; e.setAttribute('data-on-click','alert(1); eval(\\'1\\'); fetch(\\'x\\'); showView(\\'coffees\\').x'); document.body.appendChild(e); e.click()")
+    ok('a handler naming an unlisted function is ignored entirely', pg.evaluate("state.currentView")!='coffees', pg.evaluate("state.currentView"))
     ok('L6 policy blocks outside scripts', pg.evaluate("new Promise(r=>{const s=document.createElement('script'); s.src='https://example.com/x.js'; s.onerror=()=>r(true); s.onload=()=>r(false); document.head.appendChild(s); setTimeout(()=>r('timeout'),3000)})")==True)
     ok('L9 no update banner when up to date', pg.is_hidden('#update-banner'))
     # foreign currency: fetch only now; rate kept with the price
@@ -72,6 +95,12 @@ with sync_playwright() as p:
     pg.goto('http://localhost:8765/dialed/index.html'); pg.wait_for_timeout(1500)
     ok('L9 update prompt appears when a newer version exists', pg.is_visible('#update-banner') and 'v99.0' in pg.inner_text('#update-banner'))
     pg.click('#update-banner button[aria-label=Dismiss]'); ok('L9 prompt can be dismissed', pg.is_hidden('#update-banner'))
+    # works offline once installed
+    pg2=ctx.new_page(); pg2.on('pageerror',lambda e:errs.append(str(e)))
+    pg2.goto('http://localhost:8765/dialed/index.html'); pg2.evaluate("navigator.serviceWorker.ready"); pg2.wait_for_timeout(1500)
+    ctx.set_offline(True); pg2.reload(); pg2.wait_for_timeout(1200)
+    ok('app loads and runs offline (page, styles, scripts, fonts)', pg2.evaluate("typeof showView==='function' && typeof ACTIONS==='object' && getComputedStyle(document.querySelector('.bottom-nav')).position==='fixed'") and pg2.evaluate("document.fonts.check('12px \"Space Mono\"')"))
+    ctx.set_offline(False); pg2.close()
     # old settings keys dropped
     pg.evaluate("localStorage.setItem('dialin_settings', JSON.stringify({paletteId:'x',darkMode:true}))"); pg.reload(); pg.wait_for_timeout(600)
     ok('L3 old settings load cleanly', pg.evaluate("appSettings.darkMode===true && !('paletteId' in appSettings)"))

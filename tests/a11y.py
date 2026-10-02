@@ -15,7 +15,7 @@ with sync_playwright() as p:
     bad=[]; small=[]; emo=[]
     for v in views:
         pg.evaluate(f"showView('{v}')"); pg.wait_for_timeout(500)
-        bad+=pg.evaluate("[...document.querySelectorAll('[onclick]')].filter(e=>!/^(BUTTON|A|INPUT|SELECT|LABEL)$/.test(e.tagName) && !e.matches('.modal-overlay,.settings-backdrop') && !(e.getAttribute('role')==='button' && e.tabIndex>=0)).map(e=>e.className||e.tagName)")
+        bad+=pg.evaluate("[...document.querySelectorAll('[data-on-click]')].filter(e=>!/^(BUTTON|A|INPUT|SELECT|LABEL)$/.test(e.tagName) && !e.matches('.modal-overlay,.settings-backdrop') && !(e.getAttribute('role')==='button' && e.tabIndex>=0)).map(e=>e.className||e.tagName)")
         small+=pg.evaluate("""[...document.querySelectorAll('.view.active *, .bottom-nav *, header *')].filter(e=>e.offsetParent && [...e.childNodes].some(n=>n.nodeType===3&&n.textContent.trim()) && parseFloat(getComputedStyle(e).fontSize)<11).map(e=>e.textContent.trim().slice(0,20)+':'+getComputedStyle(e).fontSize)""")
         emo+=pg.evaluate(r"""(document.querySelector('.view.active').innerText.match(/[\u{1F300}-\u{1FAFF}]|[✋⚡⭐☕✏⛰✅⚖☆]/gu)||[])""")
     ok('every tappable element is a button or has a button role + tab stop', not bad, bad[:8])

@@ -1,6 +1,6 @@
 # dialed — Change Notes
 
-Specialty coffee dialling-in tracker · Single-file PWA / Android APK
+Specialty coffee dialling-in tracker · PWA (index.html + css/ + js/) / Android APK
 
 ---
 
@@ -799,15 +799,31 @@ Fixes from the full audit (32 issues found; see the status list in the session r
 
 ---
 
+## v3.30
+*2 October 2026*
+
+No visible changes — two structural changes behind the scenes.
+
+### Strict content policy
+- The browser now refuses to run any script that isn't one of the app's own files: no inline scripts and no inline tap handlers
+- All 204 tap/input handlers moved out of the markup's `on…` attributes; a small dispatcher reads them and can only call a fixed list of 102 app functions with plain values
+- Tests confirm injected scripts and handlers do not run
+
+### App split into files
+- `index.html` (markup, ~700 lines), `css/styles.css`, and six scripts in `js/`: data, core, coffee, views, tools, app
+- Files are versioned (`?v=3.30`) so an update can never mix old and new files; the service worker stores them for offline use
+- Service worker, app and `version.json` share one version number, checked by the tests
+
+---
+
 ## Pending / Roadmap
 - Rebuild the APK once to pick up the new cup icon
 - Opt-in pooled data + trained model (see feasibility notes): backend, consent, deletion, ICO registration
 - Google Drive sync (deferred — manual backup/restore and reminder in place)
 - Screenshot showcase for PWABuilder
 - Play Store listing
-- Strict content policy (needs the 160 inline tap handlers moved into script) and splitting the single file into modules — deferred, larger refactors
 - On hold: sharing with friends — start with share links (coffee + best recipe via the phone's share sheet, imported by tapping the link); connected friends/feed later if wanted
 
 ---
 
-*Document maintained automatically. Last updated: v3.29*
+*Document maintained automatically. Last updated: v3.30*

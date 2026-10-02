@@ -1,8 +1,10 @@
 // dialed service worker — offline support
 // App page: network-first (always fresh when online, cached copy when offline).
 // Icons/manifest/fonts: stale-while-revalidate. version.json: always from the network.
-const CACHE = 'dialed-v3';
-const CORE = ['./', './index.html', './manifest.json',
+const VERSION = '3.30';   // keep in step with APP_VERSION (js/app.js) and version.json — the tests check this
+const CACHE = 'dialed-' + VERSION;
+const CORE = ['./', './index.html', './manifest.json', './css/styles.css?v=' + VERSION,
+  ...['data', 'core', 'coffee', 'views', 'tools', 'app'].map(n => './js/' + n + '.js?v=' + VERSION),
   './icon-any-192.png', './icon-any-512.png', './icon-maskable-192.png', './icon-maskable-512.png', './apple-touch-icon.png',
   './fonts/SpaceGrotesk-var.woff2', './fonts/SpaceMono-Regular.woff2', './fonts/SpaceMono-Bold.woff2'];
 
