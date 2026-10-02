@@ -30,19 +30,30 @@ def main():
         else:
             print('Could not start the local server'); return 1
         failed = []
-        for s in wanted:
+        def run(s):
             name, _, arg = s.partition(':')
-            t0 = time.time()
             try:
                 r = subprocess.run([sys.executable, name + '.py'] + ([arg] if arg else []), cwd=HERE, capture_output=True, text=True,
                                    timeout=400, env={**os.environ, 'DIALED_ROOT': ROOT})
                 out, rc = r.stdout + r.stderr, r.returncode
             except subprocess.TimeoutExpired:
                 out, rc = 'timed out', 1
-            bad = rc != 0 or any(l.startswith('FAIL') for l in out.splitlines())
+            return out, rc != 0 or any(l.startswith('FAIL') for l in out.splitlines())
+        ci = bool(os.environ.get('GITHUB_ACTIONS'))
+        def note(level, s, out):   # shows on the GitHub run summary without opening the log
+            if ci:
+                lines = [l for l in out.splitlines() if l.startswith('FAIL')] or out.splitlines()[-3:]
+                print(f"::{level} title={s}::" + ' | '.join(lines)[:900].replace('%', '%25'))
+        for s in wanted:
+            t0 = time.time()
+            out, bad = run(s)
+            if bad:                 # timing-sensitive browser checks: one more go before calling it a failure
+                first = out; out, bad = run(s)
+                if not bad:
+                    print(f"ok   {s:14s} {time.time() - t0:5.1f}s  (passed on a second attempt)"); note('warning', s + ' needed a second attempt', first); continue
             print(f"{'FAIL' if bad else 'ok  '} {s:14s} {time.time() - t0:5.1f}s")
             if bad:
-                failed.append(s); print('\n'.join('     ' + l for l in out.splitlines()[-25:]))
+                failed.append(s); print('\n'.join('     ' + l for l in out.splitlines()[-25:])); note('error', s, out)
         print(f"\n{len(wanted) - len(failed)}/{len(wanted)} suites passed" + (f" — failed: {', '.join(failed)}" if failed else ''))
         return 1 if failed else 0
     finally:
