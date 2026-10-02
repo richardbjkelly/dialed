@@ -270,7 +270,11 @@ function showView(name, pushState=true) {
 // Android back gesture + double-back to exit
 let lastBackTime = 0;
 window.addEventListener('popstate', function(e) {
-  const openModal = document.querySelector('.modal-overlay.open');
+  // Back closes the top layer first: a confirm box, then full-screen brew mode, then any open sheet
+  const confirmOpen = document.querySelector('#modal-confirm-delete.open');
+  const brewing = !confirmOpen && document.querySelector('#brew-mode.open');
+  if (brewing) { closeBrewMode(); history.pushState({view:state.currentView},'',''); return; }
+  const openModal = confirmOpen || document.querySelector('.modal-overlay.open');
   if (openModal) { closeModal(openModal.id); history.pushState({view:state.currentView},'',''); return; }
   const settingsOpen = document.getElementById('settings-panel')?.classList.contains('open');
   if (settingsOpen) { closeSettings && closeSettings(); history.pushState({view:state.currentView},'',''); return; }
@@ -300,7 +304,7 @@ function closeModal(id) {
   el.classList.remove('open');
   try { a11yClosed(id); } catch(e) {}
   if (id === 'modal-fab') document.querySelector('.fab')?.classList.remove('fab-open');
-  if (id === 'modal-recipe') { try { renderTimerPill(); } catch(e) {} }
+  if (id === 'modal-recipe') { try { closeBrewMode(); renderTimerPill(); } catch(e) {} }   // brew mode belongs to Log Brew
   if (reduceMotion()) return;
   // Stays visible (and ignores taps) while it slides away; a timer guarantees it always finishes
   el.classList.add('closing');

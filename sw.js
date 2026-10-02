@@ -1,7 +1,7 @@
 // dialed service worker — offline support
 // App page: network-first (always fresh when online, cached copy when offline).
 // Icons/manifest/fonts: stale-while-revalidate. version.json: always from the network.
-const VERSION = '3.30';   // keep in step with APP_VERSION (js/app.js) and version.json — the tests check this
+const VERSION = '3.31';   // keep in step with APP_VERSION (js/app.js) and version.json — the tests check this
 const CACHE = 'dialed-' + VERSION;
 const CORE = ['./', './index.html', './manifest.json', './css/styles.css?v=' + VERSION,
   ...['data', 'core', 'coffee', 'views', 'tools', 'app'].map(n => './js/' + n + '.js?v=' + VERSION),

@@ -13,7 +13,7 @@
 <meta name="apple-mobile-web-app-title" content="dialed">
 <meta name="theme-color" content="#123C27">
 <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; font-src 'self'; connect-src 'self' https://api.frankfurter.dev https://api.frankfurter.app; object-src 'none'; base-uri 'self'; form-action 'none'">
-<link rel="stylesheet" href="css/styles.css?v=3.30">
+<link rel="stylesheet" href="css/styles.css?v=3.31">
 </head>
 <body>
 
@@ -325,6 +325,7 @@
     <div class="brew-timer">
       <div class="brew-timer-display" id="brew-timer-display">0:00</div>
       <button type="button" class="brew-timer-btn reset" id="brew-timer-reset" data-on-click="resetBrewTimer()" style="display:none">Reset</button>
+      <button type="button" class="brew-timer-btn reset" id="brew-timer-expand" data-on-click="openBrewMode()" style="display:none">Full screen</button>
       <button type="button" class="brew-timer-btn start" id="brew-timer-toggle" data-on-click="toggleBrewTimer()">▶ Start brew</button>
     </div>
     <div id="brew-step-guide" class="brew-guide" style="display:none"></div>
@@ -477,7 +478,7 @@
     <div class="modal-title" id="confirm-delete-title" style="font-size:18px">Delete Brew?</div>
     <div class="modal-subtitle" id="confirm-delete-subtitle">This cannot be undone.</div>
     <div style="display:flex;gap:10px;margin-top:16px">
-      <button class="btn-secondary" style="flex:1" data-on-click="closeModal('modal-confirm-delete')">Cancel</button>
+      <button class="btn-secondary" id="confirm-cancel-btn" style="flex:1" data-on-click="closeModal('modal-confirm-delete')">Cancel</button>
       <button class="btn-primary" id="confirm-delete-btn" style="flex:1;background:#8b1a1a">Yes, Delete</button>
     </div>
     <div style="height:10px"></div>
@@ -684,6 +685,25 @@
 <datalist id="dl-roaster"></datalist><datalist id="dl-roasterCity"></datalist><datalist id="dl-roasterCountry"></datalist><datalist id="dl-producer"></datalist><datalist id="dl-farm"></datalist><datalist id="dl-country"></datalist><datalist id="dl-region"></datalist><datalist id="dl-varietal"></datalist>
 <input type="file" id="restore-input" accept=".json,application/json" style="display:none" data-on-change="restoreData(this)">
 <button type="button" class="timer-pill" id="timer-pill" hidden data-on-click="reopenBrewSheet()" aria-label="Brew timer running. Return to Log Brew"><span class="tp-dot" aria-hidden="true"></span>Brewing <span class="tp-time">0:00</span></button>
+<div id="brew-mode" class="brew-mode" role="dialog" aria-modal="true" aria-label="Brewing" tabindex="-1" hidden>
+  <div class="bm-top">
+    <div class="bm-id"><div class="bm-coffee" id="bm-coffee"></div><div class="bm-recipe" id="bm-recipe"></div></div>
+    <button type="button" class="bm-min" data-on-click="minimiseBrewMode()">▾ Minimise</button>
+  </div>
+  <div class="bm-clock" id="bm-clock" role="timer">0:00</div>
+  <div class="bm-meta" id="bm-meta"></div>
+  <div class="bm-guide" id="bm-guide">
+    <div class="bm-now-label" id="bm-now-label"></div>
+    <div class="bm-now" id="bm-now" aria-live="polite"></div>
+    <div class="bm-bar"><i id="bm-bar"></i></div>
+    <div class="bm-next"><span id="bm-next-at"></span><span id="bm-next-in"></span></div>
+  </div>
+  <ol class="bm-steps" id="bm-steps"></ol>
+  <div class="bm-actions">
+    <button type="button" class="bm-cancel" data-on-click="confirmCancelBrew()">Cancel</button>
+    <button type="button" class="bm-stop" id="bm-stop" data-on-click="stopBrewFromMode()">■ Stop</button>
+  </div>
+</div>
 <nav class="bottom-nav">
   <button class="nav-tab active" data-on-click="showView('dashboard')">
     <span class="nav-tab-icon"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><path d="M3 9.5L12 3l9 6.5V20a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V9.5z"/><path d="M9 21V12h6v9"/></svg></span>Overview
@@ -698,11 +718,11 @@
     <span class="nav-tab-icon"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><line x1="4" y1="6" x2="20" y2="6"/><line x1="4" y1="12" x2="20" y2="12"/><line x1="4" y1="18" x2="20" y2="18"/><circle cx="8" cy="6" r="2" fill="var(--espresso)" stroke="currentColor" class="nav-fill"/><circle cx="16" cy="12" r="2" fill="var(--espresso)" stroke="currentColor" class="nav-fill"/><circle cx="10" cy="18" r="2" fill="var(--espresso)" class="nav-fill" stroke="currentColor"/></svg></span>Settings
   </button>
 </nav>
-<script src="js/data.js?v=3.30"></script>
-<script src="js/core.js?v=3.30"></script>
-<script src="js/coffee.js?v=3.30"></script>
-<script src="js/views.js?v=3.30"></script>
-<script src="js/tools.js?v=3.30"></script>
-<script src="js/app.js?v=3.30"></script>
+<script src="js/data.js?v=3.31"></script>
+<script src="js/core.js?v=3.31"></script>
+<script src="js/coffee.js?v=3.31"></script>
+<script src="js/views.js?v=3.31"></script>
+<script src="js/tools.js?v=3.31"></script>
+<script src="js/app.js?v=3.31"></script>
 </body>
 </html>

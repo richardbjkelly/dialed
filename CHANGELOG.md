@@ -816,14 +816,34 @@ No visible changes — two structural changes behind the scenes.
 
 ---
 
+## v3.31
+*2 October 2026*
+
+### Full-screen brew mode
+- Starting the brew timer now opens a full-screen view: very large clock, coffee and recipe name, dose / water / grind, the current step in large type and a bar counting down to the next step
+- The whole recipe is listed underneath as a timeline: finished steps fade and tick, the current one is marked, the next is bold; long recipes scroll and keep the current step in view
+- At the last step the bar shows how far over you are and Stop becomes "Stop & save time"
+- Minimise (or the phone's Back button, or Escape) returns to the form with the timer still running; a "Full screen" button and the timer pill bring it back
+- Recipes without timed steps show the clock on its own
+
+### Cancel a brew
+- New Cancel button for an accidental start. It asks "Cancel this brew?" first (Keep brewing / Yes, cancel brew); the timer keeps running until you confirm
+- Cancelling resets the timer to 0:00 and returns to the form; everything else you entered is kept and nothing is saved
+
+### Fix
+- On a fresh launch, the phone's Back button with a sheet or brew mode open left the app (losing a running timer). The first Back press is now always handled by the app
+
+---
+
 ## Pending / Roadmap
 - Rebuild the APK once to pick up the new cup icon
 - Opt-in pooled data + trained model (see feasibility notes): backend, consent, deletion, ICO registration
 - Google Drive sync (deferred — manual backup/restore and reminder in place)
 - Screenshot showcase for PWABuilder
 - Play Store listing
+- Score a brew later: stop saves the brew as "awaiting score", with a reminder and a quick-score sheet (mocked up, awaiting decisions)
 - On hold: sharing with friends — start with share links (coffee + best recipe via the phone's share sheet, imported by tapping the link); connected friends/feed later if wanted
 
 ---
 
-*Document maintained automatically. Last updated: v3.30*
+*Document maintained automatically. Last updated: v3.31*

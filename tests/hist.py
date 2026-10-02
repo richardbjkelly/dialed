@@ -36,7 +36,7 @@ with sync_playwright() as p:
             ok('unrated -> Last only', pg.locator('#brew-history .bh-col').count()==1 and 'not rated' in pg.inner_text('#brew-history').lower())
             # back to c1, start timer, type a note, use best
             pg.locator('#coffee-selector .coffee-selector-item', has_text='Supernova').click(); pg.wait_for_timeout(200)
-            pg.fill('#r-notes','my note'); pg.evaluate("toggleBrewTimer()"); pg.wait_for_timeout(1200)
+            pg.fill('#r-notes','my note'); pg.evaluate("toggleBrewTimer(); minimiseBrewMode()"); pg.wait_for_timeout(1200)
             pg.locator('#brew-history .bh-col.best .bh-use').click(); pg.wait_for_timeout(500)
             ok('use best: grind/temp filled', pg.input_value('#r-grind')=='11' and pg.input_value('#r-temp')=='90', (pg.input_value('#r-grind'), pg.input_value('#r-temp')))
             ok('use best: recipe + method set', pg.evaluate("state.selectedMethod")=='AeroPress' and pg.input_value('#r-recipe-select')=='aeropress-hoffmann')

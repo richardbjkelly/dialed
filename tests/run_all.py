@@ -13,7 +13,7 @@ import os, subprocess, sys, tempfile, time, urllib.request
 HERE = os.path.dirname(os.path.abspath(__file__))
 ROOT = os.path.dirname(HERE)
 PORT = 8765
-SUITES = ['basics', 'taps', 'safety', 'inject', 'behave', 'photos', 'a11y', 'hygiene', 'cost', 'del', 'ext', 'plan', 'grid', 'var',
+SUITES = ['basics', 'taps', 'brewmode:shots', 'safety', 'inject', 'behave', 'photos', 'a11y', 'hygiene', 'cost', 'del', 'ext', 'plan', 'grid', 'var',
           'same', 'decaf', 'order', 'bars', 'group', 'quick', 'zoom', 'motion', 'motion:reduce', 'finish', 'menu', 'rating',
           'tileb', 'rslider', 'taste', 'brewcard', 'hist', 'rwidth']
 

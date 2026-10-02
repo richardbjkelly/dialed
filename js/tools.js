@@ -71,12 +71,13 @@ async function backupData() {
 }
 
 // Generic confirm sheet (shares the delete-confirm markup)
-function confirmAction({ title, text, button = 'Yes', onYes, neutral = false }) {
+function confirmAction({ title, text, button = 'Yes', onYes, neutral = false, cancel = 'Cancel' }) {
   hideAllOverlays();
   setDeleteTitle(title);
   const sub = document.getElementById('confirm-delete-subtitle'); if (sub) sub.textContent = text;
   const btn = document.getElementById('confirm-delete-btn');
   if (btn) { btn.textContent = button; btn.style.background = neutral ? '' : '#8b1a1a'; btn.onclick = () => { closeModal('modal-confirm-delete'); onYes(); }; }
+  const cb = document.getElementById('confirm-cancel-btn'); if (cb) cb.textContent = cancel;
   openModal('modal-confirm-delete');
 }
 
@@ -210,7 +211,7 @@ function openLightbox(src) {
   if (img) img.src = src;
   openModal('modal-lightbox');
 }
-function resetConfirmBtn() { const b = document.getElementById('confirm-delete-btn'); if (b) { b.textContent = 'Yes, Delete'; b.style.background = '#8b1a1a'; } }
+function resetConfirmBtn() { const cb = document.getElementById('confirm-cancel-btn'); if (cb) cb.textContent = 'Cancel'; const b = document.getElementById('confirm-delete-btn'); if (b) { b.textContent = 'Yes, Delete'; b.style.background = '#8b1a1a'; } }
 function setDeleteTitle(t) { const el = document.getElementById('confirm-delete-title'); if (el) el.textContent = t; }
 function confirmDeleteCustomRecipe(id) {
   setDeleteTitle('Delete Recipe?'); resetConfirmBtn();
@@ -870,7 +871,9 @@ function renderBrewTimer() {
   t.textContent = running ? '■ Stop' : (s ? '▶ Resume' : '▶ Start brew');
   t.className = 'brew-timer-btn ' + (running ? 'stop' : 'start');
   rs.style.display = (!running && s) ? '' : 'none';
+  const ex = document.getElementById('brew-timer-expand'); if (ex) ex.style.display = running ? '' : 'none';
   renderStepGuide();
+  renderBrewMode();
   // Keeping the screen awake is only useful for a normal brew: let it sleep again after 20 minutes
   if (running && s >= WAKE_LOCK_MAX_SECS && brewTimer.wakeLock) { try { brewTimer.wakeLock.release(); } catch(e) {} brewTimer.wakeLock = null; }
   renderTimerPill();
@@ -884,13 +887,14 @@ function renderTimerPill() {
   pill.hidden = !show;
   if (show) { const s = brewTimerSecs(); pill.querySelector('.tp-time').textContent = Math.floor(s/60) + ':' + String(s%60).padStart(2,'0'); }
 }
-function reopenBrewSheet() { openModal('modal-recipe'); renderTimerPill(); }
+function reopenBrewSheet() { openModal('modal-recipe'); renderTimerPill(); if (brewTimer.startedAt) openBrewMode(); }
 async function toggleBrewTimer() {
   if (brewTimer.startedAt) { stopBrewTimer(); return; }
   brewTimer.startedAt = Date.now();
   clearInterval(brewTimer.tick);
   brewTimer.tick = setInterval(renderBrewTimer, 250);
   if (navigator.vibrate) navigator.vibrate(20);
+  openBrewMode();
   renderBrewTimer();
   try { if (navigator.wakeLock) brewTimer.wakeLock = await navigator.wakeLock.request('screen'); } catch(e) {}
   if (!brewTimer.startedAt && brewTimer.wakeLock) { try { brewTimer.wakeLock.release(); } catch(e) {} brewTimer.wakeLock = null; }   // stopped while the lock was being granted
@@ -909,7 +913,66 @@ function resetBrewTimer() {
   try { brewTimer.wakeLock && brewTimer.wakeLock.release(); } catch(e) {}
   brewTimer = { startedAt:null, elapsed:0, tick:null, wakeLock:null };
   lastGuideIdx = -1;
+  closeBrewMode();
   renderBrewTimer();
+}
+
+// ---- Full-screen brew mode: big clock, current step, whole recipe as a timeline ----
+let brewModeIdx = null;
+const brewModeEl = () => document.getElementById('brew-mode');
+const brewModeOpen = () => !!brewModeEl()?.classList.contains('open');
+function openBrewMode() {
+  const el = brewModeEl(); if (!el || brewModeOpen()) return;
+  el.hidden = false; el.classList.add('open'); brewModeIdx = null;
+  try { a11yOpened('brew-mode'); } catch(e) {}
+  renderBrewMode();
+}
+function closeBrewMode() {
+  const el = brewModeEl(); if (!el || !brewModeOpen()) return;
+  el.classList.remove('open');
+  try { a11yClosed('brew-mode'); } catch(e) {}
+  el.hidden = true;
+}
+function minimiseBrewMode() { closeBrewMode(); }
+function stopBrewFromMode() { stopBrewTimer(); closeBrewMode(); }
+function confirmCancelBrew() {
+  confirmAction({ title:'Cancel this brew?', text:"The timer will reset to 0:00. Everything else you've entered stays as it is.",
+    button:'Yes, cancel brew', cancel:'Keep brewing', onYes() { resetBrewTimer(); showToast('Brew cancelled'); } });
+}
+function renderBrewMode() {
+  if (!brewModeOpen()) return;
+  const $ = id => document.getElementById(id), fmt = n => Math.floor(n / 60) + ':' + String(n % 60).padStart(2, '0');
+  const set = (id, t) => { const e = $(id); if (e && e.textContent !== t) e.textContent = t; };
+  const s = brewTimerSecs();
+  set('bm-clock', fmt(s)); $('bm-clock').classList.toggle('long', s >= 600);
+  const cf = state.coffees.find(c => c.id === state.selectedCoffeeId);
+  const rec = state.selectedRecipeId ? getAllRecipesForMethod(state.selectedMethod).find(x => x.id === state.selectedRecipeId) : null;
+  set('bm-coffee', cf ? cf.name : 'Brewing');
+  set('bm-recipe', rec ? rec.name : (state.selectedMethod || ''));
+  const v = id => ($(id)?.value || '').trim(), isEsp = isEspressoMethod(state.selectedMethod || 'Espresso');
+  set('bm-meta', [v('r-dose') && v('r-dose') + 'g', v('r-yield') && v('r-yield') + (isEsp ? 'g out' : 'ml'), v('r-grind') && 'Grind ' + v('r-grind')].filter(Boolean).join(' · '));
+  const steps = timedSteps(), guide = $('bm-guide'), list = $('bm-steps'), stop = $('bm-stop');
+  if (steps.length < 2) {            // no timed recipe: just the clock
+    guide.style.display = 'none'; list.innerHTML = ''; list.className = 'bm-spacer'; brewModeIdx = null;
+    stop.classList.remove('final'); set('bm-stop', '■ Stop'); return;
+  }
+  guide.style.display = ''; list.className = 'bm-steps';
+  let idx = -1; steps.forEach((st, i) => { if (s >= st.at) idx = i; });
+  const cur = steps[idx], next = steps[idx + 1];
+  if (idx !== brewModeIdx) {
+    const first = brewModeIdx === null;
+    brewModeIdx = idx;
+    set('bm-now', cur ? cur.text : 'Get ready…');
+    list.innerHTML = steps.map((st, i) => `<li class="${i < idx ? 'done' : i === idx ? 'now' : i === idx + 1 ? 'next' : ''}"><b>${fmt(st.at)}</b><span>${i < idx ? '✓ ' : i === idx ? '● ' : ''}${escHtml(st.text)}</span></li>`).join('');
+    const li = list.children[Math.max(0, idx)]; if (li && li.scrollIntoView) li.scrollIntoView({ block: 'nearest' });
+    if (!first && !reduceMotion()) { guide.classList.remove('bm-pulse'); void guide.offsetWidth; guide.classList.add('bm-pulse'); }
+  }
+  set('bm-now-label', cur ? `Now · step ${idx + 1} of ${steps.length}` : 'Starting');
+  const from = cur ? cur.at : 0;
+  $('bm-bar').style.width = (next ? Math.min(100, Math.max(0, (s - from) / Math.max(1, next.at - from) * 100)) : 100) + '%';
+  set('bm-next-at', next ? 'Next at ' + fmt(next.at) : 'Last step');
+  set('bm-next-in', next ? 'in ' + fmt(Math.max(0, next.at - s)) : '+' + fmt(Math.max(0, s - from)));
+  stop.classList.toggle('final', !next); set('bm-stop', next ? '■ Stop' : '■ Stop & save time');
 }
 document.addEventListener('visibilitychange', async () => {
   if (document.hidden) return;
