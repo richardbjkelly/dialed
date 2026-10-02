@@ -52,9 +52,10 @@ with sync_playwright() as p:
     ok('last step: full bar, overtime, Stop & save time', pg.evaluate("document.getElementById('bm-bar').style.width")=='100%' and pg.inner_text('#bm-next-in').startswith('+') and 'save time' in pg.inner_text('#bm-stop').lower() and pg.evaluate("document.getElementById('bm-stop').classList.contains('final')"))
     if len(sys.argv)>1: pg.screenshot(path='shots/bm_last.png')
     pg.tap('#bm-stop'); pg.wait_for_timeout(500)
+    ok('Stop offers score now or later', pg.locator('#modal-brew-done.open').count()==1); pg.tap('#modal-brew-done button:has-text("Score now")'); pg.wait_for_timeout(500)
     t=int(pg.input_value('#r-time-mins') or 0)*60+int(pg.input_value('#r-time-secs') or 0)
     ok('Stop closes brew mode and fills in the time', pg.is_hidden('#brew-mode') and not pg.evaluate("!!brewTimer.startedAt") and last+3<=t<=last+7, t)
-    ok('Resume reopens brew mode', (pg.tap('#brew-timer-toggle'), pg.wait_for_timeout(300), pg.is_visible('#brew-mode'))[2]); pg.tap('#bm-stop'); pg.wait_for_timeout(300)
+    ok('Resume reopens brew mode', (pg.tap('#brew-timer-toggle'), pg.wait_for_timeout(300), pg.is_visible('#brew-mode'))[2]); pg.tap('#bm-stop'); pg.wait_for_timeout(300); pg.evaluate("closeModal('modal-brew-done')"); pg.wait_for_timeout(300)
     pg.evaluate("saveRecipe()"); pg.wait_for_timeout(900)
     ok('brew saves; brew mode stays closed', len(json.loads(pg.evaluate("localStorage.getItem('dialin_v2')"))['recipes'])==1 and pg.is_hidden('#brew-mode'))
     # no timed recipe: clock only

@@ -148,6 +148,8 @@ function syncSuggestedStartSwitch() {
   if (b) b.setAttribute('aria-checked', appSettings.suggestedStart === false ? 'false' : 'true');
   const c = document.getElementById('settings-costs-switch');
   if (c) c.setAttribute('aria-checked', showCosts() ? 'true' : 'false');
+  const sl = document.getElementById('settings-scorelater-switch');
+  if (sl) sl.setAttribute('aria-checked', scoreLaterOn() ? 'true' : 'false');
   const bp = document.getElementById('settings-backupphotos-switch');
   if (bp) bp.setAttribute('aria-checked', appSettings.backupPhotos === false ? 'false' : 'true');
 }
@@ -330,7 +332,7 @@ function fillBrewModal(r, opts={}) {
   editKeepCoffeeId = opts.editId ? r.coffeeId : null;
   openRecipeModal();
   suggestionSuppressed = true; renderBrewSuggestion();
-  if (opts.editId) document.getElementById('r-edit-id').value = opts.editId;
+  if (opts.editId) { document.getElementById('r-edit-id').value = opts.editId; const lb = document.getElementById('r-later-btn'); if (lb) lb.style.display = 'none'; }
   if (opts.planId) document.getElementById('r-plan-id').value = opts.planId;
   document.getElementById('r-modal-title').textContent = opts.title || 'Log Brew';
   const sel = document.getElementById('r-recipe-select');
@@ -934,7 +936,10 @@ function closeBrewMode() {
   el.hidden = true;
 }
 function minimiseBrewMode() { closeBrewMode(); }
-function stopBrewFromMode() { stopBrewTimer(); closeBrewMode(); }
+function stopBrewFromMode() {
+  stopBrewTimer(); closeBrewMode();
+  if (scoreLaterOn() && !document.getElementById('r-edit-id')?.value) openBrewDone();
+}
 function confirmCancelBrew() {
   confirmAction({ title:'Cancel this brew?', text:"The timer will reset to 0:00. Everything else you've entered stays as it is.",
     button:'Yes, cancel brew', cancel:'Keep brewing', onYes() { resetBrewTimer(); showToast('Brew cancelled'); } });
@@ -980,6 +985,130 @@ document.addEventListener('visibilitychange', async () => {
   // Wake locks are released when the app is hidden; re-acquire if still brewing
   if (brewTimer.startedAt && navigator.wakeLock && brewTimerSecs() < WAKE_LOCK_MAX_SECS) { try { brewTimer.wakeLock = await navigator.wakeLock.request('screen'); } catch(e) {} }
 });
+
+// ==================== SCORE LATER ====================
+// A brew can be saved straight after brewing and scored once it has cooled. The Overview card is the dependable
+// prompt; the notification is best-effort (there is no server, so it only fires while the app is still alive).
+const scoreLaterOn = () => appSettings.scoreLaterPrompt !== false;
+const remindMins = () => [5, 10, 15].includes(appSettings.scoreRemindMins) ? appSettings.scoreRemindMins : 10;
+const awaitingBrews = () => state.recipes.filter(r => r.awaitingScore);
+const isScoreOnly = () => !!document.getElementById('modal-recipe')?.classList.contains('score-only');
+function toggleScoreLater() { appSettings.scoreLaterPrompt = !scoreLaterOn(); saveSettings(); syncSuggestedStartSwitch(); }
+function setScoreOnly(on) {
+  const m = document.getElementById('modal-recipe'); if (!m) return;
+  m.classList.toggle('score-only', !!on);
+  const sb = document.getElementById('r-save-btn'); if (sb) sb.textContent = on ? 'Save score' : 'Log Brew';
+  const lb = document.getElementById('r-later-btn'); if (lb) lb.style.display = (!on && scoreLaterOn()) ? '' : 'none';
+  if (!on) { const sub = document.getElementById('r-modal-sub'); if (sub) sub.textContent = 'Dialling in a recipe'; }
+}
+function brewLine(r) {
+  const isEsp = isEspressoMethod(r.method || 'Espresso');
+  return [r.grind && 'Grind ' + r.grind, r.dose && r.yield ? `${r.dose}g → ${r.yield}${isEsp ? 'g' : 'ml'}` : r.dose ? r.dose + 'g' : '', r.temp && r.temp + '°C', r.time && formatBrewTime(r.time, r.method)].filter(x => x && x !== '—').join(' · ');
+}
+function agoText(iso) {
+  const t = Date.parse(iso); if (isNaN(t)) return '';
+  const m = Math.floor((Date.now() - t) / 60000);
+  return m < 1 ? 'just now' : m < 60 ? m + ' min ago' : m < 1440 ? Math.floor(m / 60) + ' h ago' : fmtDate(iso);
+}
+function setRemindMins(n) {
+  appSettings.scoreRemindMins = n; saveSettings();
+  document.querySelectorAll('#bd-chips button').forEach(b => { const on = +b.dataset.mins === remindMins(); b.classList.toggle('active', on); b.setAttribute('aria-pressed', String(on)); });
+}
+function openBrewDone() {
+  const v = id => (document.getElementById(id)?.value || '').trim();
+  const cf = state.coffees.find(c => c.id === state.selectedCoffeeId), g = selectedGrinder();
+  const draft = { method: state.selectedMethod, grind: v('r-grind'), dose: v('r-dose'), yield: v('r-yield'), temp: v('r-temp'), time: getBrewTimeSecs() };
+  const isEsp = isEspressoMethod(draft.method || 'Espresso');
+  document.getElementById('bd-sub').textContent = [cf && cf.name, draft.method].filter(Boolean).join(' · ');
+  const rows = [
+    draft.grind && `Grind <b>${escHtml(draft.grind)}</b>${g ? ` <span>${escHtml(g.brand + ' ' + g.model)}</span>` : ''}`,
+    draft.dose && `${escHtml(draft.dose)}g${draft.yield ? ' → ' + escHtml(draft.yield) + (isEsp ? 'g' : 'ml') : ''}`,
+    [draft.temp && escHtml(draft.temp) + '°C', draft.time && `<b>${escHtml(formatBrewTime(draft.time, draft.method))}</b>`].filter(Boolean).join(' · '),
+  ].filter(Boolean);
+  document.getElementById('bd-summary').innerHTML = rows.map(x => `<div>${x}</div>`).join('') || '<div><span>No recipe details entered yet</span></div>';
+  setRemindMins(remindMins());
+  openModal('modal-brew-done');
+}
+function brewDoneNow() {
+  closeModal('modal-brew-done');
+  const ex = document.querySelector('#modal-recipe .extraction-picker'); if (ex && ex.scrollIntoView) ex.scrollIntoView({ block: 'center', behavior: reduceMotion() ? 'auto' : 'smooth' });
+}
+function brewDoneLater() { closeModal('modal-brew-done'); saveBrewForLater(); }
+function saveBrewForLater() {
+  // Asked on the tap itself, which is the only moment a phone allows the question
+  try { if ('Notification' in window && Notification.permission === 'default') Notification.requestPermission().catch(() => {}); } catch(e) {}
+  saveRecipe({ later: remindMins() });
+}
+function scoreBrew(id) {
+  const r = state.recipes.find(x => x.id === id); if (!r) return;
+  document.querySelectorAll('.modal-overlay.open').forEach(m => { if (m.id !== 'modal-recipe') closeModal(m.id); });
+  fillBrewModal(r, { editId: id, title: 'Score brew', keepResult: true });
+  if (document.getElementById('r-edit-id')?.value !== id) return;      // the sheet didn't open
+  setScoreOnly(true);
+  const cf = state.coffees.find(c => c.id === r.coffeeId), t = new Date(r.createdAt);
+  const when = isNaN(t) ? '' : t.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+  document.getElementById('r-modal-sub').textContent = [cf && cf.name, when, brewLine(r)].filter(Boolean).join(' · ');
+  document.querySelector('#modal-recipe .modal').scrollTop = 0;
+}
+function leaveUnscored(id) {
+  const r = state.recipes.find(x => x.id === id); if (!r) return;
+  delete r.awaitingScore; delete r.scoreRemindAt; delete r.scoreNotified;
+  save(); scheduleScoreReminders(); rerenderCurrentView(); showToast('Left unscored — you can still edit it later');
+}
+function renderScorePending() {
+  const el = document.getElementById('score-pending'); if (!el) return;
+  const list = awaitingBrews();
+  el.innerHTML = list.slice(0, 3).map(r => {
+    const cf = state.coffees.find(c => c.id === r.coffeeId);
+    return `<div class="score-card"><div class="score-card-top"><div class="score-card-label">Awaiting score${agoText(r.createdAt) ? ' · ' + agoText(r.createdAt) : ''}</div><button type="button" class="score-card-x" aria-label="Leave this brew unscored" data-on-click="leaveUnscored('${r.id}')">✕</button></div>
+      <div class="score-card-name">${escHtml(cf ? cf.name : 'Unknown coffee')}</div>
+      <div class="score-card-sub">${escHtml([r.method, brewLine(r)].filter(Boolean).join(' · '))}</div>
+      <button type="button" class="btn-primary" data-on-click="scoreBrew('${r.id}')">Score this brew</button></div>`;
+  }).join('') + (list.length > 3 ? `<div class="score-card-sub" style="margin:-6px 0 14px">+${list.length - 3} more awaiting a score in your brew log</div>` : '');
+  try { if (list.length) navigator.setAppBadge && navigator.setAppBadge(list.length); else navigator.clearAppBadge && navigator.clearAppBadge(); } catch(e) {}
+}
+let scoreTimers = [];
+function scheduleScoreReminders() {
+  scoreTimers.forEach(clearTimeout); scoreTimers = [];
+  awaitingBrews().forEach(r => {
+    if (r.scoreNotified) return;
+    const due = Date.parse(r.scoreRemindAt); if (isNaN(due)) return;
+    scoreTimers.push(setTimeout(() => fireScoreReminder(r.id), Math.min(Math.max(0, due - Date.now()), 6 * 3600 * 1000)));
+  });
+}
+function fireScoreReminder(id) {
+  const r = state.recipes.find(x => x.id === id); if (!r || !r.awaitingScore || r.scoreNotified) return;
+  if (Date.parse(r.scoreRemindAt) > Date.now() + 1000) { scheduleScoreReminders(); return; }
+  r.scoreNotified = true; save();
+  const cf = state.coffees.find(c => c.id === r.coffeeId), name = cf ? cf.name : 'your brew';
+  try { renderScorePending(); } catch(e) {}
+  if (document.visibilityState === 'visible') {
+    if (navigator.vibrate) navigator.vibrate([30, 80, 30]);
+    if (!isScoreOnly()) showToast(`How was the ${name}? Score it from Overview`);
+  } else notifyScore(r, name);
+}
+async function notifyScore(r, name) {
+  try {
+    if (!('Notification' in window) || Notification.permission !== 'granted') return;
+    const t = new Date(r.createdAt), when = isNaN(t) ? '' : t.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) + ' ';
+    const title = `How was the ${name}?`, o = { body: `Tap to score your ${when}brew.`, tag: 'score-' + r.id, data: { id: r.id }, icon: 'icon-any-192.png', badge: 'icon-any-192.png' };
+    const reg = navigator.serviceWorker && await navigator.serviceWorker.getRegistration();
+    if (reg && reg.showNotification) await reg.showNotification(title, o);
+    else { const n = new Notification(title, o); n.onclick = () => { window.focus(); scoreBrew(r.id); n.close(); }; }
+  } catch(e) {}
+}
+// Tapping the notification opens the score sheet
+function scoreFromLink() {
+  try {
+    const id = new URLSearchParams(location.search).get('score'); if (!id) return;
+    history.replaceState(history.state, '', location.pathname);
+    if (SAFE_ID.test(id) && state.recipes.some(x => x.id === id && x.awaitingScore)) scoreBrew(id);
+  } catch(e) {}
+}
+if (navigator.serviceWorker) navigator.serviceWorker.addEventListener('message', e => {
+  const d = e.data; if (d && d.type === 'score' && typeof d.id === 'string' && SAFE_ID.test(d.id)) scoreBrew(d.id);
+});
+document.addEventListener('visibilitychange', () => { if (!document.hidden) { scheduleScoreReminders(); try { renderScorePending(); } catch(e) {} } });
 
 // ==================== PLAN NEXT BREW ====================
 let planDraft = null;

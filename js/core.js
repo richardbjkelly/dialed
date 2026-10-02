@@ -326,6 +326,7 @@ function openRecipeModal() {
   // Always reset edit state when opening fresh
   const reid = document.getElementById('r-edit-id'); if(reid) reid.value = '';
   const rtitle = document.getElementById('r-modal-title'); if(rtitle) rtitle.textContent = 'Log Brew';
+  try { setScoreOnly(false); } catch(e) {}
   // Coffee selector
   const cs = document.getElementById('coffee-selector');
   cs.innerHTML = '';

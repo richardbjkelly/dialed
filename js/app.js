@@ -49,7 +49,7 @@ function closeSettings() {
 
 
 // ==================== VERSION & UPDATES ====================
-const APP_VERSION = '3.31';
+const APP_VERSION = '3.32';
 // The app page is fetched fresh when online, but on a slow connection the saved copy is used instead.
 // version.json is tiny and never cached, so we can tell when a newer version is waiting.
 async function checkForUpdate() {
@@ -189,7 +189,7 @@ function snoozeBackupReminder() { appSettings.backupSnoozeUntil = Date.now() + 7
 function clearCompare() { state.compareIds = []; save(); updateCompareBar(); renderCompare(); }
 function hideParent(el) { el.parentElement.hidden = true; }
 
-const ACTIONS = { openBrewMode, minimiseBrewMode, stopBrewFromMode, confirmCancelBrew, addRecipeStep, applyBrewSuggestion, backupData, brewPlan, clearCompare, closeModal, closeSettings, confirmDeleteBrew, confirmDeleteCoffee, confirmDeleteCustomRecipe, confirmUndoRestore, dismissLoadProblem, dismissPlan, duplicateRecipe, editBrew, endLongPress, exportUnreadable, fabNewCustomRecipe, filterGrinders, filterRecipeMethod, fxFor, goBackToCoffees, handleLabelPhoto, hideCompareSection, hideEditOverlay, hideParent, hidePhotoError, keyMovePlan, onRecipeChange, onTasteInput, openEditCoffee, openEditCustomRecipe, openFab, openLightbox, openLightboxFor, openModal, openNewCustomRecipe, openPlanNext, openRecipeModal, openSettings, pickLabelPhoto, pickRestoreFile, reloadForUpdate, removeLabelPhoto, removeStepRow, renderCompare, renderGrinders, renderTracker, reopenBrewSheet, repeatBrew, resetBrewTimer, resetCoffeeModal, resetTaste, restoreData, saveCoffee, saveCustomRecipe, saveFinishBag, savePlan, saveRecipe, selectExtraction, selectMethod, setCoffeeLayout, setCoffeeRating, setFinishAgain, setFinishRating, setPlanDir, setRating, setStatsPeriod, setTasteSlider, setTextSize, setTrackerSort, showAllBrews, showCoffeeDetail, showEditOverlay, showGrinderDetail, showMoreBrews, showToast, showTrendModal, showView, slidePlan, snoozeBackupReminder, startLongPress, startPlanDrag, switchRecipeTab, toggleBackupPhotos, toggleBrewHistory, toggleBrewTimer, toggleCompare, toggleCustomProcess, toggleDarkMode, toggleFavourite, toggleFinishedBag, toggleOverviewCategory, toggleShowCosts, toggleSuggestedStart, updateBrewLive, updateGrindMicrons, updateGrinderConverter, updatePricePreview, useBrewSettings };
+const ACTIONS = { scoreBrew, leaveUnscored, setRemindMins, brewDoneLater, brewDoneNow, saveBrewForLater, toggleScoreLater, openBrewMode, minimiseBrewMode, stopBrewFromMode, confirmCancelBrew, addRecipeStep, applyBrewSuggestion, backupData, brewPlan, clearCompare, closeModal, closeSettings, confirmDeleteBrew, confirmDeleteCoffee, confirmDeleteCustomRecipe, confirmUndoRestore, dismissLoadProblem, dismissPlan, duplicateRecipe, editBrew, endLongPress, exportUnreadable, fabNewCustomRecipe, filterGrinders, filterRecipeMethod, fxFor, goBackToCoffees, handleLabelPhoto, hideCompareSection, hideEditOverlay, hideParent, hidePhotoError, keyMovePlan, onRecipeChange, onTasteInput, openEditCoffee, openEditCustomRecipe, openFab, openLightbox, openLightboxFor, openModal, openNewCustomRecipe, openPlanNext, openRecipeModal, openSettings, pickLabelPhoto, pickRestoreFile, reloadForUpdate, removeLabelPhoto, removeStepRow, renderCompare, renderGrinders, renderTracker, reopenBrewSheet, repeatBrew, resetBrewTimer, resetCoffeeModal, resetTaste, restoreData, saveCoffee, saveCustomRecipe, saveFinishBag, savePlan, saveRecipe, selectExtraction, selectMethod, setCoffeeLayout, setCoffeeRating, setFinishAgain, setFinishRating, setPlanDir, setRating, setStatsPeriod, setTasteSlider, setTextSize, setTrackerSort, showAllBrews, showCoffeeDetail, showEditOverlay, showGrinderDetail, showMoreBrews, showToast, showTrendModal, showView, slidePlan, snoozeBackupReminder, startLongPress, startPlanDrag, switchRecipeTab, toggleBackupPhotos, toggleBrewHistory, toggleBrewTimer, toggleCompare, toggleCustomProcess, toggleDarkMode, toggleFavourite, toggleFinishedBag, toggleOverviewCategory, toggleShowCosts, toggleSuggestedStart, updateBrewLive, updateGrindMicrons, updateGrinderConverter, updatePricePreview, useBrewSettings };
 const ACTION_EVENTS = ['click', 'input', 'change', 'touchstart', 'touchend', 'touchcancel', 'contextmenu', 'pointerdown', 'keydown'];
 const actionCache = new Map();
 function splitOutsideQuotes(str, sep) {
@@ -252,11 +252,13 @@ showLoadProblem();
 requestPersistence();
 if (showCosts() && needsFx()) refreshFx();
 loadPhotos();
+scheduleScoreReminders();
 renderDashboard();
 updateCompareBar();
 // A second entry means the phone's Back button is always caught by the app first (closing a sheet or brew mode)
 // instead of leaving it straight away on a fresh launch
 try { history.replaceState({view:'dashboard'}, '', ''); history.pushState({view:'dashboard'}, '', ''); } catch(e) {}
+scoreFromLink();
 // Offline support (only over http/https — e.g. GitHub Pages)
 if ('serviceWorker' in navigator && location.protocol.startsWith('http')) {
   window.addEventListener('load', () => { navigator.serviceWorker.register('sw.js').catch(e => console.warn('SW registration failed', e)); checkForUpdate(); });

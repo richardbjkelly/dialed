@@ -835,15 +835,34 @@ No visible changes — two structural changes behind the scenes.
 
 ---
 
+## v3.32
+*2 October 2026*
+
+### Score a brew later
+- Stopping the timer in brew mode now shows "Brew finished" with the recipe summary and two choices: **Save & remind me to score** (5, 10 or 15 minutes; your choice is remembered) or **Score now**
+- "Save & remind me" stores the brew straight away as awaiting a score. "Score now" returns to the form as before; nothing is saved until you log it
+- Log Brew also has a **Save & score later** button for brews made without the timer
+- Overview shows an **Awaiting score** card for each such brew, with "Score this brew" and a × to leave it unscored; the brew's card carries an **Unscored** badge you can tap; the app icon shows a count where the phone supports it
+- **Score brew** sheet: only extraction, rating, taste profile and notes, with the recipe shown at the top. Saving completes the brew and then offers Plan next brew (which waits for the score, since it depends on taste)
+- Correcting the recipe of an awaiting brew (e.g. the dose) keeps it awaiting; giving it a rating or extraction result completes it
+
+### Reminder (best effort)
+- When the reminder is due and the app is open, it shows a message and vibrates. If the app is in the background and still running, it shows a notification; tapping it opens the Score brew sheet
+- The app asks for notification permission the first time you choose to score later
+- There is no server, so if the phone has closed the app the notification will not arrive; the Overview card is always there when you next open it
+- Settings › Brewing › **Score Later** switches the prompt and button off
+
+---
+
 ## Pending / Roadmap
 - Rebuild the APK once to pick up the new cup icon
 - Opt-in pooled data + trained model (see feasibility notes): backend, consent, deletion, ICO registration
 - Google Drive sync (deferred — manual backup/restore and reminder in place)
 - Screenshot showcase for PWABuilder
 - Play Store listing
-- Score a brew later: stop saves the brew as "awaiting score", with a reminder and a quick-score sheet (mocked up, awaiting decisions)
+- Reliable score reminders (real push notifications) — needs the backend that sync will bring
 - On hold: sharing with friends — start with share links (coffee + best recipe via the phone's share sheet, imported by tapping the link); connected friends/feed later if wanted
 
 ---
 
-*Document maintained automatically. Last updated: v3.31*
+*Document maintained automatically. Last updated: v3.32*

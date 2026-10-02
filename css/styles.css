@@ -682,6 +682,24 @@
   .update-banner[hidden] { display:none; }
   .update-banner .ub-text { flex:1; }
   .update-banner button { background:rgba(250,250,247,0.14); color:#FAFAF7; border:1px solid rgba(250,250,247,0.3); border-radius:8px; padding:6px 12px; font-size:11px; letter-spacing:1px; text-transform:uppercase; cursor:pointer; }
+  /* Score later */
+  #modal-recipe.score-only #r-setup, #modal-recipe.score-only #r-later-btn, #modal-recipe.score-only #r-finish-row { display:none !important; }
+  .bd-summary { border:1.5px solid #52796F; background:rgba(82,121,111,0.1); border-radius:14px; padding:14px 16px; margin-top:6px; font-size:14px; line-height:1.9; color:var(--text); }
+  .bd-summary span { color:var(--text-muted); }
+  .bd-chips { display:flex; gap:8px; margin-top:8px; }
+  .bd-chips button { flex:1; border:1.5px solid var(--border); background:var(--card); color:var(--text-muted); border-radius:10px; padding:11px 0; font-size:11px; letter-spacing:2px; text-transform:uppercase; cursor:pointer; }
+  .bd-chips button.active { background:#123C27; color:#FAFAF7; border-color:#123C27; }
+  body.dark-mode .bd-chips button.active { background:#52796F; border-color:#52796F; }
+  .score-card { border:1.5px solid #C95A37; background:rgba(201,90,55,0.08); border-radius:16px; padding:14px 16px; margin-bottom:14px; }
+  .score-card-top { display:flex; justify-content:space-between; align-items:center; gap:10px; }
+  .score-card-label { font-size:11px; letter-spacing:2px; text-transform:uppercase; color:#C95A37; }
+  body.dark-mode .score-card-label, body.dark-mode .unscored-label { color:#F2A493; }
+  body.dark-mode .score-card { border-color:#F2A493; background:rgba(242,164,147,0.08); }
+  .score-card-x { background:none; border:none; color:var(--text-muted); font-size:14px; padding:4px 6px; cursor:pointer; }
+  .score-card-name { font-family:var(--font-display) !important; font-weight:600; font-size:19px; color:var(--text); margin-top:6px; }
+  .score-card-sub { font-size:12px; color:var(--text-muted); margin-top:3px; line-height:1.5; }
+  .score-card .btn-primary { margin-top:12px; }
+  .unscored-label { font-size:11px; letter-spacing:1.5px; text-transform:uppercase; color:#C95A37; background:none; border:1px solid currentColor; border-radius:20px; padding:2px 9px; flex-shrink:0; cursor:pointer; }
   /* Full-screen brew mode */
   .brew-mode { position:fixed; inset:0; z-index:350; background:#123C27; color:#FAFAF7; display:none; flex-direction:column; padding:calc(env(safe-area-inset-top, 0px) + 22px) 24px calc(env(safe-area-inset-bottom, 0px) + 22px); }
   .brew-mode.open { display:flex; animation: bmIn .22s ease-out; }

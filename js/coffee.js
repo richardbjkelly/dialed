@@ -514,16 +514,25 @@ function brewInputProblem() {
     if (sec !== null && !(sec >= 0 && sec <= 59)) return 'Seconds should be between 0 and 59'; }
   return '';
 }
-function saveRecipe() {
+function saveRecipe(opts) {
+  opts = opts || {};
   if (!state.selectedCoffeeId) { showToast('Select a coffee'); return; }
   const problem = brewInputProblem(); if (problem) { showToast(problem); return; }
   if (!tapOnce('saveRecipe')) return;
   if (brewTimer.startedAt) stopBrewTimer();
   const editBrewId = document.getElementById('r-edit-id')?.value||'';
   const brewData = {coffeeId:state.selectedCoffeeId, grinderId:state.selectedGrinderId||null, recipeId:state.selectedRecipeId||null, method:state.selectedMethod||'Espresso', grind:document.getElementById('r-grind').value, dose:document.getElementById('r-dose').value, yield:document.getElementById('r-yield').value, time:getBrewTimeSecs(), temp:document.getElementById('r-temp').value, extraction:state.selectedExtraction, rating:state.selectedRating, notes:document.getElementById('r-notes').value.trim(), taste:readTaste(), grindUm: settingToMicrons(selectedGrinder(), document.getElementById('r-grind').value)};
+  const scoreMode = isScoreOnly();
+  let wasAwaiting = false;
+  if (opts.later && !editBrewId) { brewData.awaitingScore = true; brewData.scoreRemindAt = new Date(Date.now() + opts.later * 60000).toISOString(); }
   if (editBrewId) {
     const idx = state.recipes.findIndex(x=>x.id===editBrewId);
-    if(idx>=0) state.recipes[idx]={...state.recipes[idx],...brewData};
+    if(idx>=0) {
+      const merged = {...state.recipes[idx],...brewData};
+      // A brew saved to score later is finished once a score has been given
+      if (merged.awaitingScore && (scoreMode || brewData.rating > 0 || brewData.extraction)) { wasAwaiting = true; delete merged.awaitingScore; delete merged.scoreRemindAt; delete merged.scoreNotified; }
+      state.recipes[idx] = merged;
+    }
   }
   let newBrewId = null;
   if (!editBrewId) {
@@ -540,13 +549,16 @@ function saveRecipe() {
   state.selectedExtraction=''; state.selectedRating=0;
   document.querySelectorAll('.extraction-btn').forEach(b=>b.classList.remove('selected'));
   setRating(0);
-  showToast(editBrewId ? 'Brew updated ✓' : 'Brew logged ✓'); rerenderCurrentView();
+  setScoreOnly(false); scheduleScoreReminders();
+  showToast(opts.later ? `Brew saved — reminder in ${opts.later} min` : wasAwaiting ? 'Brew scored ✓' : editBrewId ? 'Brew updated ✓' : 'Brew logged ✓'); rerenderCurrentView();
   const bagCf = state.coffees.find(x => x.id === brewData.coffeeId);
   const finishTick = document.getElementById('r-finish-bag');
   const finishNow = !!(finishTick && finishTick.checked); if (finishTick) finishTick.checked = false;
   if (finishNow && bagCf && !bagCf.finishedBag) setTimeout(() => openFinishBag(bagCf.id), 350);   // last brew: rate the bag instead of planning the next one
   else {
-    if (newBrewId) setTimeout(() => openPlanNext(newBrewId), 350);
+    // Planning the next brew needs the taste result, so it waits until the brew has been scored
+    const planFor = opts.later ? null : (newBrewId || (wasAwaiting ? editBrewId : null));
+    if (planFor) setTimeout(() => openPlanNext(planFor), 350);
     if (newBrewId && bagCf && !bagCf.finishedBag && gramsLeft(bagCf) === 0) setTimeout(() => showToast('That bag looks empty — finish it from its ⋯ menu'), 2600);
   }
 }

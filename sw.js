@@ -1,7 +1,7 @@
 // dialed service worker — offline support
 // App page: network-first (always fresh when online, cached copy when offline).
 // Icons/manifest/fonts: stale-while-revalidate. version.json: always from the network.
-const VERSION = '3.31';   // keep in step with APP_VERSION (js/app.js) and version.json — the tests check this
+const VERSION = '3.32';   // keep in step with APP_VERSION (js/app.js) and version.json — the tests check this
 const CACHE = 'dialed-' + VERSION;
 const CORE = ['./', './index.html', './manifest.json', './css/styles.css?v=' + VERSION,
   ...['data', 'core', 'coffee', 'views', 'tools', 'app'].map(n => './js/' + n + '.js?v=' + VERSION),
@@ -52,4 +52,15 @@ self.addEventListener('fetch', e => {
     }));
   }
   // Everything else (e.g. exchange-rate API) goes straight to the network
+});
+
+// Tapping a "score your brew" notification brings the app forward on the score sheet
+self.addEventListener('notificationclick', e => {
+  const id = e.notification.data && e.notification.data.id;
+  e.notification.close();
+  e.waitUntil(self.clients.matchAll({ type: 'window', includeUncontrolled: true }).then(list => {
+    const c = list.find(x => 'focus' in x);
+    if (c) { c.postMessage({ type: 'score', id }); return c.focus(); }
+    return self.clients.openWindow('./?score=' + encodeURIComponent(id || ''));
+  }));
 });

@@ -22,6 +22,7 @@ function renderDashboard() {
         <div><div style="font-family:var(--font-display);font-size:14px">${favG.brand} ${favG.model}</div><div style="font-family:var(--font-mono);font-size:11px;color:var(--text-muted);letter-spacing:1px;margin-top:2px">${favG.type==='manual'?'Manual':'Electric'} · DEFAULT GRINDER</div></div>
       </div>`
     : `<div style="font-family:var(--font-mono);font-size:11px;color:var(--text-muted);margin-bottom:16px;letter-spacing:.5px">No default grinder set — <span style="color:var(--crema);cursor:pointer" data-on-click="showView('grinders')">Browse grinders →</span></div>`;
+  try { renderScorePending(); } catch(e) {}
   const el = document.getElementById('recent-brews');
   const recent = state.recipes.slice(0,5);
   const hasMore = state.recipes.length > 5;
@@ -270,7 +271,7 @@ function recipeCard(r, showDel=false) {
           ${grinderBadge}
         </div>
       </div>
-      <div style="display:flex;align-items:center;gap:6px;flex-shrink:0">${coffee?.decaf ? '<span class="decaf-label">Decaf</span>' : ''}${exTag}<button class="card-more" aria-label="More options" data-on-click="event.stopPropagation();showEditOverlay('brew-${r.id}')">⋯</button></div>
+      <div style="display:flex;align-items:center;gap:6px;flex-shrink:0">${coffee?.decaf ? '<span class="decaf-label">Decaf</span>' : ''}${r.awaitingScore ? `<button type="button" class="unscored-label" data-on-click="event.stopPropagation();scoreBrew('${r.id}')">Unscored</button>` : ''}${exTag}<button class="card-more" aria-label="More options" data-on-click="event.stopPropagation();showEditOverlay('brew-${r.id}')">⋯</button></div>
     </div>
     <div class="recipe-params">
       <div class="param-block"><div class="param-value">${r.grind||'—'}</div><div class="param-label">Grind${brewMicrons(r)?' · <span class="unit">'+brewMicrons(r)+'µm</span>':''}</div></div>

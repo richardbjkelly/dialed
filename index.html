@@ -13,7 +13,7 @@
 <meta name="apple-mobile-web-app-title" content="dialed">
 <meta name="theme-color" content="#123C27">
 <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; font-src 'self'; connect-src 'self' https://api.frankfurter.dev https://api.frankfurter.app; object-src 'none'; base-uri 'self'; form-action 'none'">
-<link rel="stylesheet" href="css/styles.css?v=3.31">
+<link rel="stylesheet" href="css/styles.css?v=3.32">
 </head>
 <body>
 
@@ -54,6 +54,7 @@
     </div>
   </div>
   <div id="backup-reminder"></div>
+  <div id="score-pending"></div>
   <div id="dashboard-fav-grinder"></div>
   <div id="upnext-section" style="margin-bottom:8px"></div>
   <div class="divider">Recent brews</div>
@@ -287,7 +288,8 @@
     <div class="modal-title" id="r-modal-title">Log Brew</div>
     <input type="hidden" id="r-edit-id" value="">
     <input type="hidden" id="r-plan-id" value="">
-    <div class="modal-subtitle">Dialling in a recipe</div>
+    <div class="modal-subtitle" id="r-modal-sub">Dialling in a recipe</div>
+    <div id="r-setup">
     <div class="form-group"><label class="form-label">Coffee</label><div class="coffee-selector" id="coffee-selector"></div></div>
     <div class="form-group"><label class="form-label">Grinder Used</label><div class="coffee-selector" id="grinder-selector" style="max-height:150px"></div></div>
     <div class="form-group">
@@ -347,6 +349,7 @@
     </div>
     <div id="r-ratio-live" class="brew-live"></div>
     <div class="form-group"><label class="form-label">Water Temp (°C)</label><input type="number" class="form-input" id="r-temp" min="0" max="100" placeholder="e.g. 93" style="width:50%"></div>
+    </div>
     <div class="divider">Extraction</div>
     <div class="form-group">
       <label class="form-label">Extraction Result</label>
@@ -378,8 +381,9 @@
     </div>
     <div class="form-group"><label class="form-label">Tasting Notes & Adjustments</label><textarea class="form-textarea" id="r-notes" placeholder="e.g. Sour with grassy finish — grind finer next time."></textarea></div>
     <label class="finish-tick" id="r-finish-row"><input type="checkbox" id="r-finish-bag"> <span>Last brew from this bag — finish it after saving</span></label>
-    <button class="btn-primary" data-on-click="saveRecipe()">Log Brew</button>
+    <button class="btn-primary" id="r-save-btn" data-on-click="saveRecipe()">Log Brew</button>
     <div style="height:12px"></div>
+    <button class="btn-secondary" id="r-later-btn" style="width:100%;margin-bottom:12px" data-on-click="saveBrewForLater()">Save &amp; score later</button>
     <button class="btn-secondary" style="width:100%" data-on-click="closeModal('modal-recipe')">Cancel</button>
   </div>
 </div>
@@ -485,6 +489,27 @@
   </div>
 </div>
 
+
+<!-- MODAL: Brew finished (score now or later) -->
+<div class="modal-overlay" id="modal-brew-done">
+  <div class="modal">
+    <div class="modal-handle"></div>
+    <div class="modal-title">Brew finished</div>
+    <div class="modal-subtitle" id="bd-sub"></div>
+    <div class="bd-summary" id="bd-summary"></div>
+    <div style="font-size:13px;color:var(--text);line-height:1.5;margin:16px 0 14px">Let it cool, then score it. Coffee tastes clearer after a few minutes.</div>
+    <div class="form-label">Remind me in</div>
+    <div class="bd-chips" id="bd-chips" role="group" aria-label="Remind me in">
+      <button type="button" data-mins="5" data-on-click="setRemindMins(5)">5 min</button>
+      <button type="button" data-mins="10" data-on-click="setRemindMins(10)">10 min</button>
+      <button type="button" data-mins="15" data-on-click="setRemindMins(15)">15 min</button>
+    </div>
+    <button class="btn-primary" style="margin-top:18px" data-on-click="brewDoneLater()">Save &amp; remind me to score</button>
+    <div style="height:10px"></div>
+    <button class="btn-secondary" style="width:100%" data-on-click="brewDoneNow()">Score now</button>
+    <div style="height:10px"></div>
+  </div>
+</div>
 
 <!-- MODAL: Finish bag -->
 <div class="modal-overlay" id="modal-finish">
@@ -608,6 +633,14 @@
 
     <div class="settings-toggle-row">
       <div style="flex:1;padding-right:12px">
+        <div class="settings-toggle-label">Score Later</div>
+        <div class="settings-toggle-sub">After stopping the timer, offer to save the brew and remind you to score it once it has cooled</div>
+      </div>
+      <button type="button" class="switch" id="settings-scorelater-switch" role="switch" aria-checked="true" aria-label="Score Later" data-on-click="toggleScoreLater()"><span class="switch-knob"></span></button>
+    </div>
+
+    <div class="settings-toggle-row">
+      <div style="flex:1;padding-right:12px">
         <div class="settings-toggle-label">Show Costs</div>
         <div class="settings-toggle-sub">Bag price, £ per 100g, cost per brew and total spent</div>
       </div>
@@ -718,11 +751,11 @@
     <span class="nav-tab-icon"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><line x1="4" y1="6" x2="20" y2="6"/><line x1="4" y1="12" x2="20" y2="12"/><line x1="4" y1="18" x2="20" y2="18"/><circle cx="8" cy="6" r="2" fill="var(--espresso)" stroke="currentColor" class="nav-fill"/><circle cx="16" cy="12" r="2" fill="var(--espresso)" stroke="currentColor" class="nav-fill"/><circle cx="10" cy="18" r="2" fill="var(--espresso)" class="nav-fill" stroke="currentColor"/></svg></span>Settings
   </button>
 </nav>
-<script src="js/data.js?v=3.31"></script>
-<script src="js/core.js?v=3.31"></script>
-<script src="js/coffee.js?v=3.31"></script>
-<script src="js/views.js?v=3.31"></script>
-<script src="js/tools.js?v=3.31"></script>
-<script src="js/app.js?v=3.31"></script>
+<script src="js/data.js?v=3.32"></script>
+<script src="js/core.js?v=3.32"></script>
+<script src="js/coffee.js?v=3.32"></script>
+<script src="js/views.js?v=3.32"></script>
+<script src="js/tools.js?v=3.32"></script>
+<script src="js/app.js?v=3.32"></script>
 </body>
 </html>
