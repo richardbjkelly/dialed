@@ -1,6 +1,7 @@
 # Real taps (not function calls) through the main flows, to prove the handler dispatcher works end to end.
 from playwright.sync_api import sync_playwright
-import json
+import json, os
+URL=os.environ.get('DIALED_URL','http://localhost:8765/dialed/index.html')
 errs=[]; cons=[]; res=[]
 def ok(n,c,i=''):
     res.append(bool(c)); print(('ok  ' if c else 'FAIL'), n, '' if c else i)
@@ -8,7 +9,7 @@ st=lambda pg: json.loads(pg.evaluate("localStorage.getItem('dialin_v2')"))
 with sync_playwright() as p:
     b=p.chromium.launch(); pg=b.new_context(**p.devices['Pixel 7']).new_page()
     pg.on('pageerror',lambda e:errs.append(str(e))); pg.on('console',lambda m:cons.append(m.text))
-    pg.goto('http://localhost:8765/dialed/index.html'); pg.evaluate("localStorage.setItem('dialin_v2', JSON.stringify({coffees:[],recipes:[]}))"); pg.reload(); pg.wait_for_timeout(600)
+    pg.goto(URL); pg.evaluate("localStorage.setItem('dialin_v2', JSON.stringify({coffees:[],recipes:[]}))"); pg.reload(); pg.wait_for_timeout(600)
     # add a coffee by tapping
     pg.tap('.fab'); pg.wait_for_timeout(400); ok('+ opens the chooser', pg.locator('#modal-fab.open').count()==1)
     pg.tap('#modal-fab button:has-text("New Coffee")'); pg.wait_for_timeout(500); ok('New Coffee opens the form', pg.locator('#modal-coffee.open').count()==1)
@@ -71,3 +72,4 @@ with sync_playwright() as p:
     ok('nothing blocked by the content policy', not [c for c in cons if 'Content Security Policy' in c], [c for c in cons if 'Content Security Policy' in c][:2])
     ok('no page errors', not errs, errs)
 print(sum(res),'/',len(res))
+import sys; sys.exit(0 if all(res) else 1)
