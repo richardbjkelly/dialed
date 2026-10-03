@@ -854,6 +854,18 @@ No visible changes — two structural changes behind the scenes.
 
 ---
 
+## v3.33
+*3 October 2026*
+
+### Log Brew: new order and sliders
+- The recipe part of Log Brew now runs: **Grind** slider, **Water temp** slider, **Dose** and **Water** side by side, the **Start Brew** timer, then **Time** last (the timer fills it in)
+- Grind slider: moves in 0.1 on stepless grinders and in the grinder's own clicks on stepped ones. It spans the usual range for the chosen brew method on your grinder, so it is easier to set precisely, and widens to the grinder's full range if you type a value outside it
+- Temperature slider: 80–100°C in 1°C steps
+- Each slider has a number box beside it, so exact values (or a temperature outside 80–100) can still be typed; the two stay in step, including when a recipe, Use, Apply or an edit fills them in
+- With no grinder selected the grind slider is switched off and the box is used on its own
+
+---
+
 ## Pending / Roadmap
 - Rebuild the APK once to pick up the new cup icon
 - Opt-in pooled data + trained model (see feasibility notes): backend, consent, deletion, ICO registration
@@ -865,4 +877,4 @@ No visible changes — two structural changes behind the scenes.
 
 ---
 
-*Document maintained automatically. Last updated: v3.32*
+*Document maintained automatically. Last updated: v3.33*

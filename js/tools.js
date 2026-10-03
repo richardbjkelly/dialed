@@ -615,7 +615,48 @@ function brewMicrons(r) {
 function selectedGrinder() { return state.selectedGrinderId ? GRINDERS.find(g => g.id === state.selectedGrinderId) : null; }
 
 // Live readout under the grind field in Log Brew
+// ---- Grind and temperature sliders (the number boxes beside them stay the source of truth) ----
+function brewGrindSlider() {
+  const g = selectedGrinder(), sc = grinderScale(g); if (!sc) return null;
+  const step = planGrindStep(g, state.selectedMethod, '');
+  let lo = sc.s0, hi = sc.s1, usual = false;
+  // Start from the range that's usual for this brew method on this grinder: a shorter slider is easier to set precisely
+  const mr = methodRange(state.selectedMethod);
+  if (mr) {
+    const a = micronsToSetting(g, mr.min), b = micronsToSetting(g, mr.max);
+    if (a != null && b != null && b - a >= step * 4) { lo = Math.floor(a / step) * step; hi = Math.ceil(b / step) * step; usual = true; }
+  }
+  const v = parseFloat(document.getElementById('r-grind')?.value);
+  if (!isNaN(v)) { if (v < lo) { lo = Math.max(sc.s0, Math.floor(v / step) * step); usual = false; } if (v > hi) { hi = Math.min(sc.s1, Math.ceil(v / step) * step); usual = false; } }
+  return { lo: roundTo(lo, step), hi: roundTo(hi, step), step, usual };
+}
+function syncBrewSliders() {
+  const gr = document.getElementById('r-grind-range'), gi = document.getElementById('r-grind'); if (!gr || !gi) return;
+  const cfg = brewGrindSlider(), set = (id, t) => { const e = document.getElementById(id); if (e && e.textContent !== t) e.textContent = t; };
+  if (!cfg) { gr.disabled = true; gr.classList.add('unset'); set('r-grind-hint', 'Pick a grinder to use the slider'); set('r-grind-lo', ''); set('r-grind-hi', ''); }
+  else {
+    gr.disabled = false; gr.min = cfg.lo; gr.max = cfg.hi; gr.step = cfg.step;
+    const v = parseFloat(gi.value);
+    gr.value = isNaN(v) ? roundTo((cfg.lo + cfg.hi) / 2, cfg.step) : v;
+    gr.classList.toggle('unset', isNaN(v));
+    set('r-grind-hint', `${cfg.usual ? 'Usual ' + state.selectedMethod + ' range' : 'Grinder range'} · ${cfg.step} steps`);
+    set('r-grind-lo', String(cfg.lo)); set('r-grind-hi', String(cfg.hi));
+  }
+  const tr = document.getElementById('r-temp-range'), ti = document.getElementById('r-temp');
+  if (tr && ti) { const t = parseFloat(ti.value), inRange = t >= 80 && t <= 100; tr.value = inRange ? t : 93; tr.classList.toggle('unset', !inRange); }
+}
+function slideBrew(kind, val) {
+  if (kind === 'grind') { const cfg = brewGrindSlider(); document.getElementById('r-grind').value = cfg ? roundTo(+val, cfg.step) : val; updateGrindMicrons(); }
+  else { document.getElementById('r-temp').value = Math.round(+val); syncBrewSliders(); }
+  updateBrewLive();
+}
+// Anything in Log Brew that fills or changes these fields (picking a grinder or recipe, Use, Apply) keeps the sliders in step
+['click', 'change', 'input'].forEach(t => document.addEventListener(t, e => {
+  if (e.target.closest && e.target.closest('#modal-recipe') && !/^r-(grind|temp)-range$/.test(e.target.id)) setTimeout(syncBrewSliders, 0);
+}));
+
 function updateGrindMicrons() {
+  syncBrewSliders();
   const el = document.getElementById('r-grind-um'); if (!el) return;
   const g = selectedGrinder(), val = document.getElementById('r-grind').value;
   if (!g) { el.innerHTML = val ? 'Pick a grinder to see the particle size' : ''; return; }

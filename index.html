@@ -13,7 +13,7 @@
 <meta name="apple-mobile-web-app-title" content="dialed">
 <meta name="theme-color" content="#123C27">
 <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; font-src 'self'; connect-src 'self' https://api.frankfurter.dev https://api.frankfurter.app; object-src 'none'; base-uri 'self'; form-action 'none'">
-<link rel="stylesheet" href="css/styles.css?v=3.32">
+<link rel="stylesheet" href="css/styles.css?v=3.33">
 </head>
 <body>
 
@@ -318,12 +318,27 @@
     </div>
     <div id="brew-history"></div>
     <div id="brew-suggestion"></div>
-    <div class="divider">Grind & Dose</div>
-    <div class="form-row">
-      <div class="form-group"><label class="form-label">Grind Setting</label><input type="number" class="form-input" id="r-grind" placeholder="e.g. 8" step="any" inputmode="decimal" data-on-input="updateGrindMicrons()"></div>
-      <div class="form-group"><label class="form-label">Dose (g)</label><input type="number" class="form-input" id="r-dose" min="0" max="500" placeholder="e.g. 18" step="0.1" data-on-input="updateBrewLive()"></div>
+    <div class="divider">Grind &amp; Dose</div>
+    <div class="form-group brew-slider">
+      <div class="bs-head"><label class="form-label" for="r-grind">Grind Setting</label><span class="bs-hint" id="r-grind-hint"></span></div>
+      <div class="bs-row">
+        <div class="bs-track"><input type="range" id="r-grind-range" class="unset" aria-label="Grind setting slider" data-on-input="slideBrew('grind', this.value)"><div class="plan-range-ends"><span id="r-grind-lo"></span><span id="r-grind-hi"></span></div></div>
+        <input type="number" class="form-input bs-num" id="r-grind" placeholder="–" step="any" inputmode="decimal" data-on-input="updateGrindMicrons()">
+      </div>
     </div>
-    <div id="r-grind-um" class="brew-live" style="margin-top:-8px"></div>
+    <div id="r-grind-um" class="brew-live" style="margin-top:-10px"></div>
+    <div class="form-group brew-slider">
+      <div class="bs-head"><label class="form-label" for="r-temp">Water Temp (°C)</label><span class="bs-hint">1°C steps</span></div>
+      <div class="bs-row">
+        <div class="bs-track"><input type="range" id="r-temp-range" class="unset" min="80" max="100" step="1" aria-label="Water temperature slider" data-on-input="slideBrew('temp', this.value)"><div class="plan-range-ends"><span>80</span><span>100</span></div></div>
+        <input type="number" class="form-input bs-num" id="r-temp" min="0" max="100" placeholder="–" inputmode="decimal" data-on-input="syncBrewSliders()">
+      </div>
+    </div>
+    <div class="form-row">
+      <div class="form-group"><label class="form-label">Dose (g)</label><input type="number" class="form-input" id="r-dose" min="0" max="500" placeholder="e.g. 18" step="0.1" data-on-input="updateBrewLive()"></div>
+      <div class="form-group"><label class="form-label" id="r-yield-label">Yield (g)</label><input type="number" class="form-input" id="r-yield" min="0" max="5000" placeholder="e.g. 36" step="0.1" data-on-input="updateBrewLive()"></div>
+    </div>
+    <div id="r-ratio-live" class="brew-live"></div>
     <div class="brew-timer">
       <div class="brew-timer-display" id="brew-timer-display">0:00</div>
       <button type="button" class="brew-timer-btn reset" id="brew-timer-reset" data-on-click="resetBrewTimer()" style="display:none">Reset</button>
@@ -331,9 +346,7 @@
       <button type="button" class="brew-timer-btn start" id="brew-timer-toggle" data-on-click="toggleBrewTimer()">▶ Start brew</button>
     </div>
     <div id="brew-step-guide" class="brew-guide" style="display:none"></div>
-    <div class="form-row">
-      <div class="form-group"><label class="form-label" id="r-yield-label">Yield (g)</label><input type="number" class="form-input" id="r-yield" min="0" max="5000" placeholder="e.g. 36" step="0.1" data-on-input="updateBrewLive()"></div>
-      <div class="form-group">
+    <div class="form-group">
         <label class="form-label">Time</label>
         <div class="time-row" id="r-time-esp">
           <input type="number" class="form-input" id="r-time" placeholder="28" min="0" style="width:80px">
@@ -346,9 +359,6 @@
           <span style="font-size:11px;color:var(--text-muted)">m : s</span>
         </div>
       </div>
-    </div>
-    <div id="r-ratio-live" class="brew-live"></div>
-    <div class="form-group"><label class="form-label">Water Temp (°C)</label><input type="number" class="form-input" id="r-temp" min="0" max="100" placeholder="e.g. 93" style="width:50%"></div>
     </div>
     <div class="divider">Extraction</div>
     <div class="form-group">
@@ -751,11 +761,11 @@
     <span class="nav-tab-icon"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><line x1="4" y1="6" x2="20" y2="6"/><line x1="4" y1="12" x2="20" y2="12"/><line x1="4" y1="18" x2="20" y2="18"/><circle cx="8" cy="6" r="2" fill="var(--espresso)" stroke="currentColor" class="nav-fill"/><circle cx="16" cy="12" r="2" fill="var(--espresso)" stroke="currentColor" class="nav-fill"/><circle cx="10" cy="18" r="2" fill="var(--espresso)" class="nav-fill" stroke="currentColor"/></svg></span>Settings
   </button>
 </nav>
-<script src="js/data.js?v=3.32"></script>
-<script src="js/core.js?v=3.32"></script>
-<script src="js/coffee.js?v=3.32"></script>
-<script src="js/views.js?v=3.32"></script>
-<script src="js/tools.js?v=3.32"></script>
-<script src="js/app.js?v=3.32"></script>
+<script src="js/data.js?v=3.33"></script>
+<script src="js/core.js?v=3.33"></script>
+<script src="js/coffee.js?v=3.33"></script>
+<script src="js/views.js?v=3.33"></script>
+<script src="js/tools.js?v=3.33"></script>
+<script src="js/app.js?v=3.33"></script>
 </body>
 </html>

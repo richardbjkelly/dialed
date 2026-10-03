@@ -327,6 +327,7 @@ function openRecipeModal() {
   const reid = document.getElementById('r-edit-id'); if(reid) reid.value = '';
   const rtitle = document.getElementById('r-modal-title'); if(rtitle) rtitle.textContent = 'Log Brew';
   try { setScoreOnly(false); } catch(e) {}
+  setTimeout(() => { try { syncBrewSliders(); } catch(e) {} }, 0);
   // Coffee selector
   const cs = document.getElementById('coffee-selector');
   cs.innerHTML = '';

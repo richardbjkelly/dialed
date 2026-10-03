@@ -682,6 +682,17 @@
   .update-banner[hidden] { display:none; }
   .update-banner .ub-text { flex:1; }
   .update-banner button { background:rgba(250,250,247,0.14); color:#FAFAF7; border:1px solid rgba(250,250,247,0.3); border-radius:8px; padding:6px 12px; font-size:11px; letter-spacing:1px; text-transform:uppercase; cursor:pointer; }
+  /* Grind and temperature sliders in Log Brew */
+  .brew-slider .bs-head { display:flex; justify-content:space-between; align-items:baseline; gap:10px; }
+  .brew-slider .bs-hint { font-size:11px; color:var(--text-muted); text-align:right; }
+  .brew-slider .bs-row { display:flex; gap:12px; align-items:flex-start; }
+  .brew-slider .bs-track { flex:1; min-width:0; }
+  .brew-slider input[type=range] { width:100%; height:44px; accent-color:var(--espresso); touch-action:pan-y; }
+  body.dark-mode .brew-slider input[type=range] { accent-color:#8FB3A5; }
+  .brew-slider input[type=range].unset { opacity:.45; }
+  .brew-slider input[type=range]:disabled { opacity:.25; }
+  .brew-slider .plan-range-ends { margin-top:-6px; padding:0 4px; min-height:14px; }
+  .brew-slider .bs-num { width:84px; flex-shrink:0; text-align:center; padding-left:6px; padding-right:6px; }
   /* Score later */
   #modal-recipe.score-only #r-setup, #modal-recipe.score-only #r-later-btn, #modal-recipe.score-only #r-finish-row { display:none !important; }
   .bd-summary { border:1.5px solid #52796F; background:rgba(82,121,111,0.1); border-radius:14px; padding:14px 16px; margin-top:6px; font-size:14px; line-height:1.9; color:var(--text); }
