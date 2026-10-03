@@ -332,13 +332,17 @@ function openRecipeModal() {
   // Coffee selector
   const cs = document.getElementById('coffee-selector');
   cs.innerHTML = '';
-  state.coffees.filter(selectable).forEach(c => {
+  // The coffee being brewed goes first, so it's in view without scrolling (Brew now, Repeat, Edit, or the last one used)
+  const openBags = state.coffees.filter(selectable);
+  const chosen = openBags.find(c => c.id === state.selectedCoffeeId);
+  (chosen ? [chosen, ...openBags.filter(c => c !== chosen)] : openBags).forEach(c => {
     const d = document.createElement('div');
     d.className = 'coffee-selector-item' + (state.selectedCoffeeId===c.id?' selected':'');
     d.innerHTML = `<div class="cs-name">${escHtml(c.name)}</div><div class="cs-sub">${escHtml(c.roaster||'')}</div>`;
     d.onclick = () => { state.selectedCoffeeId=c.id; cs.querySelectorAll('.coffee-selector-item').forEach(x=>x.classList.remove('selected')); d.classList.add('selected'); renderBrewHistory(); renderBrewSuggestion(); };
     cs.appendChild(d);
   });
+  cs.scrollTop = 0;
   const activeCoffees = state.coffees.filter(selectable);
   if (!state.selectedCoffeeId || !activeCoffees.find(c=>c.id===state.selectedCoffeeId)) { if(activeCoffees.length){state.selectedCoffeeId=activeCoffees[0].id; cs.children[0]?.classList.add('selected');} }
   // Default grinder to favourite if none previously selected

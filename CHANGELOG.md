@@ -891,6 +891,15 @@ No visible changes — two structural changes behind the scenes.
 
 ---
 
+## v3.35
+*3 October 2026*
+
+### Log Brew: selected coffee first
+- The coffee you're brewing is now always at the top of the coffee list in Log Brew, so it's visible without scrolling. This applies to Brew now from Up next, Repeat, Use, Edit, and a plain Log Brew (where it's the coffee you used last)
+- The list doesn't jump around when you tap a different coffee; the new order applies the next time the sheet opens
+
+---
+
 ## Pending / Roadmap
 - Rebuild the APK once to pick up the new cup icon
 - Opt-in pooled data + trained model (see feasibility notes): backend, consent, deletion, ICO registration
@@ -908,4 +917,4 @@ No visible changes — two structural changes behind the scenes.
 
 ---
 
-*Document maintained automatically. Last updated: v3.34*
+*Document maintained automatically. Last updated: v3.35*
