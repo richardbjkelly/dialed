@@ -89,7 +89,7 @@ with sync_playwright() as p:
     pg.goto('http://localhost:8765/dialed/index.html?score=%3Cimg%20src%3Dx%3E'); pg.wait_for_timeout(600)
     ok('a bad link is ignored', pg.locator('.modal-overlay.open').count()==0)
     # setting off
-    pg.evaluate("openSettings()"); pg.wait_for_timeout(300); pg.tap('#settings-scorelater-switch'); pg.wait_for_timeout(200)
+    pg.evaluate("openSettings(); SETTINGS_SECTIONS.forEach(k=>setSettingsSection(k,true))"); pg.wait_for_timeout(300); pg.tap('#settings-scorelater-switch'); pg.wait_for_timeout(200)
     ok('Score Later can be switched off in Settings', pg.evaluate("appSettings.scoreLaterPrompt")==False and pg.get_attribute('#settings-scorelater-switch','aria-checked')=='false')
     pg.evaluate("closeSettings(); openRecipeModal()"); pg.wait_for_timeout(400); ok('off: no Save & score later button', pg.is_hidden('#r-later-btn'))
     pg.evaluate("toggleBrewTimer()"); pg.wait_for_timeout(1100); pg.tap('#bm-stop'); pg.wait_for_timeout(400)

@@ -379,14 +379,114 @@ function canonicalSpelling(key, value, exceptId) {
 // Existing values offered as you type
 function fillCoffeeSuggestions() {
   SUGGEST_FIELDS.forEach(k => { const dl = document.getElementById('dl-' + k); if (dl) dl.innerHTML = topN(state.coffees, k).slice(0, 40).map(([v]) => `<option value="${escHtml(v)}"></option>`).join(''); });
+  const dn = document.getElementById('dl-notes'); if (dn) dn.innerHTML = knownNotes().slice(0, 60).map(v => `<option value="${escHtml(v)}"></option>`).join('');
 }
+// ---- Tasting notes as chips. The hidden #c-notes field still holds them joined ("Blueberry, jasmine"),
+// so they are stored and shown exactly as before. ----
+const splitNotes = str => { const seen = new Set(); return String(str || '').split(/[,;\n]+/).map(x => x.trim().replace(/\s+/g, ' ')).filter(x => x && !seen.has(x.toLowerCase()) && seen.add(x.toLowerCase())); };
+function knownNotes() {      // every note used so far, most common first
+  const n = {}; state.coffees.forEach(c => splitNotes(c.notes).forEach(x => { const k = x.toLowerCase(); (n[k] = n[k] || { v: x, c: 0 }).c++; }));
+  return Object.values(n).sort((a, b) => b.c - a.c || a.v.localeCompare(b.v)).map(x => x.v);
+}
+const noteList = () => splitNotes(document.getElementById('c-notes')?.value);
+function setNoteList(arr) { const h = document.getElementById('c-notes'); if (h) h.value = arr.join(', '); renderNoteChips(); }
+function renderNoteChips() {
+  const el = document.getElementById('c-notes-chips'); if (!el) return;
+  el.innerHTML = noteList().map((n, i) => `<span class="note-chip">${escHtml(n)}<button type="button" aria-label="Remove ${escHtml(n)}" data-on-click="removeNoteChip(${i})">×</button></span>`).join('');
+}
+function addNotes(text) {
+  const list = noteList(), known = knownNotes();
+  splitNotes(text).forEach(n => {
+    n = n.slice(0, 40);
+    const same = known.find(k => k.toLowerCase() === n.toLowerCase());     // reuse the spelling already in the library
+    if (!list.some(x => x.toLowerCase() === n.toLowerCase())) list.push(same || n);
+  });
+  setNoteList(list);
+}
+function removeNoteChip(i) { const list = noteList(); list.splice(i, 1); setNoteList(list); }
+function commitNoteEntry() { const el = document.getElementById('c-note-entry'); if (!el || !el.value.trim()) { if (el) el.value = ''; return; } addNotes(el.value); el.value = ''; }
+function noteKey(e) {
+  if (e.key === 'Enter') { e.preventDefault(); commitNoteEntry(); }
+  else if (e.key === 'Backspace' && e.target.value === '' && noteList().length) { const list = noteList(); list.pop(); setNoteList(list); }
+}
+function noteInput(el) {      // typing or pasting a comma finishes the note(s) before it
+  if (!/[,;\n]/.test(el.value)) return;
+  const i = Math.max(el.value.lastIndexOf(','), el.value.lastIndexOf(';'), el.value.lastIndexOf('\n'));
+  addNotes(el.value.slice(0, i)); el.value = el.value.slice(i + 1).replace(/^\s+/, '');
+}
+
+// ---- Roasters ----
+function cleanUrl(v) {
+  v = String(v || '').trim(); if (!v) return '';
+  if (!/^[a-z][a-z0-9+.-]*:/i.test(v)) v = 'https://' + v;
+  try { const u = new URL(v); return (/^https?:$/.test(u.protocol) && u.hostname.includes('.') && !/[\s"'<>`]/.test(u.href)) ? u.href : ''; } catch(e) { return ''; }
+}
+const roasterKey = n => String(n || '').trim().toLowerCase().replace(/\s+/g, ' ');
+function roasterInfo(name) {
+  const k = roasterKey(name), cs = state.coffees.filter(c => k && roasterKey(c.roaster) === k);
+  const pick = f => (cs.find(c => c[f]) || {})[f] || '';
+  return { name: cs.length ? cs[0].roaster : String(name || ''), coffees: cs, city: pick('roasterCity'), country: pick('roasterCountry'), website: pick('roasterWebsite') };
+}
+// Picking a roaster you've used before fills in what's already known about it
+function roasterPicked() {
+  const info = roasterInfo(document.getElementById('c-roaster').value); if (!info.coffees.length) return;
+  [['c-roaster-city', info.city], ['c-roaster-country', info.country], ['c-roaster-web', info.website]].forEach(([id, v]) => { const el = document.getElementById(id); if (el && !el.value && v) el.value = v; });
+}
+function mapsUrl(q) {
+  const apple = /iPad|iPhone|iPod/.test(navigator.userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+  return (apple ? 'https://maps.apple.com/?q=' : 'https://www.google.com/maps/search/?api=1&query=') + encodeURIComponent(q);
+}
+const extLink = (url, label, cls) => `<a class="${cls}" href="${escHtml(url)}" target="_blank" rel="noopener noreferrer">${label}</a>`;
+function openRoasters() {
+  const by = {}; state.coffees.forEach(c => { const k = roasterKey(c.roaster); if (k) (by[k] = by[k] || []).push(c); });
+  const rows = Object.values(by).sort((a, b) => b.length - a.length || a[0].roaster.localeCompare(b[0].roaster)).map(cs => {
+    const info = roasterInfo(cs[0].roaster);
+    return `<button type="button" class="roaster-row" data-roaster="${escHtml(info.name)}" data-on-click="showRoasterFrom(this)"><div><div class="rr-name">${escHtml(info.name)}</div><div class="rr-sub">${escHtml([info.city, info.country].filter(Boolean).join(', ') || 'Location not set')}</div></div><div class="rr-right">${cs.length} coffee${cs.length === 1 ? '' : 's'} ›</div></button>`;
+  }).join('');
+  document.getElementById('roasters-content').innerHTML =
+    extLink(mapsUrl('specialty coffee roasters near me'), 'Find roasters near me', 'btn-primary') +
+    `<div style="height:8px"></div>` + extLink(mapsUrl('specialty coffee shop near me'), 'Coffee shops near me', 'btn-secondary') +
+    `<div class="roaster-note">Opens your maps app, which uses its own location. dialed never sees where you are.</div>` +
+    `<div class="divider" style="margin-top:18px">Your roasters</div>` +
+    (rows || `<div class="roaster-note">No roasters yet — add a roaster name to a coffee and it will appear here.</div>`);
+  openModal('modal-roasters');
+}
+function showRoasterFrom(el) { showRoaster(el.dataset.roaster); }
+function showRoaster(name) {
+  const info = roasterInfo(name); if (!info.coffees.length) return;
+  const ids = new Set(info.coffees.map(c => c.id)), brews = state.recipes.filter(r => ids.has(r.coffeeId)).length;
+  const rated = info.coffees.filter(c => c.rating > 0), avg = rated.length ? (rated.reduce((s, c) => s + Number(c.rating), 0) / rated.length).toFixed(1) : '—';
+  const bought = info.coffees.filter(c => c.priceGBP > 0), spent = bought.reduce((s, c) => s + Number(c.priceGBP), 0);
+  const where = [info.city, info.country].filter(Boolean).join(', ');
+  const host = info.website ? (() => { try { return new URL(info.website).hostname.replace(/^www\./, ''); } catch(e) { return 'Website'; } })() : '';
+  document.getElementById('roaster-content').innerHTML = `
+    <div class="modal-title" id="roaster-title">${escHtml(info.name)}</div>
+    <div class="modal-subtitle">${escHtml(where || 'Location not set')}</div>
+    <div class="roaster-links">${info.website ? extLink(info.website, escHtml(host), 'btn-primary') : ''}${extLink(mapsUrl(info.name + (where ? ' ' + where : '')), 'Find on map', info.website ? 'btn-secondary' : 'btn-primary')}</div>
+    ${info.website ? '' : '<div class="roaster-note">No website saved. Edit any coffee from this roaster to add one.</div>'}
+    <div class="roaster-stats">
+      <div><b>${info.coffees.length}</b><span>Coffee${info.coffees.length === 1 ? '' : 's'}</span></div>
+      <div><b>${brews}</b><span>Brew${brews === 1 ? '' : 's'}</span></div>
+      <div><b>${avg}</b><span>Avg rating</span></div>
+      ${showCosts() && bought.length ? `<div><b>${bought.some(c => c.fxApprox) ? '≈' : ''}£${spent.toFixed(2)}</b><span>Spent</span></div>` : ''}
+    </div>
+    <div class="divider" style="margin-top:14px">Coffees</div>
+    ${info.coffees.map(c => `<button type="button" class="roaster-row" data-on-click="openCoffeeFromRoaster('${c.id}')"><div><div class="rr-name">${escHtml(c.name)}</div><div class="rr-sub">${escHtml([c.country, c.process].filter(Boolean).join(' · ') || ' ')}</div></div><div class="rr-right">${c.rating > 0 ? c.rating + '/10' : ''}${c.finishedBag ? (c.rating > 0 ? ' · ' : '') + 'Finished' : ''} ›</div></button>`).join('')}`;
+  openModal('modal-roaster');
+}
+function openCoffeeFromRoaster(id) {
+  closeModal('modal-roaster'); closeModal('modal-roasters');
+  showView('coffees'); showCoffeeDetail(id);
+}
+
 function resetCoffeeModal() {
   fillCoffeeSuggestions();
   document.getElementById('c-modal-title').textContent = 'Add Coffee';
   document.getElementById('c-edit-id').value = '';
-  ['c-name','c-roaster','c-roaster-city','c-roaster-country','c-producer','c-farm',
-   'c-country','c-region','c-varietal','c-notes','c-roastdate','c-masl','c-process-custom','c-weight','c-price']
+  ['c-name','c-roaster','c-roaster-city','c-roaster-country','c-roaster-web','c-producer','c-farm',
+   'c-country','c-region','c-varietal','c-notes','c-note-entry','c-roastdate','c-masl','c-process-custom','c-weight','c-price']
     .forEach(id => { const el = document.getElementById(id); if(el) el.value=''; });
+  renderNoteChips();
   document.getElementById('c-process').value='';
   document.getElementById('c-process-custom').style.display='none';
   document.getElementById('c-roast').value='';
@@ -417,6 +517,7 @@ function openEditCoffee(id) {
   document.getElementById('c-roaster').value = coffee.roaster || '';
   document.getElementById('c-roaster-city').value = coffee.roasterCity || '';
   document.getElementById('c-roaster-country').value = coffee.roasterCountry || '';
+  document.getElementById('c-roaster-web').value = coffee.roasterWebsite || '';
   document.getElementById('c-producer').value = coffee.producer || '';
   document.getElementById('c-farm').value = coffee.farm || '';
   document.getElementById('c-country').value = coffee.country || '';
@@ -429,7 +530,7 @@ function openEditCoffee(id) {
   document.getElementById('c-price').value = coffee.price || '';
   document.getElementById('c-currency').value = coffee.currency || 'GBP';
   updatePricePreview();
-  document.getElementById('c-notes').value = coffee.notes || '';
+  document.getElementById('c-notes').value = coffee.notes || ''; renderNoteChips();
   // Process
   const knownProcesses = ['Washed','Natural','Honey','Anaerobic','Wet Hulled','Carbonic Maceration','Extended Fermentation'];
   if (knownProcesses.includes(coffee.process)) {
@@ -457,7 +558,10 @@ function saveCoffee() {
   if (cw !== '' && !(parseFloat(cw) > 0)) { showToast('Bag weight should be more than 0g'); return; }
   if (cp !== '' && !(parseFloat(cp) >= 0)) { showToast("Price can't be negative"); return; }
   if (cm !== '' && !(parseFloat(cm) >= 0 && parseFloat(cm) <= 4000)) { showToast('Altitude should be between 0 and 4000m'); return; }
+  const webRaw = document.getElementById('c-roaster-web').value, web = cleanUrl(webRaw);
+  if (webRaw.trim() && !web) { showToast("That website address doesn't look right"); return; }
   if (!tapOnce('saveCoffee')) return;
+  commitNoteEntry();      // a note still being typed counts
   const editId = document.getElementById('c-edit-id').value;
   const coffeeData = {
     name,
@@ -465,6 +569,7 @@ function saveCoffee() {
     roaster: document.getElementById('c-roaster').value.trim(),
     roasterCity: document.getElementById('c-roaster-city').value.trim(),
     roasterCountry: document.getElementById('c-roaster-country').value.trim(),
+    roasterWebsite: web || '',
     producer: document.getElementById('c-producer').value.trim(),
     farm: document.getElementById('c-farm').value.trim(),
     country: document.getElementById('c-country').value.trim(),

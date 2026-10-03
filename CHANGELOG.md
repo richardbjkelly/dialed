@@ -866,6 +866,31 @@ No visible changes — two structural changes behind the scenes.
 
 ---
 
+## v3.34
+*3 October 2026*
+
+### Settings in collapsible categories
+- Six categories, each opened or closed by tapping its heading: **Library** (Recipes, Grinders, Roasters), **Logging a brew** (Suggested Start, Score Later), **Display** (Dark Mode, Text Size, Show Costs), **Insights**, **Backup & storage**, **About**
+- Library and Logging a brew are open each time Settings opens; the rest start closed
+- Show Costs moved from Brewing to Display
+- Backup & storage opens by itself while an "Undo last restore" is available
+
+### Tasting notes one at a time
+- A coffee's bag tasting notes are now entered individually: type a note and press Enter or a comma, and it becomes a chip with a × to remove it
+- Notes used on other coffees are suggested as you type, and their spelling is reused
+- Existing notes are split into chips automatically; they are still stored and shown as one list ("Blueberry, jasmine, dark chocolate") exactly as before
+
+### Roasters
+- **Roaster website** field on a coffee; "https://" is added for you, and anything that isn't a web address is rejected
+- Choosing a roaster you've used before fills in its city, country and website
+- **Roaster page**: tap the roaster name on a coffee's page to see where it is, a link to its website, "Find on map", how many coffees and brews you've had from it, your average rating and spend, and the list of its coffees
+- **Roasters** list under Settings › Library, with **Find roasters near me** and **Coffee shops near me**. These open your maps app, which uses its own location; the app itself never sees where you are
+
+### Fix
+- The hidden message bubble near the top of the screen could swallow a tap on whatever was underneath it
+
+---
+
 ## Pending / Roadmap
 - Rebuild the APK once to pick up the new cup icon
 - Opt-in pooled data + trained model (see feasibility notes): backend, consent, deletion, ICO registration
@@ -873,8 +898,11 @@ No visible changes — two structural changes behind the scenes.
 - Screenshot showcase for PWABuilder
 - Play Store listing
 - Reliable score reminders (real push notifications) — needs the backend that sync will bring
+- In-app list of nearby roasters and cafés using Google Places (needs a server to keep the API key private)
+- Accounts with shared ratings and recipes, Vivino-style (needs a backend; on hold)
+- Compare brew methods (parked)
 - On hold: sharing with friends — start with share links (coffee + best recipe via the phone's share sheet, imported by tapping the link); connected friends/feed later if wanted
 
 ---
 
-*Document maintained automatically. Last updated: v3.33*
+*Document maintained automatically. Last updated: v3.34*

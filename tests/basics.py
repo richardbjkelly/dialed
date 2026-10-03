@@ -33,7 +33,7 @@ with sync_playwright() as p:
     pg.select_option('#r-recipe-select',''); assert v('r-dose')==''
     pg.evaluate("closeModal('modal-recipe')"); pg.wait_for_timeout(300)
     # settings toggle
-    pg.evaluate("openSettings()"); pg.wait_for_timeout(300)
+    pg.evaluate("openSettings(); SETTINGS_SECTIONS.forEach(k=>setSettingsSection(k,true))"); pg.wait_for_timeout(300)
     sw='#settings-suggest-switch'
     assert pg.get_attribute(sw,'aria-checked')=='true'
     pg.screenshot(path='shots/settings_on.png')
@@ -45,7 +45,7 @@ with sync_playwright() as p:
     assert pg.inner_html('#brew-suggestion').strip()=='', 'suggestion hidden when off'
     pg.evaluate("closeModal('modal-recipe')")
     pg.reload(); pg.wait_for_timeout(500)
-    pg.evaluate("openSettings()"); pg.wait_for_timeout(200)
+    pg.evaluate("openSettings(); SETTINGS_SECTIONS.forEach(k=>setSettingsSection(k,true))"); pg.wait_for_timeout(200)
     assert pg.get_attribute(sw,'aria-checked')=='false', 'persists'
     pg.evaluate("document.body.classList.add('dark-mode')"); pg.wait_for_timeout(100)
     pg.screenshot(path='shots/settings_dark.png')

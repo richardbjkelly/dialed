@@ -2,9 +2,17 @@
 // Plain scripts sharing one global scope, loaded in order: data, core, coffee, views, tools, app.
 
 // ==================== SETTINGS PANEL ====================
+const SETTINGS_SECTIONS = ['library', 'logging', 'display', 'insights', 'backup', 'about'];
+function setSettingsSection(key, open) {
+  const btn = document.getElementById('sec-btn-' + key), body = document.getElementById('sec-' + key); if (!btn || !body) return;
+  btn.setAttribute('aria-expanded', open ? 'true' : 'false'); body.hidden = !open;
+}
+function toggleSettingsSection(key) { const btn = document.getElementById('sec-btn-' + key); if (btn) setSettingsSection(key, btn.getAttribute('aria-expanded') !== 'true'); }
 function openSettings() {
   renderOverviewCategoryOptions(); syncSuggestedStartSwitch(); applyTextSize();
   renderStorageInfo(); renderAbout();
+  SETTINGS_SECTIONS.forEach(k => setSettingsSection(k, k === 'library' || k === 'logging'));   // the two used most start open
+  try { if (restoreUndo || localStorage.getItem('dialin_v2_prev')) setSettingsSection('backup', true); } catch(e) {}   // keep "Undo last restore" in view while it's available
   document.getElementById('settings-panel').classList.add('open');
   document.getElementById('settings-panel').inert = false;
   try { a11yOpened('settings-panel'); } catch(e) {}
@@ -49,7 +57,7 @@ function closeSettings() {
 
 
 // ==================== VERSION & UPDATES ====================
-const APP_VERSION = '3.33';
+const APP_VERSION = '3.34';
 // The app page is fetched fresh when online, but on a slow connection the saved copy is used instead.
 // version.json is tiny and never cached, so we can tell when a newer version is waiting.
 async function checkForUpdate() {
@@ -189,7 +197,7 @@ function snoozeBackupReminder() { appSettings.backupSnoozeUntil = Date.now() + 7
 function clearCompare() { state.compareIds = []; save(); updateCompareBar(); renderCompare(); }
 function hideParent(el) { el.parentElement.hidden = true; }
 
-const ACTIONS = { slideBrew, syncBrewSliders, scoreBrew, leaveUnscored, setRemindMins, brewDoneLater, brewDoneNow, saveBrewForLater, toggleScoreLater, openBrewMode, minimiseBrewMode, stopBrewFromMode, confirmCancelBrew, addRecipeStep, applyBrewSuggestion, backupData, brewPlan, clearCompare, closeModal, closeSettings, confirmDeleteBrew, confirmDeleteCoffee, confirmDeleteCustomRecipe, confirmUndoRestore, dismissLoadProblem, dismissPlan, duplicateRecipe, editBrew, endLongPress, exportUnreadable, fabNewCustomRecipe, filterGrinders, filterRecipeMethod, fxFor, goBackToCoffees, handleLabelPhoto, hideCompareSection, hideEditOverlay, hideParent, hidePhotoError, keyMovePlan, onRecipeChange, onTasteInput, openEditCoffee, openEditCustomRecipe, openFab, openLightbox, openLightboxFor, openModal, openNewCustomRecipe, openPlanNext, openRecipeModal, openSettings, pickLabelPhoto, pickRestoreFile, reloadForUpdate, removeLabelPhoto, removeStepRow, renderCompare, renderGrinders, renderTracker, reopenBrewSheet, repeatBrew, resetBrewTimer, resetCoffeeModal, resetTaste, restoreData, saveCoffee, saveCustomRecipe, saveFinishBag, savePlan, saveRecipe, selectExtraction, selectMethod, setCoffeeLayout, setCoffeeRating, setFinishAgain, setFinishRating, setPlanDir, setRating, setStatsPeriod, setTasteSlider, setTextSize, setTrackerSort, showAllBrews, showCoffeeDetail, showEditOverlay, showGrinderDetail, showMoreBrews, showToast, showTrendModal, showView, slidePlan, snoozeBackupReminder, startLongPress, startPlanDrag, switchRecipeTab, toggleBackupPhotos, toggleBrewHistory, toggleBrewTimer, toggleCompare, toggleCustomProcess, toggleDarkMode, toggleFavourite, toggleFinishedBag, toggleOverviewCategory, toggleShowCosts, toggleSuggestedStart, updateBrewLive, updateGrindMicrons, updateGrinderConverter, updatePricePreview, useBrewSettings };
+const ACTIONS = { toggleSettingsSection, openRoasters, showRoasterFrom, openCoffeeFromRoaster, noteKey, noteInput, commitNoteEntry, removeNoteChip, roasterPicked, slideBrew, syncBrewSliders, scoreBrew, leaveUnscored, setRemindMins, brewDoneLater, brewDoneNow, saveBrewForLater, toggleScoreLater, openBrewMode, minimiseBrewMode, stopBrewFromMode, confirmCancelBrew, addRecipeStep, applyBrewSuggestion, backupData, brewPlan, clearCompare, closeModal, closeSettings, confirmDeleteBrew, confirmDeleteCoffee, confirmDeleteCustomRecipe, confirmUndoRestore, dismissLoadProblem, dismissPlan, duplicateRecipe, editBrew, endLongPress, exportUnreadable, fabNewCustomRecipe, filterGrinders, filterRecipeMethod, fxFor, goBackToCoffees, handleLabelPhoto, hideCompareSection, hideEditOverlay, hideParent, hidePhotoError, keyMovePlan, onRecipeChange, onTasteInput, openEditCoffee, openEditCustomRecipe, openFab, openLightbox, openLightboxFor, openModal, openNewCustomRecipe, openPlanNext, openRecipeModal, openSettings, pickLabelPhoto, pickRestoreFile, reloadForUpdate, removeLabelPhoto, removeStepRow, renderCompare, renderGrinders, renderTracker, reopenBrewSheet, repeatBrew, resetBrewTimer, resetCoffeeModal, resetTaste, restoreData, saveCoffee, saveCustomRecipe, saveFinishBag, savePlan, saveRecipe, selectExtraction, selectMethod, setCoffeeLayout, setCoffeeRating, setFinishAgain, setFinishRating, setPlanDir, setRating, setStatsPeriod, setTasteSlider, setTextSize, setTrackerSort, showAllBrews, showCoffeeDetail, showEditOverlay, showGrinderDetail, showMoreBrews, showToast, showTrendModal, showView, slidePlan, snoozeBackupReminder, startLongPress, startPlanDrag, switchRecipeTab, toggleBackupPhotos, toggleBrewHistory, toggleBrewTimer, toggleCompare, toggleCustomProcess, toggleDarkMode, toggleFavourite, toggleFinishedBag, toggleOverviewCategory, toggleShowCosts, toggleSuggestedStart, updateBrewLive, updateGrindMicrons, updateGrinderConverter, updatePricePreview, useBrewSettings };
 const ACTION_EVENTS = ['click', 'input', 'change', 'touchstart', 'touchend', 'touchcancel', 'contextmenu', 'pointerdown', 'keydown'];
 const actionCache = new Map();
 function splitOutsideQuotes(str, sep) {

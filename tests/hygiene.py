@@ -43,7 +43,7 @@ with sync_playwright() as p:
     ok('L3 headings still use the display font, body the mono font', 'Space Grotesk' in pg.evaluate("getComputedStyle(document.querySelector('.app-title')).fontFamily") and 'Space Mono' in pg.evaluate("getComputedStyle(document.querySelector('.nav-tab')).fontFamily"))
     ok('L6 policy present', pg.evaluate("!!document.querySelector('meta[http-equiv=Content-Security-Policy]')"))
     # exercise things the policy could break: photo blob, service worker, inline handlers
-    pg.evaluate("openSettings()"); pg.wait_for_timeout(300)
+    pg.evaluate("openSettings(); SETTINGS_SECTIONS.forEach(k=>setSettingsSection(k,true))"); pg.wait_for_timeout(300)
     ok('L9 version shown in Settings', f'Version {ver}' in pg.inner_text('#settings-about'))
     ok('L4 privacy note in Settings', 'stays on this device' in pg.inner_text('#settings-about'))
     ok('L11 text size offered where supported', pg.is_visible('#text-size-row')); pg.evaluate("closeSettings()")
@@ -69,7 +69,7 @@ with sync_playwright() as p:
     ok('L8 rate and date stored with the price', c['priceGBP']==20 and c['fxRate']==1.25 and re.match(r'\d{4}-\d\d-\d\d$',c['fxDate']) and c['fxApprox']==False, c)
     ok('L14 new ids are not timestamps', not re.fullmatch(r'\d{13}',c['id']), c['id'])
     # editing other fields later keeps the original £ value even if rates have moved
-    pg.evaluate("fxRates.EUR=2"); pg.evaluate(f"openEditCoffee('{c['id']}')"); pg.wait_for_timeout(400); pg.fill('#c-notes','hello'); pg.evaluate("saveCoffee()"); pg.wait_for_timeout(900)
+    pg.evaluate("fxRates.EUR=2"); pg.evaluate(f"openEditCoffee('{c['id']}')"); pg.wait_for_timeout(400); pg.fill('#c-note-entry','hello'); pg.evaluate("saveCoffee()"); pg.wait_for_timeout(900)
     c2=[x for x in json.loads(pg.evaluate("localStorage.getItem('dialin_v2')"))['coffees'] if x['name']=='Euro Bag'][0]
     ok('L8 editing notes does not re-convert the price', c2['priceGBP']==20 and c2['fxRate']==1.25 and c2['notes']=='hello', c2)
     pg.evaluate(f"openEditCoffee('{c['id']}')"); pg.wait_for_timeout(400); pg.fill('#c-price','30'); pg.evaluate("saveCoffee()"); pg.wait_for_timeout(900)

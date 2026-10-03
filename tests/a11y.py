@@ -55,7 +55,7 @@ with sync_playwright() as p:
     unl=pg.evaluate("[...document.querySelectorAll('#modal-coffee input:not([type=hidden]):not([type=file]), #modal-coffee select, #modal-coffee textarea')].filter(c=>!(c.getAttribute('aria-label')||c.getAttribute('aria-labelledby')||(c.labels&&c.labels.length))).map(c=>c.id)")
     ok('every Add Coffee field has a label', not unl, unl); pg.keyboard.press('Escape'); pg.wait_for_timeout(300)
     # settings
-    pg.evaluate("openSettings()"); pg.wait_for_timeout(400)
+    pg.evaluate("openSettings(); SETTINGS_SECTIONS.forEach(k=>setSettingsSection(k,true))"); pg.wait_for_timeout(400)
     ok('settings usable when open', not pg.evaluate("document.getElementById('settings-panel').inert"))
     pg.keyboard.press('Escape'); pg.wait_for_timeout(400)
     ok('Escape closes Settings', not pg.evaluate("document.getElementById('settings-panel').classList.contains('open')") and pg.evaluate("document.getElementById('settings-panel').inert"))

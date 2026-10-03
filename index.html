@@ -13,7 +13,7 @@
 <meta name="apple-mobile-web-app-title" content="dialed">
 <meta name="theme-color" content="#123C27">
 <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; font-src 'self'; connect-src 'self' https://api.frankfurter.dev https://api.frankfurter.app; object-src 'none'; base-uri 'self'; form-action 'none'">
-<link rel="stylesheet" href="css/styles.css?v=3.33">
+<link rel="stylesheet" href="css/styles.css?v=3.34">
 </head>
 <body>
 
@@ -221,11 +221,12 @@
       <input type="checkbox" id="c-decaf" style="width:18px;height:18px;accent-color:var(--crema);cursor:pointer">
       <span style="font-size:14px;color:var(--text);flex:1;margin:0">Decaf</span>
     </label>
-    <div class="form-group"><label class="form-label">Roaster</label><input type="text" class="form-input" id="c-roaster" list="dl-roaster" autocomplete="off" placeholder="e.g. Square Mile Coffee"></div>
+    <div class="form-group"><label class="form-label">Roaster</label><input type="text" class="form-input" id="c-roaster" list="dl-roaster" autocomplete="off" data-on-change="roasterPicked()" placeholder="e.g. Square Mile Coffee"></div>
     <div class="form-row">
       <div class="form-group"><label class="form-label">Roaster City</label><input type="text" class="form-input" id="c-roaster-city" list="dl-roasterCity" autocomplete="off" placeholder="e.g. London"></div>
       <div class="form-group"><label class="form-label">Roaster Country</label><input type="text" class="form-input" id="c-roaster-country" list="dl-roasterCountry" autocomplete="off" placeholder="e.g. UK"></div>
     </div>
+    <div class="form-group"><label class="form-label">Roaster Website</label><input type="url" class="form-input" id="c-roaster-web" inputmode="url" autocapitalize="off" autocomplete="off" spellcheck="false" placeholder="e.g. squaremilecoffee.com"></div>
     <div class="form-row">
       <div class="form-group"><label class="form-label">Country</label><input type="text" class="form-input" id="c-country" list="dl-country" autocomplete="off" placeholder="e.g. Ethiopia"></div>
       <div class="form-group"><label class="form-label">Region</label><input type="text" class="form-input" id="c-region" list="dl-region" autocomplete="off" placeholder="e.g. Guji"></div>
@@ -256,7 +257,12 @@
       <div class="form-group"><label class="form-label">Currency</label><select class="form-select" id="c-currency" data-on-change="updatePricePreview();fxFor(this.value)"><option value="GBP">GBP</option><option value="EUR">EUR</option><option value="USD">USD</option><option value="AUD">AUD</option><option value="CAD">CAD</option><option value="NZD">NZD</option><option value="JPY">JPY</option><option value="CHF">CHF</option><option value="SEK">SEK</option><option value="NOK">NOK</option><option value="DKK">DKK</option><option value="HKD">HKD</option><option value="SGD">SGD</option><option value="KRW">KRW</option><option value="CNY">CNY</option></select></div>
     </div>
     <div id="c-price-preview" style="font-size:11px;color:var(--text-muted);margin:-6px 0 14px"></div>
-    <div class="form-group"><label class="form-label">Tasting Notes (from bag)</label><input type="text" class="form-input" id="c-notes" placeholder="e.g. Blueberry, jasmine, dark chocolate"></div>
+    <div class="form-group"><label class="form-label" for="c-note-entry">Tasting Notes (from bag)</label>
+      <input type="hidden" id="c-notes" value="">
+      <div class="note-chips" id="c-notes-chips"></div>
+      <input type="text" class="form-input" id="c-note-entry" list="dl-notes" autocomplete="off" enterkeyhint="done" maxlength="40" placeholder="Add one at a time, e.g. Blueberry" data-on-keydown="noteKey(event)" data-on-input="noteInput(this)" data-on-change="commitNoteEntry()">
+      <div class="note-hint">Press Enter or type a comma after each note</div>
+    </div>
     <div class="form-group">
       <label class="form-label">Overall Rating</label>
       <div class="coffee-rating-row" id="c-rating-row">
@@ -521,6 +527,28 @@
   </div>
 </div>
 
+<!-- MODAL: Roasters list -->
+<div class="modal-overlay" id="modal-roasters">
+  <div class="modal">
+    <div class="modal-handle"></div>
+    <div class="modal-title">Roasters</div>
+    <div class="modal-subtitle">From the coffees in your library</div>
+    <div id="roasters-content"></div>
+    <button class="btn-secondary" style="width:100%;margin-top:14px" data-on-click="closeModal('modal-roasters')">Close</button>
+    <div style="height:10px"></div>
+  </div>
+</div>
+
+<!-- MODAL: Roaster page -->
+<div class="modal-overlay" id="modal-roaster">
+  <div class="modal">
+    <div class="modal-handle"></div>
+    <div id="roaster-content"></div>
+    <button class="btn-secondary" style="width:100%;margin-top:14px" data-on-click="closeModal('modal-roaster')">Close</button>
+    <div style="height:10px"></div>
+  </div>
+</div>
+
 <!-- MODAL: Finish bag -->
 <div class="modal-overlay" id="modal-finish">
   <div class="modal">
@@ -611,8 +639,8 @@
   </div>
   <div class="settings-panel-body">
 
-    <div class="settings-section-header">Browse</div>
-
+    <button type="button" class="settings-section-header settings-sec-btn" id="sec-btn-library" aria-expanded="false" aria-controls="sec-library" data-on-click="toggleSettingsSection('library')"><span>Library</span><span class="sec-chev" aria-hidden="true">▾</span></button>
+    <div class="settings-sec-body" id="sec-library" hidden>
     <div class="settings-nav-item" data-on-click="closeSettings();showView('recipes')">
       <span class="settings-nav-icon"><svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="4" width="14" height="17" rx="2"/><rect x="9" y="2.5" width="6" height="3.5" rx="1"/><path d="M9 11h6M9 14.5h6M9 18h3.5"/></svg></span>
       <div style="flex:1">
@@ -631,8 +659,18 @@
       <span class="settings-nav-arrow">›</span>
     </div>
 
-    <div class="settings-section-header">Brewing</div>
+    <div class="settings-nav-item" data-on-click="closeSettings();openRoasters()">
+      <span class="settings-nav-icon"><svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 21s-6-5.5-6-10a6 6 0 0 1 12 0c0 4.5-6 10-6 10z"/><circle cx="12" cy="11" r="2"/></svg></span>
+      <div style="flex:1">
+        <div class="settings-nav-label">Roasters</div>
+        <div class="settings-nav-sub">Your roasters, their websites, and roasters near you</div>
+      </div>
+      <span class="settings-nav-arrow">›</span>
+    </div>
+    </div>
 
+    <button type="button" class="settings-section-header settings-sec-btn" id="sec-btn-logging" aria-expanded="false" aria-controls="sec-logging" data-on-click="toggleSettingsSection('logging')"><span>Logging a brew</span><span class="sec-chev" aria-hidden="true">▾</span></button>
+    <div class="settings-sec-body" id="sec-logging" hidden>
     <div class="settings-toggle-row">
       <div style="flex:1;padding-right:12px">
         <div class="settings-toggle-label">Suggested Start</div>
@@ -648,17 +686,10 @@
       </div>
       <button type="button" class="switch" id="settings-scorelater-switch" role="switch" aria-checked="true" aria-label="Score Later" data-on-click="toggleScoreLater()"><span class="switch-knob"></span></button>
     </div>
-
-    <div class="settings-toggle-row">
-      <div style="flex:1;padding-right:12px">
-        <div class="settings-toggle-label">Show Costs</div>
-        <div class="settings-toggle-sub">Bag price, £ per 100g, cost per brew and total spent</div>
-      </div>
-      <button type="button" class="switch" id="settings-costs-switch" role="switch" aria-checked="true" aria-label="Show costs" data-on-click="toggleShowCosts()"><span class="switch-knob"></span></button>
     </div>
 
-    <div class="settings-section-header">Appearance</div>
-
+    <button type="button" class="settings-section-header settings-sec-btn" id="sec-btn-display" aria-expanded="false" aria-controls="sec-display" data-on-click="toggleSettingsSection('display')"><span>Display</span><span class="sec-chev" aria-hidden="true">▾</span></button>
+    <div class="settings-sec-body" id="sec-display" hidden>
     <div class="settings-toggle-row">
       <div>
         <div class="settings-toggle-label">Dark Mode</div>
@@ -682,12 +713,26 @@
       </div>
     </div>
 
-    <div class="settings-section-header">Insights charts</div>
+
+    <div class="settings-toggle-row">
+      <div style="flex:1;padding-right:12px">
+        <div class="settings-toggle-label">Show Costs</div>
+        <div class="settings-toggle-sub">Bag price, £ per 100g, cost per brew and total spent</div>
+      </div>
+      <button type="button" class="switch" id="settings-costs-switch" role="switch" aria-checked="true" aria-label="Show costs" data-on-click="toggleShowCosts()"><span class="switch-knob"></span></button>
+    </div>
+    </div>
+
+    <button type="button" class="settings-section-header settings-sec-btn" id="sec-btn-insights" aria-expanded="false" aria-controls="sec-insights" data-on-click="toggleSettingsSection('insights')"><span>Insights</span><span class="sec-chev" aria-hidden="true">▾</span></button>
+    <div class="settings-sec-body" id="sec-insights" hidden>
     <div style="padding:14px 20px;background:var(--card);border-bottom:1px solid var(--border)">
       <div style="font-size:12px;color:var(--text-muted);margin-bottom:10px">Choose which categories appear on the Insights tab</div>
       <div id="overview-category-options"></div>
     </div>
-    <div class="settings-section-header">Data</div>
+    </div>
+
+    <button type="button" class="settings-section-header settings-sec-btn" id="sec-btn-backup" aria-expanded="false" aria-controls="sec-backup" data-on-click="toggleSettingsSection('backup')"><span>Backup &amp; storage</span><span class="sec-chev" aria-hidden="true">▾</span></button>
+    <div class="settings-sec-body" id="sec-backup" hidden>
     <div id="storage-info" style="padding:10px 20px;font-size:11px;line-height:1.6;color:var(--text-muted);background:var(--card);border-bottom:1px solid var(--border)"></div>
 
     <div class="settings-nav-item" data-on-click="backupData();closeSettings()">
@@ -713,11 +758,14 @@
         <div class="settings-nav-sub">Restore from a previous export</div>
       </div>
     </div>
+    </div>
 
-    <div class="settings-section-header">About</div>
+    <button type="button" class="settings-section-header settings-sec-btn" id="sec-btn-about" aria-expanded="false" aria-controls="sec-about" data-on-click="toggleSettingsSection('about')"><span>About</span><span class="sec-chev" aria-hidden="true">▾</span></button>
+    <div class="settings-sec-body" id="sec-about" hidden>
     <div id="settings-about" style="padding:12px 20px;font-size:11px;line-height:1.6;color:var(--text-muted);background:var(--card);border-bottom:1px solid var(--border)">
       <div class="about-version" style="color:var(--text)"></div>
       <div style="margin-top:6px"><b>Privacy.</b> Everything you enter stays on this device; there is no account and nothing is uploaded. The only outside request is an exchange-rate lookup (frankfurter.dev, European Central Bank rates) when you enter a price in a currency other than GBP. It sends no coffee data, but like any web request it reveals your IP address. Backups are plain, unencrypted files.</div>
+    </div>
     </div>
 
     <div style="height:40px"></div>
@@ -725,7 +773,7 @@
 </div>
 
 <div id="update-banner" class="update-banner" role="status" hidden><span class="ub-text">Update available</span><button type="button" data-on-click="reloadForUpdate()">Reload</button><button type="button" aria-label="Dismiss" data-on-click="hideParent(this)">✕</button></div>
-<datalist id="dl-roaster"></datalist><datalist id="dl-roasterCity"></datalist><datalist id="dl-roasterCountry"></datalist><datalist id="dl-producer"></datalist><datalist id="dl-farm"></datalist><datalist id="dl-country"></datalist><datalist id="dl-region"></datalist><datalist id="dl-varietal"></datalist>
+<datalist id="dl-notes"></datalist><datalist id="dl-roaster"></datalist><datalist id="dl-roasterCity"></datalist><datalist id="dl-roasterCountry"></datalist><datalist id="dl-producer"></datalist><datalist id="dl-farm"></datalist><datalist id="dl-country"></datalist><datalist id="dl-region"></datalist><datalist id="dl-varietal"></datalist>
 <input type="file" id="restore-input" accept=".json,application/json" style="display:none" data-on-change="restoreData(this)">
 <button type="button" class="timer-pill" id="timer-pill" hidden data-on-click="reopenBrewSheet()" aria-label="Brew timer running. Return to Log Brew"><span class="tp-dot" aria-hidden="true"></span>Brewing <span class="tp-time">0:00</span></button>
 <div id="brew-mode" class="brew-mode" role="dialog" aria-modal="true" aria-label="Brewing" tabindex="-1" hidden>
@@ -761,11 +809,11 @@
     <span class="nav-tab-icon"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><line x1="4" y1="6" x2="20" y2="6"/><line x1="4" y1="12" x2="20" y2="12"/><line x1="4" y1="18" x2="20" y2="18"/><circle cx="8" cy="6" r="2" fill="var(--espresso)" stroke="currentColor" class="nav-fill"/><circle cx="16" cy="12" r="2" fill="var(--espresso)" stroke="currentColor" class="nav-fill"/><circle cx="10" cy="18" r="2" fill="var(--espresso)" class="nav-fill" stroke="currentColor"/></svg></span>Settings
   </button>
 </nav>
-<script src="js/data.js?v=3.33"></script>
-<script src="js/core.js?v=3.33"></script>
-<script src="js/coffee.js?v=3.33"></script>
-<script src="js/views.js?v=3.33"></script>
-<script src="js/tools.js?v=3.33"></script>
-<script src="js/app.js?v=3.33"></script>
+<script src="js/data.js?v=3.34"></script>
+<script src="js/core.js?v=3.34"></script>
+<script src="js/coffee.js?v=3.34"></script>
+<script src="js/views.js?v=3.34"></script>
+<script src="js/tools.js?v=3.34"></script>
+<script src="js/app.js?v=3.34"></script>
 </body>
 </html>

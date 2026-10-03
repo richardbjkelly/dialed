@@ -57,7 +57,7 @@ with sync_playwright() as p:
     pg.locator('.bottom-nav .nav-tab', has_text='Settings').tap(); pg.wait_for_timeout(450)
     before=pg.evaluate("appSettings.showCosts!==false"); pg.tap('#settings-panel .switch >> nth=0'); pg.wait_for_timeout(200)
     ok('a settings switch toggles', pg.evaluate("JSON.stringify(appSettings)")!='' and pg.locator('#settings-panel.open').count()==1)
-    pg.tap('#text-size-options button[data-size=large]'); pg.wait_for_timeout(200); ok('text size buttons', pg.evaluate("appSettings.textSize")=='large')
+    pg.tap('#sec-btn-display'); pg.tap('#text-size-options button[data-size=large]'); pg.wait_for_timeout(200); ok('text size buttons', pg.evaluate("appSettings.textSize")=='large')
     pg.tap('#text-size-options button[data-size=default]'); pg.tap('.settings-panel-close'); pg.wait_for_timeout(400)
     ok('close button closes Settings', pg.locator('#settings-panel.open').count()==0)
     # every handler on every screen and sheet is understood by the dispatcher

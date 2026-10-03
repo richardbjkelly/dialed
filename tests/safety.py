@@ -32,7 +32,7 @@ with sync_playwright() as p:
     ok('confirm replaces data', [c['name'] for c in st(pg)['coffees']]==['Restored A','Restored B'])
     ok('settings restored', pg.evaluate("document.body.classList.contains('dark-mode')") and pg.evaluate("appSettings.textSize")=='large')
     ok('overview refreshed', pg.inner_text('#stat-coffees')=='2')
-    pg.evaluate("openSettings()"); pg.wait_for_timeout(300); ok('undo offered', pg.locator('#storage-info >> text=Undo last restore').count()==1)
+    pg.evaluate("openSettings(); SETTINGS_SECTIONS.forEach(k=>setSettingsSection(k,true))"); pg.wait_for_timeout(300); ok('undo offered', pg.locator('#storage-info >> text=Undo last restore').count()==1)
     pg.evaluate("undoRestore()"); pg.wait_for_timeout(500); ok('undo brings data back', st(pg)['coffees'][0]['name']=='Mine' and len(st(pg)['recipes'])==1)
     pg.close()
     # old-format backup (v2) still accepted

@@ -25,7 +25,7 @@ with sync_playwright() as p:
         pg.evaluate("openRecipeModal()"); pg.wait_for_timeout(450)
         m=pg.evaluate("(()=>{const r=document.querySelector('#modal-recipe .modal').getBoundingClientRect();return [Math.round(r.top),Math.round(r.bottom),innerHeight]})()")
         pg.screenshot(path=f'shots/z_{size}_modal.png'); pg.evaluate("closeModal('modal-recipe')"); pg.wait_for_timeout(300)
-        pg.evaluate("openSettings()"); pg.wait_for_timeout(400)
+        pg.evaluate("openSettings(); SETTINGS_SECTIONS.forEach(k=>setSettingsSection(k,true))"); pg.wait_for_timeout(400)
         sp=pg.evaluate("(()=>{const r=document.getElementById('settings-panel').getBoundingClientRect();return [Math.round(r.left),Math.round(r.right),Math.round(r.top),Math.round(r.bottom)]})()")
         act=pg.evaluate("document.querySelector('#text-size-options button.active').dataset.size")
         pg.locator('#text-size-options').scroll_into_view_if_needed(); pg.screenshot(path=f'shots/z_{size}_settings.png')

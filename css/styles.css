@@ -115,7 +115,7 @@
   .modal-subtitle { font-family:var(--font-mono); font-size: 11px; letter-spacing: 1.5px; text-transform: uppercase; color: var(--text-muted); margin-bottom: 24px; }
   .divider { font-family:var(--font-mono); font-size: 11px; letter-spacing: 2px; text-transform: uppercase; color: var(--crema); margin: 20px 0 14px; display: flex; align-items: center; gap: 8px; }
   .divider::after { content: ''; flex: 1; height: 1px; background: rgba(82,121,111,0.25); }
-  .toast { position:fixed; top:calc(env(safe-area-inset-top) + 96px); bottom:auto; left: 50%; transform: translateX(-50%) translateY(-12px); z-index:700 !important; background: var(--espresso); color: var(--crema-light); padding: 10px 20px; border-radius: 20px; font-family:var(--font-mono); font-size: 11px; letter-spacing: 1px; opacity: 0; transition: all 0.3s; z-index: 500; white-space: nowrap; }
+  .toast { pointer-events:none; position:fixed; top:calc(env(safe-area-inset-top) + 96px); bottom:auto; left: 50%; transform: translateX(-50%) translateY(-12px); z-index:700 !important; background: var(--espresso); color: var(--crema-light); padding: 10px 20px; border-radius: 20px; font-family:var(--font-mono); font-size: 11px; letter-spacing: 1px; opacity: 0; transition: all 0.3s; z-index: 500; white-space: nowrap; }
   .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
   .stats-bar { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-bottom: 20px; }
   .stat-block { background: var(--card); border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 14px 10px; text-align: center; }
@@ -693,6 +693,33 @@
   .brew-slider input[type=range]:disabled { opacity:.25; }
   .brew-slider .plan-range-ends { margin-top:-6px; padding:0 4px; min-height:14px; }
   .brew-slider .bs-num { width:84px; flex-shrink:0; text-align:center; padding-left:6px; padding-right:6px; }
+  /* Settings: collapsible categories */
+  .settings-sec-btn { width:100%; display:flex; justify-content:space-between; align-items:center; border:none; border-bottom:1px solid var(--border); padding:16px 20px; text-align:left; cursor:pointer; }
+  .settings-sec-btn .sec-chev { font-size:14px; transition:transform .2s; }
+  .settings-sec-btn[aria-expanded="true"] .sec-chev { transform:rotate(180deg); }
+  .settings-sec-body[hidden] { display:none; }
+  body.dark-mode .settings-sec-btn { border-color:var(--dm-border) !important; }
+  @media (prefers-reduced-motion: reduce) { .settings-sec-btn .sec-chev { transition:none; } }
+  /* Tasting note chips */
+  .note-chips { display:flex; flex-wrap:wrap; gap:6px; }
+  .note-chips:not(:empty) { margin-bottom:8px; }
+  .note-chip { display:inline-flex; align-items:center; gap:4px; background:rgba(82,121,111,0.12); border:1px solid rgba(82,121,111,0.3); color:var(--text); border-radius:20px; padding:5px 6px 5px 12px; font-size:12px; }
+  .note-chip button { background:none; border:none; color:var(--text-muted); font-size:14px; line-height:1; padding:2px 6px; cursor:pointer; }
+  .note-hint { font-size:11px; color:var(--text-muted); margin-top:5px; }
+  /* Roasters */
+  a.btn-primary, a.btn-secondary { display:block; text-align:center; text-decoration:none; box-sizing:border-box; }
+  .roaster-link { cursor:pointer; text-decoration:underline; text-decoration-color:rgba(245,237,227,.35); text-underline-offset:3px; }
+  .roaster-row { width:100%; display:flex; justify-content:space-between; align-items:center; gap:10px; background:var(--card); border:1px solid var(--border); border-radius:12px; padding:12px 14px; margin-top:8px; text-align:left; cursor:pointer; color:var(--text); }
+  .roaster-row .rr-name { font-family:var(--font-display) !important; font-size:15px; }
+  .roaster-row .rr-sub { font-size:11px; color:var(--text-muted); margin-top:2px; }
+  .roaster-row .rr-right { font-size:11px; color:var(--text-muted); flex-shrink:0; text-align:right; }
+  .roaster-stats { display:grid; grid-template-columns:repeat(2, 1fr); gap:8px; margin:14px 0 6px; }
+  .roaster-stats div { background:var(--card); border:1px solid var(--border); border-radius:12px; padding:10px 12px; }
+  .roaster-stats b { display:block; font-size:20px; color:var(--text); }
+  .roaster-stats span { font-size:11px; letter-spacing:1.5px; text-transform:uppercase; color:var(--text-muted); }
+  .roaster-links { display:flex; gap:8px; margin-top:12px; }
+  .roaster-links a { flex:1; }
+  .roaster-note { font-size:11px; color:var(--text-muted); line-height:1.5; margin-top:8px; }
   /* Score later */
   #modal-recipe.score-only #r-setup, #modal-recipe.score-only #r-later-btn, #modal-recipe.score-only #r-finish-row { display:none !important; }
   .bd-summary { border:1.5px solid #52796F; background:rgba(82,121,111,0.1); border-radius:14px; padding:14px 16px; margin-top:6px; font-size:14px; line-height:1.9; color:var(--text); }

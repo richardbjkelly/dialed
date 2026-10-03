@@ -23,7 +23,7 @@ with sync_playwright() as p:
     ok('coffee page shows the new brew straight away', pg.locator('#view-coffees .recipe-entry').count()==1); pg.close()
     # M1 back closes settings
     pg=fresh(b,{'coffees':[{'id':'c1','name':'A'}],'recipes':[]})
-    pg.evaluate("showView('coffees')"); pg.wait_for_timeout(300); pg.evaluate("openSettings()"); pg.wait_for_timeout(400); pg.go_back(); pg.wait_for_timeout(500)
+    pg.evaluate("showView('coffees')"); pg.wait_for_timeout(300); pg.evaluate("openSettings(); SETTINGS_SECTIONS.forEach(k=>setSettingsSection(k,true))"); pg.wait_for_timeout(400); pg.go_back(); pg.wait_for_timeout(500)
     ok('M1 back closes Settings and stays on the page', not pg.evaluate("document.getElementById('settings-panel').classList.contains('open')") and pg.evaluate("state.currentView")=='coffees'); pg.close()
     # M3 validation
     pg=fresh(b,{'coffees':[{'id':'c1','name':'A','weight':250}],'recipes':[]})
@@ -68,7 +68,7 @@ with sync_playwright() as p:
     # H5 + L10
     pg=fresh(b,{'coffees':[{'id':'c1','name':'A','createdAt':'2025-12-15T00:00:00Z'}],'recipes':[]})
     ok('H5 persistence requested', pg.evaluate("storagePersisted")!=None or pg.evaluate("!navigator.storage")); 
-    pg.evaluate("openSettings()"); pg.wait_for_timeout(400); t=pg.inner_text('#storage-info'); ok('H5 storage status shown in Settings', 'clear' in t.lower() or 'protected' in t.lower(), t)
+    pg.evaluate("openSettings(); SETTINGS_SECTIONS.forEach(k=>setSettingsSection(k,true))"); pg.wait_for_timeout(400); t=pg.inner_text('#storage-info'); ok('H5 storage status shown in Settings', 'clear' in t.lower() or 'protected' in t.lower(), t)
     pg.evaluate("closeSettings(); showView('tracker')"); pg.wait_for_timeout(300)
     ok('L10 default period is rolling 12 months', pg.inner_text('#stats-period-bar .type-btn.active').lower()=='12 months' and pg.evaluate("getPeriodCoffees().coffees.length")==1)
     pg.click("#stats-period-bar >> text=All Time"); pg.reload(); pg.wait_for_timeout(500); pg.evaluate("showView('tracker')")

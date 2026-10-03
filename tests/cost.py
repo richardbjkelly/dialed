@@ -12,7 +12,7 @@ with sync_playwright() as p:
     on_detail=pound(); pg.evaluate("showView('tracker')"); pg.wait_for_timeout(300); on_ins=pound()
     print('on: detail', on_detail, 'insights', on_ins); assert on_detail>0 and on_ins>0
     pg.evaluate("showView('coffees')"); pg.evaluate("showCoffeeDetail('c1')"); pg.wait_for_timeout(300)
-    pg.evaluate("openSettings()"); pg.wait_for_timeout(300)
+    pg.evaluate("openSettings(); SETTINGS_SECTIONS.forEach(k=>setSettingsSection(k,true))"); pg.wait_for_timeout(300)
     pg.click('#settings-costs-switch'); pg.wait_for_timeout(200)
     assert pg.get_attribute('#settings-costs-switch','aria-checked')=='false'
     pg.screenshot(path='shots/cost_settings.png')
@@ -25,7 +25,7 @@ with sync_playwright() as p:
     pg.reload(); pg.wait_for_timeout(500)
     assert json.loads(pg.evaluate("localStorage.getItem('dialin_settings')"))['showCosts']==False
     pg.evaluate("showView('tracker')"); pg.wait_for_timeout(300); assert pound()==0
-    pg.evaluate("openSettings()"); pg.wait_for_timeout(300); pg.click('#settings-costs-switch'); pg.evaluate("closeSettings()"); pg.wait_for_timeout(300)
+    pg.evaluate("openSettings(); SETTINGS_SECTIONS.forEach(k=>setSettingsSection(k,true))"); pg.wait_for_timeout(300); pg.click('#settings-costs-switch'); pg.evaluate("closeSettings()"); pg.wait_for_timeout(300)
     pg.evaluate("showView('tracker')"); pg.wait_for_timeout(300); assert pound()>0
     b.close()
 print(errs); assert not errs; print('PASS')

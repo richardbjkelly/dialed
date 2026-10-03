@@ -163,6 +163,7 @@ function sanitizeState(raw) {
     if ('roastDate' in o && !/^\d{4}-\d{2}-\d{2}$/.test(String(o.roastDate))) o.roastDate = '';
     ['createdAt', 'finishedAt'].forEach(k => { if (k in o) { const d = isoDate(o[k]); if (d) o[k] = d; else delete o[k]; } });
     if ('buyAgain' in o && !['yes', 'maybe', 'no', ''].includes(o.buyAgain)) o.buyAgain = '';
+    if ('roasterWebsite' in o && !/^https?:\/\/[^\s"'<>`]+$/i.test(String(o.roasterWebsite))) o.roasterWebsite = '';   // links must be plain web addresses
     return o;
   });
   out.customRecipes = (raw.customRecipes || []).filter(isObj).map(r => ({ ...r, id: fixId(r.id, 'cr'), name: String(r.name == null ? 'Recipe' : r.name),

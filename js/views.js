@@ -203,7 +203,7 @@ function showCoffeeDetail(id) {
         ${c.labelPhoto?`<img src="${photoUrl(c)}" alt="Bag label" data-on-click="openLightboxFor('${c.id}')" style="width:72px;height:90px;object-fit:cover;border-radius:10px;flex-shrink:0;border:1px solid rgba(255,255,255,0.15);cursor:zoom-in" alt="bag label">`:''}
         <div style="flex:1">
           <div style="font-family:var(--font-display);font-size:24px;color:var(--crema-light)">${escHtml(c.name)}</div>
-          <div style="font-family:var(--font-mono);font-size:11px;color:rgba(245,237,227,.75);letter-spacing:1px;margin-bottom:14px">${escHtml(c.roaster||'Unknown Roaster')}</div>
+          <div style="font-family:var(--font-mono);font-size:11px;color:rgba(245,237,227,.75);letter-spacing:1px;margin-bottom:14px">${c.roaster ? `<span class="roaster-link" data-roaster="${escHtml(c.roaster)}" data-on-click="showRoasterFrom(this)">${escHtml(c.roaster)} ›</span>` : 'Unknown Roaster'}</div>
           <div class="coffee-meta">${pills||'<span style="opacity:.5;font-size:12px">No details added</span>'}</div>
           ${c.roastDate?`<div style="font-family:var(--font-mono);font-size:11px;color:rgba(245,237,227,.7);margin-top:10px">${formatDate(c.roastDate)}</div>`:''}
           ${c.rating>0?`<div class="detail-rating">Rating <b>${c.rating}/10</b></div>`:''}
