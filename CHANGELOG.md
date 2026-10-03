@@ -898,6 +898,9 @@ No visible changes — two structural changes behind the scenes.
 - Screenshot showcase for PWABuilder
 - Play Store listing
 - Reliable score reminders (real push notifications) — needs the backend that sync will bring
+- Small server function (the shared foundation for the items below; no accounts or stored data to begin with)
+- Scan a bag label or paste a roaster's product link to pre-fill Add Coffee, with a review step; later, search the farm to suggest missing details such as altitude. Needs the server and an AI API key; add a daily usage cap
+- Free and premium tiers: sign-in, Stripe payment, server-side entitlement checks, upgrade screen. Premium = server features (scans beyond a free allowance, sync, reliable reminders); keep today's features free. Build scans first, add payment only once they're used. Needs terms, refund and privacy policies, HMRC/VAT set-up and ICO registration
 - In-app list of nearby roasters and cafés using Google Places (needs a server to keep the API key private)
 - Accounts with shared ratings and recipes, Vivino-style (needs a backend; on hold)
 - Compare brew methods (parked)
