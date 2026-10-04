@@ -1010,7 +1010,7 @@ function renderBrewMode() {
     brewModeIdx = idx;
     set('bm-now', cur ? cur.text : 'Get ready…');
     list.innerHTML = steps.map((st, i) => `<li class="${i < idx ? 'done' : i === idx ? 'now' : i === idx + 1 ? 'next' : ''}"><b>${fmt(st.at)}</b><span>${i < idx ? '✓ ' : i === idx ? '● ' : ''}${escHtml(st.text)}</span></li>`).join('');
-    const li = list.children[Math.max(0, idx)]; if (li && li.scrollIntoView) li.scrollIntoView({ block: 'nearest' });
+    const li = list.children[idx + 1] || list.children[Math.max(0, idx)]; if (li) list.scrollTop = Math.max(0, li.offsetTop - list.offsetTop);      // when the list has to scroll, start it at the next step: the current one is already shown large above
     if (!first && !reduceMotion()) { guide.classList.remove('bm-pulse'); void guide.offsetWidth; guide.classList.add('bm-pulse'); }
   }
   set('bm-now-label', cur ? `Now · step ${idx + 1} of ${steps.length}` : 'Starting');

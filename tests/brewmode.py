@@ -17,6 +17,9 @@ with sync_playwright() as p:
     pg.locator('#brew-timer-toggle').scroll_into_view_if_needed(); pg.tap('#brew-timer-toggle'); pg.wait_for_timeout(500)
     ok('Start Brew opens full-screen brew mode', pg.is_visible('#brew-mode') and pg.evaluate("(()=>{const r=document.getElementById('brew-mode').getBoundingClientRect(); return r.width>=innerWidth-1 && r.height>=innerHeight-1})()"))
     ok('coffee, recipe and dose/water/grind shown', pg.inner_text('#bm-coffee')=='Supernova' and len(pg.inner_text('#bm-recipe'))>3 and '11g' in pg.inner_text('#bm-meta').lower() and '200ml' in pg.inner_text('#bm-meta').lower() and 'grind 12' in pg.inner_text('#bm-meta').lower(), pg.inner_text('#bm-meta'))
+    fs=lambda sel: pg.evaluate("s=>parseFloat(getComputedStyle(document.querySelector(s)).fontSize)", sel)
+    sizes={k:fs(k) for k in ['#bm-coffee','#bm-recipe','#bm-meta','#bm-now-label','#bm-now','#bm-next-at','#bm-next-in','#bm-steps li','.bm-cancel','#bm-stop','.bm-min']}
+    ok('glanceable: nothing under 13px, step 32px, list 18px, countdown 22px', min(sizes.values())>=13 and sizes['#bm-now']>=32 and sizes['#bm-steps li']>=18 and sizes['#bm-next-in']>=22 and sizes['#bm-meta']>=16, sizes)
     ok('clock is large', pg.evaluate("parseFloat(getComputedStyle(document.getElementById('bm-clock')).fontSize)")>=90)
     ok('all steps listed, first is current', pg.locator('#bm-steps li').count()==len(steps) and pg.locator('#bm-steps li.now').count()==1 and steps[0]['text'] in pg.inner_text('#bm-now'))
     ok('focus moved into brew mode', pg.evaluate("document.getElementById('brew-mode').contains(document.activeElement)"))
@@ -70,5 +73,14 @@ with sync_playwright() as p:
     # xlarge text + dark
     pg.evaluate("setTextSize('xlarge'); toggleDarkMode()"); pg.wait_for_timeout(300)
     ok('fits at Extra large text size', pg.evaluate("(()=>{const m=document.getElementById('brew-mode'), s=document.getElementById('bm-stop').getBoundingClientRect(); return s.bottom<=innerHeight+1 && s.right<=innerWidth+1 && document.documentElement.scrollWidth<=innerWidth+1})()"))
+    # small phone, long recipe text: controls stay on screen and the current step stays readable
+    sm=b.new_context(viewport={'width':360,'height':640},device_scale_factor=2,is_mobile=True,has_touch=True).new_page(); sm.on('pageerror',lambda e:errs.append(str(e)))
+    sm.goto('http://localhost:8765/dialed/index.html'); sm.evaluate("s=>localStorage.setItem('dialin_v2', s)", json.dumps(seed)); sm.reload(); sm.wait_for_timeout(500)
+    sm.evaluate("state.selectedCoffeeId='c1'; state.selectedMethod='AeroPress'; openRecipeModal()"); sm.wait_for_timeout(400)
+    sm.evaluate(f"state.selectedRecipeId='{rid}'; toggleBrewTimer(); brewTimer.startedAt = Date.now() - {(steps[1]['at']+2)*1000}"); sm.wait_for_timeout(500)
+    ok('small phone: Stop, Cancel and the current step all on screen, no sideways scroll', sm.evaluate("(()=>{const on=s=>{const r=document.querySelector(s).getBoundingClientRect(); return r.top>=0 && r.bottom<=innerHeight+1 && r.left>=0 && r.right<=innerWidth+1}; return on('#bm-stop') && on('.bm-cancel') && on('#bm-now') && on('#bm-clock') && document.documentElement.scrollWidth<=innerWidth+1})()"))
+    ok('small phone: step list starts at the next step', sm.evaluate("(()=>{const l=document.getElementById('bm-steps'), n=l.querySelector('li.next'); return !n || Math.abs(n.getBoundingClientRect().top - l.getBoundingClientRect().top) < 12 || l.scrollHeight<=l.clientHeight+1})()"))
+    if len(sys.argv)>1: sm.screenshot(path='shots/bm_small.png')
+    sm.close()
     ok('no page errors', not errs, errs)
 print(sum(res),'/',len(res)); sys.exit(0 if all(res) else 1)

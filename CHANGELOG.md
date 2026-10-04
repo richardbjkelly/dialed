@@ -900,6 +900,16 @@ No visible changes — two structural changes behind the scenes.
 
 ---
 
+## v3.36
+*4 October 2026*
+
+### Brew mode readable at a glance
+- Everything on the full-screen brewing view is larger, for reading from the counter without picking the phone up: the clock, the current step (now 32px), the countdown to the next step, dose / water / grind, the step list (18px), and the Cancel and Stop buttons
+- The time left until the next step is the largest thing after the clock and the current step; the progress bar is thicker
+- On smaller phones, where the step list has to scroll, it starts at the next step (the current one is already shown large above)
+
+---
+
 ## Pending / Roadmap
 - Rebuild the APK once to pick up the new cup icon
 - Opt-in pooled data + trained model (see feasibility notes): backend, consent, deletion, ICO registration
@@ -917,4 +927,4 @@ No visible changes — two structural changes behind the scenes.
 
 ---
 
-*Document maintained automatically. Last updated: v3.35*
+*Document maintained automatically. Last updated: v3.36*
