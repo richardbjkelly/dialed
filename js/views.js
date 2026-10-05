@@ -55,11 +55,13 @@ function coffeeTileGrid(c, rc) {
   const banner = c.labelPhoto
     ? `<img class="tile-photo" src="${photoUrl(c)}" alt="">`
     : `<div class="tile-photo tile-photo-empty" aria-hidden="true"><span>${escHtml(initial)}</span></div>`;
-  const summary = [c.country, c.process, c.roastLevel].filter(Boolean).map(escHtml).join(' · ');
+  const ov = originView(c);
+  const summary = [ov.country, ov.process, c.roastLevel].filter(Boolean).map(escHtml).join(' · ');
   return `<div class="coffee-card tile-b${c.finishedBag ? ' finished' : ''}" data-on-click="showCoffeeDetail('${c.id}')">
     <div class="tile-banner">${banner}
       ${c.finishedBag ? '<span class="tile-badge tile-fin">FINISHED</span>' : ''}
       ${c.decaf ? '<span class="tile-badge tile-decaf">DECAF</span>' : ''}
+      ${c.blend ? '<span class="tile-badge tile-blend">BLEND</span>' : ''}
       ${c.rating > 0 ? `<span class="tile-badge tile-rating"><b>${c.rating}</b>/10</span>` : ''}
       <button class="card-more tile-more" aria-label="More options for ${escHtml(c.name)}" data-on-click="event.stopPropagation();showEditOverlay('coffee-${c.id}')">⋯</button>
     </div>
@@ -85,9 +87,10 @@ function renderCoffeesView() {
     const rc = state.recipes.filter(r=>r.coffeeId===c.id).length;
     const maslPill = (c.masl ? `<span class="meta-pill">${c.masl}m</span>` : '') + (per100g(c)!=null ? `<span class="meta-pill">£${per100g(c).toFixed(2)}/100g</span>` : '') + (gramsLeft(c)!=null && !c.finishedBag ? `<span class="meta-pill">${Math.round(gramsLeft(c))}g left</span>` : '') + (roastAgeToday(c)!=null && !c.finishedBag ? `<span class="meta-pill">${roastAgeToday(c)}d off roast</span>` : ''); const isGrid = appSettings.coffeeLayout === 'grid';
     // Grid: several varietals collapse to the first one plus a count, e.g. "Castillo +2"
-    let varietal = c.varietal, varietalTitle = '';
+    const ov = originView(c);
+    let varietal = ov.varietal, varietalTitle = '';
     if (isGrid && varietal) { const parts = String(varietal).split(/\s*(?:,|\/|&|\+|;|\band\b)\s*/i).filter(Boolean); if (parts.length > 1) { varietalTitle = varietal; varietal = parts[0] + ' +' + (parts.length - 1); } }
-    const corePills = [c.country,c.process,c.roastLevel,varietal].filter(Boolean).map(p=>`<span class="meta-pill"${p===varietal&&varietalTitle?` title="${escHtml(varietalTitle)}"`:''}>${escHtml(p)}</span>`);
+    const corePills = [c.blend ? 'Blend' : '', ov.country,ov.process,c.roastLevel,varietal].filter(Boolean).map(p=>`<span class="meta-pill"${p===varietal&&varietalTitle?` title="${escHtml(varietalTitle)}"`:''}>${escHtml(p)}</span>`);
     const extraCount = (maslPill.match(/class="meta-pill"/g) || []).length;
     // Grid tiles: country, process, roast and varietal first; anything else becomes "+N"
     const pills = appSettings.coffeeLayout === 'grid'
@@ -189,12 +192,27 @@ function restoreCoffeeList() {
   renderCoffeesView();
 }
 
+// "In this blend" on a coffee's page: a share bar (when shares are known) and one card per coffee
+function blendSectionHtml(c) {
+  const comps = blendComps(c); if (!comps.length) return '';
+  const shares = comps.every(x => x.share !== '' && x.share != null && Number(x.share) > 0);
+  const bar = shares ? `<div class="blend-bar">${comps.map((x, i) => `<i style="width:${Number(x.share)}%;background:${stackColor(i, 'x')}"></i>`).join('')}</div>` : '';
+  const cards = comps.map((x, i) => {
+    const title = [x.country, x.region].filter(Boolean).join(' · ') || `Coffee ${i + 1}`;
+    const line1 = [x.varietal, x.process, x.masl ? x.masl + ' masl' : ''].filter(Boolean).join(' · ');
+    const line2 = [x.producer ? 'Producer: ' + x.producer : '', x.farm ? 'Farm: ' + x.farm : ''].filter(Boolean).join(' · ');
+    return `<div class="blend-comp"><div class="bn"><span>${escHtml(title)}</span>${x.share !== '' && x.share != null ? `<span style="color:${stackColor(i, 'x')}">${escHtml(String(x.share))}%</span>` : ''}</div>
+      ${line1 || line2 ? `<div class="bd">${escHtml(line1)}${line1 && line2 ? '<br>' : ''}${escHtml(line2)}</div>` : '<div class="bd">No details entered</div>'}</div>`;
+  }).join('');
+  return `<div style="margin-bottom:20px"><div class="divider" style="margin-top:0">In this blend</div>${bar}${cards}</div>`;
+}
+
 function showCoffeeDetail(id) {
   const c = state.coffees.find(x=>x.id===id); if(!c) return;
   const locationStr = [c.roasterCity,c.roasterCountry].filter(Boolean).join(', ');
   const producerStr = [c.producer?'Producer: '+c.producer:'', c.farm?'Farm: '+c.farm:''].filter(Boolean).join(' · ');
   const recs = state.recipes.filter(r=>r.coffeeId===id);
-  const maslPill2 = (c.masl ? `<span class="meta-pill"><svg class="ico" width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M3 19l6-11 4 7 2-3 6 7H3z"/></svg> ${c.masl} masl</span>` : '') + (priceLabel(c) ? `<span class="meta-pill">${priceLabel(c)}</span>` : ''); const pills = [c.country,c.region,c.varietal,c.process,c.roastLevel].filter(Boolean).map(p=>`<span class="meta-pill">${escHtml(p)}</span>`).join('') + maslPill2;
+  const maslPill2 = (c.masl ? `<span class="meta-pill"><svg class="ico" width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M3 19l6-11 4 7 2-3 6 7H3z"/></svg> ${c.masl} masl</span>` : '') + (priceLabel(c) ? `<span class="meta-pill">${priceLabel(c)}</span>` : ''); const pills = (c.blend ? [`Blend · ${blendComps(c).length} coffees`, originView(c).country, c.roastLevel] : [c.country,c.region,c.varietal,c.process,c.roastLevel]).filter(Boolean).map(p=>`<span class="meta-pill">${escHtml(p)}</span>`).join('') + maslPill2;
   document.getElementById('view-coffees').innerHTML = `
     <div style="height:20px"></div>
     <button class="detail-back" data-on-click="goBackToCoffees()">← Back</button>
@@ -213,6 +231,7 @@ function showCoffeeDetail(id) {
         </div>
       </div>
     </div>
+    ${blendSectionHtml(c)}
     <div style="display:flex;gap:8px;margin-bottom:20px">
       <button class="btn-secondary" style="flex:1" data-on-click="openEditCoffee('${c.id}')"><svg class="ico" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M4 20h4L19 9l-4-4L4 16v4z"/><path d="M13.5 6.5l4 4"/></svg> Edit</button>
       <button class="btn-secondary" style="flex:1" data-on-click="showTrendModal('${c.id}')"><svg class="ico" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M3 17l6-6 4 4 8-8"/><path d="M15 7h6v6"/></svg> Trends</button>
@@ -382,6 +401,11 @@ function renderStackedBar(items, total, opts = {}) {
   const legend = shown.map(([label, count, members], i) => {
     const swatch = `<div style="width:10px;height:10px;border-radius:2px;background:${colorOf(label, i)};flex-shrink:0"></div>`;
     const hasMembers = Array.isArray(members) && members.length && !(members.length === 1 && members[0][0] === label);
+    if (!hasMembers && label === 'Blend' && opts.blendKey) return `
+    <button type="button" class="blend-legend-btn" aria-label="Blend: ${count}. Show what the blends are made of" data-on-click="openBlendBreakdown('${opts.blendKey}')">${swatch}
+      <span class="stack-legend-label" style="font-size:11px;flex:1">Blend <span style="color:var(--text-muted)">· see what's in ${count === 1 ? 'it' : 'them'} ›</span></span>
+      <span style="font-size:11px;color:var(--text-muted)">${count}</span>
+    </button>`;
     if (!hasMembers) return `
     <div style="display:flex;align-items:center;gap:6px;margin-bottom:3px">${swatch}
       <span class="stack-legend-label" style="font-size:11px;flex:1">${escHtml(label)}</span>
@@ -444,10 +468,10 @@ const GROUPERS = {
 // items: [[label, count], ...] most common first. Returns chart items plus an optional note.
 // All-time order of a category's values (or of its groups), used to give each entry a fixed colour
 function colorRankFor(key, grouped) {
-  const all = topN(state.coffees, key);
+  const all = topN(forCharts(state.coffees), key);
   if (!grouped || !GROUPERS[key]) return all.map(x => x[0]);
   const totals = {};
-  all.forEach(([label, n]) => { const g = GROUPERS[key].by(label); totals[g] = (totals[g] || 0) + n; });
+  all.forEach(([label, n]) => { const g = label === 'Blend' ? 'Blend' : GROUPERS[key].by(label); totals[g] = (totals[g] || 0) + n; });
   return Object.entries(totals).sort((a, b) => b[1] - a[1]).map(x => x[0]);
 }
 const CHART_UNITS = { country:['country','countries'], roasterCountry:['country','countries'], process:['process','processes'], roastLevel:['roast level','roast levels'], roaster:['roaster','roasters'], varietal:['varietal','varietals'] };
@@ -455,7 +479,7 @@ function groupForChart(key, items) {
   const g = GROUPERS[key], unit = CHART_UNITS[key];
   if (!g || items.length <= 7) return { items, opts: { unit } };
   const groups = {};
-  items.forEach(([label, n]) => { const k = g.by(label); (groups[k] = groups[k] || { n: 0, members: [] }); groups[k].n += n; groups[k].members.push([label, n]); });
+  items.forEach(([label, n]) => { const k = label === 'Blend' ? 'Blend' : g.by(label); (groups[k] = groups[k] || { n: 0, members: [] }); groups[k].n += n; groups[k].members.push([label, n]); });
   const isCatchAll = k => /^Other /.test(k);
   const grouped = Object.entries(groups).map(([k, v]) => [k, v.n, v.members]).sort((a, b) => (isCatchAll(a[0]) - isCatchAll(b[0])) || (b[1] - a[1]));
   if (grouped.length >= items.length) return { items, opts: { unit } };   // grouping wouldn't help
@@ -463,6 +487,34 @@ function groupForChart(key, items) {
 }
 
 function renderBarChart(items, total, opts) { return renderStackedBar(items, total, opts); }
+
+// On the origin, process and varietal charts a blend counts once, as "Blend" (tap it for the breakdown)
+const BLEND_CHART_KEYS = { country:'Origin country', process:'Process', varietal:'Varietal' };
+const forCharts = list => list.map(c => c.blend ? { ...c, country:'Blend', process:'Blend', varietal:'Blend' } : c);
+function openBlendBreakdown(key) {
+  const label = BLEND_CHART_KEYS[key]; if (!label) return;
+  const blends = getPeriodCoffees().coffees.filter(c => c.blend);
+  const tot = {};
+  blends.forEach(c => {
+    const comps = blendComps(c);
+    if (!comps.length) { (tot['not specified'] = tot['not specified'] || { v:'Not specified', n:0 }).n += 1; return; }
+    const shares = comps.every(x => Number(x.share) > 0), sum = shares ? comps.reduce((s, x) => s + Number(x.share), 0) : comps.length;
+    comps.forEach(x => {
+      const v = String(x[key] || '').trim() || 'Not specified', k = v.toLowerCase().replace(/\s+/g, ' ');
+      (tot[k] = tot[k] || { v, n:0 }).n += (shares ? Number(x.share) : 1) / sum;
+    });
+  });
+  const rows = Object.values(tot).sort((a, b) => (a.v === 'Not specified') - (b.v === 'Not specified') || b.n - a.n);
+  const n = blends.length;
+  document.getElementById('blend-content').innerHTML = `
+    <div class="modal-title">Blends · ${label}</div>
+    <div class="modal-subtitle">${n} blend${n === 1 ? '' : 's'} in this period</div>
+    <div class="roaster-note" style="margin-top:0">What your blends are made of, weighted by each coffee's share (equal parts where no share was given).</div>
+    ${rows.map(r => { const pct = n ? r.n / n * 100 : 0; return `<div class="blend-row"><div class="br-top"><span>${escHtml(r.v)}</span><span>${pct >= 10 ? Math.round(pct) : pct.toFixed(1)}%</span></div><div class="br-bar"><i style="width:${pct.toFixed(1)}%"></i></div></div>`; }).join('')}
+    <div class="divider" style="margin-top:18px">The blends</div>
+    ${blends.map(c => `<button type="button" class="roaster-row" data-on-click="openCoffeeFromRoaster('${c.id}')"><div><div class="rr-name">${escHtml(c.name)}</div><div class="rr-sub">${escHtml([c.roaster, originView(c)[key]].filter(Boolean).join(' · ') || ' ')}</div></div><div class="rr-right">${c.rating > 0 ? c.rating + '/10 ' : ''}›</div></button>`).join('')}`;
+  openModal('modal-blend');
+}
 
 function renderStatsDashboard() {
   const el = document.getElementById('stats-dashboard');
@@ -485,8 +537,8 @@ function renderStatsDashboard() {
   const dialledPct = brews.length ? Math.round(dialled/brews.length*100)+'%' : '—';
 
   // Top origins, processes, roasters
-  const countries = topN(coffees, 'country');
-  const processes = topN(coffees, 'process');
+  const countries = topN(forCharts(coffees), 'country');
+  const processes = topN(forCharts(coffees), 'process');
   const roasters = topN(coffees, 'roaster');
   const roasterCountries = topN(coffees, 'roasterCountry');
 
@@ -527,7 +579,7 @@ function renderStatsDashboard() {
         process: { label:'Process', data:processes },
         roaster: { label:'Roaster', data:roasters },
         roasterCountry: { label:'Roaster Country', data:roasterCountries },
-        varietal: { label:'Varietal', data:topN(coffees,'varietal') },
+        varietal: { label:'Varietal', data:topN(forCharts(coffees),'varietal') },
         roastLevel: { label:'Roast Level', data:topN(coffees,'roastLevel') },
       };
       return cats.map(k => {
@@ -535,6 +587,7 @@ function renderStatsDashboard() {
         if (!cat || !cat.data.length) return '';
         const gd = groupForChart(k, cat.data);
         gd.opts.colorRank = colorRankFor(k, !!gd.opts.note);
+        if (BLEND_CHART_KEYS[k]) gd.opts.blendKey = k;
         return `<div style="margin-bottom:20px"><div class="divider" style="margin-top:0">${cat.label}</div><div class="stats-bar-chart">${renderBarChart(gd.items, coffees.length, gd.opts)}</div></div>`;
       }).join('');
     })()}

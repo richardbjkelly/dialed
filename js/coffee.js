@@ -415,6 +415,104 @@ function noteInput(el) {      // typing or pasting a comma finishes the note(s) 
   addNotes(el.value.slice(0, i)); el.value = el.value.slice(i + 1).replace(/^\s+/, '');
 }
 
+// ---- Blends: one bag made of 2–4 coffees, each with the same origin fields as a single-origin coffee ----
+const BLEND_MIN = 2, BLEND_MAX = 4;
+let blendDraft = [], blendOpenIdx = 0;
+const emptyComp = () => ({ country:'', region:'', producer:'', farm:'', varietal:'', process:'', masl:'', share:'' });
+const compHasData = x => !!x && Object.values(x).some(v => String(v == null ? '' : v).trim() !== '');
+const blendOn = () => !!document.getElementById('c-blend')?.checked;
+const blendComps = c => (c && c.blend && Array.isArray(c.components)) ? c.components : [];
+function blendJoin(c, f, sep = ' + ') {
+  const seen = new Set();
+  return blendComps(c).map(x => String(x[f] || '').trim()).filter(v => v && !seen.has(v.toLowerCase()) && seen.add(v.toLowerCase())).join(sep);
+}
+// What to show for a coffee's origin: its own fields, or for a blend the components' values joined ("Brazil + Ethiopia")
+function originView(c) {
+  return (c && c.blend) ? { country: blendJoin(c, 'country'), region: blendJoin(c, 'region'), process: blendJoin(c, 'process'), varietal: blendJoin(c, 'varietal') } : (c || {});
+}
+function compSummary(x) {
+  const bits = [x.country, x.process, x.share !== '' && x.share != null ? x.share + '%' : ''].map(v => String(v == null ? '' : v).trim()).filter(Boolean);
+  return bits.length ? bits.join(' · ') : (compHasData(x) ? 'Details entered' : 'Nothing entered yet');
+}
+function setBlendUI(on) {
+  const show = (id, v) => { const e = document.getElementById(id); if (e) e.hidden = !v; };
+  show('c-blend-count-row', on); show('c-blend-box', on);
+  const single = document.getElementById('c-origin-single'); if (single) single.style.display = on ? 'none' : '';
+  const masl = document.getElementById('c-masl-group'); if (masl) masl.style.display = on ? 'none' : '';
+  if (on) renderBlendCards();
+}
+function renderBlendCards() {
+  const el = document.getElementById('c-blend-components'); if (!el) return;
+  const n = blendDraft.length;
+  document.getElementById('c-blend-count').textContent = n;
+  const st = document.querySelectorAll('.blend-stepper button'); if (st[0]) st[0].disabled = n <= BLEND_MIN; if (st[1]) st[1].disabled = n >= BLEND_MAX;
+  const inp = (i, f, label, extra) => `<div class="form-group"><label class="form-label" for="bc-${i}-${f}">${label}</label><input class="form-input" id="bc-${i}-${f}" value="${escHtml(blendDraft[i][f])}" autocomplete="off" data-on-input="blendField(${i}, '${f}', this.value)" ${extra}></div>`;
+  el.innerHTML = blendDraft.map((x, i) => { const open = i === blendOpenIdx; return `
+    <div class="blend-card${open ? ' open' : ''}">
+      <button type="button" class="blend-card-hd" aria-expanded="${open}" data-on-click="toggleBlendCard(${i})"><span><span class="bc-t">Coffee ${i + 1}</span><span class="bc-s" id="bc-sum-${i}">${escHtml(compSummary(x))}</span></span><span aria-hidden="true">${open ? '▴' : '▾'}</span></button>
+      <div class="blend-card-bd"${open ? '' : ' hidden'}>
+        <div class="form-row" style="margin-top:10px">${inp(i, 'share', 'Share of blend (%)', 'type="number" min="1" max="100" step="any" inputmode="decimal" placeholder="e.g. 60"')}${inp(i, 'country', 'Country', 'type="text" list="dl-country" placeholder="e.g. Brazil"')}</div>
+        <div class="form-row">${inp(i, 'region', 'Region', 'type="text" list="dl-region" placeholder="e.g. Cerrado"')}${inp(i, 'masl', 'Altitude (masl)', 'type="number" min="0" max="4500" inputmode="numeric" placeholder="e.g. 1100"')}</div>
+        <div class="form-row">${inp(i, 'producer', 'Producer', 'type="text" list="dl-producer" placeholder="optional"')}${inp(i, 'farm', 'Farm', 'type="text" list="dl-farm" placeholder="optional"')}</div>
+        <div class="form-row">${inp(i, 'varietal', 'Varietal', 'type="text" list="dl-varietal" placeholder="e.g. Bourbon"')}${inp(i, 'process', 'Process', 'type="text" list="dl-blend-process" placeholder="e.g. Natural"')}</div>
+      </div>
+    </div>`; }).join('');
+}
+function blendField(i, f, v) {
+  if (!blendDraft[i]) return;
+  blendDraft[i][f] = v;
+  const s = document.getElementById('bc-sum-' + i); if (s) s.textContent = compSummary(blendDraft[i]);
+}
+function toggleBlendCard(i) { blendOpenIdx = blendOpenIdx === i ? -1 : i; renderBlendCards(); }
+function changeBlendCount(d) {
+  const n = Math.max(BLEND_MIN, Math.min(BLEND_MAX, blendDraft.length + d)); if (n === blendDraft.length) return;
+  if (n > blendDraft.length) { blendDraft.push(emptyComp()); blendOpenIdx = blendDraft.length - 1; renderBlendCards(); return; }
+  const drop = () => { blendDraft.pop(); if (blendOpenIdx >= blendDraft.length) blendOpenIdx = -1; renderBlendCards(); };
+  if (compHasData(blendDraft[blendDraft.length - 1])) confirmAction({ title: `Remove Coffee ${blendDraft.length}?`, text: 'The details entered for it will be discarded.', button: 'Remove', cancel: 'Keep it', onYes: drop });
+  else drop();
+}
+const SINGLE_ORIGIN_IDS = { country:'c-country', region:'c-region', producer:'c-producer', farm:'c-farm', varietal:'c-varietal', masl:'c-masl' };
+function toggleBlend(cb) {
+  if (cb.checked) {
+    // Anything already typed as a single origin becomes Coffee 1
+    const first = emptyComp();
+    Object.entries(SINGLE_ORIGIN_IDS).forEach(([f, id]) => { const e = document.getElementById(id); if (e) { first[f] = e.value.trim(); e.value = ''; } });
+    first.process = getProcessValue(); document.getElementById('c-process').value = ''; toggleCustomProcess(document.getElementById('c-process'));
+    blendDraft = [first, emptyComp()]; blendOpenIdx = compHasData(first) ? 1 : 0;
+    setBlendUI(true); return;
+  }
+  const others = blendDraft.slice(1).some(compHasData);
+  if (!others) { applyUnblend(); return; }
+  cb.checked = true;      // stays a blend until confirmed
+  confirmAction({ title: 'Turn off Blend?', text: "Coffee 1's details are kept as this coffee's origin. The details of the other coffees will be removed.", button: 'Turn off', cancel: 'Keep blend', onYes: applyUnblend });
+}
+function applyUnblend() {
+  const first = blendDraft[0] || emptyComp();
+  Object.entries(SINGLE_ORIGIN_IDS).forEach(([f, id]) => { const e = document.getElementById(id); if (e) e.value = first[f] || ''; });
+  setProcessField(first.process || '');
+  blendDraft = []; blendOpenIdx = 0;
+  const cb = document.getElementById('c-blend'); if (cb) cb.checked = false;
+  setBlendUI(false);
+}
+function setProcessField(v) {
+  const sel = document.getElementById('c-process'), custom = document.getElementById('c-process-custom');
+  if (!v || [...sel.options].some(o => o.value === v || o.text === v)) { sel.value = v; custom.value = ''; }
+  else { sel.value = 'Other…'; custom.value = v; }
+  toggleCustomProcess(sel);
+}
+// Returns the cleaned components, or a message string if something needs fixing
+function readBlendComps() {
+  const comps = blendDraft.map(x => { const o = {}; Object.keys(emptyComp()).forEach(k => { o[k] = String(x[k] == null ? '' : x[k]).trim(); }); return o; });
+  for (const [i, x] of comps.entries()) {
+    if (x.masl !== '' && !(parseFloat(x.masl) >= 0 && parseFloat(x.masl) <= 4000)) return `Coffee ${i + 1}: altitude should be between 0 and 4000m`;
+    if (x.share !== '' && !(parseFloat(x.share) > 0 && parseFloat(x.share) <= 100)) return `Coffee ${i + 1}: share should be between 1 and 100%`;
+  }
+  const given = comps.filter(x => x.share !== '');
+  if (given.length && given.length < comps.length) return 'Give every coffee a share, or leave them all blank';
+  if (given.length) { const sum = given.reduce((s, x) => s + parseFloat(x.share), 0); if (Math.abs(sum - 100) > 0.5) return `Shares add up to ${Math.round(sum * 10) / 10}% — they should total 100%`; }
+  return comps.map(x => ({ ...x, share: x.share === '' ? '' : parseFloat(x.share) }));
+}
+
 // ---- Roasters ----
 function cleanUrl(v) {
   v = String(v || '').trim(); if (!v) return '';
@@ -471,11 +569,11 @@ function showRoaster(name) {
       ${showCosts() && bought.length ? `<div><b>${bought.some(c => c.fxApprox) ? '≈' : ''}£${spent.toFixed(2)}</b><span>Spent</span></div>` : ''}
     </div>
     <div class="divider" style="margin-top:14px">Coffees</div>
-    ${info.coffees.map(c => `<button type="button" class="roaster-row" data-on-click="openCoffeeFromRoaster('${c.id}')"><div><div class="rr-name">${escHtml(c.name)}</div><div class="rr-sub">${escHtml([c.country, c.process].filter(Boolean).join(' · ') || ' ')}</div></div><div class="rr-right">${c.rating > 0 ? c.rating + '/10' : ''}${c.finishedBag ? (c.rating > 0 ? ' · ' : '') + 'Finished' : ''} ›</div></button>`).join('')}`;
+    ${info.coffees.map(c => `<button type="button" class="roaster-row" data-on-click="openCoffeeFromRoaster('${c.id}')"><div><div class="rr-name">${escHtml(c.name)}</div><div class="rr-sub">${escHtml([c.blend ? 'Blend' : '', originView(c).country, originView(c).process].filter(Boolean).join(' · ') || ' ')}</div></div><div class="rr-right">${c.rating > 0 ? c.rating + '/10' : ''}${c.finishedBag ? (c.rating > 0 ? ' · ' : '') + 'Finished' : ''} ›</div></button>`).join('')}`;
   openModal('modal-roaster');
 }
 function openCoffeeFromRoaster(id) {
-  closeModal('modal-roaster'); closeModal('modal-roasters');
+  closeModal('modal-roaster'); closeModal('modal-roasters'); closeModal('modal-blend');
   showView('coffees'); showCoffeeDetail(id);
 }
 
@@ -487,6 +585,8 @@ function resetCoffeeModal() {
    'c-country','c-region','c-varietal','c-notes','c-note-entry','c-roastdate','c-masl','c-process-custom','c-weight','c-price']
     .forEach(id => { const el = document.getElementById(id); if(el) el.value=''; });
   renderNoteChips();
+  const cblend = document.getElementById('c-blend'); if (cblend) cblend.checked = false;
+  blendDraft = []; blendOpenIdx = 0; setBlendUI(false);
   document.getElementById('c-process').value='';
   document.getElementById('c-process-custom').style.display='none';
   document.getElementById('c-roast').value='';
@@ -531,6 +631,11 @@ function openEditCoffee(id) {
   document.getElementById('c-currency').value = coffee.currency || 'GBP';
   updatePricePreview();
   document.getElementById('c-notes').value = coffee.notes || ''; renderNoteChips();
+  if (coffee.blend) {
+    blendDraft = blendComps(coffee).slice(0, BLEND_MAX).map(x => ({ ...emptyComp(), ...x }));
+    while (blendDraft.length < BLEND_MIN) blendDraft.push(emptyComp());
+    blendOpenIdx = -1; document.getElementById('c-blend').checked = true; setBlendUI(true);
+  }
   // Process
   const knownProcesses = ['Washed','Natural','Honey','Anaerobic','Wet Hulled','Carbonic Maceration','Extended Fermentation'];
   if (knownProcesses.includes(coffee.process)) {
@@ -560,6 +665,8 @@ function saveCoffee() {
   if (cm !== '' && !(parseFloat(cm) >= 0 && parseFloat(cm) <= 4000)) { showToast('Altitude should be between 0 and 4000m'); return; }
   const webRaw = document.getElementById('c-roaster-web').value, web = cleanUrl(webRaw);
   if (webRaw.trim() && !web) { showToast("That website address doesn't look right"); return; }
+  const comps = blendOn() ? readBlendComps() : null;
+  if (typeof comps === 'string') { showToast(comps); return; }
   if (!tapOnce('saveCoffee')) return;
   commitNoteEntry();      // a note still being typed counts
   const editId = document.getElementById('c-edit-id').value;
@@ -584,6 +691,10 @@ function saveCoffee() {
     labelPhoto: pendingLabelDataUrl || null,
     rating: pendingCoffeeRating || 0,
   };
+  if (comps) {      // a blend keeps its origins on the components; the bag-level origin fields stay empty
+    Object.assign(coffeeData, { producer:'', farm:'', country:'', region:'', varietal:'', masl:null, process:'', blend:true,
+      components: comps.map(x => { ['country', 'region', 'producer', 'farm', 'varietal'].forEach(k => { if (x[k]) x[k] = canonicalSpelling(k, x[k], editId); }); return x; }) });
+  } else { coffeeData.blend = false; coffeeData.components = undefined; }
   // Reuse the spelling already used for the same value (e.g. "colombia" -> "Colombia") so categories don't split
   SUGGEST_FIELDS.forEach(k => { if (coffeeData[k]) coffeeData[k] = canonicalSpelling(k, coffeeData[k], editId); });
   if (editId) {

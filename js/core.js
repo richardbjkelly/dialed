@@ -163,6 +163,15 @@ function sanitizeState(raw) {
     if ('roastDate' in o && !/^\d{4}-\d{2}-\d{2}$/.test(String(o.roastDate))) o.roastDate = '';
     ['createdAt', 'finishedAt'].forEach(k => { if (k in o) { const d = isoDate(o[k]); if (d) o[k] = d; else delete o[k]; } });
     if ('buyAgain' in o && !['yes', 'maybe', 'no', ''].includes(o.buyAgain)) o.buyAgain = '';
+    o.blend = !!o.blend;
+    if (o.blend) {
+      const txt = v => String(v == null ? '' : v).slice(0, 60);
+      o.components = (Array.isArray(o.components) ? o.components : []).filter(isObj).slice(0, 4).map(x => {
+        const sh = Number(x.share);
+        return { country: txt(x.country), region: txt(x.region), producer: txt(x.producer), farm: txt(x.farm), varietal: txt(x.varietal), process: txt(x.process),
+          masl: numish(x.masl) || '', share: (x.share !== '' && x.share != null && sh > 0 && sh <= 100) ? sh : '' };
+      });
+    } else delete o.components;
     if ('roasterWebsite' in o && !/^https?:\/\/[^\s"'<>`]+$/i.test(String(o.roasterWebsite))) o.roasterWebsite = '';   // links must be plain web addresses
     return o;
   });

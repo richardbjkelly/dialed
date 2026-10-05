@@ -13,7 +13,7 @@
 <meta name="apple-mobile-web-app-title" content="dialed">
 <meta name="theme-color" content="#123C27">
 <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; font-src 'self'; connect-src 'self' https://api.frankfurter.dev https://api.frankfurter.app; object-src 'none'; base-uri 'self'; form-action 'none'">
-<link rel="stylesheet" href="css/styles.css?v=3.36">
+<link rel="stylesheet" href="css/styles.css?v=3.37">
 </head>
 <body>
 
@@ -221,12 +221,26 @@
       <input type="checkbox" id="c-decaf" style="width:18px;height:18px;accent-color:var(--crema);cursor:pointer">
       <span style="font-size:14px;color:var(--text);flex:1;margin:0">Decaf</span>
     </label>
+    <label style="display:flex;align-items:center;gap:10px;margin-bottom:14px;padding:10px 14px;background:var(--foam);border:1.5px solid var(--border);border-radius:var(--radius-sm);cursor:pointer">
+      <input type="checkbox" id="c-blend" style="width:18px;height:18px;accent-color:var(--crema);cursor:pointer" data-on-change="toggleBlend(this)">
+      <span style="font-size:14px;color:var(--text);flex:1;margin:0">Blend</span><span style="font-size:11px;color:var(--text-muted)">more than one coffee</span>
+    </label>
+    <div id="c-blend-count-row" class="blend-count-row" hidden>
+      <div><div class="form-label" style="margin:0">Coffees in this blend</div><div style="font-size:11px;color:var(--text-muted);margin-top:3px">2 to 4</div></div>
+      <div class="blend-stepper" role="group" aria-label="Number of coffees in this blend"><button type="button" aria-label="One fewer" data-on-click="changeBlendCount(-1)">−</button><b id="c-blend-count" aria-live="polite">2</b><button type="button" aria-label="One more" data-on-click="changeBlendCount(1)">+</button></div>
+    </div>
     <div class="form-group"><label class="form-label">Roaster</label><input type="text" class="form-input" id="c-roaster" list="dl-roaster" autocomplete="off" data-on-change="roasterPicked()" placeholder="e.g. Square Mile Coffee"></div>
     <div class="form-row">
       <div class="form-group"><label class="form-label">Roaster City</label><input type="text" class="form-input" id="c-roaster-city" list="dl-roasterCity" autocomplete="off" placeholder="e.g. London"></div>
       <div class="form-group"><label class="form-label">Roaster Country</label><input type="text" class="form-input" id="c-roaster-country" list="dl-roasterCountry" autocomplete="off" placeholder="e.g. UK"></div>
     </div>
     <div class="form-group"><label class="form-label">Roaster Website</label><input type="url" class="form-input" id="c-roaster-web" inputmode="url" autocapitalize="off" autocomplete="off" spellcheck="false" placeholder="e.g. squaremilecoffee.com"></div>
+    <div id="c-blend-box" hidden>
+      <div class="form-label">The coffees <span style="text-transform:none;letter-spacing:0;opacity:.8">— fill in what you know</span></div>
+      <div id="c-blend-components"></div>
+      <div class="note-hint" style="margin-bottom:14px">Shares are optional. If you enter them, they should add up to 100%.</div>
+    </div>
+    <div id="c-origin-single">
     <div class="form-row">
       <div class="form-group"><label class="form-label">Country</label><input type="text" class="form-input" id="c-country" list="dl-country" autocomplete="off" placeholder="e.g. Ethiopia"></div>
       <div class="form-group"><label class="form-label">Region</label><input type="text" class="form-input" id="c-region" list="dl-region" autocomplete="off" placeholder="e.g. Guji"></div>
@@ -242,8 +256,9 @@
         <input type="text" class="form-input" id="c-process-custom" placeholder="Describe the process…" style="display:none;margin-top:6px">
       </div>
     </div>
+    </div>
     <div class="form-row">
-      <div class="form-group"><label class="form-label">Altitude (masl)</label><input type="number" class="form-input" id="c-masl" placeholder="e.g. 1800" min="0" max="4500"></div>
+      <div class="form-group" id="c-masl-group"><label class="form-label">Altitude (masl)</label><input type="number" class="form-input" id="c-masl" placeholder="e.g. 1800" min="0" max="4500"></div>
       <div class="form-group"><label class="form-label">Roast Level</label>
         <select class="form-select" id="c-roast"><option value="">Select…</option><option>Light</option><option>Light-Medium</option><option>Medium</option><option>Medium-Dark</option><option>Dark</option></select>
       </div>
@@ -527,6 +542,16 @@
   </div>
 </div>
 
+<!-- MODAL: Blend breakdown (from Insights) -->
+<div class="modal-overlay" id="modal-blend">
+  <div class="modal">
+    <div class="modal-handle"></div>
+    <div id="blend-content"></div>
+    <button class="btn-secondary" style="width:100%;margin-top:14px" data-on-click="closeModal('modal-blend')">Close</button>
+    <div style="height:10px"></div>
+  </div>
+</div>
+
 <!-- MODAL: Roasters list -->
 <div class="modal-overlay" id="modal-roasters">
   <div class="modal">
@@ -773,7 +798,7 @@
 </div>
 
 <div id="update-banner" class="update-banner" role="status" hidden><span class="ub-text">Update available</span><button type="button" data-on-click="reloadForUpdate()">Reload</button><button type="button" aria-label="Dismiss" data-on-click="hideParent(this)">✕</button></div>
-<datalist id="dl-notes"></datalist><datalist id="dl-roaster"></datalist><datalist id="dl-roasterCity"></datalist><datalist id="dl-roasterCountry"></datalist><datalist id="dl-producer"></datalist><datalist id="dl-farm"></datalist><datalist id="dl-country"></datalist><datalist id="dl-region"></datalist><datalist id="dl-varietal"></datalist>
+<datalist id="dl-blend-process"><option value="Washed"></option><option value="Natural"></option><option value="Honey"></option><option value="Anaerobic"></option><option value="Wet Hulled"></option><option value="Carbonic Maceration"></option><option value="Extended Fermentation"></option></datalist><datalist id="dl-notes"></datalist><datalist id="dl-roaster"></datalist><datalist id="dl-roasterCity"></datalist><datalist id="dl-roasterCountry"></datalist><datalist id="dl-producer"></datalist><datalist id="dl-farm"></datalist><datalist id="dl-country"></datalist><datalist id="dl-region"></datalist><datalist id="dl-varietal"></datalist>
 <input type="file" id="restore-input" accept=".json,application/json" style="display:none" data-on-change="restoreData(this)">
 <button type="button" class="timer-pill" id="timer-pill" hidden data-on-click="reopenBrewSheet()" aria-label="Brew timer running. Return to Log Brew"><span class="tp-dot" aria-hidden="true"></span>Brewing <span class="tp-time">0:00</span></button>
 <div id="brew-mode" class="brew-mode" role="dialog" aria-modal="true" aria-label="Brewing" tabindex="-1" hidden>
@@ -809,11 +834,11 @@
     <span class="nav-tab-icon"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><line x1="4" y1="6" x2="20" y2="6"/><line x1="4" y1="12" x2="20" y2="12"/><line x1="4" y1="18" x2="20" y2="18"/><circle cx="8" cy="6" r="2" fill="var(--espresso)" stroke="currentColor" class="nav-fill"/><circle cx="16" cy="12" r="2" fill="var(--espresso)" stroke="currentColor" class="nav-fill"/><circle cx="10" cy="18" r="2" fill="var(--espresso)" class="nav-fill" stroke="currentColor"/></svg></span>Settings
   </button>
 </nav>
-<script src="js/data.js?v=3.36"></script>
-<script src="js/core.js?v=3.36"></script>
-<script src="js/coffee.js?v=3.36"></script>
-<script src="js/views.js?v=3.36"></script>
-<script src="js/tools.js?v=3.36"></script>
-<script src="js/app.js?v=3.36"></script>
+<script src="js/data.js?v=3.37"></script>
+<script src="js/core.js?v=3.37"></script>
+<script src="js/coffee.js?v=3.37"></script>
+<script src="js/views.js?v=3.37"></script>
+<script src="js/tools.js?v=3.37"></script>
+<script src="js/app.js?v=3.37"></script>
 </body>
 </html>

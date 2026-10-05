@@ -910,6 +910,22 @@ No visible changes — two structural changes behind the scenes.
 
 ---
 
+## v3.37
+*5 October 2026*
+
+### Blends
+- **Blend** tick box in Add Coffee, under Decaf. Ticking it shows a counter for the number of coffees in the blend (2 to 4) and one collapsible card per coffee
+- Each card has the same origin fields as a single-origin coffee — country, region, altitude, producer, farm, varietal and process — plus an optional **share of the blend (%)**. Everything is optional: fill in what the bag tells you
+- Anything already typed as a single origin becomes Coffee 1 when you tick Blend
+- Shares must be given for every coffee or none, and must total 100%
+- Unticking Blend, or reducing the count, asks for confirmation when details would be lost. Turning Blend off keeps Coffee 1 as the coffee's origin
+- **Coffee page**: "Blend · 2 coffees" and the joined origins ("Brazil + Ethiopia") in the header, then an "In this blend" section with a share bar and each coffee's details
+- **Library**: Blend badge on tiles and joined origins in the summary
+- **Insights**: on the Origin country, Process and Varietal charts a blend counts once, as "Blend". Tap that entry to see what your blends are made of, weighted by share (equal parts where no share was given), and the list of blends
+- Name, roaster, roast, weight, price, tasting notes, rating and photo stay once for the whole bag
+
+---
+
 ## Pending / Roadmap
 - Rebuild the APK once to pick up the new cup icon
 - Opt-in pooled data + trained model (see feasibility notes): backend, consent, deletion, ICO registration
@@ -927,4 +943,4 @@ No visible changes — two structural changes behind the scenes.
 
 ---
 
-*Document maintained automatically. Last updated: v3.36*
+*Document maintained automatically. Last updated: v3.37*
