@@ -926,6 +926,21 @@ No visible changes — two structural changes behind the scenes.
 
 ---
 
+## v3.38
+*7 October 2026*
+
+### Back from a coffee returns to the Coffee Library
+- Swiping back (or pressing the phone's Back button) on a coffee's page now returns to the Coffee Library instead of jumping to Overview. A second Back goes to Overview, and from there "Press back again to exit" as before
+- The library reopens at the place you had scrolled to, both for the swipe and for the on-screen "← Back"
+- Open sheets, Settings and brew mode still close first, as before
+
+### Roaster country: US and UK
+- "US", "USA", "United States", "United States of America" (and "U.S.", "America") are all stored and counted as **US**
+- "UK", "United Kingdom" (and "U.K.", "Great Britain", "Britain", "GB") are all stored and counted as **UK**
+- Applies to new entries and to coffees already saved, so Insights and roaster pages no longer split them
+
+---
+
 ## Pending / Roadmap
 - Rebuild the APK once to pick up the new cup icon
 - Opt-in pooled data + trained model (see feasibility notes): backend, consent, deletion, ICO registration
@@ -943,4 +958,4 @@ No visible changes — two structural changes behind the scenes.
 
 ---
 
-*Document maintained automatically. Last updated: v3.37*
+*Document maintained automatically. Last updated: v3.38*

@@ -170,8 +170,11 @@ function saveFinishBag() {
   refreshAfterFinish(c.id);
 }
 
+let coffeeListScroll = 0;      // where the library was scrolled to when a coffee was opened
 function goBackToCoffees() {
   restoreCoffeeList();
+  const y = coffeeListScroll || 0; window.scrollTo(0, y);
+  setTimeout(() => { if (!document.querySelector('#view-coffees .detail-hero') && state.currentView === 'coffees') window.scrollTo(0, y); }, 0);
   playEnter(document.getElementById('view-coffees'), 'slide-in-left');
   history.pushState({view:'coffees'}, '', '');
 }
@@ -209,6 +212,9 @@ function blendSectionHtml(c) {
 
 function showCoffeeDetail(id) {
   const c = state.coffees.find(x=>x.id===id); if(!c) return;
+  // Remember where the library was scrolled to (only when leaving the list itself, before the page is replaced)
+  if (state.currentView === 'coffees' && document.getElementById('coffees-list')) coffeeListScroll = window.scrollY;
+  else if (state.currentView !== 'coffees') coffeeListScroll = 0;
   const locationStr = [c.roasterCity,c.roasterCountry].filter(Boolean).join(', ');
   const producerStr = [c.producer?'Producer: '+c.producer:'', c.farm?'Farm: '+c.farm:''].filter(Boolean).join(' · ');
   const recs = state.recipes.filter(r=>r.coffeeId===id);

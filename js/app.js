@@ -57,7 +57,7 @@ function closeSettings() {
 
 
 // ==================== VERSION & UPDATES ====================
-const APP_VERSION = '3.37';
+const APP_VERSION = '3.38';
 // The app page is fetched fresh when online, but on a slow connection the saved copy is used instead.
 // version.json is tiny and never cached, so we can tell when a newer version is waiting.
 async function checkForUpdate() {
@@ -265,6 +265,7 @@ renderDashboard();
 updateCompareBar();
 // A second entry means the phone's Back button is always caught by the app first (closing a sheet or brew mode)
 // instead of leaving it straight away on a fresh launch
+try { history.scrollRestoration = 'manual'; } catch(e) {}      // the app decides where each screen is scrolled to, not the browser
 try { history.replaceState({view:'dashboard'}, '', ''); history.pushState({view:'dashboard'}, '', ''); } catch(e) {}
 scoreFromLink();
 // Offline support (only over http/https — e.g. GitHub Pages)

@@ -134,6 +134,14 @@ function newId(prefix = '') {
   const rnd = (window.crypto && crypto.randomUUID) ? crypto.randomUUID().replace(/-/g, '').slice(0, 16) : Date.now().toString(36) + Math.random().toString(36).slice(2, 10);
   return prefix + rnd;
 }
+// Roaster countries: the many ways of writing the US and the UK all become "US" / "UK"
+const ROASTER_COUNTRY_ALIASES = { US: ['us', 'usa', 'u.s.', 'u.s', 'u.s.a.', 'u.s.a', 'united states', 'united states of america', 'the united states', 'america'],
+                                  UK: ['uk', 'u.k.', 'u.k', 'united kingdom', 'the united kingdom', 'great britain', 'britain', 'gb'] };
+function normRoasterCountry(v) {
+  const t = String(v == null ? '' : v).trim(), k = t.toLowerCase().replace(/\s+/g, ' ');
+  for (const [name, list] of Object.entries(ROASTER_COUNTRY_ALIASES)) if (list.includes(k)) return name;
+  return t;
+}
 function sanitizeState(raw) {
   if (!isObj(raw)) throw new Error('Not a dialed data file');
   ['coffees', 'recipes', 'plannedBrews', 'customRecipes'].forEach(k => { if (raw[k] != null && !Array.isArray(raw[k])) throw new Error(`"${k}" is not a list`); });
@@ -163,6 +171,7 @@ function sanitizeState(raw) {
     if ('roastDate' in o && !/^\d{4}-\d{2}-\d{2}$/.test(String(o.roastDate))) o.roastDate = '';
     ['createdAt', 'finishedAt'].forEach(k => { if (k in o) { const d = isoDate(o[k]); if (d) o[k] = d; else delete o[k]; } });
     if ('buyAgain' in o && !['yes', 'maybe', 'no', ''].includes(o.buyAgain)) o.buyAgain = '';
+    if (typeof o.roasterCountry === 'string' && o.roasterCountry) o.roasterCountry = normRoasterCountry(o.roasterCountry);
     o.blend = !!o.blend;
     if (o.blend) {
       const txt = v => String(v == null ? '' : v).slice(0, 60);
@@ -288,6 +297,8 @@ window.addEventListener('popstate', function(e) {
   if (openModal) { closeModal(openModal.id); history.pushState({view:state.currentView},'',''); return; }
   const settingsOpen = document.getElementById('settings-panel')?.classList.contains('open');
   if (settingsOpen) { closeSettings && closeSettings(); history.pushState({view:state.currentView},'',''); return; }
+  // A coffee's page goes back to the Coffee Library, not all the way to Overview
+  if (state.currentView === 'coffees' && document.querySelector('#view-coffees .detail-hero')) { goBackToCoffees(); return; }
   if (state.currentView !== 'dashboard') {
     showView('dashboard', false);
     history.pushState({view:'dashboard'}, '', '');

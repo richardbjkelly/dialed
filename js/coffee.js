@@ -675,7 +675,7 @@ function saveCoffee() {
     decaf: document.getElementById('c-decaf')?.checked||false,
     roaster: document.getElementById('c-roaster').value.trim(),
     roasterCity: document.getElementById('c-roaster-city').value.trim(),
-    roasterCountry: document.getElementById('c-roaster-country').value.trim(),
+    roasterCountry: normRoasterCountry(document.getElementById('c-roaster-country').value),
     roasterWebsite: web || '',
     producer: document.getElementById('c-producer').value.trim(),
     farm: document.getElementById('c-farm').value.trim(),
