@@ -30,5 +30,20 @@ with sync_playwright() as p:
     pg.evaluate("editBrew('rf')"); pg.wait_for_timeout(500); ok('editing a brew of a finished bag: that coffee first', order(pg)[0]=='Finished' and sel(pg)=='Finished', order(pg)); close(pg)
     pg.evaluate("state.selectedCoffeeId='nope'; openRecipeModal()"); pg.wait_for_timeout(400)
     ok('unknown selection falls back to the first coffee', order(pg)==names and sel(pg)=='Alpha' and 'Finished' not in order(pg))
+    # ---- roast-date order
+    import datetime
+    d=lambda n:(datetime.date.today()-datetime.timedelta(days=n)).isoformat()
+    sd={'coffees':[{'id':'n1','name':'No date A','roaster':'R'},{'id':'f1','name':'Fresh','roaster':'R','roastDate':d(3)},{'id':'o1','name':'Oldest','roaster':'Sq','roastDate':d(40)},
+                   {'id':'n2','name':'No date B'},{'id':'m1','name':'Middle','roaster':'R','roastDate':d(18)},{'id':'t1','name':'Today','roaster':'R','roastDate':d(0)},{'id':'x1','name':'Old but finished','roastDate':d(90),'finishedBag':True}],'recipes':[]}
+    pg2=b.new_context(**p.devices['Pixel 7']).new_page(); pg2.on('pageerror',lambda e:errs.append(str(e)))
+    pg2.goto('http://localhost:8765/dialed/index.html'); pg2.evaluate("s=>localStorage.setItem('dialin_v2', s)", json.dumps(sd)); pg2.reload(); pg2.wait_for_timeout(600)
+    pg2.evaluate("openRecipeModal()"); pg2.wait_for_timeout(400)
+    ok('oldest roast at the top, undated after in library order, finished bags left out', order(pg2)==['Oldest','Middle','Fresh','Today','No date A','No date B'], order(pg2))
+    ok('first Log Brew selects the oldest roast', sel(pg2)=='Oldest' and pg2.evaluate("state.selectedCoffeeId")=='o1')
+    subs=pg2.evaluate("[...document.querySelectorAll('#coffee-selector .cs-sub')].map(e=>e.textContent)")
+    ok('days off roast shown', subs[:4]==['Sq · 40 days off roast','R · 18 days off roast','R · 3 days off roast','R · roasted today'] and subs[4]=='R', subs)
+    close(pg2); pg2.evaluate("state.selectedCoffeeId='f1'; openRecipeModal()"); pg2.wait_for_timeout(400)
+    ok('the coffee being brewed still goes first, the rest by roast date', order(pg2)==['Fresh','Oldest','Middle','Today','No date A','No date B'] and sel(pg2)=='Fresh', order(pg2))
+    pg2.close()
     ok('no page errors', not errs, errs)
 print(sum(res),'/',len(res)); sys.exit(0 if all(res) else 1)

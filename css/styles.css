@@ -700,6 +700,13 @@
   .settings-sec-body[hidden] { display:none; }
   body.dark-mode .settings-sec-btn { border-color:var(--dm-border) !important; }
   @media (prefers-reduced-motion: reduce) { .settings-sec-btn .sec-chev { transition:none; } }
+  /* Ratio lock */
+  .ratio-row { display:flex; justify-content:space-between; align-items:flex-start; gap:10px; margin:-4px 0 12px; }
+  .ratio-row .brew-live { margin:4px 0 0; flex:1; }
+  .ratio-lock { flex-shrink:0; display:inline-flex; align-items:center; gap:5px; background:var(--card); border:1.5px solid var(--border); color:var(--text-muted); border-radius:20px; padding:5px 11px; font-size:11px; letter-spacing:.5px; cursor:pointer; }
+  .ratio-lock[aria-pressed="true"] { background:#123C27; border-color:#123C27; color:#FAFAF7; }
+  body.dark-mode .ratio-lock[aria-pressed="true"] { background:#52796F; border-color:#52796F; }
+  .recipe-scaled { color:#F2C8A0; font-weight:700; }
   /* Blends */
   .blend-count-row { display:flex; justify-content:space-between; align-items:center; gap:12px; margin-bottom:14px; }
   .blend-count-row[hidden], #c-blend-box[hidden] { display:none; }

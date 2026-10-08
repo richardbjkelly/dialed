@@ -234,13 +234,15 @@ function renderRecipeCard(method, recipeId) {
   const recipe = options.find(r => r.id === recipeId);
   if (!recipe) { card.innerHTML = ''; card.style.display = 'none'; return; }
   card.style.display = 'block';
+  const f = recipeScale(recipe), [cd, cw] = doseWater();
   card.innerHTML = `
     <div style="background:var(--espresso);border-radius:var(--radius-sm);padding:14px;margin-top:10px">
       <div style="font-family:var(--font-display);font-size:15px;color:var(--crema-light);margin-bottom:2px">${escHtml(recipe.name)}</div>
       <div style="font-family:var(--font-mono);font-size:11px;color:rgba(245,237,227,.45);letter-spacing:1px;margin-bottom:12px">${recipe.dose}g · ${recipe.water}ml · ${recipe.temp}°C · ${escHtml(recipe.ratio)}${recipe.grindHint?' · '+escHtml(recipe.grindHint):''}${recipe.pours?' · '+recipe.pours+' pours':''}${recipe.totalTime?' · '+recipe.totalTime:''}</div>
       <ol style="padding-left:16px;margin:0">
-        ${recipe.steps.map(s => `<li style="font-size:12px;color:rgba(245,237,227,.75);line-height:1.5;margin-bottom:5px">${escHtml(s)}</li>`).join('')}
+        ${recipe.steps.map(s => `<li style="font-size:12px;color:rgba(245,237,227,.75);line-height:1.5;margin-bottom:5px">${scaleStepText(s, recipe, f, true)}</li>`).join('')}
       </ol>
+      ${f ? `<div class="recipe-scaled-note" style="font-size:11px;color:rgba(245,237,227,.6);margin-top:8px">Amounts adjusted to your ${cd > 0 ? cd + 'g' : ''}${cd > 0 && cw > 0 ? ' · ' : ''}${cw > 0 ? cw + 'ml' : ''} (recipe: ${recipe.dose}g · ${recipe.water}ml)</div>` : ''}
     </div>`;
 }
 

@@ -479,8 +479,69 @@ function repeatBrew(id) {
 }
 
 // ---- Live ratio + cost in Log Brew ----
+// ---- Ratio lock: with it on, changing the dose changes the water to match (and the other way round) ----
+let ratioLockValue = null;      // water ÷ dose, kept unrounded so repeated edits don't drift
+const ratioLocked = () => appSettings.ratioLocked === true;
+const LOCK_ICON = '<svg class="ico" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/></svg>', UNLOCK_ICON = '<svg class="ico" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V8a4 4 0 0 1 7.5-2"/></svg>';
+function doseWater() { return [parseFloat(document.getElementById('r-dose')?.value), parseFloat(document.getElementById('r-yield')?.value)]; }
+function captureRatio() { const [d, w] = doseWater(); ratioLockValue = d > 0 && w > 0 ? w / d : null; renderRatioLock(); }
+function renderRatioLock() {
+  const b = document.getElementById('r-ratio-lock'); if (!b) return;
+  const on = ratioLocked();
+  b.setAttribute('aria-pressed', on ? 'true' : 'false');
+  b.querySelector('.rl-ico').innerHTML = on ? LOCK_ICON : UNLOCK_ICON;
+  b.querySelector('.rl-txt').textContent = on ? (ratioLockValue ? 'Locked 1:' + (Math.round(ratioLockValue * 10) / 10) : 'Ratio locked') : 'Lock ratio';
+  b.setAttribute('aria-label', on ? 'Ratio locked. Changing the dose changes the water. Tap to unlock' : 'Lock the ratio, so changing the dose changes the water');
+}
+function toggleRatioLock() {
+  if (ratioLocked()) { appSettings.ratioLocked = false; }
+  else {
+    captureRatio();
+    if (!ratioLockValue) { showToast('Enter a dose and water first'); return; }
+    appSettings.ratioLocked = true;
+  }
+  saveSettings(); renderRatioLock();
+}
+function doseInput() {
+  const [d] = doseWater();
+  if (ratioLocked() && ratioLockValue && d > 0) {
+    const esp = isEspressoMethod(state.selectedMethod || 'Espresso');
+    document.getElementById('r-yield').value = esp ? Math.round(d * ratioLockValue * 10) / 10 : Math.round(d * ratioLockValue);
+  } else if (ratioLocked() && !ratioLockValue) captureRatio();
+  updateBrewLive();
+}
+function waterInput() {
+  const [, w] = doseWater();
+  if (ratioLocked() && ratioLockValue && w > 0) document.getElementById('r-dose').value = Math.round(w / ratioLockValue * 10) / 10;
+  else if (ratioLocked() && !ratioLockValue) captureRatio();
+  updateBrewLive();
+}
+
+// ---- Recipes scale with your dose and water: gram and ml amounts in the steps follow the numbers you've entered ----
+function recipeScale(recipe) {
+  const [d, w] = doseWater();
+  const fd = recipe && recipe.dose > 0 && d > 0 ? d / recipe.dose : null, fw = recipe && recipe.water > 0 && w > 0 ? w / recipe.water : null;
+  const f = { dose: fd || fw || 1, water: fw || fd || 1 };
+  return (Math.abs(f.dose - 1) < 0.005 && Math.abs(f.water - 1) < 0.005) ? null : f;
+}
+// "Pour 60g water … to 300g total" → scaled amounts. The coffee dose itself scales with the dose; everything else with the water.
+function scaleStepText(text, recipe, f, mark) {
+  if (!f) return mark ? escHtml(text) : text;
+  const out = [], re = /(\d+(?:\.\d+)?)(\s?)(g|ml)\b/gi;
+  let last = 0, m;
+  while ((m = re.exec(text))) {
+    const n = parseFloat(m[1]), isDose = recipe.dose && Math.abs(n - recipe.dose) < 0.01;
+    const v = n * (isDose ? f.dose : f.water), shown = isDose ? String(Math.round(v * 10) / 10) : String(Math.round(v));
+    out.push(mark ? escHtml(text.slice(last, m.index)) + `<span class="recipe-scaled">${shown}${m[2]}${escHtml(m[3])}</span>` : text.slice(last, m.index) + shown + m[2] + m[3]);
+    last = m.index + m[0].length;
+  }
+  out.push(mark ? escHtml(text.slice(last)) : text.slice(last));
+  return out.join('');
+}
+
 function updateBrewLive() {
   const el = document.getElementById('r-ratio-live'); if (!el) return;
+  try { if (state.selectedRecipeId) { renderRecipeCard(state.selectedMethod, state.selectedRecipeId); renderStepGuide(); } } catch(e) {}
   const r = { dose: document.getElementById('r-dose').value, yield: document.getElementById('r-yield').value };
   const cf = state.coffees.find(c => c.id === state.selectedCoffeeId);
   const parts = [];
@@ -513,7 +574,8 @@ let lastGuideIdx = -1;
 function timedSteps() {
   const rec = state.selectedRecipeId ? getAllRecipesForMethod(state.selectedMethod).find(x => x.id === state.selectedRecipeId) : null;
   if (!rec) return [];
-  return rec.steps.map(s => { const m = s.match(/^~?\s*(\d{1,2}):(\d{2})\s*[—–-]\s*(.*)$/); return m ? { at: +m[1] * 60 + +m[2], text: m[3] } : null; }).filter(Boolean).sort((a, b) => a.at - b.at);
+  const f = recipeScale(rec);
+  return rec.steps.map(s => scaleStepText(s, rec, f, false)).map(s => { const m = s.match(/^~?\s*(\d{1,2}):(\d{2})\s*[—–-]\s*(.*)$/); return m ? { at: +m[1] * 60 + +m[2], text: m[3] } : null; }).filter(Boolean).sort((a, b) => a.at - b.at);
 }
 function renderStepGuide() {
   const el = document.getElementById('brew-step-guide'); if (!el) return;
@@ -652,7 +714,10 @@ function slideBrew(kind, val) {
 }
 // Anything in Log Brew that fills or changes these fields (picking a grinder or recipe, Use, Apply) keeps the sliders in step
 ['click', 'change', 'input'].forEach(t => document.addEventListener(t, e => {
-  if (e.target.closest && e.target.closest('#modal-recipe') && !/^r-(grind|temp)-range$/.test(e.target.id)) setTimeout(syncBrewSliders, 0);
+  if (!(e.target.closest && e.target.closest('#modal-recipe'))) return;
+  if (!/^r-(grind|temp)-range$/.test(e.target.id)) setTimeout(syncBrewSliders, 0);
+  // Dose and water filled in some other way (recipe, Use, Apply): the locked ratio becomes the new one
+  if (!/^r-(dose|yield)$/.test(e.target.id) && !(e.target.closest('#r-ratio-lock'))) setTimeout(() => { if (ratioLocked()) captureRatio(); }, 0);
 }));
 
 function updateGrindMicrons() {
@@ -811,7 +876,7 @@ function renderBrewSuggestion() {
       <button type="button" class="suggest-apply" data-on-click="applyBrewSuggestion()">Apply</button>
     </div>
     <div class="suggest-main">${parts.join(' · ')}${!rec && ratioText ? ` · <b>${ratioText}</b>` : ''}</div>
-    ${rec ? `<div class="suggest-sub">${chosen ? 'Your recipe' : 'Recipe'}: ${escHtml(rec.name)}${recRatio ? ' · ' + recRatio : ''} — dose, water and steps as written</div>` : ''}
+    ${rec ? `<div class="suggest-sub">${chosen ? 'Your recipe' : 'Recipe'}: ${escHtml(rec.name)}${recRatio ? ' · ' + recRatio : ''} — ${recipeScale(rec) ? 'steps adjusted to your dose and water' : 'dose, water and steps as written'}</div>` : ''}
     <details class="suggest-why"><summary>Why?</summary><ul>${reasons.map(r => `<li>${r}</li>`).join('')}</ul>
       <div class="suggest-sub" style="margin-top:6px">A starting point, not a rule. Taste, then use Plan next to fine-tune.</div></details>
   </div>`;
@@ -996,7 +1061,7 @@ function renderBrewMode() {
   set('bm-coffee', cf ? cf.name : 'Brewing');
   set('bm-recipe', rec ? rec.name : (state.selectedMethod || ''));
   const v = id => ($(id)?.value || '').trim(), isEsp = isEspressoMethod(state.selectedMethod || 'Espresso');
-  set('bm-meta', [v('r-dose') && v('r-dose') + 'g', v('r-yield') && v('r-yield') + (isEsp ? 'g out' : 'ml'), v('r-grind') && 'Grind ' + v('r-grind')].filter(Boolean).join(' · '));
+  set('bm-meta', [v('r-dose') && v('r-dose') + 'g', v('r-yield') && v('r-yield') + (isEsp ? 'g out' : 'ml'), v('r-temp') && v('r-temp') + '°C', v('r-grind') && 'Grind ' + v('r-grind')].filter(Boolean).join(' · '));
   const steps = timedSteps(), guide = $('bm-guide'), list = $('bm-steps'), stop = $('bm-stop');
   if (steps.length < 2) {            // no timed recipe: just the clock
     guide.style.display = 'none'; list.innerHTML = ''; list.className = 'bm-spacer'; brewModeIdx = null;

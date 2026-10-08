@@ -941,6 +941,29 @@ No visible changes — two structural changes behind the scenes.
 
 ---
 
+## v3.39
+*8 October 2026*
+
+### Log Brew: coffees in roast-date order
+- The coffee list in Log Brew is now sorted by roast date, oldest at the top, so the bag to use up first is easiest to reach. Coffees without a roast date follow, in library order
+- Each coffee shows how many days off roast it is beside the roaster (e.g. "Square Mile · 18 days off roast")
+- The coffee you're brewing (Brew now, Repeat, Use, Edit, or the one you used last) still goes to the very top; on a first Log Brew the oldest roast is selected
+
+### Lock the ratio
+- A **Lock ratio** button beside the ratio line in Log Brew. With it on, changing the dose changes the water to keep the same ratio, and changing the water changes the dose
+- It locks whatever ratio you have when you tap it; choosing a recipe, Use or Apply sets a new locked ratio from the numbers they fill in
+- The lock stays on between brews until you tap it again
+
+### Recipes follow your dose and water
+- When your dose or water differs from the recipe's, the gram and ml amounts in its steps are recalculated to match (e.g. Hoffmann's V60 at 15g: "Pour 30g water … to 150g total … 250g total"), highlighted, with a note showing the recipe's own numbers
+- The coffee amount follows your dose; pour amounts follow your water. Times are unchanged
+- The scaled steps are also what the timer guide and brew mode show
+
+### Brew mode
+- Water temperature is now shown on the brewing screen alongside dose, water and grind
+
+---
+
 ## Pending / Roadmap
 - Rebuild the APK once to pick up the new cup icon
 - Opt-in pooled data + trained model (see feasibility notes): backend, consent, deletion, ICO registration
@@ -958,4 +981,4 @@ No visible changes — two structural changes behind the scenes.
 
 ---
 
-*Document maintained automatically. Last updated: v3.38*
+*Document maintained automatically. Last updated: v3.39*

@@ -348,23 +348,26 @@ function openRecipeModal() {
   const reid = document.getElementById('r-edit-id'); if(reid) reid.value = '';
   const rtitle = document.getElementById('r-modal-title'); if(rtitle) rtitle.textContent = 'Log Brew';
   try { setScoreOnly(false); } catch(e) {}
-  setTimeout(() => { try { syncBrewSliders(); } catch(e) {} }, 0);
+  setTimeout(() => { try { syncBrewSliders(); captureRatio(); } catch(e) {} }, 0);
   // Coffee selector
   const cs = document.getElementById('coffee-selector');
   cs.innerHTML = '';
-  // The coffee being brewed goes first, so it's in view without scrolling (Brew now, Repeat, Edit, or the last one used)
-  const openBags = state.coffees.filter(selectable);
+  // Oldest roast first (use those bags up first); bags with no roast date follow in library order.
+  // The coffee being brewed still goes to the very top, so it's in view without scrolling (Brew now, Repeat, Edit, or the last one used)
+  const roastT = c => { const t = c.roastDate ? Date.parse(c.roastDate + 'T00:00:00') : NaN; return isNaN(t) ? Infinity : t; };
+  const openBags = state.coffees.filter(selectable).map((c, i) => [c, i]).sort((a, b) => (roastT(a[0]) - roastT(b[0])) || (a[1] - b[1])).map(x => x[0]);
   const chosen = openBags.find(c => c.id === state.selectedCoffeeId);
-  (chosen ? [chosen, ...openBags.filter(c => c !== chosen)] : openBags).forEach(c => {
+  const listed = chosen ? [chosen, ...openBags.filter(c => c !== chosen)] : openBags;
+  listed.forEach(c => {
     const d = document.createElement('div');
     d.className = 'coffee-selector-item' + (state.selectedCoffeeId===c.id?' selected':'');
-    d.innerHTML = `<div class="cs-name">${escHtml(c.name)}</div><div class="cs-sub">${escHtml(c.roaster||'')}</div>`;
+    const age = roastAgeToday(c);
+    d.innerHTML = `<div class="cs-name">${escHtml(c.name)}</div><div class="cs-sub">${escHtml([c.roaster, age != null ? (age === 0 ? 'roasted today' : age + ' day' + (age === 1 ? '' : 's') + ' off roast') : ''].filter(Boolean).join(' · '))}</div>`;
     d.onclick = () => { state.selectedCoffeeId=c.id; cs.querySelectorAll('.coffee-selector-item').forEach(x=>x.classList.remove('selected')); d.classList.add('selected'); renderBrewHistory(); renderBrewSuggestion(); };
     cs.appendChild(d);
   });
   cs.scrollTop = 0;
-  const activeCoffees = state.coffees.filter(selectable);
-  if (!state.selectedCoffeeId || !activeCoffees.find(c=>c.id===state.selectedCoffeeId)) { if(activeCoffees.length){state.selectedCoffeeId=activeCoffees[0].id; cs.children[0]?.classList.add('selected');} }
+  if (!chosen && listed.length) { state.selectedCoffeeId = listed[0].id; cs.children[0]?.classList.add('selected'); }   // nothing chosen yet: the oldest roast
   // Default grinder to favourite if none previously selected
   if (!state.selectedGrinderId && state.favouriteGrinderId) { state.selectedGrinderId = state.favouriteGrinderId; }
   // Grinder selector
