@@ -964,6 +964,15 @@ No visible changes — two structural changes behind the scenes.
 
 ---
 
+## v3.40
+*19 October 2026*
+
+### Wider grind slider in Log Brew
+- The grind slider now covers the usual range for the brew method plus half as much again on each side. For pourover that's roughly 250–850µm instead of 400–700µm, converted to your grinder's settings
+- Applies to every method; typing a value outside the slider still widens it to the grinder's full range
+
+---
+
 ## Pending / Roadmap
 - Rebuild the APK once to pick up the new cup icon
 - Opt-in pooled data + trained model (see feasibility notes): backend, consent, deletion, ICO registration
@@ -981,4 +990,4 @@ No visible changes — two structural changes behind the scenes.
 
 ---
 
-*Document maintained automatically. Last updated: v3.39*
+*Document maintained automatically. Last updated: v3.40*

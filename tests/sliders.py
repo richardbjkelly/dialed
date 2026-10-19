@@ -63,5 +63,13 @@ with sync_playwright() as p:
     # layout at extra-large text
     pg.evaluate("setTextSize('xlarge')"); pg.wait_for_timeout(300)
     ok('fits at Extra large text', pg.evaluate("(()=>{const m=document.querySelector('#modal-recipe .modal'); return m.scrollWidth<=m.clientWidth+1})()"))
+    # pourover range is wide enough for coarser and finer experiments
+    pg.evaluate("setTextSize('default'); closeModal('modal-recipe')"); pg.wait_for_timeout(400)
+    pg.evaluate("state.selectedMethod='Pourover'; openRecipeModal()"); pg.wait_for_timeout(400)
+    pg.evaluate(f"state.selectedGrinderId='{gid}'; document.getElementById('r-grind').value=''; syncBrewSliders()")
+    lo,hi=float(pg.get_attribute('#r-grind-range','min')), float(pg.get_attribute('#r-grind-range','max'))
+    um=pg.evaluate(f"[settingToMicrons(GRINDERS.find(g=>g.id==='{gid}'), {lo}), settingToMicrons(GRINDERS.find(g=>g.id==='{gid}'), {hi})]")
+    sc2=pg.evaluate(f"grinderScale(GRINDERS.find(g=>g.id==='{gid}'))")
+    ok('pourover slider spans about 250–850µm (or the grinder limits)', (um[0]<=260 or abs(lo-sc2['s0'])<0.01) and (um[1]>=840 or abs(hi-sc2['s1'])<0.01), [lo,hi,um])
     ok('no page errors', not errs, errs)
 print(sum(res),'/',len(res)); sys.exit(0 if all(res) else 1)

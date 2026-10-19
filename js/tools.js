@@ -682,10 +682,12 @@ function brewGrindSlider() {
   const g = selectedGrinder(), sc = grinderScale(g); if (!sc) return null;
   const step = planGrindStep(g, state.selectedMethod, '');
   let lo = sc.s0, hi = sc.s1, usual = false;
-  // Start from the range that's usual for this brew method on this grinder: a shorter slider is easier to set precisely
+  // Start from the range that's usual for this brew method on this grinder (a shorter slider is easier to set precisely),
+  // with half as much again either side so finer and coarser experiments still fit
   const mr = methodRange(state.selectedMethod);
   if (mr) {
-    const a = micronsToSetting(g, mr.min), b = micronsToSetting(g, mr.max);
+    const pad = (mr.max - mr.min) * 0.5;
+    const a = micronsToSetting(g, Math.max(100, mr.min - pad)), b = micronsToSetting(g, mr.max + pad);
     if (a != null && b != null && b - a >= step * 4) { lo = Math.floor(a / step) * step; hi = Math.ceil(b / step) * step; usual = true; }
   }
   const v = parseFloat(document.getElementById('r-grind')?.value);
