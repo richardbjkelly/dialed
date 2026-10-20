@@ -28,6 +28,8 @@ with sync_playwright() as p:
     ok('recipe fills its own dose/water and becomes the locked ratio', v(pg,'#r-dose')=='30' and v(pg,'#r-yield')=='500' and '1:16.7' in pg.inner_text('#r-ratio-lock'))
     ok('at the recipe amounts nothing is marked as adjusted', pg.locator('#r-recipe-card .recipe-scaled').count()==0 and 'Amounts adjusted' not in pg.inner_text('#r-recipe-card'))
     pg.fill('#r-dose','15'); pg.wait_for_timeout(300)
+    ok('recipe steps folded away by default', 'show the' in pg.inner_text('#r-recipe-card').lower() and pg.locator('#r-recipe-card ol[hidden]').count()==1)
+    pg.locator('#r-recipe-card .rc-toggle').tap(); pg.wait_for_timeout(200)
     card=pg.inner_text('#r-recipe-card')
     ok('half the dose: water halves via the lock', v(pg,'#r-yield')=='250')
     ok('recipe steps rescale: coffee 15g, bloom 30g, pours to 150g and 250g', 'Add 15g coffee' in card and 'Pour 30g water' in card and '150g total' in card and '250g total' in card, card)

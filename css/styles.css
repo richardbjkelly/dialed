@@ -700,6 +700,36 @@
   .settings-sec-body[hidden] { display:none; }
   body.dark-mode .settings-sec-btn { border-color:var(--dm-border) !important; }
   @media (prefers-reduced-motion: reduce) { .settings-sec-btn .sec-chev { transition:none; } }
+  /* Log Brew in two screens: Set up, then How was it? */
+  .brew-steps-head { display:flex; align-items:center; gap:10px; margin:-6px 0 8px; font-size:12px; color:var(--text-muted); }
+  .brew-steps-head .bsh-label { flex:1; letter-spacing:1px; }
+  .brew-steps-head button { background:none; border:none; color:var(--text-muted); font-size:13px; padding:6px 4px; cursor:pointer; }
+  .brew-steps-head .bsh-back { color:var(--text); font-size:13px; letter-spacing:.5px; }
+  .brew-steps-head .bsh-back[hidden] { display:none; }
+  .brew-prog { display:flex; gap:6px; margin-bottom:14px; }
+  .brew-prog i { flex:1; height:5px; border-radius:3px; background:var(--border); }
+  .brew-prog i.on { background:var(--espresso); }
+  body.dark-mode .brew-prog i.on { background:#8FB3A5; }
+  #modal-recipe.score-only .brew-prog, #modal-recipe.score-only .bsh-label { visibility:hidden; }
+  .brew-summary { display:flex; flex-wrap:wrap; gap:6px; margin-bottom:12px; }
+  .brew-summary[hidden], #r-setup[hidden], #r-taste-page[hidden], .bf-row[hidden], .brew-timer[hidden] { display:none; }
+  .brew-summary span { font-size:11px; background:rgba(82,121,111,0.14); color:var(--text); border-radius:20px; padding:4px 10px; }
+  #modal-recipe .modal { padding-bottom:0; }
+  .brew-foot { position:sticky; bottom:0; margin:16px -20px 0; padding:12px 20px calc(env(safe-area-inset-bottom, 0px) + 14px); background:var(--foam); border-top:1px solid var(--border); z-index:2; }
+  body.dark-mode .brew-foot { background:var(--dm-surface, #1b2622); border-color:var(--dm-border); }
+  .bf-row { display:flex; gap:10px; }
+  .bf-row .btn-secondary { flex:1; padding:14px 8px; }
+  .bf-row .btn-primary { flex:2; width:auto; }
+  .bf-row .btn-secondary[hidden] { display:none; }
+  /* Coffee and grinder lists show just the choice until tapped */
+  .coffee-selector.compact { max-height:none; overflow:visible; }
+  .coffee-selector.compact > :not(.coffee-selector-item.selected) { display:none; }
+  .coffee-selector.compact .coffee-selector-item.selected { position:relative; padding-right:96px; }
+  .coffee-selector.compact .coffee-selector-item.selected::after { content:'Change ▾'; position:absolute; right:14px; top:50%; transform:translateY(-50%); font-size:11px; letter-spacing:1px; text-transform:uppercase; color:var(--text-muted); }
+  #method-tabs { flex-wrap:nowrap; overflow-x:auto; padding-bottom:4px; scrollbar-width:none; }
+  #method-tabs::-webkit-scrollbar { display:none; }
+  #method-tabs .method-tab { flex-shrink:0; }
+  .rc-toggle { background:none; border:none; color:rgba(245,237,227,.75); font-size:11px; letter-spacing:1px; text-transform:uppercase; padding:4px 0 0; cursor:pointer; }
   /* Ratio lock */
   .ratio-row { display:flex; justify-content:space-between; align-items:flex-start; gap:10px; margin:-4px 0 12px; }
   .ratio-row .brew-live { margin:4px 0 0; flex:1; }

@@ -6,7 +6,7 @@ with sync_playwright() as p:
         pg=b.new_context(**p.devices['Pixel 7']).new_page(); pg.on('pageerror',lambda e:errs.append(str(e)))
         pg.goto('http://localhost:8765/dialed/index.html')
         pg.evaluate(f"localStorage.setItem('dialin_v2', JSON.stringify({{coffees:[{{id:'c1',name:'S'}}],recipes:[]}})); localStorage.setItem('dialin_settings', JSON.stringify({{textSize:'{size}'}}))"); pg.reload(); pg.wait_for_timeout(400)
-        pg.evaluate("openRecipeModal()"); pg.wait_for_timeout(400)
+        pg.evaluate("openRecipeModal(); setBrewPage('taste')"); pg.wait_for_timeout(400)
         widths=set(); clipped=[]
         for n in range(0,11):
             pg.evaluate(f"setRating({n})")

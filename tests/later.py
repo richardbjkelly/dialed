@@ -12,9 +12,9 @@ with sync_playwright() as p:
     pg.goto('http://localhost:8765/dialed/index.html'); pg.evaluate("s=>localStorage.setItem('dialin_v2', s)", json.dumps(seed)); pg.reload(); pg.wait_for_timeout(700)
     ok('no awaiting card to start with', pg.inner_text('#score-pending').strip()=='')
     pg.evaluate("state.selectedCoffeeId='c1'; state.selectedMethod='AeroPress'; openRecipeModal()"); pg.wait_for_timeout(500)
-    ok('form offers Save & score later', pg.is_visible('#r-later-btn'))
+    pg.evaluate("setBrewPage('taste')"); ok('form offers Score later', pg.is_visible('#r-later-btn')); pg.evaluate("setBrewPage('setup')")
     pg.fill('#r-grind','12'); pg.fill('#r-dose','11'); pg.fill('#r-yield','200'); pg.fill('#r-temp','92')
-    pg.locator('#brew-timer-toggle').scroll_into_view_if_needed(); pg.tap('#brew-timer-toggle'); pg.wait_for_timeout(300)
+    pg.tap('#r-start-btn'); pg.wait_for_timeout(300)
     pg.evaluate("brewTimer.startedAt = Date.now() - 202000"); pg.wait_for_timeout(400); pg.tap('#bm-stop'); pg.wait_for_timeout(500)
     ok('stopping shows Brew finished with the recipe summary', pg.locator('#modal-brew-done.open').count()==1 and all(x in pg.inner_text('#bd-summary') for x in ['Grind 12','11g → 200ml','92°C','3:22']) and 'supernova' in pg.inner_text('#bd-sub').lower(), pg.inner_text('#bd-sub'))
     ok('nothing saved yet', len(st(pg)['recipes'])==0)
@@ -66,9 +66,9 @@ with sync_playwright() as p:
     ok('card and Unscored badge gone', pg.inner_text('#score-pending').strip()=='' and pg.locator('.unscored-label').count()==0)
     # next ordinary Log Brew is the full form again
     pg.evaluate("openRecipeModal()"); pg.wait_for_timeout(400)
-    ok('Log Brew is back to the full form', pg.locator('#modal-recipe.score-only').count()==0 and pg.is_visible('#r-setup') and pg.inner_text('#r-save-btn').lower()=='log brew' and pg.inner_text('#r-modal-title')=='Log Brew' and pg.input_value('#r-edit-id')=='')
+    ok('Log Brew is back to the full form', pg.locator('#modal-recipe.score-only').count()==0 and pg.is_visible('#r-setup') and pg.inner_text('#r-save-btn').lower()=='save brew' and pg.inner_text('#r-modal-title')=='Log Brew' and pg.input_value('#r-edit-id')=='')
     # Save & score later straight from the form (no timer)
-    pg.fill('#r-dose','15'); pg.fill('#r-yield','250'); pg.locator('#r-later-btn').scroll_into_view_if_needed(); pg.tap('#r-later-btn'); pg.wait_for_timeout(1000)
+    pg.fill('#r-dose','15'); pg.fill('#r-yield','250'); pg.tap('#r-skip-btn'); pg.wait_for_timeout(200); pg.tap('#r-later-btn'); pg.wait_for_timeout(1000)
     r=st(pg)['recipes']; ok('Save & score later from the form', len(r)==2 and r[0].get('awaitingScore')==True and str(r[0]['dose'])=='15')
     # Score now path
     pg.evaluate("document.querySelectorAll('.modal-overlay.open').forEach(m=>closeModal(m.id))"); pg.wait_for_timeout(400)
@@ -91,7 +91,7 @@ with sync_playwright() as p:
     # setting off
     pg.evaluate("openSettings(); SETTINGS_SECTIONS.forEach(k=>setSettingsSection(k,true))"); pg.wait_for_timeout(300); pg.tap('#settings-scorelater-switch'); pg.wait_for_timeout(200)
     ok('Score Later can be switched off in Settings', pg.evaluate("appSettings.scoreLaterPrompt")==False and pg.get_attribute('#settings-scorelater-switch','aria-checked')=='false')
-    pg.evaluate("closeSettings(); openRecipeModal()"); pg.wait_for_timeout(400); ok('off: no Save & score later button', pg.is_hidden('#r-later-btn'))
+    pg.evaluate("closeSettings(); openRecipeModal()"); pg.wait_for_timeout(400); pg.evaluate("setBrewPage('taste')"); ok('off: no Score later button', pg.is_hidden('#r-later-btn') and pg.is_visible('#r-save-btn')); pg.evaluate("setBrewPage('setup')")
     pg.evaluate("toggleBrewTimer()"); pg.wait_for_timeout(1100); pg.tap('#bm-stop'); pg.wait_for_timeout(400)
     ok('off: Stop goes straight back to the form', pg.locator('#modal-brew-done.open').count()==0 and pg.locator('#modal-recipe.open').count()==1)
     ok('no page errors', not errs, errs)

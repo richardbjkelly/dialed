@@ -40,7 +40,7 @@ with sync_playwright() as p:
     # 3. Log Brew tick box
     pg.evaluate("state.selectedCoffeeId='c3'; openRecipeModal()"); pg.wait_for_timeout(500)
     ok('tick unchecked on open', not pg.is_checked('#r-finish-bag'))
-    pg.fill('#r-dose','15'); pg.check('#r-finish-bag'); pg.evaluate("saveRecipe()"); pg.wait_for_timeout(900)
+    pg.fill('#r-dose','15'); pg.evaluate("setBrewPage('taste')"); pg.check('#r-finish-bag'); pg.evaluate("saveRecipe()"); pg.wait_for_timeout(900)
     ok('finish sheet after save', pg.locator('#modal-finish.open').count()==1)
     ok('plan-next NOT opened', pg.locator('#modal-plan.open').count()==0)
     ok('brew was saved', any(r['coffeeId']=='c3' for r in st()['recipes']))

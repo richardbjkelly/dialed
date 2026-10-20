@@ -294,6 +294,8 @@ window.addEventListener('popstate', function(e) {
   const brewing = !confirmOpen && document.querySelector('#brew-mode.open');
   if (brewing) { closeBrewMode(); history.pushState({view:state.currentView},'',''); return; }
   const openModal = confirmOpen || document.querySelector('.modal-overlay.open');
+  // On "How was it?", Back returns to Set up rather than closing Log Brew
+  if (openModal && openModal.id === 'modal-recipe' && brewPage === 'taste' && !isScoreOnly()) { setBrewPage('setup'); history.pushState({view:state.currentView},'',''); return; }
   if (openModal) { closeModal(openModal.id); history.pushState({view:state.currentView},'',''); return; }
   const settingsOpen = document.getElementById('settings-panel')?.classList.contains('open');
   if (settingsOpen) { closeSettings && closeSettings(); history.pushState({view:state.currentView},'',''); return; }
@@ -347,7 +349,7 @@ function openRecipeModal() {
   // Always reset edit state when opening fresh
   const reid = document.getElementById('r-edit-id'); if(reid) reid.value = '';
   const rtitle = document.getElementById('r-modal-title'); if(rtitle) rtitle.textContent = 'Log Brew';
-  try { setScoreOnly(false); } catch(e) {}
+  try { setScoreOnly(false); setBrewPage('setup'); } catch(e) {}
   setTimeout(() => { try { syncBrewSliders(); captureRatio(); } catch(e) {} }, 0);
   // Coffee selector
   const cs = document.getElementById('coffee-selector');
@@ -366,7 +368,7 @@ function openRecipeModal() {
     d.onclick = () => { state.selectedCoffeeId=c.id; cs.querySelectorAll('.coffee-selector-item').forEach(x=>x.classList.remove('selected')); d.classList.add('selected'); renderBrewHistory(); renderBrewSuggestion(); };
     cs.appendChild(d);
   });
-  cs.scrollTop = 0;
+  cs.scrollTop = 0; compactSelector(cs);
   if (!chosen && listed.length) { state.selectedCoffeeId = listed[0].id; cs.children[0]?.classList.add('selected'); }   // nothing chosen yet: the oldest roast
   // Default grinder to favourite if none previously selected
   if (!state.selectedGrinderId && state.favouriteGrinderId) { state.selectedGrinderId = state.favouriteGrinderId; }
@@ -401,6 +403,8 @@ function openRecipeModal() {
     gs.appendChild(sep);
   }
   otherGrinders.forEach(g => gs.appendChild(makeGrinderItem(g)));
+  compactSelector(gs);
+  setTimeout(() => { const t = document.querySelector('#method-tabs .method-tab.selected'); const box = document.getElementById('method-tabs'); if (t && box) box.scrollLeft = Math.max(0, t.offsetLeft - box.offsetLeft - 20); }, 0);
   // Set correct yield/water label for current method on open
   const lbl2 = document.getElementById('r-yield-label');
   const inp2 = document.getElementById('r-yield');

@@ -8,7 +8,7 @@ with sync_playwright() as p:
     shots=[]
     for dark in (False, True):
         if dark: pg.evaluate("toggleDarkMode()")
-        pg.evaluate("openRecipeModal()"); pg.wait_for_timeout(400)
+        pg.evaluate("openRecipeModal(); setBrewPage('taste')"); pg.wait_for_timeout(400)
         for v in ('under','good','over'):
             pg.evaluate(f"selectExtraction('{v}')"); pg.wait_for_timeout(100)
             el=pg.locator('.extraction-btn.'+v); el.scroll_into_view_if_needed()

@@ -26,17 +26,17 @@ with sync_playwright() as p:
         hb=pg.locator('#brew-history').bounding_box(); pg.screenshot(path=f'shots/bh_{m}.png', clip={'x':0,'y':hb['y']-60,'width':412,'height':hb['height']+80})
         if dark:
             # switch coffees via the selector
-            pg.locator('#coffee-selector .coffee-selector-item', has_text='Pepe').click(); pg.wait_for_timeout(200)
+            pg.evaluate("document.getElementById('coffee-selector').classList.remove('compact')"); pg.locator('#coffee-selector .coffee-selector-item', has_text='Pepe').click(); pg.wait_for_timeout(200)
             ok('no brews -> panel gone', pg.inner_html('#brew-history').strip()=='')
             ok('no brews -> suggested start back', pg.inner_html('#brew-suggestion').strip()!='')
-            pg.locator('#coffee-selector .coffee-selector-item', has_text='Get Ground').click(); pg.wait_for_timeout(200)
+            pg.evaluate("document.getElementById('coffee-selector').classList.remove('compact')"); pg.locator('#coffee-selector .coffee-selector-item', has_text='Get Ground').click(); pg.wait_for_timeout(200)
             ok('one brew -> single Last & best column', pg.locator('#brew-history .bh-col').count()==1 and 'last & best' in pg.inner_text('#brew-history').lower())
             ok('follows coffee: shows V60 recipe', 'Pourover' in pg.inner_text('#brew-history'))
-            pg.locator('#coffee-selector .coffee-selector-item', has_text='Unrated').click(); pg.wait_for_timeout(200)
+            pg.evaluate("document.getElementById('coffee-selector').classList.remove('compact')"); pg.locator('#coffee-selector .coffee-selector-item', has_text='Unrated').click(); pg.wait_for_timeout(200)
             ok('unrated -> Last only', pg.locator('#brew-history .bh-col').count()==1 and 'not rated' in pg.inner_text('#brew-history').lower())
             # back to c1, start timer, type a note, use best
-            pg.locator('#coffee-selector .coffee-selector-item', has_text='Supernova').click(); pg.wait_for_timeout(200)
-            pg.fill('#r-notes','my note'); pg.evaluate("toggleBrewTimer(); minimiseBrewMode()"); pg.wait_for_timeout(1200)
+            pg.evaluate("document.getElementById('coffee-selector').classList.remove('compact')"); pg.locator('#coffee-selector .coffee-selector-item', has_text='Supernova').click(); pg.wait_for_timeout(200)
+            pg.evaluate("document.getElementById('r-notes').value='my note'"); pg.evaluate("toggleBrewTimer(); minimiseBrewMode()"); pg.wait_for_timeout(1200)
             pg.locator('#brew-history .bh-col.best .bh-use').click(); pg.wait_for_timeout(500)
             ok('use best: grind/temp filled', pg.input_value('#r-grind')=='11' and pg.input_value('#r-temp')=='90', (pg.input_value('#r-grind'), pg.input_value('#r-temp')))
             ok('use best: recipe + method set', pg.evaluate("state.selectedMethod")=='AeroPress' and pg.input_value('#r-recipe-select')=='aeropress-hoffmann')

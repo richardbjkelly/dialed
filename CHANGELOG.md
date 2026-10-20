@@ -973,6 +973,22 @@ No visible changes — two structural changes behind the scenes.
 
 ---
 
+## v3.41
+*20 October 2026*
+
+### Log Brew in two screens
+- **Step 1 · Set up**: coffee, grinder, method, recipe, Last & best, grind and temperature sliders, dose and water (with the ratio lock) and time. The footer holds **▶ Start brew** (opens brew mode) and **Skip timer**
+- **Step 2 · How was it?**: extraction, rating, taste profile, notes and "finish this bag", with a strip summarising the brew (coffee, recipe, grind, dose → water, temperature, time). The footer holds **Score later** and **Save brew**
+- Stopping the timer takes you to step 2 (via the Score now / later choice if Score Later is on); "‹ Set up", the phone's Back button or Escape returns to step 1 without losing anything
+- A progress bar and "Step 1 of 2" sit under the title, with a ✕ to close
+- The coffee and grinder lists show just the current choice, with "Change ▾" to open the full list; picking one closes it again
+- Brew methods sit on one sideways-scrolling row
+- The recipe card folds its steps away ("Show the 7 steps ▾"); they're still on the timer and brew-mode screens
+- The timer card appears once a brew has started (to resume, reset or go full screen); until then Start brew lives in the footer
+- Editing a brew shows **Next ›** instead of Start brew; Score brew opens straight on step 2
+
+---
+
 ## Pending / Roadmap
 - Rebuild the APK once to pick up the new cup icon
 - Opt-in pooled data + trained model (see feasibility notes): backend, consent, deletion, ICO registration
@@ -990,4 +1006,4 @@ No visible changes — two structural changes behind the scenes.
 
 ---
 
-*Document maintained automatically. Last updated: v3.40*
+*Document maintained automatically. Last updated: v3.41*

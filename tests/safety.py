@@ -59,7 +59,7 @@ with sync_playwright() as p:
     pg=fresh(b,{'coffees':[{'id':'active','name':'Active'},{'id':'done','name':'Done','finishedBag':True}],'recipes':[{'id':'r1','coffeeId':'done','method':'AeroPress','dose':'11','createdAt':'2026-10-01T07:00:00Z'}]})
     pg.evaluate("editBrew('r1')"); pg.wait_for_timeout(500)
     ok('C2 finished coffee shown and selected when editing', pg.locator('#coffee-selector .coffee-selector-item.selected').inner_text().startswith('Done'))
-    pg.fill('#r-notes','edited'); pg.evaluate("saveRecipe()"); pg.wait_for_timeout(600)
+    pg.evaluate("document.getElementById('r-notes').value='edited'"); pg.evaluate("saveRecipe()"); pg.wait_for_timeout(600)
     r=st(pg)['recipes'][0]; ok('C2 brew stays on its coffee', r['coffeeId']=='done' and r['notes']=='edited', r)
     pg.evaluate("document.querySelectorAll('.modal-overlay.open').forEach(m=>closeModal(m.id))"); pg.wait_for_timeout(300)
     pg.evaluate("openRecipeModal()"); pg.wait_for_timeout(400); ok('C2 new brews still exclude finished bags', pg.locator('#coffee-selector .coffee-selector-item').count()==1); pg.close()

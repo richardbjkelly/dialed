@@ -332,7 +332,7 @@ function fillBrewModal(r, opts={}) {
   editKeepCoffeeId = opts.editId ? r.coffeeId : null;
   openRecipeModal();
   suggestionSuppressed = true; renderBrewSuggestion();
-  if (opts.editId) { document.getElementById('r-edit-id').value = opts.editId; const lb = document.getElementById('r-later-btn'); if (lb) lb.style.display = 'none'; }
+  if (opts.editId) { document.getElementById('r-edit-id').value = opts.editId; renderStartBtn(); const lb = document.getElementById('r-later-btn'); if (lb) lb.style.display = 'none'; }
   if (opts.planId) document.getElementById('r-plan-id').value = opts.planId;
   document.getElementById('r-modal-title').textContent = opts.title || 'Log Brew';
   const sel = document.getElementById('r-recipe-select');
@@ -580,8 +580,8 @@ function timedSteps() {
 function renderStepGuide() {
   const el = document.getElementById('brew-step-guide'); if (!el) return;
   const steps = timedSteps();
-  if (steps.length < 2) { el.style.display = 'none'; lastGuideIdx = -1; return; }
   const s = brewTimerSecs(), running = !!brewTimer.startedAt;
+  if (steps.length < 2 || (!running && s === 0)) { el.style.display = 'none'; lastGuideIdx = -1; return; }   // shown once a brew is under way
   let idx = -1; steps.forEach((st, i) => { if (s >= st.at) idx = i; });
   if ((running || s > 0) && idx !== lastGuideIdx && idx >= 0) {
     if (lastGuideIdx !== -1 || idx > 0) {
@@ -982,6 +982,8 @@ function renderBrewTimer() {
   t.className = 'brew-timer-btn ' + (running ? 'stop' : 'start');
   rs.style.display = (!running && s) ? '' : 'none';
   const ex = document.getElementById('brew-timer-expand'); if (ex) ex.style.display = running ? '' : 'none';
+  const card = document.querySelector('#modal-recipe .brew-timer'); if (card) card.hidden = !(running || s > 0);   // Start brew lives in the footer until a brew has begun
+  renderStartBtn();
   renderStepGuide();
   renderBrewMode();
   // Keeping the screen awake is only useful for a normal brew: let it sleep again after 20 minutes
@@ -1047,6 +1049,7 @@ function minimiseBrewMode() { closeBrewMode(); }
 function stopBrewFromMode() {
   stopBrewTimer(); closeBrewMode();
   if (scoreLaterOn() && !document.getElementById('r-edit-id')?.value) openBrewDone();
+  else setBrewPage('taste');
 }
 function confirmCancelBrew() {
   confirmAction({ title:'Cancel this brew?', text:"The timer will reset to 0:00. Everything else you've entered stays as it is.",
@@ -1094,6 +1097,55 @@ document.addEventListener('visibilitychange', async () => {
   if (brewTimer.startedAt && navigator.wakeLock && brewTimerSecs() < WAKE_LOCK_MAX_SECS) { try { brewTimer.wakeLock = await navigator.wakeLock.request('screen'); } catch(e) {} }
 });
 
+// ==================== LOG BREW: TWO SCREENS ====================
+// 1 · Set up (coffee, recipe, numbers; Start brew)  →  brew mode  →  2 · How was it? (extraction, rating, taste, notes; Save)
+let brewPage = 'setup';
+function setBrewPage(p) {
+  brewPage = p === 'taste' ? 'taste' : 'setup';
+  const taste = brewPage === 'taste', $ = id => document.getElementById(id);
+  if (!$('r-setup')) return;
+  $('r-setup').hidden = taste; $('r-taste-page').hidden = !taste;
+  $('r-foot-setup').hidden = taste; $('r-foot-taste').hidden = !taste;
+  $('r-back-setup').hidden = !taste || isScoreOnly();
+  $('r-step-label').textContent = taste ? 'Step 2 of 2 · How was it?' : 'Step 1 of 2 · Set up';
+  [...$('r-prog').children].forEach((b, i) => b.classList.toggle('on', i === 0 || taste));
+  $('r-summary').hidden = !taste;
+  if (taste) renderBrewSummary();
+  renderStartBtn();
+  const m = document.querySelector('#modal-recipe .modal'); if (m) m.scrollTop = 0;
+}
+function renderBrewSummary() {
+  const v = id => (document.getElementById(id)?.value || '').trim();
+  const cf = state.coffees.find(c => c.id === state.selectedCoffeeId), isEsp = isEspressoMethod(state.selectedMethod || 'Espresso');
+  const rec = state.selectedRecipeId ? getAllRecipesForMethod(state.selectedMethod).find(x => x.id === state.selectedRecipeId) : null;
+  const t = getBrewTimeSecs();
+  const bits = [cf && cf.name, rec ? rec.name.split('—').pop().trim() : state.selectedMethod, v('r-grind') && 'Grind ' + v('r-grind'),
+    v('r-dose') && (v('r-dose') + 'g' + (v('r-yield') ? ' → ' + v('r-yield') + (isEsp ? 'g' : 'ml') : '')), v('r-temp') && v('r-temp') + '°C', t && formatBrewTime(t, state.selectedMethod)].filter(x => x && x !== '—');
+  document.getElementById('r-summary').innerHTML = bits.map(b => `<span>${escHtml(b)}</span>`).join('');
+}
+function renderStartBtn() {
+  const b = document.getElementById('r-start-btn'), skip = document.getElementById('r-skip-btn'); if (!b) return;
+  const editing = !!document.getElementById('r-edit-id')?.value, running = !!brewTimer.startedAt, s = brewTimerSecs();
+  const label = editing || (s > 0 && !running) ? 'Next ›' : running ? 'Back to the timer' : '▶ Start brew';
+  if (b.textContent !== label) b.textContent = label;
+  if (skip) { skip.hidden = editing || (s > 0 && !running); skip.textContent = running ? 'Next ›' : 'Skip timer'; }
+}
+function startOrNext() {
+  const editing = !!document.getElementById('r-edit-id')?.value, running = !!brewTimer.startedAt, s = brewTimerSecs();
+  if (editing || (s > 0 && !running)) setBrewPage('taste');
+  else if (running) openBrewMode();
+  else toggleBrewTimer();
+}
+// Coffee and grinder lists show only the current choice; tapping it opens the full list, picking one closes it again
+function compactSelector(el) {
+  el.classList.add('compact');
+  el.onclick = e => {
+    if (!e.target.closest('.coffee-selector-item')) return;
+    if (el.classList.contains('compact')) el.classList.remove('compact');
+    else { el.classList.add('compact'); el.scrollTop = 0; }
+  };
+}
+
 // ==================== SCORE LATER ====================
 // A brew can be saved straight after brewing and scored once it has cooled. The Overview card is the dependable
 // prompt; the notification is best-effort (there is no server, so it only fires while the app is still alive).
@@ -1105,8 +1157,9 @@ function toggleScoreLater() { appSettings.scoreLaterPrompt = !scoreLaterOn(); sa
 function setScoreOnly(on) {
   const m = document.getElementById('modal-recipe'); if (!m) return;
   m.classList.toggle('score-only', !!on);
-  const sb = document.getElementById('r-save-btn'); if (sb) sb.textContent = on ? 'Save score' : 'Log Brew';
+  const sb = document.getElementById('r-save-btn'); if (sb) sb.textContent = on ? 'Save score' : 'Save brew';
   const lb = document.getElementById('r-later-btn'); if (lb) lb.style.display = (!on && scoreLaterOn()) ? '' : 'none';
+  if (on) setBrewPage('taste');
   if (!on) { const sub = document.getElementById('r-modal-sub'); if (sub) sub.textContent = 'Dialling in a recipe'; }
 }
 function brewLine(r) {
@@ -1137,10 +1190,7 @@ function openBrewDone() {
   setRemindMins(remindMins());
   openModal('modal-brew-done');
 }
-function brewDoneNow() {
-  closeModal('modal-brew-done');
-  const ex = document.querySelector('#modal-recipe .extraction-picker'); if (ex && ex.scrollIntoView) ex.scrollIntoView({ block: 'center', behavior: reduceMotion() ? 'auto' : 'smooth' });
-}
+function brewDoneNow() { closeModal('modal-brew-done'); setBrewPage('taste'); }
 function brewDoneLater() { closeModal('modal-brew-done'); saveBrewForLater(); }
 function saveBrewForLater() {
   // Asked on the tap itself, which is the only moment a phone allows the question

@@ -10,10 +10,10 @@ with sync_playwright() as p:
     pg.goto('http://localhost:8765/dialed/index.html'); pg.evaluate("s=>localStorage.setItem('dialin_v2', s)", json.dumps(seed)); pg.reload(); pg.wait_for_timeout(600)
     pg.evaluate("state.selectedCoffeeId='c1'; state.selectedMethod='AeroPress'; state.selectedGrinderId=null; openRecipeModal()"); pg.wait_for_timeout(500)
     y=lambda sel: pg.evaluate("s=>document.querySelector(s).getBoundingClientRect().top + document.querySelector('#modal-recipe .modal').scrollTop", sel)
-    order=[y(s) for s in ['#r-grind-range','#r-temp-range','#r-dose','#brew-timer-toggle','#r-time-mins']]
-    ok('order: grind, temp, dose/water, Start Brew, time', order==sorted(order) and len(set(order))==5, order)
+    order=[y(s) for s in ['#r-grind-range','#r-temp-range','#r-dose','#r-ratio-lock','#r-time-mins']]
+    ok('order: grind, temp, dose/water (+ ratio lock), time', order==sorted(order) and len(set(order))==5, order)
     ok('dose and water side by side', abs(y('#r-dose')-y('#r-yield'))<2)
-    ok('time is the last thing before Extraction', y('#r-time-mins') < y('#modal-recipe .extraction-picker') and y('#brew-timer-toggle') < y('#r-time-mins'))
+    ok('time is the last field on Set up; Start brew sits in the footer', pg.evaluate("(()=>{const f=[...document.querySelectorAll('#r-setup input:not([type=hidden]), #r-setup select')].filter(e=>e.offsetParent); return f[f.length-1].id})()") in ('r-time-secs','r-time') and pg.is_visible('#r-start-btn'))
     # no grinder: slider off, box still works
     ok('no grinder: slider disabled with a hint, number box usable', pg.is_disabled('#r-grind-range') and 'pick a grinder' in pg.inner_text('#r-grind-hint').lower() and pg.is_enabled('#r-grind'))
     pg.fill('#r-grind','7'); ok('grind can be typed without a grinder', pg.input_value('#r-grind')=='7'); pg.fill('#r-grind','')
@@ -45,7 +45,7 @@ with sync_playwright() as p:
     pg.fill('#r-temp','60'); pg.wait_for_timeout(150); ok('a temp outside 80–100 can still be typed', pg.input_value('#r-temp')=='60' and pg.evaluate("document.getElementById('r-temp-range').classList.contains('unset')"))
     pg.fill('#r-temp','94')
     # real drag on the slider
-    bb=pg.locator('#r-temp-range').bounding_box(); pg.locator('#r-temp-range').scroll_into_view_if_needed(); bb=pg.locator('#r-temp-range').bounding_box()
+    bb=pg.locator('#r-temp-range').bounding_box(); pg.locator('#r-temp-range').evaluate("e=>e.scrollIntoView({block:'center'})"); pg.wait_for_timeout(100); bb=pg.locator('#r-temp-range').bounding_box()
     pg.mouse.click(bb['x']+bb['width']*0.95, bb['y']+bb['height']/2); pg.wait_for_timeout(200)
     ok('tapping the slider itself works', int(pg.input_value('#r-temp'))>=98, pg.input_value('#r-temp'))
     # recipe selection / saved values keep sliders in step
