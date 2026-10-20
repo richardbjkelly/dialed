@@ -1,4 +1,5 @@
 from playwright.sync_api import sync_playwright
+import brewnav
 errs=[]
 with sync_playwright() as p:
     b=p.chromium.launch(); pg=b.new_context(**p.devices['Pixel 7']).new_page(); pg.on('pageerror',lambda e:errs.append(str(e)))

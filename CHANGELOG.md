@@ -989,6 +989,26 @@ No visible changes — two structural changes behind the scenes.
 
 ---
 
+## v3.42
+*20 October 2026*
+
+### Log Brew in three screens
+- **Step 1 · Choose**: coffee (oldest roast first), grinder, brew method and recipe. Footer: **Cancel** / **Next ›**
+- **Step 2 · Dial in**: a strip showing coffee, grinder and method, then Last & best, Suggested start, the grind and temperature sliders, dose and water (with the ratio lock), the timer card once a brew starts, and time. Footer: **Skip timer** / **▶ Start brew**
+- **Step 3 · How was it?**: unchanged
+- **‹ Back**, the phone's Back button and Escape each go back one screen; Back on step 1 closes Log Brew
+- Repeat, Use these settings and Brew now open straight on Dial in, as the coffee and recipe are already chosen. Editing a brew starts on Choose
+- Problems with the numbers send you to Dial in; a missing coffee sends you to Choose
+- The footer buttons are taller (58px), and their text is centred both ways and kept on one line. **▶ Start brew** is larger and bolder
+
+### Grind slider covers the whole grinder
+- The slider now runs from the grinder's finest to its coarsest setting
+- The usual range for the brew method is drawn as a terracotta band on the track, with a key underneath: "Suggested for Pourover · 26–50 clicks"
+- Wide grinders get the same fine step across the whole range, and you can still type an exact value
+- With no grinder chosen, the slider stays off and you type the setting
+
+---
+
 ## Pending / Roadmap
 - Rebuild the APK once to pick up the new cup icon
 - Opt-in pooled data + trained model (see feasibility notes): backend, consent, deletion, ICO registration
@@ -1006,4 +1026,4 @@ No visible changes — two structural changes behind the scenes.
 
 ---
 
-*Document maintained automatically. Last updated: v3.41*
+*Document maintained automatically. Last updated: v3.42*

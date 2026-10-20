@@ -1,4 +1,5 @@
 from playwright.sync_api import sync_playwright
+import brewnav
 import json
 errs=[]; res=[]
 def ok(n,c,i=''):

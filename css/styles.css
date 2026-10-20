@@ -712,15 +712,25 @@
   body.dark-mode .brew-prog i.on { background:#8FB3A5; }
   #modal-recipe.score-only .brew-prog, #modal-recipe.score-only .bsh-label { visibility:hidden; }
   .brew-summary { display:flex; flex-wrap:wrap; gap:6px; margin-bottom:12px; }
-  .brew-summary[hidden], #r-setup[hidden], #r-taste-page[hidden], .bf-row[hidden], .brew-timer[hidden] { display:none; }
+  .brew-summary[hidden], #r-setup[hidden], #r-choose[hidden], #r-dial[hidden], #r-taste-page[hidden], .bf-row[hidden], .brew-timer[hidden] { display:none; }
   .brew-summary span { font-size:11px; background:rgba(82,121,111,0.14); color:var(--text); border-radius:20px; padding:4px 10px; }
   #modal-recipe .modal { padding-bottom:0; }
   .brew-foot { position:sticky; bottom:0; margin:16px -20px 0; padding:12px 20px calc(env(safe-area-inset-bottom, 0px) + 14px); background:var(--foam); border-top:1px solid var(--border); z-index:2; }
   body.dark-mode .brew-foot { background:var(--dm-surface, #1b2622); border-color:var(--dm-border); }
   .bf-row { display:flex; gap:10px; }
-  .bf-row .btn-secondary { flex:1; padding:14px 8px; }
-  .bf-row .btn-primary { flex:2; width:auto; }
+  .bf-row button { display:flex; align-items:center; justify-content:center; text-align:center; min-height:58px; white-space:nowrap; }
+  .bf-row .btn-secondary { flex:1; padding:12px 8px; }
+  .bf-row .btn-primary { flex:2; width:auto; padding:12px 14px; font-size:15px; letter-spacing:2px; font-weight:700; }
   .bf-row .btn-secondary[hidden] { display:none; }
+  /* Grind slider: the grinder's whole range, with the usual range for the method as a band */
+  .grind-track { position:relative; }
+  .grind-band { position:absolute; top:15px; height:14px; border-radius:7px; background:rgba(201,90,55,0.22); border:1.5px solid rgba(201,90,55,0.55); pointer-events:none; box-sizing:border-box; }
+  .grind-band[hidden], .grind-sug[hidden] { display:none; }
+  .grind-track input[type=range] { position:relative; background:transparent; }
+  .grind-sug { display:flex; align-items:center; gap:6px; font-size:11px; color:#B4532F; margin-top:4px; }
+  .grind-sug i { display:inline-block; width:18px; height:8px; border-radius:4px; background:rgba(201,90,55,0.22); border:1.5px solid rgba(201,90,55,0.55); flex-shrink:0; }
+  body.dark-mode .grind-band, body.dark-mode .grind-sug i { background:rgba(242,164,147,0.22); border-color:rgba(242,164,147,0.6); }
+  body.dark-mode .grind-sug { color:#F2A493; }
   /* Coffee and grinder lists show just the choice until tapped */
   .coffee-selector.compact { max-height:none; overflow:visible; }
   .coffee-selector.compact > :not(.coffee-selector-item.selected) { display:none; }

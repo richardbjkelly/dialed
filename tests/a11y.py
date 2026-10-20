@@ -1,4 +1,5 @@
 from playwright.sync_api import sync_playwright
+import brewnav
 import json, sys
 errs=[]; res=[]
 def ok(n,c,i=''):
@@ -49,6 +50,8 @@ with sync_playwright() as p:
     pg.evaluate("confirmAction({title:'T',text:'x',button:'Go',onYes(){}})"); pg.wait_for_timeout(300); pg.keyboard.press('Escape'); pg.wait_for_timeout(400)
     ok('Escape closes only the top sheet', pg.locator('#modal-confirm-delete.open').count()==0 and pg.locator('#modal-recipe.open').count()==1)
     pg.fill('#r-dose','12'); pg.keyboard.press('Escape'); pg.wait_for_timeout(400)
+    ok('Escape on Dial in steps back to Choose; focus not left in a hidden field', pg.locator('#modal-recipe.open').count()==1 and pg.is_hidden('#r-dial') and not pg.evaluate("(()=>{const a=document.activeElement; return !!(a && a.closest('[data-brew-page]') && a.closest('[data-brew-page]').hidden)})()"))
+    pg.keyboard.press('Escape'); pg.wait_for_timeout(400)
     ok('Escape closes Log Brew; focus not left in a hidden field', pg.locator('#modal-recipe.open').count()==0 and not pg.evaluate("document.getElementById('modal-recipe').contains(document.activeElement)"))
     # coffee form labels
     pg.evaluate("resetCoffeeModal(); openModal('modal-coffee')"); pg.wait_for_timeout(400)

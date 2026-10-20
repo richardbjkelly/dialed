@@ -13,7 +13,7 @@
 <meta name="apple-mobile-web-app-title" content="dialed">
 <meta name="theme-color" content="#123C27">
 <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; font-src 'self'; connect-src 'self' https://api.frankfurter.dev https://api.frankfurter.app; object-src 'none'; base-uri 'self'; form-action 'none'">
-<link rel="stylesheet" href="css/styles.css?v=3.41">
+<link rel="stylesheet" href="css/styles.css?v=3.42">
 </head>
 <body>
 
@@ -310,10 +310,11 @@
     <input type="hidden" id="r-edit-id" value="">
     <input type="hidden" id="r-plan-id" value="">
     <div class="modal-subtitle" id="r-modal-sub">Dialling in a recipe</div>
-    <div class="brew-steps-head"><button type="button" class="bsh-back" id="r-back-setup" data-on-click="setBrewPage('setup')" hidden>‹ Set up</button><span class="bsh-label" id="r-step-label">Step 1 of 2 · Set up</span><button type="button" class="bsh-close" aria-label="Close Log Brew" data-on-click="closeModal('modal-recipe')">✕</button></div>
-    <div class="brew-prog" id="r-prog" aria-hidden="true"><i class="on"></i><i></i></div>
+    <div class="brew-steps-head"><button type="button" class="bsh-back" id="r-back-setup" data-on-click="brewPageBack()" hidden>‹ Back</button><span class="bsh-label" id="r-step-label">Step 1 of 3 · Choose</span><button type="button" class="bsh-close" aria-label="Close Log Brew" data-on-click="closeModal('modal-recipe')">✕</button></div>
+    <div class="brew-prog" id="r-prog" aria-hidden="true"><i class="on"></i><i></i><i></i></div>
     <div class="brew-summary" id="r-summary" hidden></div>
     <div id="r-setup">
+    <div id="r-choose" data-brew-page="choose">
     <div class="form-group"><label class="form-label">Coffee</label><div class="coffee-selector" id="coffee-selector"></div></div>
     <div class="form-group"><label class="form-label">Grinder Used</label><div class="coffee-selector" id="grinder-selector" style="max-height:150px"></div></div>
     <div class="form-group">
@@ -340,13 +341,16 @@
       </div>
       <div id="r-recipe-card"></div>
     </div>
+    </div>
+    <div id="r-dial" data-brew-page="dial" hidden>
+    <div class="brew-summary" id="r-dial-summary"></div>
     <div id="brew-history"></div>
     <div id="brew-suggestion"></div>
     <div class="divider">Grind &amp; Dose</div>
     <div class="form-group brew-slider">
       <div class="bs-head"><label class="form-label" for="r-grind">Grind Setting</label><span class="bs-hint" id="r-grind-hint"></span></div>
       <div class="bs-row">
-        <div class="bs-track"><input type="range" id="r-grind-range" class="unset" aria-label="Grind setting slider" data-on-input="slideBrew('grind', this.value)"><div class="plan-range-ends"><span id="r-grind-lo"></span><span id="r-grind-hi"></span></div></div>
+        <div class="bs-track grind-track"><div class="grind-band" id="r-grind-band" aria-hidden="true" hidden></div><input type="range" id="r-grind-range" class="unset" aria-label="Grind setting slider" aria-describedby="r-grind-sug" data-on-input="slideBrew('grind', this.value)"><div class="plan-range-ends"><span id="r-grind-lo"></span><span id="r-grind-hi"></span></div><div class="grind-sug" id="r-grind-sug" hidden><i></i><span></span></div></div>
         <input type="number" class="form-input bs-num" id="r-grind" placeholder="–" step="any" inputmode="decimal" data-on-input="updateGrindMicrons()">
       </div>
     </div>
@@ -384,7 +388,8 @@
         </div>
       </div>
     </div>
-    <div id="r-taste-page" hidden>
+    </div>
+    <div id="r-taste-page" data-brew-page="taste" hidden>
     <div class="divider">Extraction</div>
     <div class="form-group">
       <label class="form-label">Extraction Result</label>
@@ -418,7 +423,8 @@
     <label class="finish-tick" id="r-finish-row"><input type="checkbox" id="r-finish-bag"> <span>Last brew from this bag — finish it after saving</span></label>
     </div>
     <div class="brew-foot">
-      <div class="bf-row" id="r-foot-setup"><button type="button" class="btn-secondary" id="r-skip-btn" data-on-click="setBrewPage('taste')">Skip timer</button><button type="button" class="btn-primary" id="r-start-btn" data-on-click="startOrNext()">▶ Start brew</button></div>
+      <div class="bf-row" id="r-foot-choose"><button type="button" class="btn-secondary" data-on-click="closeModal('modal-recipe')">Cancel</button><button type="button" class="btn-primary" id="r-next-btn" data-on-click="setBrewPage('dial')">Next ›</button></div>
+      <div class="bf-row" id="r-foot-setup" hidden><button type="button" class="btn-secondary" id="r-skip-btn" data-on-click="setBrewPage('taste')">Skip timer</button><button type="button" class="btn-primary" id="r-start-btn" data-on-click="startOrNext()">▶ Start brew</button></div>
       <div class="bf-row" id="r-foot-taste" hidden><button type="button" class="btn-secondary" id="r-later-btn" data-on-click="saveBrewForLater()">Score later</button><button type="button" class="btn-primary" id="r-save-btn" data-on-click="saveRecipe()">Save brew</button></div>
     </div>
   </div>
@@ -839,11 +845,11 @@
     <span class="nav-tab-icon"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><line x1="4" y1="6" x2="20" y2="6"/><line x1="4" y1="12" x2="20" y2="12"/><line x1="4" y1="18" x2="20" y2="18"/><circle cx="8" cy="6" r="2" fill="var(--espresso)" stroke="currentColor" class="nav-fill"/><circle cx="16" cy="12" r="2" fill="var(--espresso)" stroke="currentColor" class="nav-fill"/><circle cx="10" cy="18" r="2" fill="var(--espresso)" class="nav-fill" stroke="currentColor"/></svg></span>Settings
   </button>
 </nav>
-<script src="js/data.js?v=3.41"></script>
-<script src="js/core.js?v=3.41"></script>
-<script src="js/coffee.js?v=3.41"></script>
-<script src="js/views.js?v=3.41"></script>
-<script src="js/tools.js?v=3.41"></script>
-<script src="js/app.js?v=3.41"></script>
+<script src="js/data.js?v=3.42"></script>
+<script src="js/core.js?v=3.42"></script>
+<script src="js/coffee.js?v=3.42"></script>
+<script src="js/views.js?v=3.42"></script>
+<script src="js/tools.js?v=3.42"></script>
+<script src="js/app.js?v=3.42"></script>
 </body>
 </html>

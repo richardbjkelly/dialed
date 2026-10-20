@@ -737,8 +737,8 @@ function brewInputProblem() {
 }
 function saveRecipe(opts) {
   opts = opts || {};
-  if (!state.selectedCoffeeId) { showToast('Select a coffee'); setBrewPage('setup'); return; }
-  const problem = brewInputProblem(); if (problem) { showToast(problem); if (!isScoreOnly()) setBrewPage('setup'); return; }
+  if (!state.selectedCoffeeId) { showToast('Select a coffee'); setBrewPage('choose'); return; }
+  const problem = brewInputProblem(); if (problem) { showToast(problem); if (!isScoreOnly()) setBrewPage('dial'); return; }
   if (!tapOnce('saveRecipe')) return;
   if (brewTimer.startedAt) stopBrewTimer();
   const editBrewId = document.getElementById('r-edit-id')?.value||'';

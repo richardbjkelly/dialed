@@ -1,5 +1,6 @@
 # Log Brew layout: grind + temperature sliders, then dose/water, then timer, then time.
 from playwright.sync_api import sync_playwright
+import brewnav
 import json, sys
 errs=[]; res=[]
 def ok(n,c,i=''):
@@ -8,12 +9,12 @@ seed={'coffees':[{'id':'c1','name':'Supernova','roaster':'Manhattan','weight':25
 with sync_playwright() as p:
     b=p.chromium.launch(); pg=b.new_context(**p.devices['Pixel 7']).new_page(); pg.on('pageerror',lambda e:errs.append(str(e)))
     pg.goto('http://localhost:8765/dialed/index.html'); pg.evaluate("s=>localStorage.setItem('dialin_v2', s)", json.dumps(seed)); pg.reload(); pg.wait_for_timeout(600)
-    pg.evaluate("state.selectedCoffeeId='c1'; state.selectedMethod='AeroPress'; state.selectedGrinderId=null; openRecipeModal()"); pg.wait_for_timeout(500)
+    pg.evaluate("state.selectedCoffeeId='c1'; state.selectedMethod='AeroPress'; state.selectedGrinderId=null; openRecipeModal(); setBrewPage('dial')"); pg.wait_for_timeout(500)
     y=lambda sel: pg.evaluate("s=>document.querySelector(s).getBoundingClientRect().top + document.querySelector('#modal-recipe .modal').scrollTop", sel)
     order=[y(s) for s in ['#r-grind-range','#r-temp-range','#r-dose','#r-ratio-lock','#r-time-mins']]
     ok('order: grind, temp, dose/water (+ ratio lock), time', order==sorted(order) and len(set(order))==5, order)
     ok('dose and water side by side', abs(y('#r-dose')-y('#r-yield'))<2)
-    ok('time is the last field on Set up; Start brew sits in the footer', pg.evaluate("(()=>{const f=[...document.querySelectorAll('#r-setup input:not([type=hidden]), #r-setup select')].filter(e=>e.offsetParent); return f[f.length-1].id})()") in ('r-time-secs','r-time') and pg.is_visible('#r-start-btn'))
+    ok('time is the last field on Set up; Start brew sits in the footer', pg.evaluate("(()=>{const f=[...document.querySelectorAll('#r-dial input:not([type=hidden]), #r-dial select')].filter(e=>e.offsetParent); return f[f.length-1].id})()") in ('r-time-secs','r-time') and pg.is_visible('#r-start-btn'))
     # no grinder: slider off, box still works
     ok('no grinder: slider disabled with a hint, number box usable', pg.is_disabled('#r-grind-range') and 'pick a grinder' in pg.inner_text('#r-grind-hint').lower() and pg.is_enabled('#r-grind'))
     pg.fill('#r-grind','7'); ok('grind can be typed without a grinder', pg.input_value('#r-grind')=='7'); pg.fill('#r-grind','')

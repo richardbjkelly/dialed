@@ -1,4 +1,5 @@
 from playwright.sync_api import sync_playwright
+import brewnav
 import json, sys
 RM = len(sys.argv) > 1 and sys.argv[1] == 'reduce'
 errs=[]; results=[]

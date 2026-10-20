@@ -351,6 +351,7 @@ function fillBrewModal(r, opts={}) {
     setRating(0);
   }
   updateBrewLive(); updateGrindMicrons(); renderBrewHistory();
+  if (!opts.editId) setBrewPage('dial');      // Repeat, Use or Brew now: coffee and recipe are already chosen
 }
 
 
@@ -679,20 +680,17 @@ function selectedGrinder() { return state.selectedGrinderId ? GRINDERS.find(g =>
 // Live readout under the grind field in Log Brew
 // ---- Grind and temperature sliders (the number boxes beside them stay the source of truth) ----
 function brewGrindSlider() {
+  // The whole of the grinder's range; the usual range for the brew method is shown as a band on top
   const g = selectedGrinder(), sc = grinderScale(g); if (!sc) return null;
   const step = planGrindStep(g, state.selectedMethod, '');
-  let lo = sc.s0, hi = sc.s1, usual = false;
-  // Start from the range that's usual for this brew method on this grinder (a shorter slider is easier to set precisely),
-  // with half as much again either side so finer and coarser experiments still fit
+  const lo = roundTo(Math.floor(sc.s0 / step) * step, step), hi = roundTo(Math.ceil(sc.s1 / step) * step, step);
+  let band = null;
   const mr = methodRange(state.selectedMethod);
   if (mr) {
-    const pad = (mr.max - mr.min) * 0.5;
-    const a = micronsToSetting(g, Math.max(100, mr.min - pad)), b = micronsToSetting(g, mr.max + pad);
-    if (a != null && b != null && b - a >= step * 4) { lo = Math.floor(a / step) * step; hi = Math.ceil(b / step) * step; usual = true; }
+    const a = micronsToSetting(g, mr.min), b = micronsToSetting(g, mr.max);
+    if (a != null && b != null && b > a) band = { lo: roundTo(Math.max(lo, a), step), hi: roundTo(Math.min(hi, b), step) };
   }
-  const v = parseFloat(document.getElementById('r-grind')?.value);
-  if (!isNaN(v)) { if (v < lo) { lo = Math.max(sc.s0, Math.floor(v / step) * step); usual = false; } if (v > hi) { hi = Math.min(sc.s1, Math.ceil(v / step) * step); usual = false; } }
-  return { lo: roundTo(lo, step), hi: roundTo(hi, step), step, usual };
+  return { lo, hi, step, band, stepless: !!sc.stepless, usual: false };
 }
 function syncBrewSliders() {
   const gr = document.getElementById('r-grind-range'), gi = document.getElementById('r-grind'); if (!gr || !gi) return;
@@ -703,8 +701,21 @@ function syncBrewSliders() {
     const v = parseFloat(gi.value);
     gr.value = isNaN(v) ? roundTo((cfg.lo + cfg.hi) / 2, cfg.step) : v;
     gr.classList.toggle('unset', isNaN(v));
-    set('r-grind-hint', `${cfg.usual ? 'Usual ' + state.selectedMethod + ' range' : 'Grinder range'} · ${cfg.step} steps`);
+    set('r-grind-hint', `Full grinder range · steps of ${cfg.step}`);
     set('r-grind-lo', String(cfg.lo)); set('r-grind-hi', String(cfg.hi));
+  }
+  // Suggested range band: positioned along the track, allowing for the thumb's travel stopping short of the ends
+  const band = document.getElementById('r-grind-band'), sug = document.getElementById('r-grind-sug');
+  if (band && sug) {
+    const bnd = cfg && cfg.band, span = cfg ? (cfg.hi - cfg.lo) || 1 : 1;
+    band.hidden = sug.hidden = !bnd;
+    if (bnd) {
+      const p0 = (bnd.lo - cfg.lo) / span, p1 = (bnd.hi - cfg.lo) / span, T = 11;
+      band.style.left = `calc(${T}px + (100% - ${2 * T}px) * ${p0.toFixed(4)} - 7px)`;
+      band.style.width = `calc((100% - ${2 * T}px) * ${(p1 - p0).toFixed(4)} + 14px)`;
+      const unit = cfg.stepless ? '' : ' clicks';
+      sug.querySelector('span').textContent = `Suggested for ${state.selectedMethod} · ${bnd.lo}–${bnd.hi}${unit}`;
+    }
   }
   const tr = document.getElementById('r-temp-range'), ti = document.getElementById('r-temp');
   if (tr && ti) { const t = parseFloat(ti.value), inRange = t >= 80 && t <= 100; tr.value = inRange ? t : 93; tr.classList.toggle('unset', !inRange); }
@@ -1046,7 +1057,7 @@ function closeBrewMode() {
   el.hidden = true;
 }
 function minimiseBrewMode() { closeBrewMode(); }
-function stopBrewFromMode() {
+function stopBrewFromMode() {  // → How was it?
   stopBrewTimer(); closeBrewMode();
   if (scoreLaterOn() && !document.getElementById('r-edit-id')?.value) openBrewDone();
   else setBrewPage('taste');
@@ -1097,22 +1108,36 @@ document.addEventListener('visibilitychange', async () => {
   if (brewTimer.startedAt && navigator.wakeLock && brewTimerSecs() < WAKE_LOCK_MAX_SECS) { try { brewTimer.wakeLock = await navigator.wakeLock.request('screen'); } catch(e) {} }
 });
 
-// ==================== LOG BREW: TWO SCREENS ====================
-// 1 · Set up (coffee, recipe, numbers; Start brew)  →  brew mode  →  2 · How was it? (extraction, rating, taste, notes; Save)
-let brewPage = 'setup';
+// ==================== LOG BREW: THREE SCREENS ====================
+// 1 · Choose (coffee, grinder, method, recipe) → 2 · Dial in (numbers; Start brew) → brew mode → 3 · How was it? (scores; Save)
+let brewPage = 'choose';
+const BREW_PAGES = ['choose', 'dial', 'taste'];
+const BREW_PAGE_LABELS = { choose: 'Step 1 of 3 · Choose', dial: 'Step 2 of 3 · Dial in', taste: 'Step 3 of 3 · How was it?' };
 function setBrewPage(p) {
-  brewPage = p === 'taste' ? 'taste' : 'setup';
-  const taste = brewPage === 'taste', $ = id => document.getElementById(id);
-  if (!$('r-setup')) return;
-  $('r-setup').hidden = taste; $('r-taste-page').hidden = !taste;
-  $('r-foot-setup').hidden = taste; $('r-foot-taste').hidden = !taste;
-  $('r-back-setup').hidden = !taste || isScoreOnly();
-  $('r-step-label').textContent = taste ? 'Step 2 of 2 · How was it?' : 'Step 1 of 2 · Set up';
-  [...$('r-prog').children].forEach((b, i) => b.classList.toggle('on', i === 0 || taste));
-  $('r-summary').hidden = !taste;
-  if (taste) renderBrewSummary();
+  if (p === 'setup') p = 'dial';          // older name for the numbers screen
+  brewPage = BREW_PAGES.includes(p) ? p : 'choose';
+  const $ = id => document.getElementById(id); if (!$('r-setup')) return;
+  const i = BREW_PAGES.indexOf(brewPage);
+  $('r-setup').hidden = brewPage === 'taste';
+  $('r-choose').hidden = brewPage !== 'choose'; $('r-dial').hidden = brewPage !== 'dial'; $('r-taste-page').hidden = brewPage !== 'taste';
+  $('r-foot-choose').hidden = brewPage !== 'choose'; $('r-foot-setup').hidden = brewPage !== 'dial'; $('r-foot-taste').hidden = brewPage !== 'taste';
+  $('r-back-setup').hidden = brewPage === 'choose' || isScoreOnly();
+  $('r-step-label').textContent = BREW_PAGE_LABELS[brewPage];
+  [...$('r-prog').children].forEach((b, k) => b.classList.toggle('on', k <= i));
+  $('r-summary').hidden = brewPage !== 'taste';
+  if (brewPage === 'taste') renderBrewSummary();
+  if (brewPage === 'dial') { renderDialSummary(); setTimeout(() => { try { syncBrewSliders(); } catch(e) {} }, 0); }
   renderStartBtn();
+  const ae = document.activeElement, pg = ae && ae.closest && ae.closest('[data-brew-page]');
+  if (pg && pg.hidden) ae.blur();       // don't leave focus in a screen that's just been put away
   const m = document.querySelector('#modal-recipe .modal'); if (m) m.scrollTop = 0;
+}
+function brewPageBack() { setBrewPage(brewPage === 'taste' ? 'dial' : 'choose'); }
+function renderDialSummary() {
+  const el = document.getElementById('r-dial-summary'); if (!el) return;
+  const cf = state.coffees.find(c => c.id === state.selectedCoffeeId), g = selectedGrinder();
+  const rec = state.selectedRecipeId ? getAllRecipesForMethod(state.selectedMethod).find(x => x.id === state.selectedRecipeId) : null;
+  el.innerHTML = [cf && cf.name, g ? g.model : '', rec ? rec.name.split('—').pop().trim() : state.selectedMethod].filter(Boolean).map(b => `<span>${escHtml(b)}</span>`).join('');
 }
 function renderBrewSummary() {
   const v = id => (document.getElementById(id)?.value || '').trim();

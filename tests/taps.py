@@ -1,5 +1,6 @@
 # Real taps (not function calls) through the main flows, to prove the handler dispatcher works end to end.
 from playwright.sync_api import sync_playwright
+import brewnav
 import json, os
 URL=os.environ.get('DIALED_URL','http://localhost:8765/dialed/index.html')
 errs=[]; cons=[]; res=[]

@@ -1,5 +1,6 @@
 # The coffee being brewed is listed first in Log Brew.
 from playwright.sync_api import sync_playwright
+import brewnav
 import json, sys
 errs=[]; res=[]
 def ok(n,c,i=''):

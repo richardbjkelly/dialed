@@ -1,4 +1,5 @@
 from playwright.sync_api import sync_playwright
+import brewnav
 errs=[]
 with sync_playwright() as p:
     b=p.chromium.launch()

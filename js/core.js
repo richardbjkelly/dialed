@@ -295,7 +295,7 @@ window.addEventListener('popstate', function(e) {
   if (brewing) { closeBrewMode(); history.pushState({view:state.currentView},'',''); return; }
   const openModal = confirmOpen || document.querySelector('.modal-overlay.open');
   // On "How was it?", Back returns to Set up rather than closing Log Brew
-  if (openModal && openModal.id === 'modal-recipe' && brewPage === 'taste' && !isScoreOnly()) { setBrewPage('setup'); history.pushState({view:state.currentView},'',''); return; }
+  if (openModal && openModal.id === 'modal-recipe' && brewPage !== 'choose' && !isScoreOnly()) { brewPageBack(); history.pushState({view:state.currentView},'',''); return; }
   if (openModal) { closeModal(openModal.id); history.pushState({view:state.currentView},'',''); return; }
   const settingsOpen = document.getElementById('settings-panel')?.classList.contains('open');
   if (settingsOpen) { closeSettings && closeSettings(); history.pushState({view:state.currentView},'',''); return; }
@@ -349,7 +349,7 @@ function openRecipeModal() {
   // Always reset edit state when opening fresh
   const reid = document.getElementById('r-edit-id'); if(reid) reid.value = '';
   const rtitle = document.getElementById('r-modal-title'); if(rtitle) rtitle.textContent = 'Log Brew';
-  try { setScoreOnly(false); setBrewPage('setup'); } catch(e) {}
+  try { setScoreOnly(false); setBrewPage('choose'); } catch(e) {}
   setTimeout(() => { try { syncBrewSliders(); captureRatio(); } catch(e) {} }, 0);
   // Coffee selector
   const cs = document.getElementById('coffee-selector');
