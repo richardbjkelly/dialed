@@ -1009,6 +1009,19 @@ No visible changes — two structural changes behind the scenes.
 
 ---
 
+## v3.43
+*20 October 2026*
+
+### Dial in fits on one screen
+- Brewing from **Up next** (or any Log Brew) now fits on one screen on Dial in without scrolling. Checked on Pixel 7, Pixel 5, iPhone 13 and Galaxy S9+ sizes
+- **Last & best** starts folded. Its strip already shows the rating, grind and temperature; tap it to see the full brews, and it stays open if you leave it open
+- The "Dialling in a recipe" subtitle and the "Grind & Dose" heading are dropped on Dial in
+- The suggested-range key sits on the same line as the slider's end values ("Suggested 26–50"), and the particle-size line is shorter ("≈ 354µm (fine) · finer than usual")
+- The Suggested start card is shorter: the recipe goes on one line, and where the suggestion comes from is now under "Why?"
+- On shorter phones, Dial in tightens its spacing, hides the "Log Brew" title and lets the sheet use a little more of the screen
+
+---
+
 ## Pending / Roadmap
 - Rebuild the APK once to pick up the new cup icon
 - Opt-in pooled data + trained model (see feasibility notes): backend, consent, deletion, ICO registration
@@ -1026,4 +1039,4 @@ No visible changes — two structural changes behind the scenes.
 
 ---
 
-*Document maintained automatically. Last updated: v3.42*
+*Document maintained automatically. Last updated: v3.43*

@@ -15,7 +15,7 @@ with sync_playwright() as p:
                      {'id':'r2','coffeeId':'c1','grinderId':'e29','method':'AeroPress','recipeId':'aeropress-hoffmann','grind':'11','dose':'11','yield':'200','temp':'90','time':210,'rating':9,'extraction':'good','createdAt':'2026-09-27T08:00:00Z'},
                      {'id':'r3','coffeeId':'c3','grinderId':'m07','method':'Pourover','recipeId':'v60-hoffmann','grind':'22','dose':'15','yield':'250','temp':'94','rating':8,'extraction':'good','createdAt':'2026-09-25T08:00:00Z'},
                      {'id':'r4','coffeeId':'c4','method':'Espresso','grind':'5','dose':'18','yield':'36','createdAt':'2026-09-24T08:00:00Z'}]}
-        pg.evaluate(f"localStorage.setItem('dialin_v2', JSON.stringify({json.dumps(seed)})); localStorage.setItem('dialin_settings', JSON.stringify({{darkMode:{str(dark).lower()}}}))")
+        pg.evaluate(f"localStorage.setItem('dialin_v2', JSON.stringify({json.dumps(seed)})); localStorage.setItem('dialin_settings', JSON.stringify({{darkMode:{str(dark).lower()}, brewHistoryOpen:true}}))")
         pg.reload(); pg.wait_for_timeout(500)
         pg.evaluate("state.selectedCoffeeId='c1'; openRecipeModal()"); pg.wait_for_timeout(500)
         cols=pg.locator('#brew-history .bh-col')

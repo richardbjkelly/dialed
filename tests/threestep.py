@@ -41,7 +41,7 @@ with sync_playwright() as p:
     ok('grind slider spans the grinder\'s whole range', g['min']<=g['s0']+1e-9 and g['max']>=g['s1']-1e-9 and g['max']-g['min']>=(g['s1']-g['s0'])*0.99 and 'full grinder range' in g['hint'].lower(), g)
     c=g['cfg']; span=c['hi']-c['lo']
     ok('suggested band drawn over the usual Pourover range', g['band'] and c['band'] and c['lo']<c['band']['lo']<c['band']['hi']<=c['hi'] and abs((g['bl']+7-11)/(g['tw']-22) - (c['band']['lo']-c['lo'])/span)<0.03 and abs((g['br']-7-11)/(g['tw']-22) - (c['band']['hi']-c['lo'])/span)<0.03, g)
-    ok('key reads "Suggested for Pourover · a–b"', g['sug'].startswith('Suggested for Pourover') and f"{c['band']['lo']}–{c['band']['hi']}" in g['sug'], g['sug'])
+    ok('key reads "Suggested a–b" on the same line as the range ends', g['sug'].startswith('Suggested') and pg.evaluate("(()=>{const a=document.getElementById('r-grind-lo').getBoundingClientRect(), b=document.getElementById('r-grind-sug').getBoundingClientRect(); return Math.abs(a.top-b.top)<6 && b.height<20})()") and f"{c['band']['lo']}–{c['band']['hi']}" in g['sug'], g['sug'])
     pg.evaluate(f"(()=>{{const r=document.getElementById('r-grind-range'); r.value={c['lo']}; r.dispatchEvent(new Event('input',{{bubbles:true}}))}})()"); pg.wait_for_timeout(100)
     ok('slider can reach the finest setting', float(pg.input_value('#r-grind'))==c['lo'], pg.input_value('#r-grind'))
     pg.fill('#r-grind', str(c['band']['lo'])); pg.dispatch_event('#r-grind','input'); pg.wait_for_timeout(100)

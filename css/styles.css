@@ -722,12 +722,32 @@
   .bf-row .btn-secondary { flex:1; padding:12px 8px; }
   .bf-row .btn-primary { flex:2; width:auto; padding:12px 14px; font-size:15px; letter-spacing:2px; font-weight:700; }
   .bf-row .btn-secondary[hidden] { display:none; }
+  /* Dial in and How was it? drop the subtitle to keep the screen to one page */
+  #modal-recipe[data-page=dial] #r-modal-sub, #modal-recipe[data-page=taste] #r-modal-sub { display:none; }
+  #r-grind-um:empty { display:none; }
   /* Grind slider: the grinder's whole range, with the usual range for the method as a band */
   .grind-track { position:relative; }
   .grind-band { position:absolute; top:15px; height:14px; border-radius:7px; background:rgba(201,90,55,0.22); border:1.5px solid rgba(201,90,55,0.55); pointer-events:none; box-sizing:border-box; }
   .grind-band[hidden], .grind-sug[hidden] { display:none; }
   .grind-track input[type=range] { position:relative; background:transparent; }
-  .grind-sug { display:flex; align-items:center; gap:6px; font-size:11px; color:#B4532F; margin-top:4px; }
+  .grind-sug { display:flex; align-items:center; gap:5px; font-size:11px; color:#B4532F; white-space:nowrap; }
+  #r-dial > .divider { display:none; }
+  #r-dial .suggest-card { margin-bottom:14px; }
+  #r-dial .ratio-row { margin:-8px 0 6px; }
+  #modal-recipe .brew-foot { margin-top:6px; }
+  /* Shorter phones: tighten Dial in so it still fits without scrolling */
+  @media (max-height: 800px) {
+    #modal-recipe[data-page=dial] #r-modal-title, #modal-recipe[data-page=taste] #r-modal-title { display:none; }
+    #modal-recipe[data-page=dial] .modal-handle { margin-bottom:8px; }
+    #r-dial .form-group { margin-bottom:8px; }
+    #r-dial .brew-slider input[type=range] { height:36px; }
+    #r-dial .form-input { padding-top:9px; padding-bottom:9px; }
+    #r-dial .suggest-card { padding:9px 12px; margin-bottom:10px; }
+    #r-dial .brew-summary { margin-bottom:8px; }
+    #modal-recipe .bf-row button { min-height:52px; }
+    #modal-recipe .modal { max-height:calc(97vh / var(--ui-zoom)); }
+  }   /* one section on this screen: no heading needed */
+  .suggest-one { white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
   .grind-sug i { display:inline-block; width:18px; height:8px; border-radius:4px; background:rgba(201,90,55,0.22); border:1.5px solid rgba(201,90,55,0.55); flex-shrink:0; }
   body.dark-mode .grind-band, body.dark-mode .grind-sug i { background:rgba(242,164,147,0.22); border-color:rgba(242,164,147,0.6); }
   body.dark-mode .grind-sug { color:#F2A493; }

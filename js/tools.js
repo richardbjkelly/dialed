@@ -456,7 +456,7 @@ function renderBrewHistory() {
   if (editing || !brews.length) { el.innerHTML = ''; return; }
   const last = brews[0], best = bestBrew(state.selectedCoffeeId);
   const same = !best || best.id === last.id;
-  const open = appSettings.brewHistoryOpen !== false;
+  const open = appSettings.brewHistoryOpen === true;   // folded by default: the strip already shows the key numbers
   const sumBits = [last.rating > 0 ? `${last.rating}/10` : '', last.extraction ? (last.extraction === 'good' ? 'Good' : last.extraction[0].toUpperCase() + last.extraction.slice(1)) : '', last.grind ? `Grind ${escHtml(last.grind)}` : '', last.temp ? `${escHtml(last.temp)}°C` : ''].filter(Boolean).join(' · ');
   el.innerHTML = `<div class="bh">
     <button type="button" class="bh-strip" aria-expanded="${open}" data-on-click="toggleBrewHistory()">
@@ -465,7 +465,7 @@ function renderBrewHistory() {
     ${open ? `<div class="bh-cols${same ? ' one' : ''}">${brewHistCol(last, same && best ? 'Last & best' : 'Last', same && best ? 'best' : '')}${same ? '' : brewHistCol(best, 'Best', 'best')}</div>` : ''}
   </div>`;
 }
-function toggleBrewHistory() { appSettings.brewHistoryOpen = appSettings.brewHistoryOpen === false; saveSettings(); renderBrewHistory(); }
+function toggleBrewHistory() { appSettings.brewHistoryOpen = appSettings.brewHistoryOpen !== true; saveSettings(); renderBrewHistory(); }
 function useBrewSettings(id) {
   const r = state.recipes.find(x => x.id === id); if (!r) return;
   const notes = document.getElementById('r-notes').value;
@@ -714,7 +714,9 @@ function syncBrewSliders() {
       band.style.left = `calc(${T}px + (100% - ${2 * T}px) * ${p0.toFixed(4)} - 7px)`;
       band.style.width = `calc((100% - ${2 * T}px) * ${(p1 - p0).toFixed(4)} + 14px)`;
       const unit = cfg.stepless ? '' : ' clicks';
-      sug.querySelector('span').textContent = `Suggested for ${state.selectedMethod} · ${bnd.lo}–${bnd.hi}${unit}`;
+      sug.querySelector('span').textContent = `Suggested ${bnd.lo}–${bnd.hi}`;
+      sug.title = `Suggested for ${state.selectedMethod} · ${bnd.lo}–${bnd.hi}${unit}`;
+      band.title = sug.title;
     }
   }
   const tr = document.getElementById('r-temp-range'), ti = document.getElementById('r-temp');
@@ -737,15 +739,15 @@ function updateGrindMicrons() {
   syncBrewSliders();
   const el = document.getElementById('r-grind-um'); if (!el) return;
   const g = selectedGrinder(), val = document.getElementById('r-grind').value;
-  if (!g) { el.innerHTML = val ? 'Pick a grinder to see the particle size' : ''; return; }
+  if (!g) { el.innerHTML = ''; return; }   // the slider hint already says to pick a grinder
   if (val !== '' && !settingInRange(g, val)) { const sc = grinderScale(g); el.innerHTML = `<span style="color:#c0564b">${val} is outside the ${g.model}'s ${sc.s0}–${sc.s1} range</span>`; return; }
   const um = settingToMicrons(g, val);
   if (um == null) { el.innerHTML = ''; return; }
   const mr = methodRange(state.selectedMethod);
   let fit = '';
-  if (mr) fit = um < mr.min ? ` · <span style="color:#c0564b">finer than usual for ${state.selectedMethod} (${mr.min}–${mr.max}µm)</span>`
-               : um > mr.max ? ` · <span style="color:#c0564b">coarser than usual for ${state.selectedMethod} (${mr.min}–${mr.max}µm)</span>`
-               : ` · in the usual ${state.selectedMethod} range`;
+  if (mr) fit = um < mr.min ? ` · <span style="color:#c0564b">finer than usual</span>`
+               : um > mr.max ? ` · <span style="color:#c0564b">coarser than usual</span>`
+               : ` · in range`;
   el.innerHTML = `≈ <b>${um}µm</b> (${grindWord(um)})${fit}`;
 }
 
@@ -881,7 +883,8 @@ function renderBrewSuggestion() {
   const recRatio = rec ? (rec.ratio || (rec.dose && rec.water ? '1:' + (rec.water / rec.dose).toFixed(1) : '')) : '';
   const ratioText = rec ? recRatio : (s.ratio ? '1:' + (Math.round(s.ratio * 10) / 10) : '');
   lastSuggestion = { ...s, temp, setting, recipe: rec, recipeChosen: !!chosen };
-  const label = s.source === 'coffee' ? 'Your best for this coffee' : s.source === 'personal' ? 'Suggested start · learned from your brews' : 'Suggested start · general guidance';
+  const label = s.source === 'coffee' ? 'Your best for this coffee' : 'Suggested start';
+  const basis = s.source === 'coffee' ? 'Your best-rated brew of this coffee' : s.source === 'personal' ? 'Learned from your brews' : 'Based on general brewing guidance';
   const parts = [grindText, temp && method !== 'Cold Brew' ? `<b>${temp}°C</b>` : ''].filter(Boolean);
   el.innerHTML = `<div class="suggest-card">
     <div style="display:flex;align-items:center;gap:8px;margin-bottom:6px">
@@ -889,8 +892,8 @@ function renderBrewSuggestion() {
       <button type="button" class="suggest-apply" data-on-click="applyBrewSuggestion()">Apply</button>
     </div>
     <div class="suggest-main">${parts.join(' · ')}${!rec && ratioText ? ` · <b>${ratioText}</b>` : ''}</div>
-    ${rec ? `<div class="suggest-sub">${chosen ? 'Your recipe' : 'Recipe'}: ${escHtml(rec.name)}${recRatio ? ' · ' + recRatio : ''} — ${recipeScale(rec) ? 'steps adjusted to your dose and water' : 'dose, water and steps as written'}</div>` : ''}
-    <details class="suggest-why"><summary>Why?</summary><ul>${reasons.map(r => `<li>${r}</li>`).join('')}</ul>
+    ${rec ? `<div class="suggest-sub suggest-one">${chosen ? 'Your recipe' : 'Recipe'}: ${escHtml(rec.name)}${recRatio ? ' · ' + recRatio : ''}</div>` : ''}
+    <details class="suggest-why"><summary>Why?</summary><div class="suggest-sub" style="margin:6px 0 2px">${basis}${rec ? ` · ${recipeScale(rec) ? 'recipe steps adjusted to your dose and water' : 'recipe dose, water and steps as written'}` : ''}</div><ul>${reasons.map(r => `<li>${r}</li>`).join('')}</ul>
       <div class="suggest-sub" style="margin-top:6px">A starting point, not a rule. Taste, then use Plan next to fine-tune.</div></details>
   </div>`;
 }
@@ -1123,6 +1126,7 @@ function setBrewPage(p) {
   $('r-foot-choose').hidden = brewPage !== 'choose'; $('r-foot-setup').hidden = brewPage !== 'dial'; $('r-foot-taste').hidden = brewPage !== 'taste';
   $('r-back-setup').hidden = brewPage === 'choose' || isScoreOnly();
   $('r-step-label').textContent = BREW_PAGE_LABELS[brewPage];
+  document.getElementById('modal-recipe').dataset.page = brewPage;
   [...$('r-prog').children].forEach((b, k) => b.classList.toggle('on', k <= i));
   $('r-summary').hidden = brewPage !== 'taste';
   if (brewPage === 'taste') renderBrewSummary();
