@@ -1141,7 +1141,7 @@ function renderDialSummary() {
   const el = document.getElementById('r-dial-summary'); if (!el) return;
   const cf = state.coffees.find(c => c.id === state.selectedCoffeeId), g = selectedGrinder();
   const rec = state.selectedRecipeId ? getAllRecipesForMethod(state.selectedMethod).find(x => x.id === state.selectedRecipeId) : null;
-  el.innerHTML = [cf && cf.name, g ? g.model : '', rec ? rec.name.split('—').pop().trim() : state.selectedMethod].filter(Boolean).map(b => `<span>${escHtml(b)}</span>`).join('');
+  el.innerHTML = [cf && cf.name, g ? g.model : '', rec ? rec.name.split('—').pop().trim() : state.selectedMethod].filter(Boolean).map(b => `<span title="${escHtml(b)}">${escHtml(b)}</span>`).join('');
 }
 function renderBrewSummary() {
   const v = id => (document.getElementById(id)?.value || '').trim();

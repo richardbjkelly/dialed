@@ -1022,6 +1022,22 @@ No visible changes — two structural changes behind the scenes.
 
 ---
 
+## v3.44
+*21 October 2026*
+
+### Start brew in dark mode
+- In dark mode, the main footer button (**▶ Start brew**, **Next ›**, **Save brew**) is now light sage with dark text, so it stands out from the dark-green sheet. The secondary button beside it is outlined
+- **Skip timer** and **Start brew** are now exactly the same height and line up. A stray top margin on the primary button had made Skip timer 8px taller
+
+### Fixes from a general pass
+- **Large text on narrow phones:** the footer buttons could push **Start brew** off the right edge. They now shrink to fit, and wrap only if the text is very large
+- **Taste profile:** the Sweetness, Acidity, Body and Bitterness sliders didn't line up, and at larger text sizes the value pushed off-screen. The labels now have a fixed column, so the sliders align and stay on screen
+- **Dial in summary:** a long coffee name made the chips wrap onto two lines, which pushed Dial in into scrolling. The chips now stay on one line, and a long name shortens with "…" (the full name shows on long-press or hover)
+- **Extra-large text on small phones:** the Overview stats row (Coffees / Brews / Dialled in) made the page wider than the screen, nudging the bottom nav's Settings tab off the edge. The stats now fit, and the nav tabs share the width evenly
+- New checks cover these on two phone sizes, three text sizes, and light and dark modes
+
+---
+
 ## Pending / Roadmap
 - Rebuild the APK once to pick up the new cup icon
 - Opt-in pooled data + trained model (see feasibility notes): backend, consent, deletion, ICO registration
@@ -1039,4 +1055,4 @@ No visible changes — two structural changes behind the scenes.
 
 ---
 
-*Document maintained automatically. Last updated: v3.43*
+*Document maintained automatically. Last updated: v3.44*

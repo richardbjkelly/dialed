@@ -48,7 +48,7 @@
   .app-title { font-family:var(--font-display); font-size: 26px; letter-spacing: -0.5px; color: var(--crema); }
   .app-subtitle { white-space:nowrap; font-size: 11px; color: rgba(245,237,227,0.5); font-family:var(--font-mono); letter-spacing: 2px; text-transform: uppercase; }
   .bottom-nav { position:fixed; bottom:0; left:0; right:0; background:var(--espresso); display:flex; z-index:200; border-top:1px solid rgba(255,255,255,0.08); padding-bottom:env(safe-area-inset-bottom); }
-  .nav-tab { flex:1; padding:10px 4px 12px; background:none; border:none; color:rgba(245,237,227,0.4); font-family:var(--font-mono); font-size:11px; letter-spacing:0.5px; text-transform:uppercase; cursor:pointer; border-top:2px solid transparent; transition:all 0.2s; text-align:center; display:flex; flex-direction:column; align-items:center; gap:3px; }
+  .nav-tab { flex:1 1 0; min-width:0; overflow:hidden; text-overflow:ellipsis; padding:10px 2px 12px; background:none; border:none; color:rgba(245,237,227,0.4); font-family:var(--font-mono); font-size:11px; letter-spacing:0.5px; text-transform:uppercase; cursor:pointer; border-top:2px solid transparent; transition:all 0.2s; text-align:center; display:flex; flex-direction:column; align-items:center; gap:3px; }
   .nav-tab.active { color:var(--crema-light); border-top-color:var(--crema); }
   .nav-tab-icon { font-size:18px; line-height:1; display:flex; align-items:center; justify-content:center; }
   .nav-tab-icon svg { stroke:currentColor; }
@@ -117,10 +117,10 @@
   .divider::after { content: ''; flex: 1; height: 1px; background: rgba(82,121,111,0.25); }
   .toast { pointer-events:none; position:fixed; top:calc(env(safe-area-inset-top) + 96px); bottom:auto; left: 50%; transform: translateX(-50%) translateY(-12px); z-index:700 !important; background: var(--espresso); color: var(--crema-light); padding: 10px 20px; border-radius: 20px; font-family:var(--font-mono); font-size: 11px; letter-spacing: 1px; opacity: 0; transition: all 0.3s; z-index: 500; white-space: nowrap; }
   .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
-  .stats-bar { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-bottom: 20px; }
-  .stat-block { background: var(--card); border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 14px 10px; text-align: center; }
+  .stats-bar { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px; margin-bottom: 20px; }
+  .stat-block { background: var(--card); border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 14px 6px; text-align: center; min-width:0; }
   .stat-value { font-family:var(--font-display); font-size: 24px; color: var(--espresso); }
-  .stat-label { font-family:var(--font-mono); font-size: 11px; letter-spacing: 1.5px; text-transform: uppercase; color: var(--text-muted); margin-top: 3px; }
+  .stat-label { overflow-wrap:anywhere; font-family:var(--font-mono); font-size: 11px; letter-spacing: 1.5px; text-transform: uppercase; color: var(--text-muted); margin-top: 3px; }
   .coffee-selector { display: flex; flex-direction: column; gap: 8px; margin-bottom: 4px; max-height: 180px; overflow-y: auto; }
   .coffee-selector-item { padding: 10px 14px; border: 1.5px solid var(--border); border-radius: var(--radius-sm); cursor: pointer; transition: all 0.15s; background: var(--foam); }
   .coffee-selector-item.selected { border-color: var(--crema); background: rgba(200,135,58,0.08); }
@@ -412,8 +412,8 @@
   .guide-now { font-size:14px; font-weight:600; color:var(--text); margin:2px 0 4px; line-height:1.35; }
   .guide-next { font-size:11px; color:var(--text-muted); }
   .taste-row { display:flex; align-items:center; gap:10px; margin-bottom:6px; }
-  .taste-row label { width:88px; font-size:12px; color:var(--text); }
-  .taste-row input[type=range] { flex:1; accent-color:var(--crema); }
+  .taste-row label { flex:0 0 7.6em; min-width:0; font-size:12px; color:var(--text); overflow-wrap:anywhere; }
+  .taste-row input[type=range] { flex:1 1 0; min-width:0; accent-color:var(--crema); }
   .taste-row input.unset { opacity:.35; }
   .taste-row .tv { width:40px; height:28px; flex-shrink:0; display:inline-flex; align-items:center; justify-content:center; gap:3px; border:1px solid transparent; border-radius:14px; background:none; font-size:13px; color:var(--text-muted); padding:0; cursor:default; }
   .taste-row .tv.set { color:var(--text); border-color:var(--border); cursor:pointer; }
@@ -714,13 +714,23 @@
   .brew-summary { display:flex; flex-wrap:wrap; gap:6px; margin-bottom:12px; }
   .brew-summary[hidden], #r-setup[hidden], #r-choose[hidden], #r-dial[hidden], #r-taste-page[hidden], .bf-row[hidden], .brew-timer[hidden] { display:none; }
   .brew-summary span { font-size:11px; background:rgba(82,121,111,0.14); color:var(--text); border-radius:20px; padding:4px 10px; }
+  /* Dial in: keep the chips to one line; a long coffee name shortens with … */
+  #r-dial-summary { flex-wrap:nowrap; overflow:hidden; }
+  #r-dial-summary span { white-space:nowrap; overflow:hidden; text-overflow:ellipsis; min-width:0; flex:0 1 auto; }
+  #r-dial-summary span:not(:first-child) { flex-shrink:0; max-width:45%; }
   #modal-recipe .modal { padding-bottom:0; }
   .brew-foot { position:sticky; bottom:0; margin:16px -20px 0; padding:12px 20px calc(env(safe-area-inset-bottom, 0px) + 14px); background:var(--foam); border-top:1px solid var(--border); z-index:2; }
   body.dark-mode .brew-foot { background:var(--dm-surface, #1b2622); border-color:var(--dm-border); }
-  .bf-row { display:flex; gap:10px; }
-  .bf-row button { display:flex; align-items:center; justify-content:center; text-align:center; min-height:58px; white-space:nowrap; }
-  .bf-row .btn-secondary { flex:1; padding:12px 8px; }
-  .bf-row .btn-primary { flex:2; width:auto; padding:12px 14px; font-size:15px; letter-spacing:2px; font-weight:700; }
+  .bf-row { display:flex; gap:10px; align-items:stretch; }
+  /* Both footer buttons share one height (no stray margin on the primary), with text centred both ways.
+     They may shrink and, only if the text is very large, wrap, rather than run off the screen */
+  .bf-row button { display:flex; align-items:center; justify-content:center; text-align:center; min-height:58px; margin:0; min-width:0; line-height:1.2; box-sizing:border-box; }
+  .bf-row .btn-secondary { flex:1 1 0; padding:10px 8px; }
+  .bf-row .btn-primary { flex:1.7 1 0; width:auto; padding:10px 12px; font-size:15px; letter-spacing:2px; font-weight:700; }
+  /* Dark mode: a light sage fill so the main action stands out from the dark-green sheet */
+  body.dark-mode .bf-row .btn-primary { background:#A9CDBB !important; color:#0F2A1C !important; box-shadow:0 0 0 1px rgba(169,205,187,0.35), 0 6px 18px rgba(0,0,0,0.35); }
+  body.dark-mode .bf-row .btn-primary:active { background:#93BCA8 !important; }
+  body.dark-mode .bf-row .btn-secondary { background:transparent !important; border-color:rgba(169,205,187,0.35) !important; color:var(--dm-text) !important; }
   .bf-row .btn-secondary[hidden] { display:none; }
   /* Dial in and How was it? drop the subtitle to keep the screen to one page */
   #modal-recipe[data-page=dial] #r-modal-sub, #modal-recipe[data-page=taste] #r-modal-sub { display:none; }
