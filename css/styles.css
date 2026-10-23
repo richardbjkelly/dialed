@@ -591,7 +591,10 @@
   .step-row textarea { flex:1; min-height:52px; resize:none; font-size:13px; line-height:1.5; padding:8px 12px; background:var(--foam); border:1.5px solid var(--border); border-radius:var(--radius-sm); font-family:var(--font-mono); color:var(--text); outline:none; }
   .step-row textarea:focus { border-color:var(--crema); background:white; }
   .step-row-num { font-family:var(--font-mono); font-size:11px; color:var(--text-muted); padding-top:10px; min-width:18px; }
-  .step-remove { background:none; border:none; color:rgba(139,26,26,0.4); cursor:pointer; font-size:18px; padding:6px 2px; line-height:1; flex-shrink:0; }
+  /* A full-size tap target that's clearly visible, so tapping ✕ removes the step instead of opening the keyboard in the box beside it */
+  .step-remove { width:44px; height:44px; flex-shrink:0; display:flex; align-items:center; justify-content:center; margin:4px 0 0; background:rgba(139,26,26,0.08); border:1px solid rgba(139,26,26,0.25); border-radius:12px; color:#8b1a1a; cursor:pointer; font-size:16px; line-height:1; touch-action:manipulation; }
+  body.dark-mode .step-remove { background:rgba(242,164,147,0.1); border-color:rgba(242,164,147,0.35); color:#F2A493; }
+  .step-remove:active { transform:scale(.92); }
   .step-remove:hover { color:var(--red); }
   /* Custom recipe cards */
   .custom-recipe-card { background:var(--card); border:1px solid var(--border); border-radius:var(--radius); overflow:hidden; margin-bottom:14px; box-shadow:0 2px 12px rgba(26,15,10,0.06); }
@@ -721,6 +724,14 @@
   #modal-recipe .modal { padding-bottom:0; }
   .brew-foot { position:sticky; bottom:0; margin:16px -20px 0; padding:12px 20px calc(env(safe-area-inset-bottom, 0px) + 14px); background:var(--foam); border-top:1px solid var(--border); z-index:2; }
   body.dark-mode .brew-foot { background:var(--dm-surface, #1b2622); border-color:var(--dm-border); }
+  /* Sheets, Settings and brew mode: the page behind stays still, and scrolling inside a sheet never spills over to it */
+  html.scroll-locked, html.scroll-locked body { overflow:hidden; overscroll-behavior:none; }
+  .modal, .settings-panel, .brew-mode { overscroll-behavior:contain; }
+  .modal-overlay { overscroll-behavior:contain; touch-action:pan-y; }
+  /* Dark mode: every main action button is light sage with dark text, so it stands out from dark-green surfaces.
+     Buttons coloured on purpose (red delete, crema Log brew, outline styles) keep their own colours */
+  body.dark-mode .btn-primary:not([style*="background"]):not(.fab-recipe-btn), body.dark-mode .suggest-apply { background:#A9CDBB !important; color:#0F2A1C !important; }
+  body.dark-mode .btn-primary:not([style*="background"]):not(.fab-recipe-btn):active, body.dark-mode .suggest-apply:active { background:#93BCA8 !important; }
   .bf-row { display:flex; gap:10px; align-items:stretch; }
   /* Both footer buttons share one height (no stray margin on the primary), with text centred both ways.
      They may shrink and, only if the text is very large, wrap, rather than run off the screen */

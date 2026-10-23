@@ -1038,6 +1038,24 @@ No visible changes — two structural changes behind the scenes.
 
 ---
 
+## v3.45
+*23 October 2026*
+
+### The page behind sheets stays still
+- While Log Brew, Settings, the recipe editor, brew mode or any other sheet is open, the page behind no longer scrolls. Scrolling inside a sheet stops at its ends instead of carrying on to the page underneath
+- When the sheet closes, you're back where you were
+
+### Recipe editor
+- **Deleting steps:** the ✕ beside each step was 15px wide and very faint (nearly invisible in dark mode), so taps usually landed in the text box and opened the keyboard instead. It's now a full 44px button, clearly visible in both modes, and removing a step renumbers the rest
+- **Keyboard closing while editing:** dragging inside the editor could scroll the page behind it, which pushed the field you were typing in out of view. That scrolling is now blocked, and the misfired taps on ✕ no longer bounce focus in and out of the text boxes
+- Steps containing `<`, `>` or `&` now show exactly as typed (they could previously be cut short or garbled)
+
+### Sage buttons across dark mode
+- Every main action button in dark mode (New Coffee, Save Recipe, Add to Up next, Brew now, Apply on Suggested start, and so on) now uses the same light sage with dark text as Start brew
+- Buttons coloured on purpose keep their colours: red Delete, the Log Brew tile, outlined buttons, and the grinder Favourite/Compare toggles
+
+---
+
 ## Pending / Roadmap
 - Rebuild the APK once to pick up the new cup icon
 - Opt-in pooled data + trained model (see feasibility notes): backend, consent, deletion, ICO registration
@@ -1055,4 +1073,4 @@ No visible changes — two structural changes behind the scenes.
 
 ---
 
-*Document maintained automatically. Last updated: v3.44*
+*Document maintained automatically. Last updated: v3.45*

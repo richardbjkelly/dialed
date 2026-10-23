@@ -57,7 +57,7 @@ function closeSettings() {
 
 
 // ==================== VERSION & UPDATES ====================
-const APP_VERSION = '3.44';
+const APP_VERSION = '3.45';
 // The app page is fetched fresh when online, but on a slow connection the saved copy is used instead.
 // version.json is tiny and never cached, so we can tell when a newer version is waiting.
 async function checkForUpdate() {
@@ -172,7 +172,12 @@ document.addEventListener('keydown', e => {
   else if (!e.shiftKey && a === last) { e.preventDefault(); first.focus(); }
 });
 let a11yQueued = false;
-function a11yQueue() { if (a11yQueued) return; a11yQueued = true; setTimeout(() => { a11yQueued = false; try { a11yEnhance(); } catch(e) {} }, 0); }
+// While a sheet, Settings or brew mode is open, the page behind it doesn't scroll
+function updateScrollLock() {
+  const on = !!document.querySelector('.modal-overlay.open, .settings-panel.open, .brew-mode.open');
+  document.documentElement.classList.toggle('scroll-locked', on);
+}
+function a11yQueue() { try { updateScrollLock(); } catch(e) {} if (a11yQueued) return; a11yQueued = true; setTimeout(() => { a11yQueued = false; try { a11yEnhance(); } catch(e) {} }, 0); }
 a11ySetupDialogs(); a11yEnhance();
 document.addEventListener('DOMContentLoaded', () => { a11ySetupDialogs(); a11yEnhance(); });   // the settings panel and tab bar come later in the page
 new MutationObserver(a11yQueue).observe(document.body, { childList: true, subtree: true, attributes: true, attributeFilter: ['class'] });

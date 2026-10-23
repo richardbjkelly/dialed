@@ -114,13 +114,18 @@ function addRecipeStep(text='') {
   row.className = 'step-row';
   row.innerHTML = `
     <span class="step-row-num">${idx}.</span>
-    <textarea placeholder="Describe this step…">${text}</textarea>
-    <button class="step-remove" data-on-click="removeStepRow(this)">✕</button>`;
+    <textarea placeholder="Describe this step…" aria-label="Step ${idx}">${escHtml(text)}</textarea>
+    <button type="button" class="step-remove" aria-label="Remove step ${idx}" data-on-click="removeStepRow(this)">✕</button>`;
   list.appendChild(row);
+  return row;
 }
 
 function renumberSteps() {
-  document.querySelectorAll('.step-row-num').forEach((el,i) => el.textContent = (i+1)+'.');
+  document.querySelectorAll('#cr-steps-list .step-row').forEach((row,i) => {
+    row.querySelector('.step-row-num').textContent = (i+1)+'.';
+    row.querySelector('textarea').setAttribute('aria-label', 'Step ' + (i+1));
+    row.querySelector('.step-remove').setAttribute('aria-label', 'Remove step ' + (i+1));
+  });
 }
 
 function openEditCustomRecipe(id) {
