@@ -39,8 +39,8 @@ with sync_playwright() as p:
     pg.goto('http://localhost:8765/dialed/index.html'); pg.evaluate("s=>localStorage.setItem('dialin_v2', s)", json.dumps(seed)); pg.reload(); pg.wait_for_timeout(1500)
     for v in ['dashboard','coffees','tracker','recipes','grinders']: pg.evaluate(f"showView('{v}')"); pg.wait_for_timeout(300)
     ok('L4 no third-party requests on launch or browsing', not ext, ext)
-    ok('L4 both fonts load from the site', pg.evaluate("document.fonts.ready.then(()=>document.fonts.check('12px \"Space Mono\"') && document.fonts.check('600 16px \"Space Grotesk\"') && [...document.fonts].filter(f=>f.status==='loaded').length>=2)"))
-    ok('L3 headings still use the display font, body the mono font', 'Space Grotesk' in pg.evaluate("getComputedStyle(document.querySelector('.app-title')).fontFamily") and 'Space Mono' in pg.evaluate("getComputedStyle(document.querySelector('.nav-tab')).fontFamily"))
+    ok('L4 both fonts load from the site', pg.evaluate("document.fonts.ready.then(()=>document.fonts.check('12px \"Inter\"') && document.fonts.check('600 16px \"Space Grotesk\"') && [...document.fonts].filter(f=>f.status==='loaded').length>=2)"))
+    ok('L3 headings use the display font, text uses Inter', 'Space Grotesk' in pg.evaluate("getComputedStyle(document.querySelector('.app-title')).fontFamily") and 'Inter' in pg.evaluate("getComputedStyle(document.querySelector('.nav-tab')).fontFamily"))
     ok('L6 policy present', pg.evaluate("!!document.querySelector('meta[http-equiv=Content-Security-Policy]')"))
     # exercise things the policy could break: photo blob, service worker, inline handlers
     pg.evaluate("openSettings(); SETTINGS_SECTIONS.forEach(k=>setSettingsSection(k,true))"); pg.wait_for_timeout(300)
@@ -99,7 +99,7 @@ with sync_playwright() as p:
     pg2=ctx.new_page(); pg2.on('pageerror',lambda e:errs.append(str(e)))
     pg2.goto('http://localhost:8765/dialed/index.html'); pg2.evaluate("navigator.serviceWorker.ready"); pg2.wait_for_timeout(1500)
     ctx.set_offline(True); pg2.reload(); pg2.wait_for_timeout(1200)
-    ok('app loads and runs offline (page, styles, scripts, fonts)', pg2.evaluate("typeof showView==='function' && typeof ACTIONS==='object' && getComputedStyle(document.querySelector('.bottom-nav')).position==='fixed'") and pg2.evaluate("document.fonts.check('12px \"Space Mono\"')"))
+    ok('app loads and runs offline (page, styles, scripts, fonts)', pg2.evaluate("typeof showView==='function' && typeof ACTIONS==='object' && getComputedStyle(document.querySelector('.bottom-nav')).position==='fixed'") and pg2.evaluate("document.fonts.check('12px \"Inter\"')"))
     ctx.set_offline(False); pg2.close()
     # old settings keys dropped
     pg.evaluate("localStorage.setItem('dialin_settings', JSON.stringify({paletteId:'x',darkMode:true}))"); pg.reload(); pg.wait_for_timeout(600)

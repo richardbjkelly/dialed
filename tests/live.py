@@ -33,7 +33,7 @@ with sync_playwright() as p:
     ok('page starts and shows the same version', pg.evaluate("typeof APP_VERSION === 'string' ? APP_VERSION : null") == want)
     ok('every file the page asks for is found', not failed, failed[:5])
     ok('styles applied', pg.evaluate("getComputedStyle(document.querySelector('.bottom-nav')).position") == 'fixed')
-    ok('fonts load from the site', pg.evaluate("document.fonts.ready.then(() => document.fonts.check('12px \"Space Mono\"') && document.fonts.check('600 16px \"Space Grotesk\"'))"))
+    ok('fonts load from the site', pg.evaluate("document.fonts.ready.then(() => document.fonts.check('12px \"Inter\"') && document.fonts.check('600 16px \"Space Grotesk\"'))"))
     ok('manifest and icons resolve', pg.evaluate("""fetch(document.querySelector('link[rel=manifest]').href).then(r => r.json()).then(m => Promise.all(m.icons.map(i => fetch(new URL(i.src, document.querySelector('link[rel=manifest]').href)).then(r => r.ok))).then(a => a.every(Boolean)))"""))
     ok('service worker installs', pg.evaluate("navigator.serviceWorker.ready.then(r => !!r.active)"))
     pg.wait_for_timeout(2500)

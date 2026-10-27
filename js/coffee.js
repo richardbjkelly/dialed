@@ -31,7 +31,7 @@ function renderBuiltinRecipes() {
     const list = RECIPES[method] || [];
     if (!list.length) return;
     if (activeRecipeMethod === 'all') {
-      html += `<div style="font-family:var(--font-mono);font-size:11px;letter-spacing:2px;text-transform:uppercase;color:var(--text-muted);margin:16px 0 8px;padding-bottom:6px;border-bottom:1px solid var(--border)">${method}</div>`;
+      html += `<div style="font-family:var(--font-text);font-size:11px;letter-spacing:1.2px;text-transform:uppercase;color:var(--text-muted);margin:16px 0 8px;padding-bottom:6px;border-bottom:1px solid var(--border)">${method}</div>`;
     }
     list.forEach(r => {
       const pourMeta = r.pours ? `${r.pours} pour${r.pours>1?'s':''}${r.bloomRatio&&r.bloomRatio!=='N/A'?' · bloom '+r.bloomRatio:''}${r.totalTime?' · '+r.totalTime:''}` : '';
@@ -210,7 +210,7 @@ function renderMyRecipes() {
       <div class="custom-recipe-card-header">
         <div>
           <div style="font-family:var(--font-display);font-size:16px;color:var(--crema-light)">${escHtml(r.name)}</div>
-          <div style="font-family:var(--font-mono);font-size:11px;color:rgba(245,237,227,.6);letter-spacing:1px;margin-top:2px">${r.author?escHtml(r.author)+' · ':''}${escHtml(r.method)}</div>
+          <div style="font-family:var(--font-text);font-size:11px;color:rgba(245,237,227,.6);letter-spacing:0.6px;margin-top:2px">${r.author?escHtml(r.author)+' · ':''}${escHtml(r.method)}</div>
         </div>
         <div style="display:flex;gap:8px;align-items:center">
           <button class="btn-secondary" style="padding:5px 10px;font-size:11px" data-on-click="openEditCustomRecipe('${r.id}')">Edit</button>
@@ -245,7 +245,7 @@ function renderRecipeCard(method, recipeId) {
   card.innerHTML = `
     <div style="background:var(--espresso);border-radius:var(--radius-sm);padding:14px;margin-top:10px">
       <div style="font-family:var(--font-display);font-size:15px;color:var(--crema-light);margin-bottom:2px">${escHtml(recipe.name)}</div>
-      <div style="font-family:var(--font-mono);font-size:11px;color:rgba(245,237,227,.45);letter-spacing:1px;margin-bottom:12px">${recipe.dose}g · ${recipe.water}ml · ${recipe.temp}°C · ${escHtml(recipe.ratio)}${recipe.grindHint?' · '+escHtml(recipe.grindHint):''}${recipe.pours?' · '+recipe.pours+' pours':''}${recipe.totalTime?' · '+recipe.totalTime:''}</div>
+      <div style="font-family:var(--font-text);font-size:11px;color:rgba(245,237,227,.45);letter-spacing:0.6px;margin-bottom:12px">${recipe.dose}g · ${recipe.water}ml · ${recipe.temp}°C · ${escHtml(recipe.ratio)}${recipe.grindHint?' · '+escHtml(recipe.grindHint):''}${recipe.pours?' · '+recipe.pours+' pours':''}${recipe.totalTime?' · '+recipe.totalTime:''}</div>
       <button type="button" class="rc-toggle" aria-expanded="${recipeStepsOpen}" data-on-click="toggleRecipeSteps()">${recipeStepsOpen ? 'Hide steps ▴' : 'Show the ' + recipe.steps.length + ' steps ▾'}</button>
       <ol style="padding-left:16px;margin:8px 0 0"${recipeStepsOpen ? '' : ' hidden'}>
         ${recipe.steps.map(s => `<li style="font-size:12px;color:rgba(245,237,227,.75);line-height:1.5;margin-bottom:5px">${scaleStepText(s, recipe, f, true)}</li>`).join('')}

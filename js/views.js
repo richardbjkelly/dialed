@@ -19,16 +19,16 @@ function renderDashboard() {
   if (favEl) favEl.innerHTML = favG
     ? `<div style="display:flex;align-items:center;gap:8px;background:rgba(82,121,111,0.1);border:1px solid rgba(82,121,111,0.3);border-radius:10px;padding:10px 14px;margin-bottom:20px;cursor:pointer;color:var(--text)" data-on-click="showView('grinders')">
         <span style="line-height:0;color:var(--crema)"><svg class="ico" width="20" height="20" viewBox="0 0 24 24" fill="currentColor" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M12 3.5l2.6 5.4 5.9.8-4.3 4.1 1 5.8L12 16.9 6.8 19.6l1-5.8L3.5 9.7l5.9-.8z"/></svg></span>
-        <div><div style="font-family:var(--font-display);font-size:14px">${favG.brand} ${favG.model}</div><div style="font-family:var(--font-mono);font-size:11px;color:var(--text-muted);letter-spacing:1px;margin-top:2px">${favG.type==='manual'?'Manual':'Electric'} · DEFAULT GRINDER</div></div>
+        <div><div style="font-family:var(--font-display);font-size:14px">${favG.brand} ${favG.model}</div><div style="font-family:var(--font-text);font-size:11px;color:var(--text-muted);letter-spacing:0.6px;margin-top:2px">${favG.type==='manual'?'Manual':'Electric'} · DEFAULT GRINDER</div></div>
       </div>`
-    : `<div style="font-family:var(--font-mono);font-size:11px;color:var(--text-muted);margin-bottom:16px;letter-spacing:.5px">No default grinder set — <span style="color:var(--crema);cursor:pointer" data-on-click="showView('grinders')">Browse grinders →</span></div>`;
+    : `<div style="font-family:var(--font-text);font-size:11px;color:var(--text-muted);margin-bottom:16px;letter-spacing:.5px">No default grinder set — <span style="color:var(--crema);cursor:pointer" data-on-click="showView('grinders')">Browse grinders →</span></div>`;
   try { renderScorePending(); } catch(e) {}
   const el = document.getElementById('recent-brews');
   const recent = state.recipes.slice(0,5);
   const hasMore = state.recipes.length > 5;
   const divEl = el.previousElementSibling;
   if (divEl && divEl.classList.contains('divider')) {
-    divEl.innerHTML = `<span>Recent brews</span>${hasMore?`<button data-on-click="showAllBrews()" style="background:none;border:none;font-family:var(--font-mono);font-size:11px;color:var(--crema);cursor:pointer;letter-spacing:1px;text-transform:uppercase;margin-left:8px">View all (${state.recipes.length}) →</button>`:''}`;
+    divEl.innerHTML = `<span>Recent brews</span>${hasMore?`<button data-on-click="showAllBrews()" style="background:none;border:none;font-family:var(--font-text);font-size:11px;color:var(--crema);cursor:pointer;letter-spacing:0.6px;text-transform:uppercase;margin-left:8px">View all (${state.recipes.length}) →</button>`:''}`;
   }
 
   renderStatsDashboard();
@@ -252,12 +252,12 @@ function showCoffeeDetail(id) {
         ${c.labelPhoto?`<img src="${photoUrl(c)}" alt="Bag label" data-on-click="openLightboxFor('${c.id}')" style="width:72px;height:90px;object-fit:cover;border-radius:10px;flex-shrink:0;border:1px solid rgba(255,255,255,0.15);cursor:zoom-in" alt="bag label">`:''}
         <div style="flex:1">
           <div style="font-family:var(--font-display);font-size:24px;color:var(--crema-light)">${escHtml(c.name)}</div>
-          <div style="font-family:var(--font-mono);font-size:11px;color:rgba(245,237,227,.75);letter-spacing:1px;margin-bottom:14px">${c.roaster ? `<span class="roaster-link" data-roaster="${escHtml(c.roaster)}" data-on-click="showRoasterFrom(this)">${escHtml(c.roaster)} ›</span>` : 'Unknown Roaster'}</div>
+          <div style="font-family:var(--font-text);font-size:11px;color:rgba(245,237,227,.75);letter-spacing:0.6px;margin-bottom:14px">${c.roaster ? `<span class="roaster-link" data-roaster="${escHtml(c.roaster)}" data-on-click="showRoasterFrom(this)">${escHtml(c.roaster)} ›</span>` : 'Unknown Roaster'}</div>
           <div class="coffee-meta">${pills||'<span style="opacity:.5;font-size:12px">No details added</span>'}</div>
-          ${c.roastDate?`<div style="font-family:var(--font-mono);font-size:11px;color:rgba(245,237,227,.7);margin-top:10px">${formatDate(c.roastDate)}</div>`:''}
+          ${c.roastDate?`<div style="font-family:var(--font-text);font-size:11px;color:rgba(245,237,227,.7);margin-top:10px">${formatDate(c.roastDate)}</div>`:''}
           ${c.rating>0?`<div class="detail-rating">Rating <b>${c.rating}/10</b></div>`:''}
-          ${locationStr?`<div style="font-family:var(--font-mono);font-size:11px;color:rgba(245,237,227,.6);margin-top:8px"><svg class="ico" width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M12 21s-6-5.5-6-10a6 6 0 0 1 12 0c0 4.5-6 10-6 10z"/><circle cx="12" cy="11" r="2"/></svg> ${escHtml(locationStr)}</div>`:''}
-          ${producerStr?`<div style="font-family:var(--font-mono);font-size:11px;color:rgba(245,237,227,.6);margin-top:4px">${escHtml(producerStr)}</div>`:''}
+          ${locationStr?`<div style="font-family:var(--font-text);font-size:11px;color:rgba(245,237,227,.6);margin-top:8px"><svg class="ico" width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M12 21s-6-5.5-6-10a6 6 0 0 1 12 0c0 4.5-6 10-6 10z"/><circle cx="12" cy="11" r="2"/></svg> ${escHtml(locationStr)}</div>`:''}
+          ${producerStr?`<div style="font-family:var(--font-text);font-size:11px;color:rgba(245,237,227,.6);margin-top:4px">${escHtml(producerStr)}</div>`:''}
           ${c.notes?`<div style="font-size:13px;color:rgba(245,237,227,.9);margin-top:12px;font-style:italic">"${escHtml(c.notes)}"</div>`:''}
         </div>
       </div>
@@ -311,9 +311,9 @@ function recipeCard(r, showDel=false) {
   const ratio = ratioStr(r); const dayOff = daysOffRoast(r, coffee); const cupCost = costPerCup(r, coffee);
   const yieldLabel = isEsp ? 'Yield' : 'Water';
   const yieldUnit = isEsp ? 'g' : 'ml';
-  const grinderBadge = grinder ? `<span style="display:inline-block;margin-top:4px;font-family:var(--font-mono);font-size:11px;background:rgba(82,121,111,0.1);border:1px solid rgba(82,121,111,0.25);color:var(--crema);border-radius:20px;padding:2px 8px;letter-spacing:.5px">${grinder.brand} ${grinder.model}</span>` : '';
+  const grinderBadge = grinder ? `<span style="display:inline-block;margin-top:4px;font-family:var(--font-text);font-size:11px;background:rgba(82,121,111,0.1);border:1px solid rgba(82,121,111,0.25);color:var(--crema);border-radius:20px;padding:2px 8px;letter-spacing:.5px">${grinder.brand} ${grinder.model}</span>` : '';
   const recipeObj = r.recipeId ? [...Object.values(RECIPES).flat(), ...(state.customRecipes||[])].find(x=>x.id===r.recipeId) : null;
-  const recipeBadge = recipeObj ? `<span style="display:inline-block;margin-top:4px;margin-left:4px;font-family:var(--font-mono);font-size:11px;background:rgba(18,60,39,0.08);border:1px solid rgba(18,60,39,0.15);color:var(--espresso);border-radius:20px;padding:2px 8px;letter-spacing:.5px"><svg class="ico" width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M9 5H6a1 1 0 0 0-1 1v14a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1V6a1 1 0 0 0-1-1h-3"/><path d="M9 3.5h6v3H9z"/><path d="M9 12h6M9 16h6"/></svg> ${escHtml(recipeObj.name.split('—')[0].trim())}</span>` : '';
+  const recipeBadge = recipeObj ? `<span style="display:inline-block;margin-top:4px;margin-left:4px;font-family:var(--font-text);font-size:11px;background:rgba(18,60,39,0.08);border:1px solid rgba(18,60,39,0.15);color:var(--espresso);border-radius:20px;padding:2px 8px;letter-spacing:.5px"><svg class="ico" width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M9 5H6a1 1 0 0 0-1 1v14a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1V6a1 1 0 0 0-1-1h-3"/><path d="M9 3.5h6v3H9z"/><path d="M9 12h6M9 16h6"/></svg> ${escHtml(recipeObj.name.split('—')[0].trim())}</span>` : '';
   const thumbHtml = coffee?.labelPhoto ? `<img src="${photoUrl(coffee)}" class="brew-label-thumb" alt="Bag label" loading="lazy" data-on-click="openLightboxFor('${coffee.id}')" style="cursor:zoom-in">` : '';
   return `<div class="card-wrap" data-on-touchstart="startLongPress('${r.id}','brew')" data-on-touchend="endLongPress()" data-on-touchcancel="endLongPress()" data-on-contextmenu="event.stopPropagation();showEditOverlay('brew-${r.id}');return false"><div class="card-edit-overlay" data-overlay="brew-${r.id}"><button class="edit-overlay-btn" data-on-click="event.stopPropagation();editBrew('${r.id}');hideEditOverlay('brew-${r.id}')"><svg class="ico" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M4 20h4L19 9l-4-4L4 16v4z"/><path d="M13.5 6.5l4 4"/></svg> Edit</button><button class="edit-overlay-btn" data-on-click="event.stopPropagation();hideEditOverlay('brew-${r.id}');openPlanNext('${r.id}')">↻ Plan next</button><button class="edit-overlay-btn" data-on-click="event.stopPropagation();confirmDeleteBrew('${r.id}')">✕ Delete</button><button class="edit-overlay-btn" data-on-click="event.stopPropagation();hideEditOverlay('brew-${r.id}')">Cancel</button></div><div class="recipe-entry">
     <div class="recipe-entry-header">
@@ -321,7 +321,7 @@ function recipeCard(r, showDel=false) {
         ${thumbHtml}
         <div style="flex:1;min-width:0">
           <div style="font-family:var(--font-display);font-size:14px">${escHtml(coffee?.name||'Unknown Coffee')}</div>
-          <div style="font-family:var(--font-mono);font-size:11px;color:var(--text-muted)">${escHtml(coffee?.roaster||'')}${coffee?.roaster&&r.method?' · ':''}${escHtml(r.method||'')}</div>
+          <div style="font-family:var(--font-text);font-size:11px;color:var(--text-muted)">${escHtml(coffee?.roaster||'')}${coffee?.roaster&&r.method?' · ':''}${escHtml(r.method||'')}</div>
           ${grinderBadge}${waterBadgeHtml(r)}
         </div>
       </div>
@@ -782,9 +782,9 @@ function renderGrinders() {
     const isFav = state.favouriteGrinderId === g.id;
     return `<div class="grinder-card ${inCmp?'in-compare':''}" style="${isFav?'border-color:var(--crema);background:rgba(200,135,58,0.04);':''}" data-on-click="showGrinderDetail('${g.id}')">
       <div style="flex:1">
-        <div class="grinder-brand">${g.brand}${isFav?' <span style="font-size:11px;color:var(--crema);font-family:var(--font-mono);letter-spacing:1px;text-transform:uppercase"><svg class="ico" width="10" height="10" viewBox="0 0 24 24" fill="currentColor" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M12 3.5l2.6 5.4 5.9.8-4.3 4.1 1 5.8L12 16.9 6.8 19.6l1-5.8L3.5 9.7l5.9-.8z"/></svg> Default</span>':''}</div>
+        <div class="grinder-brand">${g.brand}${isFav?' <span style="font-size:11px;color:var(--crema);font-family:var(--font-text);letter-spacing:0.6px;text-transform:uppercase"><svg class="ico" width="10" height="10" viewBox="0 0 24 24" fill="currentColor" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M12 3.5l2.6 5.4 5.9.8-4.3 4.1 1 5.8L12 16.9 6.8 19.6l1-5.8L3.5 9.7l5.9-.8z"/></svg> Default</span>':''}</div>
         <div class="grinder-model">${g.model}</div>
-        <div style="font-family:var(--font-mono);font-size:11px;color:var(--text-muted);margin-top:4px">${g.min}–${g.max}µm · ${grinderRangeLabel(g)}</div>
+        <div style="font-family:var(--font-text);font-size:11px;color:var(--text-muted);margin-top:4px">${g.min}–${g.max}µm · ${grinderRangeLabel(g)}</div>
       </div>
       <div style="display:flex;flex-direction:column;align-items:flex-end;gap:6px">
         <span class="grinder-type-badge badge-${g.type}">${g.type==='manual'?'Manual':'Electric'}</span>
@@ -851,7 +851,7 @@ function showGrinderDetail(gid) {
     const left=pct(m.min), width=pct(m.max)-left;
     const compat = g.min<=m.max && g.max>=m.min;
     return `<div style="position:absolute;top:${i*(rowHeight+3)}px;left:${left}%;width:${width}%;height:${rowHeight}px;background:${m.color};border-radius:3px;opacity:${compat?0.85:0.15};display:flex;align-items:center;padding:0 4px">
-      <span style="font-family:var(--font-mono);font-size:11px;color:white;white-space:nowrap;overflow:hidden">${m.name}</span></div>`;
+      <span style="font-family:var(--font-text);font-size:11px;color:white;white-space:nowrap;overflow:hidden">${m.name}</span></div>`;
   }).join('');
 
   // Grinder range overlay
@@ -861,8 +861,8 @@ function showGrinderDetail(gid) {
     <div class="grinder-detail-card">
       <div style="font-family:var(--font-display);font-size:22px;color:var(--crema-light)">${g.model}</div>
       <div style="display:flex;align-items:center;gap:8px;margin-bottom:14px">
-        <span style="font-family:var(--font-mono);font-size:11px;color:rgba(245,237,227,.5);letter-spacing:1px">${g.brand} · ${g.type==='manual'?'Manual':'Electric'}</span>
-        ${isFav?'<span style="font-family:var(--font-mono);font-size:11px;background:rgba(200,135,58,0.25);color:var(--crema-light);border-radius:20px;padding:2px 8px;letter-spacing:1px"><svg class="ico" width="10" height="10" viewBox="0 0 24 24" fill="currentColor" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M12 3.5l2.6 5.4 5.9.8-4.3 4.1 1 5.8L12 16.9 6.8 19.6l1-5.8L3.5 9.7l5.9-.8z"/></svg> DEFAULT GRINDER</span>':''}
+        <span style="font-family:var(--font-text);font-size:11px;color:rgba(245,237,227,.5);letter-spacing:0.6px">${g.brand} · ${g.type==='manual'?'Manual':'Electric'}</span>
+        ${isFav?'<span style="font-family:var(--font-text);font-size:11px;background:rgba(200,135,58,0.25);color:var(--crema-light);border-radius:20px;padding:2px 8px;letter-spacing:0.6px"><svg class="ico" width="10" height="10" viewBox="0 0 24 24" fill="currentColor" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M12 3.5l2.6 5.4 5.9.8-4.3 4.1 1 5.8L12 16.9 6.8 19.6l1-5.8L3.5 9.7l5.9-.8z"/></svg> DEFAULT GRINDER</span>':''}
       </div>
       <div class="grinder-specs-grid">
         <div class="grinder-spec-block"><div class="grinder-spec-value">${g.clickMin!==undefined?g.clickMin+'–'+g.clickMax:g.settings}</div><div class="grinder-spec-label">${g.stepless?(g.clickMin!==undefined?'Dial · stepless':'Stepless'):(g.clickMin!==undefined?'Click Range':'Settings')}</div></div>
@@ -883,12 +883,12 @@ function showGrinderDetail(gid) {
 
     <div style="margin-bottom:6px;font-family:var(--font-display);font-size:16px">Compatible Brew Methods</div>
     <div style="display:flex;flex-wrap:wrap;margin-bottom:20px">
-      ${covered.map(m=>`<span style="display:inline-flex;align-items:center;gap:4px;padding:4px 10px;border-radius:20px;font-family:var(--font-mono);font-size:11px;letter-spacing:1px;text-transform:uppercase;margin:3px;background:${m.color}18;border:1px solid ${m.color}40;color:${m.color}">${m.name}</span>`).join('')}
+      ${covered.map(m=>`<span style="display:inline-flex;align-items:center;gap:4px;padding:4px 10px;border-radius:20px;font-family:var(--font-text);font-size:11px;letter-spacing:0.6px;text-transform:uppercase;margin:3px;background:${m.color}18;border:1px solid ${m.color}40;color:${m.color}">${m.name}</span>`).join('')}
       ${covered.length===0?'<span style="font-size:13px;color:var(--text-muted)">Highly specialised grinder</span>':''}
     </div>
 
     <div style="margin-bottom:8px;font-family:var(--font-display);font-size:16px">Grind Range vs Brew Methods</div>
-    <div style="font-family:var(--font-mono);font-size:11px;color:var(--text-muted);margin-bottom:12px">Highlighted = compatible. Amber overlay = this grinder's range.</div>
+    <div style="font-family:var(--font-text);font-size:11px;color:var(--text-muted);margin-bottom:12px">Highlighted = compatible. Amber overlay = this grinder's range.</div>
     <div style="background:white;border-radius:var(--radius);padding:16px;border:1px solid var(--border);margin-bottom:20px">
       <div style="position:relative;height:${chartH}px;margin-bottom:8px">
         ${methodRows}
@@ -900,7 +900,7 @@ function showGrinderDetail(gid) {
       </div>
       <div style="display:flex;align-items:center;gap:6px;margin-top:8px">
         <div style="width:16px;height:10px;background:rgba(200,135,58,0.22);border:1.5px solid var(--crema);border-radius:2px"></div>
-        <span style="font-family:var(--font-mono);font-size:11px;color:var(--text-muted)">This grinder's range</span>
+        <span style="font-family:var(--font-text);font-size:11px;color:var(--text-muted)">This grinder's range</span>
       </div>
     </div>
 
@@ -947,8 +947,8 @@ function renderCompare(containerId='view-compare') {
     }).join('');
     return `<div style="display:flex;align-items:center;justify-content:space-between;padding:10px 14px;border-bottom:1px solid var(--border)">
       <div>
-        <div style="font-family:var(--font-mono);font-size:11px;letter-spacing:.5px">${m.name}</div>
-        <div style="font-family:var(--font-mono);font-size:11px;color:var(--text-muted)">${m.min}–${m.max}µm</div>
+        <div style="font-family:var(--font-text);font-size:11px;letter-spacing:.5px">${m.name}</div>
+        <div style="font-family:var(--font-text);font-size:11px;color:var(--text-muted)">${m.min}–${m.max}µm</div>
       </div>
       <div style="display:flex;align-items:center">${dots}</div>
     </div>`;
@@ -960,7 +960,7 @@ function renderCompare(containerId='view-compare') {
       <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
         <div>
           <div style="font-family:var(--font-display);font-size:15px">${g.model}</div>
-          <div style="font-family:var(--font-mono);font-size:11px;color:var(--text-muted);letter-spacing:.5px">${g.brand}</div>
+          <div style="font-family:var(--font-text);font-size:11px;color:var(--text-muted);letter-spacing:.5px">${g.brand}</div>
         </div>
         <span class="grinder-type-badge badge-${g.type}">${g.type==='manual'?'Manual':'Electric'}</span>
       </div>
@@ -969,7 +969,7 @@ function renderCompare(containerId='view-compare') {
         <div class="param-block" style="flex:2"><div class="param-value" style="font-size:12px">${g.min}–${g.max}µm</div><div class="param-label">Grind Range</div></div>
       </div>
       ${g.notes?`<div style="font-size:11px;color:var(--text-muted);font-style:italic;line-height:1.5">${g.notes}</div>`:''}
-      <button style="margin-top:8px;background:none;border:1px solid rgba(139,26,26,0.2);color:var(--red);border-radius:8px;padding:4px 12px;font-family:var(--font-mono);font-size:11px;letter-spacing:1px;cursor:pointer" data-on-click="toggleCompare('${g.id}');renderCompare()">✕ Remove</button>
+      <button style="margin-top:8px;background:none;border:1px solid rgba(139,26,26,0.2);color:var(--red);border-radius:8px;padding:4px 12px;font-family:var(--font-text);font-size:11px;letter-spacing:0.6px;cursor:pointer" data-on-click="toggleCompare('${g.id}');renderCompare()">✕ Remove</button>
     </div>`).join('');
 
   el.innerHTML = `
@@ -981,18 +981,18 @@ function renderCompare(containerId='view-compare') {
         <span class="grind-axis-label">750</span><span class="grind-axis-label">1125</span><span class="grind-axis-label">1500µm</span>
       </div>
       <div style="margin-top:12px">
-        ${grinders.map((g,i)=>`<div style="display:flex;align-items:center;gap:6px;margin-bottom:3px"><span style="display:inline-block;width:12px;height:8px;border-radius:2px;background:${COMPARE_COLORS[i]}"></span><span style="font-family:var(--font-mono);font-size:11px;color:var(--text-muted)">${g.brand} ${g.model}</span></div>`).join('')}
+        ${grinders.map((g,i)=>`<div style="display:flex;align-items:center;gap:6px;margin-bottom:3px"><span style="display:inline-block;width:12px;height:8px;border-radius:2px;background:${COMPARE_COLORS[i]}"></span><span style="font-family:var(--font-text);font-size:11px;color:var(--text-muted)">${g.brand} ${g.model}</span></div>`).join('')}
       </div>
     </div>
 
     <div class="card" style="padding:0;overflow:hidden">
       <div style="padding:14px 16px 12px;background:var(--espresso)">
         <div style="font-family:var(--font-display);font-size:16px;color:var(--crema-light)">Brew Compatibility Matrix</div>
-        <div style="font-family:var(--font-mono);font-size:11px;color:rgba(245,237,227,.4);letter-spacing:1px;margin-top:4px;text-transform:uppercase">Filled dot = grinder can reach this method</div>
+        <div style="font-family:var(--font-text);font-size:11px;color:rgba(245,237,227,.4);letter-spacing:0.6px;margin-top:4px;text-transform:uppercase">Filled dot = grinder can reach this method</div>
       </div>
       <div style="background:white;padding:6px 0">
         <div style="display:flex;padding:8px 14px 6px">
-          ${grinders.map((g,i)=>`<div style="display:flex;align-items:center;gap:4px;margin-right:12px"><span style="display:inline-block;width:10px;height:10px;border-radius:50%;background:${COMPARE_COLORS[i]}"></span><span style="font-family:var(--font-mono);font-size:11px;color:var(--text-muted)">${g.model}</span></div>`).join('')}
+          ${grinders.map((g,i)=>`<div style="display:flex;align-items:center;gap:4px;margin-right:12px"><span style="display:inline-block;width:10px;height:10px;border-radius:50%;background:${COMPARE_COLORS[i]}"></span><span style="font-family:var(--font-text);font-size:11px;color:var(--text-muted)">${g.model}</span></div>`).join('')}
         </div>
         ${matrixHTML}
       </div>

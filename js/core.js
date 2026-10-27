@@ -395,7 +395,7 @@ function openRecipeModal() {
   gs.innerHTML = '';
   const none = document.createElement('div');
   none.className = 'coffee-selector-item' + (!state.selectedGrinderId?' selected':'');
-  none.innerHTML = '<div class="cs-name" style="font-size:13px;font-family:var(--font-mono)">No grinder / unspecified</div>';
+  none.innerHTML = '<div class="cs-name" style="font-size:13px;font-family:var(--font-text)">No grinder / unspecified</div>';
   none.onclick = () => { state.selectedGrinderId=null; gs.querySelectorAll('.coffee-selector-item').forEach(x=>x.classList.remove('selected')); none.classList.add('selected'); };
   gs.appendChild(none);
   function makeGrinderItem(g) {
@@ -411,12 +411,12 @@ function openRecipeModal() {
   const otherGrinders = GRINDERS.filter(g => g.id !== state.favouriteGrinderId);
   if (favGrinders.length) {
     const hdr = document.createElement('div');
-    hdr.style.cssText = "font-family:var(--font-mono);font-size:11px;letter-spacing:1.5px;text-transform:uppercase;color:var(--crema);padding:6px 2px 4px;";
+    hdr.style.cssText = "font-family:var(--font-text);font-size:11px;letter-spacing:1px;text-transform:uppercase;color:var(--crema);padding:6px 2px 4px;";
     hdr.textContent = 'Favourite';
     gs.appendChild(hdr);
     favGrinders.forEach(g => gs.appendChild(makeGrinderItem(g)));
     const sep = document.createElement('div');
-    sep.style.cssText = "font-family:var(--font-mono);font-size:11px;letter-spacing:1.5px;text-transform:uppercase;color:var(--text-muted);padding:8px 2px 4px;border-top:1px solid var(--border);margin-top:4px;";
+    sep.style.cssText = "font-family:var(--font-text);font-size:11px;letter-spacing:1px;text-transform:uppercase;color:var(--text-muted);padding:8px 2px 4px;border-top:1px solid var(--border);margin-top:4px;";
     sep.textContent = 'All Grinders';
     gs.appendChild(sep);
   }

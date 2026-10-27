@@ -39,7 +39,7 @@ function applyTextSize() {
 }
 function setTextSize(v) { appSettings.textSize = v; saveSettings(); applyTextSize(); }
 function applySettings() {
-  // Fonts are set in the stylesheet (Space Grotesk headings, Space Mono body)
+  // Fonts are set in the stylesheet (Space Grotesk headings, Inter text)
   applyTextSize();
   applyDarkMode();
 }
@@ -465,7 +465,7 @@ function bestBrewHtml(cf) {
   const parts = [b.grind ? 'Grind ' + b.grind : '', b.dose ? b.dose + 'g' : '', ratioStr(b), b.temp ? b.temp + '°C' : '', b.time ? formatBrewTime(b.time, b.method) : ''].filter(Boolean);
   return `<div class="card" style="padding:14px 16px;border:1.5px solid var(--crema)">
     <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px">
-      <span style="font-size:11px;letter-spacing:1.5px;text-transform:uppercase;color:var(--text-muted)"><svg class="ico" width="10" height="10" viewBox="0 0 24 24" fill="currentColor" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M12 3.5l2.6 5.4 5.9.8-4.3 4.1 1 5.8L12 16.9 6.8 19.6l1-5.8L3.5 9.7l5.9-.8z"/></svg> Best brew so far</span>
+      <span style="font-size:11px;letter-spacing:1px;text-transform:uppercase;color:var(--text-muted)"><svg class="ico" width="10" height="10" viewBox="0 0 24 24" fill="currentColor" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M12 3.5l2.6 5.4 5.9.8-4.3 4.1 1 5.8L12 16.9 6.8 19.6l1-5.8L3.5 9.7l5.9-.8z"/></svg> Best brew so far</span>
       <span style="font-size:12px;color:var(--text);font-weight:600">${b.rating}/10</span>
     </div>
     <div style="font-size:14px;color:var(--text);font-weight:600;margin-bottom:2px">${escHtml(b.method)}</div>
@@ -990,7 +990,7 @@ function methodSettingsGuide(g) {
     const a = micronsToSetting(g, Math.max(m.min, g.min)), b = micronsToSetting(g, Math.min(m.max, g.max));
     return `<div style="display:flex;justify-content:space-between;padding:4px 0;border-bottom:1px solid var(--border)"><span>${m.name}</span><b>${a === b ? a : a + '–' + b}</b></div>`;
   });
-  return rows.length ? `<div style="font-size:12px;color:var(--text);margin-top:12px"><div style="font-size:11px;letter-spacing:1px;text-transform:uppercase;color:var(--text-muted);margin-bottom:4px">Where to start on this grinder</div>${rows.join('')}</div>` : '';
+  return rows.length ? `<div style="font-size:12px;color:var(--text);margin-top:12px"><div style="font-size:11px;letter-spacing:0.6px;text-transform:uppercase;color:var(--text-muted);margin-bottom:4px">Where to start on this grinder</div>${rows.join('')}</div>` : '';
 }
 
 

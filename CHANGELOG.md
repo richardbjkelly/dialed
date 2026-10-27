@@ -1129,6 +1129,18 @@ No visible changes — two structural changes behind the scenes.
 
 ---
 
+## v3.50
+*27 October 2026*
+
+### New text font: Inter (option B)
+- Text, labels, buttons and numbers now use **Inter**, a sans-serif made for reading on screens, in place of Space Mono. Headings and coffee names keep **Space Grotesk**, so dialed still looks like dialed
+- Numbers use same-width digits, so grind, dose and time line up in columns
+- Spacing on capitalised labels and buttons is tightened to suit the new font
+- The font is bundled with the app, so it works offline and loads nothing from other sites. It's cut down to the characters dialed uses: 127 KB, smaller than the two Space Mono files it replaces (now removed)
+- Dark mode: the selected brew method and Insights period now use the light sage highlight, so the choice is easy to see
+
+---
+
 ## Pending / Roadmap
 - Rebuild the APK once to pick up the new cup icon
 - Opt-in pooled data + trained model (see feasibility notes): backend, consent, deletion, ICO registration
@@ -1146,4 +1158,4 @@ No visible changes — two structural changes behind the scenes.
 
 ---
 
-*Document maintained automatically. Last updated: v3.49*
+*Document maintained automatically. Last updated: v3.50*
