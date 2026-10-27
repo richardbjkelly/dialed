@@ -1082,6 +1082,16 @@ No visible changes — two structural changes behind the scenes.
 
 ---
 
+## v3.47
+*27 October 2026*
+
+### Smaller Finer / Coarser step for espresso
+- In Plan next, one Finer or Coarser tap on an **espresso** brew now moves a fifth of a number on the Timemore Sculptor 078S (about 11µm), down from half a number. Small grind changes have a much bigger effect on espresso
+- Other grinders get the same change in particle size, rounded to what they can do, and never less than one step. For example: 0.2 on a Sculptor 078, 1 click on a 1Zpresso JX-Pro, 2 steps on a Baratza Vario, about 5 on a stepless Eureka Mignon
+- Filter methods keep the larger step from v3.46 (half a number on the 078S, about 28µm)
+
+---
+
 ## Pending / Roadmap
 - Rebuild the APK once to pick up the new cup icon
 - Opt-in pooled data + trained model (see feasibility notes): backend, consent, deletion, ICO registration
@@ -1099,4 +1109,4 @@ No visible changes — two structural changes behind the scenes.
 
 ---
 
-*Document maintained automatically. Last updated: v3.46*
+*Document maintained automatically. Last updated: v3.47*

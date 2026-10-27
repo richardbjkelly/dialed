@@ -57,7 +57,7 @@ function closeSettings() {
 
 
 // ==================== VERSION & UPDATES ====================
-const APP_VERSION = '3.46';
+const APP_VERSION = '3.47';
 // The app page is fetched fresh when online, but on a slow connection the saved copy is used instead.
 // version.json is tiny and never cached, so we can tell when a newer version is waiting.
 async function checkForUpdate() {

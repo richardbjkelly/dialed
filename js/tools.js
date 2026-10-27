@@ -1002,17 +1002,19 @@ function planGrindStep(g, method, rawGrind) {
   if (sc.stepless) return 0.1;
   return sc.step || 1;
 }
-// One Finer/Coarser nudge in Plan next: the same change in particle size on every grinder, set to half a
-// number on the Timemore Sculptor 078S (≈28µm). Rounded to what the grinder can do, and never less than one step.
-const NUDGE_REF_GRINDER = 'e29', NUDGE_REF_SETTINGS = 0.5;
-function nudgeMicrons() {
+// One Finer/Coarser nudge in Plan next: the same change in particle size on every grinder, set against the
+// Timemore Sculptor 078S: half a number for filter (≈28µm), a fifth of a number for espresso (≈11µm), where small
+// changes matter more. Rounded to what the grinder can do, and never less than one step.
+const NUDGE_REF_GRINDER = 'e29', NUDGE_REF_SETTINGS = 0.5, NUDGE_REF_SETTINGS_ESPRESSO = 0.2;
+function nudgeMicrons(method) {
   const sc = grinderScale(GRINDERS.find(g => g.id === NUDGE_REF_GRINDER));
-  return sc ? NUDGE_REF_SETTINGS * sc.per : 28;
+  const n = isEspressoMethod(method || '') ? NUDGE_REF_SETTINGS_ESPRESSO : NUDGE_REF_SETTINGS;
+  return sc ? n * sc.per : n * 55.6;
 }
 function planGrindNudge(g, method, rawGrind) {
   const step = planGrindStep(g, method, rawGrind), sc = grinderScale(g);
   if (!sc || !(sc.per > 0)) return step;
-  const n = Math.max(1, Math.round(nudgeMicrons() / sc.per / step));
+  const n = Math.max(1, Math.round(nudgeMicrons(method) / sc.per / step));
   return roundTo(n * step, step);
 }
 // Slider range: roughly ±150µm around the last setting (at least ±10 steps), kept inside the grinder's range
