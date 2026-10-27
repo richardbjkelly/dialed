@@ -14,9 +14,9 @@ with sync_playwright() as p:
     # Stepless Sculptor 078S
     pg.evaluate("openPlanNext('r1')"); pg.wait_for_timeout(400)
     g=pg.locator('#plan-grind-range'); print('sculptor range', g.get_attribute('min'), g.get_attribute('max'), g.get_attribute('step'), 'value', g.input_value())
-    assert g.get_attribute('step')=='0.1' and g.input_value()=='8.3'
+    assert g.get_attribute('step')=='0.1' and g.input_value()=='7.9', g.input_value()   # under-extracted: one nudge finer = half a number on the 078S
     pg.screenshot(path='shots/plan_sculptor.png')
-    pg.evaluate("const r=document.getElementById('plan-grind-range'); r.value='7.9'; r.dispatchEvent(new Event('input',{bubbles:true}))")
+    pg.evaluate("const r=document.getElementById('plan-grind-range'); r.value='7.8'; r.dispatchEvent(new Event('input',{bubbles:true}))")
     t=pg.locator('#plan-temp-range'); print('temp', t.get_attribute('min'), t.get_attribute('max'), t.get_attribute('step'), t.input_value())
     assert (t.get_attribute('min'),t.get_attribute('max'),t.get_attribute('step'))==('80','100','1')
     pg.evaluate("const r=document.getElementById('plan-temp-range'); r.value='97'; r.dispatchEvent(new Event('input',{bubbles:true}))")
@@ -36,7 +36,7 @@ with sync_playwright() as p:
     st=json.loads(pg.evaluate("localStorage.getItem('dialin_v2')"))
     print('plans', [(x['coffeeId'],x['grind'],x['temp']) for x in st['plannedBrews']])
     assert [x['coffeeId'] for x in st['plannedBrews']]==['c1','c2','c3']
-    assert st['plannedBrews'][0]['grind']=='7.9' and st['plannedBrews'][0]['temp']=='97' and st['plannedBrews'][2]['temp']=='85'
+    assert st['plannedBrews'][0]['grind']=='7.8' and st['plannedBrews'][0]['temp']=='97' and st['plannedBrews'][2]['temp']=='85'
     # Drag: move Charlie (3rd) to top using the handle
     pg.evaluate("showView('dashboard')"); pg.wait_for_timeout(400)
     pg.evaluate("document.querySelectorAll('#upnext-list .upnext-card')[1].scrollIntoView({block:'center'})"); pg.wait_for_timeout(200)   # keep the handle clear of the + button

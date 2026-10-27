@@ -169,6 +169,13 @@ function sanitizeState(raw) {
     nums(o, ['weight', 'price', 'priceGBP', 'masl']);
     if ('currency' in o && !/^[A-Z]{3}$/.test(String(o.currency))) o.currency = 'GBP';
     if ('roastDate' in o && !/^\d{4}-\d{2}-\d{2}$/.test(String(o.roastDate))) o.roastDate = '';
+    if ('freezes' in o) {   // freezer periods: valid dates only, at most one still open (the latest)
+      const D = /^\d{4}-\d{2}-\d{2}$/;
+      const f = (Array.isArray(o.freezes) ? o.freezes : []).filter(x => isObj(x) && D.test(String(x.from))).map(x => ({ from: String(x.from), to: D.test(String(x.to)) ? String(x.to) : null }));
+      f.forEach((x, i) => { if (!x.to && i < f.length - 1) x.to = f[i + 1].from; });
+      if (o.finishedBag) f.forEach(x => { if (!x.to) x.to = x.from; });
+      if (f.length) o.freezes = f; else delete o.freezes;
+    }
     ['createdAt', 'finishedAt'].forEach(k => { if (k in o) { const d = isoDate(o[k]); if (d) o[k] = d; else delete o[k]; } });
     if ('buyAgain' in o && !['yes', 'maybe', 'no', ''].includes(o.buyAgain)) o.buyAgain = '';
     if (typeof o.roasterCountry === 'string' && o.roasterCountry) o.roasterCountry = normRoasterCountry(o.roasterCountry);
@@ -340,7 +347,12 @@ let editKeepCoffeeId = null;   // set by fillBrewModal when editing: that coffee
 function openRecipeModal() {
   if (!state.coffees.length) { showToast('Add a coffee first!'); return; }
   const keepId = editKeepCoffeeId; editKeepCoffeeId = null;
-  const selectable = c => !c.finishedBag || c.id === keepId;
+  const selectable = c => (!c.finishedBag && !isFrozen(c)) || c.id === keepId;   // frozen bags can't be brewed until thawed
+  if (!state.coffees.some(selectable) && state.coffees.some(c => !c.finishedBag && isFrozen(c))) {
+    confirmAction({ title: 'Everything is frozen', text: 'All your open bags are in the freezer. Thaw one from its page or the Coffee Library to brew it.',
+      button: 'Go to Coffees', neutral: true, onYes: () => showView('coffees') });
+    return;
+  }
   if (!state.coffees.some(selectable)) {
     confirmAction({ title: 'No open bags', text: 'All your coffees are marked finished. Add a new coffee, or reopen one from its ⋯ menu in the Coffee Library.',
       button: 'Add a coffee', neutral: true, onYes: () => { resetCoffeeModal(); openModal('modal-coffee'); } });
@@ -356,8 +368,9 @@ function openRecipeModal() {
   cs.innerHTML = '';
   // Oldest roast first (use those bags up first); bags with no roast date follow in library order.
   // The coffee being brewed still goes to the very top, so it's in view without scrolling (Brew now, Repeat, Edit, or the last one used)
-  const roastT = c => { const t = c.roastDate ? Date.parse(c.roastDate + 'T00:00:00') : NaN; return isNaN(t) ? Infinity : t; };
-  const openBags = state.coffees.filter(selectable).map((c, i) => [c, i]).sort((a, b) => (roastT(a[0]) - roastT(b[0])) || (a[1] - b[1])).map(x => x[0]);
+  // "Oldest" means the most days off roast, not counting time spent in the freezer
+  const ageKey = c => { const a = roastAgeToday(c); return a == null ? -Infinity : a; };
+  const openBags = state.coffees.filter(selectable).map((c, i) => [c, i]).sort((a, b) => (ageKey(b[0]) - ageKey(a[0])) || (a[1] - b[1])).map(x => x[0]);
   const chosen = openBags.find(c => c.id === state.selectedCoffeeId);
   const listed = chosen ? [chosen, ...openBags.filter(c => c !== chosen)] : openBags;
   listed.forEach(c => {

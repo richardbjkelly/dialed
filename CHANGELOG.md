@@ -1056,6 +1056,32 @@ No visible changes — two structural changes behind the scenes.
 
 ---
 
+## v3.46
+*27 October 2026*
+
+### Brew from the Coffee Library
+- Every open bag in the Coffee Library has a **Brew** button, in both list and grid view. It opens Log Brew with that coffee already chosen
+- A coffee's own page has **Log brew** at the top
+
+### Coffee Library in oldest-roast order
+- Open bags are listed oldest roast first (most days off roast). Bags with no roast date come after them
+- Next comes a **Freezer** group, then **Finished** bags, each with a heading
+
+### Freezer
+- **❄ Freeze** a coffee from its page or its ⋯ menu. Its days-off-roast clock pauses until you **Thaw** it, and freezing again later adds another pause
+- Time in the freezer is never counted: cards, the coffee page, Log Brew, Suggested start, and "oldest first" ordering all use the paused age. A brew logged before freezing keeps the age it had at the time
+- Frozen coffees can't be brewed. They're left out of Log Brew's coffee list, and Brew now (Up next) or Repeat on a frozen coffee asks "Thaw and brew?" first. If every open bag is frozen, Log Brew says so
+- A frozen card shows "❄ Frozen · 12d off roast" with a **Thaw** button. The coffee page says when it went in and where its clock is paused
+- Finishing a frozen bag takes it out of the freezer. Freezing and thawing on the same day leaves no pause behind
+- Backups keep freezer history, and imported freezer data is checked and cleaned up
+
+### Bigger Finer / Coarser steps in Plan next
+- One Finer or Coarser tap now changes particle size by the same amount on every grinder: half a number on the Timemore Sculptor 078S (about 28µm), up from 0.1
+- Other grinders get the nearest equivalent their adjustment allows, and never less than one step. For example: 0.6 on a Sculptor 078, 2 clicks on a 1Zpresso JX-Pro, 1 click on a Comandante C40, about 12 on a stepless Eureka Mignon
+- The slider still fine-tunes in the grinder's smallest step, and Plan next shows both sizes
+
+---
+
 ## Pending / Roadmap
 - Rebuild the APK once to pick up the new cup icon
 - Opt-in pooled data + trained model (see feasibility notes): backend, consent, deletion, ICO registration
@@ -1073,4 +1099,4 @@ No visible changes — two structural changes behind the scenes.
 
 ---
 
-*Document maintained automatically. Last updated: v3.45*
+*Document maintained automatically. Last updated: v3.46*

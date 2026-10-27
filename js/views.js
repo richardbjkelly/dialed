@@ -39,15 +39,36 @@ function renderDashboard() {
 
 // ==================== COFFEES ====================
 // Library order: most recently brewed first; never-brewed coffees next (newest added first); finished bags last
-function libraryOrder() {
+// Coffee library: open bags oldest roast first (most days off roast, freezer time not counted; no roast date last),
+// then the Freezer, then finished bags (most recently brewed first)
+function libraryGroups() {
   const last = {};
   state.recipes.forEach(r => { const t = r.createdAt ? Date.parse(r.createdAt) : 0; if (t && (!last[r.coffeeId] || t > last[r.coffeeId])) last[r.coffeeId] = t; });
   const added = c => c.createdAt ? Date.parse(c.createdAt) : 0;
-  return state.coffees.map((c, i) => ({ c, i })).sort((a, b) =>
-    (!!a.c.finishedBag - !!b.c.finishedBag) ||
-    ((last[b.c.id] || 0) - (last[a.c.id] || 0)) ||
-    (added(b.c) - added(a.c)) || (a.i - b.i)
-  ).map(x => x.c);
+  const recent = (a, b) => ((last[b.c.id] || 0) - (last[a.c.id] || 0)) || (added(b.c) - added(a.c)) || (a.i - b.i);
+  const ageKey = c => { const a = roastAgeToday(c); return a == null ? -Infinity : a; };
+  const byAge = (a, b) => (ageKey(b.c) - ageKey(a.c)) || recent(a, b);
+  const all = state.coffees.map((c, i) => ({ c, i }));
+  const pick = (f, sort) => all.filter(x => f(x.c)).sort(sort).map(x => x.c);
+  return [
+    { key: 'open', label: 'Open bags', items: pick(c => !c.finishedBag && !isFrozen(c), byAge) },
+    { key: 'frozen', label: 'Freezer', items: pick(c => !c.finishedBag && isFrozen(c), byAge) },
+    { key: 'finished', label: 'Finished', items: pick(c => c.finishedBag, recent) }
+  ];
+}
+function libraryOrder() { return libraryGroups().flatMap(g => g.items); }
+const CUP_ICO = '<svg class="ico" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M4 9h12v5a5 5 0 0 1-5 5H9a5 5 0 0 1-5-5V9z"/><path d="M16 11h1.5a2.5 2.5 0 0 1 0 5H16"/><path d="M8 3v3M12 3v3"/></svg>';
+// The brew / thaw button on a library card (none on finished bags)
+function cardBrewBtn(c) {
+  if (c.finishedBag) return '';
+  if (isFrozen(c)) return `<button type="button" class="card-brew-btn thaw" aria-label="Thaw ${escHtml(c.name)}" data-on-click="event.stopPropagation();toggleFreeze('${c.id}')">Thaw</button>`;
+  return `<button type="button" class="card-brew-btn" aria-label="Log a brew of ${escHtml(c.name)}" data-on-click="event.stopPropagation();logBrewFor('${c.id}')">${CUP_ICO} Brew</button>`;
+}
+function roastAgePill(c) {
+  if (c.finishedBag) return '';
+  const age = roastAgeToday(c);
+  if (isFrozen(c)) return `<span class="meta-pill frozen-pill">❄ Frozen${age != null ? ' · ' + age + 'd off roast' : ''}</span>`;
+  return age != null ? `<span class="meta-pill">${age}d off roast</span>` : '';
 }
 // Grid tile (photo banner): label photo across the top, badges on the photo, then name, roaster, origin summary, brews
 function coffeeTileGrid(c, rc) {
@@ -60,6 +81,7 @@ function coffeeTileGrid(c, rc) {
   return `<div class="coffee-card tile-b${c.finishedBag ? ' finished' : ''}" data-on-click="showCoffeeDetail('${c.id}')">
     <div class="tile-banner">${banner}
       ${c.finishedBag ? '<span class="tile-badge tile-fin">FINISHED</span>' : ''}
+      ${isFrozen(c) ? '<span class="tile-badge tile-frozen">❄ FROZEN</span>' : ''}
       ${c.decaf ? '<span class="tile-badge tile-decaf">DECAF</span>' : ''}
       ${c.blend ? '<span class="tile-badge tile-blend">BLEND</span>' : ''}
       ${c.rating > 0 ? `<span class="tile-badge tile-rating"><b>${c.rating}</b>/10</span>` : ''}
@@ -69,7 +91,7 @@ function coffeeTileGrid(c, rc) {
       <div class="tile-name">${escHtml(c.name)}</div>
       <div class="tile-roaster">${escHtml(c.roaster || 'Unknown roaster')}</div>
       <div class="tile-summary">${summary || '—'}</div>
-      <div class="tile-brews">${rc} brew${rc !== 1 ? 's' : ''}</div>
+      <div class="tile-brews"><span>${rc} brew${rc !== 1 ? 's' : ''}</span>${cardBrewBtn(c)}</div>
     </div>
   </div>`;
 }
@@ -83,9 +105,11 @@ function renderCoffeesView() {
   el.classList.toggle('grid', layout === 'grid' && state.coffees.length > 0);
   document.querySelectorAll('.layout-toggle button').forEach(b => { const on = b.dataset.layout === layout; b.classList.toggle('active', on); b.setAttribute('aria-pressed', on); });
   if (!state.coffees.length) { el.innerHTML=`<div class="empty-state"><div class="empty-icon"><svg class="ico" width="44" height="44" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M21 8l-9-5-9 5v8l9 5 9-5V8z"/><path d="M3 8l9 5 9-5"/><path d="M12 13v8"/></svg></div><div class="empty-title">No coffees yet</div><div class="empty-desc">Tap + to add your first coffee.</div></div>`; return; }
-  el.innerHTML = libraryOrder().map(c => {
+  const groups = libraryGroups().filter(g => g.items.length);
+  const headed = groups.length > 1 || (groups[0] && groups[0].key !== 'open');
+  el.innerHTML = groups.map(g => (headed ? `<div class="lib-divider divider">${g.label}${g.key === 'frozen' ? ' <span class="lib-sub">· roast clock paused</span>' : ''}</div>` : '') + g.items.map(c => {
     const rc = state.recipes.filter(r=>r.coffeeId===c.id).length;
-    const maslPill = (c.masl ? `<span class="meta-pill">${c.masl}m</span>` : '') + (per100g(c)!=null ? `<span class="meta-pill">£${per100g(c).toFixed(2)}/100g</span>` : '') + (gramsLeft(c)!=null && !c.finishedBag ? `<span class="meta-pill">${Math.round(gramsLeft(c))}g left</span>` : '') + (roastAgeToday(c)!=null && !c.finishedBag ? `<span class="meta-pill">${roastAgeToday(c)}d off roast</span>` : ''); const isGrid = appSettings.coffeeLayout === 'grid';
+    const maslPill = (c.masl ? `<span class="meta-pill">${c.masl}m</span>` : '') + (per100g(c)!=null ? `<span class="meta-pill">£${per100g(c).toFixed(2)}/100g</span>` : '') + (gramsLeft(c)!=null && !c.finishedBag ? `<span class="meta-pill">${Math.round(gramsLeft(c))}g left</span>` : '') + roastAgePill(c); const isGrid = appSettings.coffeeLayout === 'grid';
     // Grid: several varietals collapse to the first one plus a count, e.g. "Castillo +2"
     const ov = originView(c);
     let varietal = ov.varietal, varietalTitle = '';
@@ -99,10 +123,10 @@ function renderCoffeesView() {
     const headerImg = c.labelPhoto ? `<img src="${photoUrl(c)}" style="width:52px;height:52px;border-radius:8px;object-fit:cover;flex-shrink:0;border:1px solid rgba(255,255,255,0.15);cursor:zoom-in" alt="Bag label" data-on-click="event.stopPropagation();openLightboxFor('${c.id}')">` : '';
     const cardRating = c.rating > 0 ? `<div class="coffee-card-rating">${c.rating}/10</div>` : '';
     const finishedStyle = '';
-    const wrapOpen = `<div class="card-wrap" data-on-touchstart="startLongPress('${c.id}','coffee')" data-on-touchend="endLongPress()" data-on-touchcancel="endLongPress()" data-on-contextmenu="event.stopPropagation();showEditOverlay('coffee-${c.id}');return false"><div class="card-edit-overlay" data-overlay="coffee-${c.id}"><button class="edit-overlay-btn" data-on-click="event.stopPropagation();openEditCoffee('${c.id}');hideEditOverlay('coffee-${c.id}')"><svg class="ico" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M4 20h4L19 9l-4-4L4 16v4z"/><path d="M13.5 6.5l4 4"/></svg> Edit</button><button class="edit-overlay-btn" data-on-click="event.stopPropagation();showTrendModal('${c.id}');hideEditOverlay('coffee-${c.id}')"><svg class="ico" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M3 17l6-6 4 4 8-8"/><path d="M15 7h6v6"/></svg> Trends</button><button class="edit-overlay-btn" data-on-click="event.stopPropagation();hideEditOverlay('coffee-${c.id}');toggleFinishedBag('${c.id}')">${c.finishedBag ? '↺ Reopen' : '✓ Finish'}</button><button class="edit-overlay-btn" data-on-click="event.stopPropagation();confirmDeleteCoffee('${c.id}')">✕ Delete</button><button class="edit-overlay-btn" data-on-click="event.stopPropagation();hideEditOverlay('coffee-${c.id}')">Cancel</button></div>`;
+    const wrapOpen = `<div class="card-wrap" data-on-touchstart="startLongPress('${c.id}','coffee')" data-on-touchend="endLongPress()" data-on-touchcancel="endLongPress()" data-on-contextmenu="event.stopPropagation();showEditOverlay('coffee-${c.id}');return false"><div class="card-edit-overlay" data-overlay="coffee-${c.id}"><button class="edit-overlay-btn" data-on-click="event.stopPropagation();openEditCoffee('${c.id}');hideEditOverlay('coffee-${c.id}')"><svg class="ico" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M4 20h4L19 9l-4-4L4 16v4z"/><path d="M13.5 6.5l4 4"/></svg> Edit</button><button class="edit-overlay-btn" data-on-click="event.stopPropagation();showTrendModal('${c.id}');hideEditOverlay('coffee-${c.id}')"><svg class="ico" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M3 17l6-6 4 4 8-8"/><path d="M15 7h6v6"/></svg> Trends</button>${c.finishedBag ? '' : `<button class="edit-overlay-btn" data-on-click="event.stopPropagation();hideEditOverlay('coffee-${c.id}');toggleFreeze('${c.id}')">${isFrozen(c) ? '☀ Thaw' : '❄ Freeze'}</button>`}<button class="edit-overlay-btn" data-on-click="event.stopPropagation();hideEditOverlay('coffee-${c.id}');toggleFinishedBag('${c.id}')">${c.finishedBag ? '↺ Reopen' : '✓ Finish'}</button><button class="edit-overlay-btn" data-on-click="event.stopPropagation();confirmDeleteCoffee('${c.id}')">✕ Delete</button><button class="edit-overlay-btn" data-on-click="event.stopPropagation();hideEditOverlay('coffee-${c.id}')">Cancel</button></div>`;
     if (isGrid) return wrapOpen + coffeeTileGrid(c, rc) + `</div>`;
-    return wrapOpen + `<div class="coffee-card${c.finishedBag ? ' finished' : ''}" data-on-click="showCoffeeDetail('${c.id}')" style="${finishedStyle}"><div class="coffee-card-header"><div><div class="coffee-card-name">${escHtml(c.name)}${c.finishedBag?'<span class="finished-badge">FINISHED</span>':''}</div><div class="coffee-card-roaster">${escHtml(c.roaster||'Unknown Roaster')}</div>${cardRating}</div><div style="display:flex;align-items:flex-start;gap:8px">${headerImg}<button class="card-more" aria-label="More options" data-on-click="event.stopPropagation();showEditOverlay('coffee-${c.id}')">⋯</button></div></div><div class="coffee-card-body">${pills?`<div class="coffee-meta">${pills}</div>`:''}  <div class="card-foot"><div class="recipe-count">${rc} brew${rc!==1?'s':''} logged</div>${c.decaf ? '<span class="decaf-label">Decaf</span>' : ''}</div></div></div>` + `</div>`;
-  }).join('');
+    return wrapOpen + `<div class="coffee-card${c.finishedBag ? ' finished' : ''}" data-on-click="showCoffeeDetail('${c.id}')" style="${finishedStyle}"><div class="coffee-card-header"><div><div class="coffee-card-name">${escHtml(c.name)}${c.finishedBag?'<span class="finished-badge">FINISHED</span>':''}</div><div class="coffee-card-roaster">${escHtml(c.roaster||'Unknown Roaster')}</div>${cardRating}</div><div style="display:flex;align-items:flex-start;gap:8px">${headerImg}<button class="card-more" aria-label="More options" data-on-click="event.stopPropagation();showEditOverlay('coffee-${c.id}')">⋯</button></div></div><div class="coffee-card-body">${pills?`<div class="coffee-meta">${pills}</div>`:''}  <div class="card-foot"><div class="recipe-count">${rc} brew${rc!==1?'s':''} logged</div><div class="card-foot-r">${c.decaf ? '<span class="decaf-label">Decaf</span>' : ''}${cardBrewBtn(c)}</div></div></div></div>` + `</div>`;
+  }).join('')).join('');
 }
 
 // Finishing a bag asks for final ratings; reopening is immediate
@@ -160,6 +184,7 @@ function saveFinishBag() {
   if (!tapOnce('saveFinish')) return;
   const c = state.coffees.find(x=>x.id===d.id); if (!c) return;
   c.finishedBag = true;
+  if (isFrozen(c)) c.freezes.find(x => !x.to).to = todayISO();   // a finished bag isn't in the freezer any more
   c.finishedAt = new Date().toISOString();
   if (d.rating) c.rating = d.rating;
   c.buyAgain = d.again || '';
@@ -238,6 +263,10 @@ function showCoffeeDetail(id) {
       </div>
     </div>
     ${blendSectionHtml(c)}
+    ${c.finishedBag ? '' : `<div class="detail-brew-row">
+      ${isFrozen(c) ? `<div class="frozen-note">❄ In the freezer since ${new Date(frozenSince(c) + 'T00:00:00').toLocaleDateString('en-GB', {day:'numeric', month:'short'})}${roastAgeToday(c) != null ? ' · paused at ' + roastAgeToday(c) + 'd off roast' : ''}</div>` : `<button class="btn-primary" style="flex:2;margin-top:0" data-on-click="logBrewFor('${c.id}')">${CUP_ICO} Log brew</button>`}
+      <button class="btn-secondary" style="flex:1" data-on-click="toggleFreeze('${c.id}')">${isFrozen(c) ? '☀ Thaw' : '❄ Freeze'}</button>
+    </div>`}
     <div style="display:flex;gap:8px;margin-bottom:20px">
       <button class="btn-secondary" style="flex:1" data-on-click="openEditCoffee('${c.id}')"><svg class="ico" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M4 20h4L19 9l-4-4L4 16v4z"/><path d="M13.5 6.5l4 4"/></svg> Edit</button>
       <button class="btn-secondary" style="flex:1" data-on-click="showTrendModal('${c.id}')"><svg class="ico" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M3 17l6-6 4 4 8-8"/><path d="M15 7h6v6"/></svg> Trends</button>

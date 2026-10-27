@@ -357,15 +357,60 @@ function fillBrewModal(r, opts={}) {
 
 // ==================== DIALLING-IN HELPERS ====================
 const DAY_MS = 86400000;
+// ---- Freezer: a frozen bag's days-off-roast clock is paused ----
+// c.freezes = [{ from:'YYYY-MM-DD', to:'YYYY-MM-DD' | null }]; an open period (to:null) means it's in the freezer now
+const dayStart = s => new Date(s + 'T00:00:00').getTime();
+function isFrozen(c) { return !!(c && Array.isArray(c.freezes) && c.freezes.some(f => f && !f.to)); }
+function frozenSince(c) { const f = isFrozen(c) ? c.freezes.find(x => !x.to) : null; return f ? f.from : null; }
+// Whole days spent frozen between the roast and time t
+function frozenDaysBefore(c, t) {
+  if (!c || !Array.isArray(c.freezes) || !c.roastDate) return 0;
+  const r0 = dayStart(c.roastDate); let ms = 0;
+  c.freezes.forEach(f => {
+    if (!f || !f.from) return;
+    const a = Math.max(r0, dayStart(f.from)), b = Math.min(t, f.to ? dayStart(f.to) : t);
+    if (b > a) ms += b - a;
+  });
+  return Math.floor(ms / DAY_MS);
+}
+function roastAgeAt(cf, t) {
+  if (!cf || !cf.roastDate) return null;
+  const d = Math.floor((t - dayStart(cf.roastDate)) / DAY_MS);
+  if (d < 0) return null;
+  return Math.max(0, d - frozenDaysBefore(cf, t));
+}
 function daysOffRoast(r, cf) {
   if (!cf || !cf.roastDate || !r || !r.createdAt) return null;
-  const d = Math.floor((new Date(r.createdAt) - new Date(cf.roastDate + 'T00:00:00')) / DAY_MS);
-  return d >= 0 ? d : null;
+  return roastAgeAt(cf, new Date(r.createdAt).getTime());
 }
-function roastAgeToday(cf) {
-  if (!cf || !cf.roastDate) return null;
-  const d = Math.floor((Date.now() - new Date(cf.roastDate + 'T00:00:00')) / DAY_MS);
-  return d >= 0 ? d : null;
+function roastAgeToday(cf) { return roastAgeAt(cf, Date.now()); }
+function todayISO() { const d = new Date(); return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`; }
+function toggleFreeze(id) {
+  const c = state.coffees.find(x => x.id === id); if (!c || c.finishedBag) return;
+  const today = todayISO();
+  if (!Array.isArray(c.freezes)) c.freezes = [];
+  if (isFrozen(c)) {
+    const f = c.freezes.find(x => !x.to); f.to = today;
+    if (f.to <= f.from) c.freezes = c.freezes.filter(x => x !== f);   // frozen and thawed the same day: no pause
+    showToast('Thawed: the roast clock is running again');
+  } else {
+    c.freezes.push({ from: today, to: null });
+    const age = roastAgeToday(c);
+    showToast(age != null ? `Frozen: paused at ${age} day${age === 1 ? '' : 's'} off roast` : 'Frozen');
+  }
+  save();
+  hideAllOverlays();
+  refreshAfterFinish(id);
+}
+// Frozen coffees can't be brewed: offer to thaw first, then carry on
+function brewGuard(coffeeId, go) {
+  const c = state.coffees.find(x => x.id === coffeeId);
+  if (!c || !isFrozen(c)) { go(); return; }
+  confirmAction({ title: 'In the freezer', text: `${c.name} is frozen. Thaw it to brew it? Its roast clock starts again from ${roastAgeToday(c) ?? 'where it paused'}${roastAgeToday(c) != null ? ' days' : ''}.`,
+    button: 'Thaw and brew', neutral: true, onYes: () => { toggleFreeze(c.id); go(); } });
+}
+function logBrewFor(id) {
+  brewGuard(id, () => { state.selectedCoffeeId = id; openRecipeModal(); });
 }
 function ratioStr(r) {
   const d = parseFloat(r.dose), y = parseFloat(r.yield);
@@ -402,7 +447,10 @@ function bagPanelHtml(cf) {
       ${left <= 0 && !cf.finishedBag ? `<button class="btn-secondary" style="width:100%;margin-bottom:10px;color:var(--text)" data-on-click="toggleFinishedBag('${cf.id}')">Bag's empty — mark finished</button>` : ''}`);
   }
   const facts = [];
-  if (age !== null) facts.push(`Roasted <b>${age}</b> day${age !== 1 ? 's' : ''} ago`);
+  const iced = cf.roastDate ? frozenDaysBefore(cf, Date.now()) : 0;
+  if (age !== null) facts.push(iced > 0
+    ? `<b>${age}</b> day${age !== 1 ? 's' : ''} off roast${isFrozen(cf) ? ' (paused in the freezer)' : ''} · ${iced} day${iced !== 1 ? 's' : ''} in the freezer not counted`
+    : `Roasted <b>${age}</b> day${age !== 1 ? 's' : ''} ago`);
   if ((left == null || cf.finishedBag) && used > 0) facts.push(`<b>${Math.round(used)}g</b> used${cf.finishedBag ? ` over <b>${brewsFor(cf.id).length}</b> brew${brewsFor(cf.id).length !== 1 ? 's' : ''}` : ''}`);
   if (costs.length) facts.push(`<b>£${(costs.reduce((a, b) => a + b, 0) / costs.length).toFixed(2)}</b> avg per cup`);
   if (!rows.length && !facts.length) return '';
@@ -476,7 +524,7 @@ function useBrewSettings(id) {
 
 function repeatBrew(id) {
   const r = state.recipes.find(x => x.id === id); if (!r) return;
-  fillBrewModal(r, { title: 'Log Brew · Repeat' });
+  brewGuard(r.coffeeId, () => fillBrewModal(r, { title: 'Log Brew · Repeat' }));
 }
 
 // ---- Live ratio + cost in Log Brew ----
@@ -947,13 +995,25 @@ function grinderRangeLabel(g) {
   if (g.stepless) return g.clickMin !== undefined ? `stepless dial ${g.clickMin}–${g.clickMax}` : 'stepless';
   return g.clickMin !== undefined ? `${g.clickMin}–${g.clickMax} clicks` : `${g.settings} settings`;
 }
-// One nudge in Plan next: a click on stepped grinders; ~20µm (filter) or ~6µm (espresso) on stepless ones
 // Slider resolution: 0.1 on stepless grinders, the grinder's own click size on stepped ones
 function planGrindStep(g, method, rawGrind) {
   const sc = grinderScale(g);
   if (!sc) return grindStep(rawGrind);
   if (sc.stepless) return 0.1;
   return sc.step || 1;
+}
+// One Finer/Coarser nudge in Plan next: the same change in particle size on every grinder, set to half a
+// number on the Timemore Sculptor 078S (≈28µm). Rounded to what the grinder can do, and never less than one step.
+const NUDGE_REF_GRINDER = 'e29', NUDGE_REF_SETTINGS = 0.5;
+function nudgeMicrons() {
+  const sc = grinderScale(GRINDERS.find(g => g.id === NUDGE_REF_GRINDER));
+  return sc ? NUDGE_REF_SETTINGS * sc.per : 28;
+}
+function planGrindNudge(g, method, rawGrind) {
+  const step = planGrindStep(g, method, rawGrind), sc = grinderScale(g);
+  if (!sc || !(sc.per > 0)) return step;
+  const n = Math.max(1, Math.round(nudgeMicrons() / sc.per / step));
+  return roundTo(n * step, step);
 }
 // Slider range: roughly ±150µm around the last setting (at least ±10 steps), kept inside the grinder's range
 function planGrindRange(d) {
@@ -970,7 +1030,8 @@ function planStepHint(d) {
   const g = d.from.grinderId ? GRINDERS.find(x => x.id === d.from.grinderId) : null;
   const sc = grinderScale(g); if (!sc || d.grindBase === null) return '';
   const um = Math.round(d.grindStepSize * sc.per);
-  return `<div style="font-size:11px;color:var(--text-muted);margin-top:2px">${sc.stepless ? 'Stepless' : 'Stepped'} · slider moves in ${d.grindStepSize}${sc.stepless ? '' : d.grindStepSize === 1 ? ' click' : ' clicks'} (≈${um}µm)</div>`;
+  const n = d.grindNudge || d.grindStepSize, unit = v => sc.stepless ? '' : v === 1 ? ' click' : ' clicks';
+  return `<div style="font-size:11px;color:var(--text-muted);margin-top:2px">Finer / Coarser moves ${n}${unit(n)} (≈${Math.round(n * sc.per)}µm) · slider fine-tunes in ${d.grindStepSize}${unit(d.grindStepSize)} (≈${um}µm)</div>`;
 }
 
 function playEnter(el, cls) {
@@ -1307,7 +1368,7 @@ function openPlanNext(brewId) {
   const coffee = state.coffees.find(x=>x.id===r.coffeeId);
   const grinder = r.grinderId ? GRINDERS.find(g=>g.id===r.grinderId) : null;
   const grind = numOrNull(r.grind), temp = numOrNull(r.temp), gs = planGrindStep(grinder, r.method, r.grind);
-  planDraft = { from:r, grindBase:grind, tempBase:temp, grindStepSize:gs, grind, temp, grindDir:'same', tempDir:'same' };
+  planDraft = { from:r, grindBase:grind, tempBase:temp, grindStepSize:gs, grindNudge:planGrindNudge(grinder, r.method, r.grind), grind, temp, grindDir:'same', tempDir:'same' };
   document.getElementById('plan-subtitle').textContent = (coffee?coffee.name:'Coffee') + ' · ' + (r.method||'');
   const res = r.extraction ? `<span class="extraction-tag tag-${r.extraction}">${r.extraction==='good'?'✓ Good':r.extraction}</span>` : 'no result logged';
   document.getElementById('plan-last').innerHTML = `Last brew: grind <strong>${r.grind||'—'}</strong>${grinder?' ('+grinder.model+')':''} · <strong>${r.temp?r.temp+'°C':'—'}</strong> · <strong>${formatBrewTime(r.time,r.method)}</strong> · ${res}`;
@@ -1339,7 +1400,7 @@ function setPlanDir(kind, dir) {
   const d = planDraft; if (!d) return;
   if (kind === 'grind') {
     d.grindDir = dir;
-    if (d.grindBase !== null) { const rg = planGrindRange(d); d.grind = roundTo(Math.min(rg.hi, Math.max(rg.lo, d.grindBase + (dir==='finer' ? -d.grindStepSize : dir==='coarser' ? d.grindStepSize : 0))), d.grindStepSize); }
+    if (d.grindBase !== null) { const rg = planGrindRange(d); d.grind = roundTo(Math.min(rg.hi, Math.max(rg.lo, d.grindBase + (dir==='finer' ? -(d.grindNudge || d.grindStepSize) : dir==='coarser' ? (d.grindNudge || d.grindStepSize) : 0))), d.grindStepSize); }
   } else {
     d.tempDir = dir;
     if (d.tempBase !== null) d.temp = Math.min(100, Math.max(80, d.tempBase + (dir==='hotter' ? 1 : dir==='cooler' ? -1 : 0)));
@@ -1451,7 +1512,7 @@ function keyMovePlan(e, id) {
 }
 function brewPlan(planId) {
   const p = (state.plannedBrews||[]).find(x=>x.id===planId); if (!p) return;
-  fillBrewModal(p, { planId, title:'Log Brew · Up next' });
+  brewGuard(p.coffeeId, () => fillBrewModal(p, { planId, title:'Log Brew · Up next' }));
 }
 function dismissPlan(planId) {
   state.plannedBrews = (state.plannedBrews||[]).filter(x=>x.id!==planId);
@@ -1468,6 +1529,7 @@ function renderUpNext() {
     const numericGrind = numOrNull(p.grind) !== null;
     if (p.grind) chg.push(`<span class="meta-pill">Grind ${p.grindFrom && p.grindFrom!==p.grind ? p.grindFrom+' → ' : ''}${p.grind}${!numericGrind && p.grindDir!=='same' ? ' ('+p.grindDir+')' : ''}</span>`);
     if (p.temp) chg.push(`<span class="meta-pill">${p.tempFrom && p.tempFrom!==p.temp ? p.tempFrom+' → ' : ''}${p.temp}°C</span>`);
+    if (isFrozen(cf)) chg.push('<span class="meta-pill frozen-pill">❄ Frozen · thaw to brew</span>');
     if (p.fromExtraction) chg.push(`<span class="extraction-tag tag-${p.fromExtraction}">after ${p.fromExtraction}</span>`);
     return `<div class="upnext-card" data-plan-id="${p.id}">
       <div class="upnext-head"><div style="flex:1;min-width:0">
