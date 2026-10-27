@@ -1195,7 +1195,7 @@ function setBrewPage(p) {
   document.getElementById('modal-recipe').dataset.page = brewPage;
   [...$('r-prog').children].forEach((b, k) => b.classList.toggle('on', k <= i));
   $('r-summary').hidden = brewPage !== 'taste';
-  if (brewPage === 'taste') renderBrewSummary();
+  if (brewPage === 'taste') { renderBrewSummary(); try { renderDropsReminder(); } catch(e) {} }
   if (brewPage === 'choose') { try { renderWaterPicker(); } catch(e) {} }
   if (brewPage === 'dial') { renderDialSummary(); setTimeout(() => { try { syncBrewSliders(); } catch(e) {} }, 0); }
   renderStartBtn();
@@ -1284,6 +1284,7 @@ function openBrewDone() {
   ].filter(Boolean);
   document.getElementById('bd-summary').innerHTML = rows.map(x => `<div>${x}</div>`).join('') || '<div><span>No recipe details entered yet</span></div>';
   setRemindMins(remindMins());
+  try { renderDropsReminder(); } catch(e) {}
   openModal('modal-brew-done');
 }
 function brewDoneNow() { closeModal('modal-brew-done'); setBrewPage('taste'); }

@@ -27,7 +27,7 @@ const formulaHtml = f => escHtml(f).replace(/([A-Za-z)])(\d+)/g, '$1<sub>$2</sub
 function defaultWaterState() {
   return { enabled: false, dropsPerGram: 20, salts: ['mgcl2', 'cacl2', 'nahco3', 'khco3'],
     bottles: { A: { total: 20, salts: { mgcl2: 0.85, cacl2: 0.26 } }, B: { total: 20, salts: { nahco3: 0.25, khco3: 0.30 } } },
-    custom: [], lastId: null };
+    custom: [], lastId: null, addTo: 'cup' };
 }
 function W() { if (!state.water) state.water = defaultWaterState(); return state.water; }
 function waterOn() { return !!(state.water && state.water.enabled); }
@@ -54,6 +54,7 @@ function cleanWaterState(raw) {
       name: name(x.name) || 'My water', type: x.type === 'plain' ? 'plain' : 'mix',
       gh: n(x.gh, 0, 500, 0), kh: n(x.kh, 0, 500, 0) })),
     lastId: /^w-[\w-]{1,34}$/.test(String(raw.lastId)) ? String(raw.lastId) : null,
+    addTo: raw.addTo === 'water' ? 'water' : 'cup',
   };
 }
 // The water recorded on a brew or a plan: a small snapshot, so renaming or deleting a style later doesn't change history
@@ -152,6 +153,8 @@ function renderWaterView() {
       <div class="wb wb-b"><div class="wb-k">Bottle B · buffer</div><div class="wb-v">${fmtNum(B.kh)} KH per g/L</div><div class="wb-s">${comp(w.bottles.B)}</div></div>
     </div>
     <div class="water-row"><div><div class="wr-k">Drops per gram</div><div class="wr-v">${fmtNum(w.dropsPerGram)}</div></div><button type="button" class="btn-secondary wr-btn" data-on-click="openWaterCal()">Calibrate</button></div>
+    <div class="water-row"><div><div class="wr-k">I add the drops</div><div class="wr-s">${w.addTo === 'water' ? 'To the brew water, before brewing' : 'To the cup, after brewing: you get a reminder with the drops'}</div></div>
+      <div class="seg" role="group" aria-label="When drops are added"><button type="button" class="${w.addTo !== 'water' ? 'on' : ''}" aria-pressed="${w.addTo !== 'water'}" data-on-click="setWaterAddTo('cup')">Cup</button><button type="button" class="${w.addTo === 'water' ? 'on' : ''}" aria-pressed="${w.addTo === 'water'}" data-on-click="setWaterAddTo('water')">Water</button></div></div>
     <div class="water-row"><div><div class="wr-k">Make new bottles</div><div class="wr-s">From the salts you have</div></div><button type="button" class="btn-secondary wr-btn" data-on-click="openWaterBottles()">Make</button></div>
     <div class="divider">Water styles</div>
     ${WATER_STYLES.map(s => card({ ...s, type: 'mix' })).join('')}
@@ -168,6 +171,8 @@ function toggleWater() {
   renderWaterView();
   showToast(w.enabled ? 'Water tracking on' : 'Water tracking off');
 }
+
+function setWaterAddTo(v) { W().addTo = v === 'water' ? 'water' : 'cup'; save(); renderWaterView(); }
 
 // ---- Mix it ----
 let waterMix = null;   // { id, name, gh, kh, type, ml, dirty }
@@ -346,6 +351,30 @@ function brewWaterValue() {
   const x = waterById(selectedWaterId) || (brewWaterSnapshot && brewWaterSnapshot.id === selectedWaterId ? brewWaterSnapshot : null);
   return x ? cleanBrewWater(x) : null;
 }
+// ---- Reminder after brewing: drops to add to the cup ----
+// The coffee in the cup: espresso yield; for filter, the water less what the grounds hold back (about 2 g per g of coffee)
+function cupVolumeMl() {
+  const v = id => parseFloat(document.getElementById(id)?.value);
+  const water = v('r-yield'), dose = v('r-dose');
+  if (!(water > 0)) return null;
+  if (isEspressoMethod(state.selectedMethod || 'Espresso')) return Math.round(water);
+  return Math.round(Math.max(water * 0.5, dose > 0 ? water - 2 * dose : water));
+}
+function dropsReminderHtml() {
+  if (!waterOn() || W().addTo === 'water') return '';
+  const x = selectedWaterId && selectedWaterId !== 'w-none' ? (waterById(selectedWaterId) || (brewWaterSnapshot && brewWaterSnapshot.id === selectedWaterId ? brewWaterSnapshot : null)) : null;
+  if (!x || x.type === 'plain') return '';
+  const ml = cupVolumeMl(), vol = ml || 250, m = mixFor(x, vol);
+  const isEsp = isEspressoMethod(state.selectedMethod || 'Espresso');
+  return `<div class="drops-note" role="note"><div class="dn-k">💧 Add to your cup now</div>
+    <div class="dn-v"><span class="dn-a"><b>${fmtDrops(m.dA)}</b> drops of A</span><span class="dn-b"><b>${fmtDrops(m.dB)}</b> drops of B</span></div>
+    <div class="dn-s">${escHtml(x.name)} · ${ml ? `for about ${ml} ml in the cup${isEsp ? '' : ' (your water less what the grounds hold)'}` : 'per 250 ml: enter your water amount for an exact count'}</div></div>`;
+}
+function renderDropsReminder() {
+  const show = !isScoreOnly() && !document.getElementById('r-edit-id')?.value;
+  ['r-drops-note', 'bd-drops-note'].forEach(id => { const el = document.getElementById(id); if (el) el.innerHTML = show ? dropsReminderHtml() : ''; });
+}
+
 // After a brew is saved with a water, that becomes the default next time
 function noteWaterUsed(w) { if (w && waterById(w.id)) { W().lastId = w.id; } }
 function waterBadgeHtml(r) {

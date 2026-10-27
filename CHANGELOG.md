@@ -1115,6 +1115,20 @@ No visible changes — two structural changes behind the scenes.
 
 ---
 
+## v3.49
+*27 October 2026*
+
+### Drops reminder after brewing
+- When you stop the timer, the **Brew finished** sheet and **How was it?** show "💧 Add to your cup now", with the drops of A and B for the water you picked. Example: Bright & juicy, 15 g → 250 ml gives 9 drops of A and 4½ drops of B
+- The count is for the coffee actually in the cup:
+  - Filter: your water less what the grounds hold back (about 2 g per g of coffee), so 15 g → 250 ml is about 220 ml
+  - Espresso: the yield
+  - No water amount entered: it shows per 250 ml and asks for the amount
+- New setting on the Water page, **I add the drops: Cup / Water**. Cup (the default) gives the reminder. Water means you mineralise the brew water beforehand, so there's no reminder
+- No reminder for tap/bottled water, "Not recorded", editing a brew, or scoring a brew saved earlier
+
+---
+
 ## Pending / Roadmap
 - Rebuild the APK once to pick up the new cup icon
 - Opt-in pooled data + trained model (see feasibility notes): backend, consent, deletion, ICO registration
@@ -1132,4 +1146,4 @@ No visible changes — two structural changes behind the scenes.
 
 ---
 
-*Document maintained automatically. Last updated: v3.48*
+*Document maintained automatically. Last updated: v3.49*

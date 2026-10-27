@@ -88,6 +88,29 @@ with sync_playwright() as p:
     ok('Repeat keeps the water', pg.evaluate("selectedWaterId")=='w-bright'); close(pg)
     pg.evaluate(f"openPlanNext('{br['id']}'); savePlan()"); pg.wait_for_timeout(400)
     ok('Plan next carries the water to Up next', st(pg)['plannedBrews'][0].get('water',{}).get('id')=='w-bright')
+    # reminder after brewing: drops for the coffee in the cup
+    close(pg); pg.evaluate("state.selectedCoffeeId='c1'; state.selectedMethod='Pourover'; openRecipeModal()"); pg.wait_for_timeout(400)
+    pg.locator('#water-selector .coffee-selector-item.selected').tap(); pg.wait_for_timeout(150); pg.locator('#water-selector .coffee-selector-item', has_text='Bright & juicy').tap()
+    pg.evaluate("setBrewPage('dial')"); pg.fill('#r-dose','15'); pg.fill('#r-yield','250')
+    pg.evaluate("appSettings.scoreLaterPrompt=true; brewTimer.startedAt=Date.now()-180000; openBrewMode()"); pg.wait_for_timeout(300); pg.tap('#bm-stop'); pg.wait_for_timeout(500)
+    t=pg.inner_text('#bd-drops-note')
+    ok('Brew finished sheet: add 9 drops of A + 4½ of B for ~220 ml', 'add to your cup now' in t.lower() and '9 drops of A' in t.replace('\n',' ') and '4½ drops of B' in t.replace('\n',' ') and '220 ml' in t, t)
+    pg.tap('#modal-brew-done button:has-text("Score now")'); pg.wait_for_timeout(400)
+    ok('...and on How was it?', '220 ml' in pg.inner_text('#r-drops-note'))
+    pg.evaluate("W().addTo='water'; setBrewPage('taste')"); pg.wait_for_timeout(200)
+    ok('"I add the drops: to the water" turns the reminder off', pg.inner_text('#r-drops-note').strip()=='')
+    pg.evaluate("W().addTo='cup'; setBrewPage('dial')"); pg.fill('#r-yield',''); pg.evaluate("setBrewPage('taste')"); pg.wait_for_timeout(200)
+    ok('no water amount: per 250 ml, with a hint', 'per 250 ml' in pg.inner_text('#r-drops-note'))
+    pg.locator('#water-selector .coffee-selector-item.selected').evaluate("e=>e")  # still there
+    pg.evaluate("selectedWaterId='w-ctap'"); pg.evaluate("setBrewPage('taste')"); pg.wait_for_timeout(100)
+    tapid=pg.evaluate("W().custom.find(x=>x.type==='plain').id"); pg.evaluate(f"selectedWaterId='{tapid}'; setBrewPage('taste')"); pg.wait_for_timeout(100)
+    ok('tap water: no drops reminder', pg.inner_text('#r-drops-note').strip()=='')
+    close(pg); pg.evaluate("resetBrewTimer()")
+    sc=pg.evaluate("state.recipes.find(r=>r.water).id"); pg.evaluate(f"scoreBrew('{sc}')"); pg.wait_for_timeout(400)
+    ok('scoring a saved brew later: no reminder (drops already added)', pg.inner_text('#r-drops-note').strip()=='')
+    close(pg)
+    pg.evaluate("showView('water')"); pg.wait_for_timeout(200)
+    ok('Water page has the Cup / Water choice', pg.locator('#water-body .seg button.on').inner_text().lower()=='cup')
     # Insights
     pg.evaluate("""(()=>{const mk=(id,w,r)=>({id, coffeeId:'c1', method:'Pourover', dose:'15', yield:'250', rating:r, extraction: r>=8?'good':'under', createdAt:new Date().toISOString(), water:w});
       const B={id:'w-bright',name:'Bright & juicy',gh:60,kh:15,type:'mix'}, N={id:'w-balanced',name:'Balanced',gh:45,kh:22.5,type:'mix'};
