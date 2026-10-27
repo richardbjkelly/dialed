@@ -1092,6 +1092,29 @@ No visible changes — two structural changes behind the scenes.
 
 ---
 
+## v3.48
+*27 October 2026*
+
+### Water & minerals (optional)
+- Turn on **Water & minerals** in Settings › Logging a brew. It's off by default, and when off, nothing about water appears anywhere
+- **Water page** (Settings › Library › Water):
+  - Your two mineral bottles: A for hardness (GH) and B for buffer (KH), with their strength per g/L and what's in them
+  - Drops per gram, and the water styles: Bright & juicy (GH 60 / KH 15), Balanced (45 / 22.5), Sweet & creamy (45 / 30) and Delicate & floral (30 / 15)
+  - Each style shows how many g/L of each bottle it takes and the TDS reading you should expect
+- **Mix it:** tap a water and pick an amount (100 ml to 4 L, or any amount) to see drops and grams of each bottle, plus the expected TDS meter reading. Adjust GH or KH and save it as your own water
+- **Tap / bottled water:** save waters like tap or a bottled brand, with optional GH/KH, to compare against
+- **Make new bottles:**
+  - Tick the salts you have (magnesium chloride, Epsom salt, calcium chloride hydrated or anhydrous, baking soda, potassium bicarbonate). It suggests what to put in each bottle for a 20 g, 50 g, 100 g or 250 g batch, at the same strength as now, so your waters don't change
+  - With both magnesium and calcium, choose mostly magnesium, even, or mostly calcium. With both buffers, choose both evenly, or just one
+  - Epsom salt and calcium aren't put in the same bottle (they'd cloud out as gypsum), and you get a warning if a bottle can't be made
+- **Calibrate drops:** count drops onto a scale to set your drops per gram. There's also an optional TDS meter check: enter drops of A and B, the amount of water and your reading, and it tells you whether your bottles and drop count look right
+- **Log Brew:** a Water picker on the Choose screen. It defaults to the water you last used for that coffee (or last used overall) and shows the drops for your cup. "Not recorded" leaves it off
+- Each brew stores the water it used, so renaming or deleting a water later doesn't change history. Brew cards show it, and Repeat, Up next and Edit keep it
+- **Insights › Water:** average rating for each water, filtered by coffee and method (2+ rated brews each), with a line on which water rates highest so far
+- Backups include water settings, and imported water data is checked and cleaned up
+
+---
+
 ## Pending / Roadmap
 - Rebuild the APK once to pick up the new cup icon
 - Opt-in pooled data + trained model (see feasibility notes): backend, consent, deletion, ICO registration
@@ -1109,4 +1132,4 @@ No visible changes — two structural changes behind the scenes.
 
 ---
 
-*Document maintained automatically. Last updated: v3.47*
+*Document maintained automatically. Last updated: v3.48*

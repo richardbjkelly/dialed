@@ -1,5 +1,5 @@
 // dialed — Saved state, data validation, navigation and form controls
-// Plain scripts sharing one global scope, loaded in order: data, core, coffee, views, tools, app.
+// Plain scripts sharing one global scope, loaded in order: data, core, coffee, views, tools, water, app.
 
 // ==================== STATE ====================
 let state = {
@@ -203,6 +203,7 @@ function sanitizeState(raw) {
     if ('grind' in o) o.grind = plain(o.grind, 20);
     o.method = plain(o.method) || 'Other';
     if ('createdAt' in o) { const d = isoDate(o.createdAt); if (d) o.createdAt = d; else delete o.createdAt; }
+    if ('water' in o) { const w = cleanBrewWater(o.water); if (w) o.water = w; else delete o.water; }
     return o;
   });
   out.plannedBrews = (raw.plannedBrews || []).filter(isObj).map(p => {
@@ -211,8 +212,10 @@ function sanitizeState(raw) {
     ['grind', 'grindFrom', 'grindDir', 'tempDir'].forEach(k => { if (k in o) o[k] = plain(o[k], 20); });
     o.method = plain(o.method) || 'Other';
     if (!['under', 'good', 'over', ''].includes(o.fromExtraction || '')) o.fromExtraction = '';
+    if ('water' in o) { const w = cleanBrewWater(o.water); if (w) o.water = w; else delete o.water; }
     return o;
   });
+  out.water = cleanWaterState(raw.water);
   out.compareIds = Array.isArray(raw.compareIds) ? raw.compareIds.map(safeRef).filter(Boolean) : [];
   out.favouriteGrinderId = safeRef(raw.favouriteGrinderId);
   out.selectedGrinderId = safeRef(raw.selectedGrinderId);
@@ -289,6 +292,7 @@ function showView(name, pushState=true) {
   if(name==='grinders') renderGrinders();
   if(name==='tracker') renderTracker();
   if(name==='compare') renderCompare();
+  if(name==='water') renderWaterView();
   if(changed) playEnter(document.getElementById('view-' + name), 'view-enter');
   if(pushState) history.pushState({view:name}, '', '');
 }
@@ -361,6 +365,7 @@ function openRecipeModal() {
   // Always reset edit state when opening fresh
   const reid = document.getElementById('r-edit-id'); if(reid) reid.value = '';
   const rtitle = document.getElementById('r-modal-title'); if(rtitle) rtitle.textContent = 'Log Brew';
+  selectedWaterId = null; brewWaterSnapshot = null; waterPickedByHand = false;   // water defaults to the last one used for this coffee
   try { setScoreOnly(false); setBrewPage('choose'); } catch(e) {}
   setTimeout(() => { try { syncBrewSliders(); captureRatio(); } catch(e) {} }, 0);
   // Coffee selector
@@ -378,7 +383,7 @@ function openRecipeModal() {
     d.className = 'coffee-selector-item' + (state.selectedCoffeeId===c.id?' selected':'');
     const age = roastAgeToday(c);
     d.innerHTML = `<div class="cs-name">${escHtml(c.name)}</div><div class="cs-sub">${escHtml([c.roaster, age != null ? (age === 0 ? 'roasted today' : age + ' day' + (age === 1 ? '' : 's') + ' off roast') : ''].filter(Boolean).join(' · '))}</div>`;
-    d.onclick = () => { state.selectedCoffeeId=c.id; cs.querySelectorAll('.coffee-selector-item').forEach(x=>x.classList.remove('selected')); d.classList.add('selected'); renderBrewHistory(); renderBrewSuggestion(); };
+    d.onclick = () => { state.selectedCoffeeId=c.id; cs.querySelectorAll('.coffee-selector-item').forEach(x=>x.classList.remove('selected')); d.classList.add('selected'); renderBrewHistory(); renderBrewSuggestion(); if (!waterPickedByHand) { selectedWaterId = null; renderWaterPicker(); } };
     cs.appendChild(d);
   });
   cs.scrollTop = 0; compactSelector(cs);
@@ -461,6 +466,7 @@ function isEspressoMethod(m) { return ESPRESSO_METHODS.includes(m); }
 
 function selectMethod(el, val) {
   state.selectedMethod = val;
+  try { renderWaterPicker(); } catch(e) {}
   document.querySelectorAll('.method-tab').forEach(t => t.classList.remove('selected'));
   el.classList.add('selected');
   // Swap yield ↔ water volume label depending on method

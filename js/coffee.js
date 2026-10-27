@@ -748,6 +748,7 @@ function saveRecipe(opts) {
   if (brewTimer.startedAt) stopBrewTimer();
   const editBrewId = document.getElementById('r-edit-id')?.value||'';
   const brewData = {coffeeId:state.selectedCoffeeId, grinderId:state.selectedGrinderId||null, recipeId:state.selectedRecipeId||null, method:state.selectedMethod||'Espresso', grind:document.getElementById('r-grind').value, dose:document.getElementById('r-dose').value, yield:document.getElementById('r-yield').value, time:getBrewTimeSecs(), temp:document.getElementById('r-temp').value, extraction:state.selectedExtraction, rating:state.selectedRating, notes:document.getElementById('r-notes').value.trim(), taste:readTaste(), grindUm: settingToMicrons(selectedGrinder(), document.getElementById('r-grind').value)};
+  if (waterOn() && !isScoreOnly()) { const wv = brewWaterValue(); brewData.water = wv || undefined; noteWaterUsed(wv); }
   const scoreMode = isScoreOnly();
   let wasAwaiting = false;
   if (opts.later && !editBrewId) { brewData.awaitingScore = true; brewData.scoreRemindAt = new Date(Date.now() + opts.later * 60000).toISOString(); }

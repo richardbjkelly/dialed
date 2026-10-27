@@ -13,7 +13,7 @@
 <meta name="apple-mobile-web-app-title" content="dialed">
 <meta name="theme-color" content="#123C27">
 <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; font-src 'self'; connect-src 'self' https://api.frankfurter.dev https://api.frankfurter.app; object-src 'none'; base-uri 'self'; form-action 'none'">
-<link rel="stylesheet" href="css/styles.css?v=3.47">
+<link rel="stylesheet" href="css/styles.css?v=3.48">
 </head>
 <body>
 
@@ -128,6 +128,7 @@
     </div>
     <div id="stats-dashboard"></div>
   </div>
+  <div id="water-insights"></div>
   <div class="divider">All brews</div>
   <div class="section-subtitle" id="tracker-count" style="margin-top:-6px">All brews</div>
 
@@ -166,6 +167,17 @@
   </div>
 
   <div id="tracker-list"></div>
+</div>
+
+<!-- WATER -->
+<div id="view-water" class="view">
+  <div style="height:20px"></div>
+  <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:12px">
+    <div><div class="section-title">Water</div><div class="section-subtitle">Your mineral bottles and water styles</div></div>
+    <button type="button" class="switch" id="water-switch" role="switch" aria-checked="false" aria-label="Water tracking" data-on-click="toggleWater()" style="margin-top:6px"><span class="switch-knob"></span></button>
+  </div>
+  <div id="water-body"></div>
+  <div style="height:90px"></div>
 </div>
 
 <!-- GRINDERS -->
@@ -341,6 +353,7 @@
       </div>
       <div id="r-recipe-card"></div>
     </div>
+    <div class="form-group" id="r-water-group" hidden><label class="form-label">Water</label><div class="coffee-selector" id="water-selector"></div></div>
     </div>
     <div id="r-dial" data-brew-page="dial" hidden>
     <div class="brew-summary" id="r-dial-summary"></div>
@@ -668,6 +681,104 @@
 <div class="settings-backdrop" id="settings-backdrop" data-on-click="closeSettings()"></div>
 
 <!-- Settings panel -->
+<!-- MODAL: Water mix -->
+<div class="modal-overlay" id="modal-water-mix">
+  <div class="modal">
+    <div class="modal-handle"></div>
+    <div class="modal-title" id="wm-title">Mix</div>
+    <div class="modal-subtitle" id="wm-sub" style="text-transform:none;letter-spacing:.5px"></div>
+    <div class="form-label">How much water?</div>
+    <div class="chips wm-chips" id="wm-vols">
+      <button type="button" class="chip2" data-ml="100" data-on-click="setWaterMl(100)">100 ml</button><button type="button" class="chip2" data-ml="250" data-on-click="setWaterMl(250)">250 ml</button><button type="button" class="chip2" data-ml="500" data-on-click="setWaterMl(500)">500 ml</button><button type="button" class="chip2" data-ml="1000" data-on-click="setWaterMl(1000)">1 L</button><button type="button" class="chip2" data-ml="4000" data-on-click="setWaterMl(4000)">4 L</button>
+      <input type="number" class="form-input wm-ml" id="wm-ml" min="10" max="20000" placeholder="Other ml" aria-label="Other amount in ml" data-on-input="setWaterMl(this.value)">
+    </div>
+    <div class="wm-big">
+      <div class="wm-a"><div class="wm-n" id="wm-da">0</div><div class="wm-u">drops of A</div><div class="wm-g" id="wm-ga"></div></div>
+      <div class="wm-b"><div class="wm-n" id="wm-db">0</div><div class="wm-u">drops of B</div><div class="wm-g" id="wm-gb"></div></div>
+    </div>
+    <div class="wm-res" id="wm-res"></div>
+    <div class="form-label" style="margin-top:16px">Adjust</div>
+    <div class="wm-sl"><span>GH</span><input type="range" id="wm-gh" min="0" max="150" step="0.5" aria-label="GH" data-on-input="slideWater('gh', this.value)"><input type="number" class="form-input" id="wm-gh-n" min="0" max="200" step="0.5" aria-label="GH value" data-on-change="slideWater('gh', this.value)"></div>
+    <div class="wm-sl kh"><span>KH</span><input type="range" id="wm-kh" min="0" max="80" step="0.5" aria-label="KH" data-on-input="slideWater('kh', this.value)"><input type="number" class="form-input" id="wm-kh-n" min="0" max="100" step="0.5" aria-label="KH value" data-on-change="slideWater('kh', this.value)"></div>
+    <div class="wm-hint">Typical: GH 30–80, KH 15–40.</div>
+    <div id="wm-save-row" hidden>
+      <div class="form-group" style="margin-top:12px"><label class="form-label" for="wm-name">Name</label><input type="text" class="form-input" id="wm-name" maxlength="30" placeholder="e.g. Extra bright"></div>
+      <button type="button" class="btn-primary" id="wm-save" data-on-click="saveWaterMix()">Save as a new water</button>
+      <button type="button" class="btn-delete-water" id="wm-delete" data-on-click="deleteWaterMix()" hidden>Delete this water</button>
+    </div>
+    <div style="height:10px"></div>
+    <button type="button" class="btn-secondary" style="width:100%" data-on-click="closeModal('modal-water-mix')">Close</button>
+    <div style="height:10px"></div>
+  </div>
+</div>
+
+<!-- MODAL: Tap / bottled water -->
+<div class="modal-overlay" id="modal-water-plain">
+  <div class="modal">
+    <div class="modal-handle"></div>
+    <div class="modal-title" id="wp-title">Tap or bottled water</div>
+    <div class="modal-subtitle">GH and KH are optional: check the label or your water company's report</div>
+    <div class="form-group"><label class="form-label" for="wp-name">Name</label><input type="text" class="form-input" id="wp-name" maxlength="30" placeholder="e.g. Tap, Volvic"></div>
+    <div class="form-row">
+      <div class="form-group"><label class="form-label" for="wp-gh">GH (optional)</label><input type="number" class="form-input" id="wp-gh" min="0" max="500" placeholder="e.g. 120"></div>
+      <div class="form-group"><label class="form-label" for="wp-kh">KH (optional)</label><input type="number" class="form-input" id="wp-kh" min="0" max="500" placeholder="e.g. 90"></div>
+    </div>
+    <button type="button" class="btn-primary" data-on-click="saveWaterPlain()">Save</button>
+    <button type="button" class="btn-delete-water" id="wp-delete" data-on-click="deleteWaterPlain()" hidden>Delete this water</button>
+    <div style="height:10px"></div>
+    <button type="button" class="btn-secondary" style="width:100%" data-on-click="closeModal('modal-water-plain')">Cancel</button>
+    <div style="height:10px"></div>
+  </div>
+</div>
+
+<!-- MODAL: Make new bottles -->
+<div class="modal-overlay" id="modal-water-bottles">
+  <div class="modal">
+    <div class="modal-handle"></div>
+    <div class="modal-title">Make new bottles</div>
+    <div class="modal-subtitle">Tick the salts you have</div>
+    <div id="wb-salts" class="salt-list"></div>
+    <div id="wb-balance" class="wb-opt" hidden><div class="form-label">Hardness from</div><div class="chips"><button type="button" class="chip2" data-v="mg" data-on-click="setBottleOpt('balance','mg')">Mostly magnesium</button><button type="button" class="chip2" data-v="even" data-on-click="setBottleOpt('balance','even')">Even</button><button type="button" class="chip2" data-v="ca" data-on-click="setBottleOpt('balance','ca')">Mostly calcium</button></div><div class="wm-hint">Magnesium tends to taste brighter and pull more fruit; calcium rounder and heavier.</div></div>
+    <div id="wb-buffer" class="wb-opt" hidden><div class="form-label">Buffer from</div><div class="chips"><button type="button" class="chip2" data-v="even" data-on-click="setBottleOpt('buffer','even')">Both evenly</button><button type="button" class="chip2" data-v="na" data-on-click="setBottleOpt('buffer','na')">Baking soda</button><button type="button" class="chip2" data-v="k" data-on-click="setBottleOpt('buffer','k')">Potassium</button></div></div>
+    <div class="form-label" style="margin-top:14px">Batch size (each bottle)</div>
+    <div class="chips" id="wb-sizes"><button type="button" class="chip2" data-g="20" data-on-click="setBottleOpt('total',20)">20 g</button><button type="button" class="chip2" data-g="50" data-on-click="setBottleOpt('total',50)">50 g</button><button type="button" class="chip2" data-g="100" data-on-click="setBottleOpt('total',100)">100 g</button><button type="button" class="chip2" data-g="250" data-on-click="setBottleOpt('total',250)">250 g</button></div>
+    <div id="wb-result"></div>
+    <button type="button" class="btn-primary" id="wb-use" data-on-click="useSuggestedBottles()">Use these as my bottles</button>
+    <div style="height:10px"></div>
+    <button type="button" class="btn-secondary" style="width:100%" data-on-click="closeModal('modal-water-bottles')">Close</button>
+    <div style="height:10px"></div>
+  </div>
+</div>
+
+<!-- MODAL: Calibrate drops -->
+<div class="modal-overlay" id="modal-water-cal">
+  <div class="modal">
+    <div class="modal-handle"></div>
+    <div class="modal-title">Calibrate drops</div>
+    <div class="modal-subtitle">Now <span id="wc-now"></span> drops per gram</div>
+    <ol class="wc-steps"><li>Put a small cup on your scale and tare it.</li><li>Drip from bottle A, counting, until it reads about 1 g.</li><li>Enter the count and the exact weight shown.</li></ol>
+    <div class="form-row">
+      <div class="form-group"><label class="form-label" for="wc-drops">Drops counted</label><input type="number" class="form-input" id="wc-drops" min="1" max="200" placeholder="e.g. 21" data-on-input="waterCalPreview()"></div>
+      <div class="form-group"><label class="form-label" for="wc-grams">Weight (g)</label><input type="number" class="form-input" id="wc-grams" min="0.1" max="20" step="0.01" data-on-input="waterCalPreview()"></div>
+    </div>
+    <div class="wc-out" id="wc-out"></div>
+    <button type="button" class="btn-primary" data-on-click="saveWaterCal()">Save drops per gram</button>
+    <div class="divider" style="margin-top:20px">Check with a TDS meter (optional)</div>
+    <div class="form-row wc-tds">
+      <div class="form-group"><label class="form-label" for="wc-ta">Drops A</label><input type="number" class="form-input" id="wc-ta" min="0" max="500" data-on-input="waterCalPreview()"></div>
+      <div class="form-group"><label class="form-label" for="wc-tb">Drops B</label><input type="number" class="form-input" id="wc-tb" min="0" max="500" data-on-input="waterCalPreview()"></div>
+    </div>
+    <div class="form-row wc-tds">
+      <div class="form-group"><label class="form-label" for="wc-tml">Water (ml)</label><input type="number" class="form-input" id="wc-tml" min="10" max="10000" data-on-input="waterCalPreview()"></div>
+      <div class="form-group"><label class="form-label" for="wc-tppm">Meter reads (ppm)</label><input type="number" class="form-input" id="wc-tppm" min="0" max="2000" placeholder="e.g. 133" data-on-input="waterCalPreview()"></div>
+    </div>
+    <div class="wc-out" id="wc-tout"></div>
+    <div style="height:10px"></div>
+    <button type="button" class="btn-secondary" style="width:100%" data-on-click="closeModal('modal-water-cal')">Close</button>
+    <div style="height:10px"></div>
+  </div>
+</div>
+
 <div class="settings-panel" id="settings-panel">
   <div class="settings-panel-header">
     <div class="settings-panel-title">Settings</div>
@@ -691,6 +802,15 @@
       <div style="flex:1">
         <div class="settings-nav-label">Grinders</div>
         <div class="settings-nav-sub">Browse 58 grinders, compare, set default</div>
+      </div>
+      <span class="settings-nav-arrow">›</span>
+    </div>
+
+    <div class="settings-nav-item" data-on-click="closeSettings();openWater()">
+      <span class="settings-nav-icon"><svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3s6 6.5 6 11a6 6 0 0 1-12 0c0-4.5 6-11 6-11z"/><path d="M9.5 15a2.5 2.5 0 0 0 2.5 2.5"/></svg></span>
+      <div style="flex:1">
+        <div class="settings-nav-label">Water</div>
+        <div class="settings-nav-sub">Mineral bottles, water styles and a drops calculator</div>
       </div>
       <span class="settings-nav-arrow">›</span>
     </div>
@@ -721,6 +841,14 @@
         <div class="settings-toggle-sub">After stopping the timer, offer to save the brew and remind you to score it once it has cooled</div>
       </div>
       <button type="button" class="switch" id="settings-scorelater-switch" role="switch" aria-checked="true" aria-label="Score Later" data-on-click="toggleScoreLater()"><span class="switch-knob"></span></button>
+    </div>
+
+    <div class="settings-toggle-row">
+      <div style="flex:1;padding-right:12px">
+        <div class="settings-toggle-label">Water &amp; minerals</div>
+        <div class="settings-toggle-sub">Pick a water when logging a brew, mix it from your mineral bottles, and compare results by water</div>
+      </div>
+      <button type="button" class="switch" id="settings-water-switch" role="switch" aria-checked="false" aria-label="Water and minerals" data-on-click="toggleWater()"><span class="switch-knob"></span></button>
     </div>
     </div>
 
@@ -845,11 +973,12 @@
     <span class="nav-tab-icon"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><line x1="4" y1="6" x2="20" y2="6"/><line x1="4" y1="12" x2="20" y2="12"/><line x1="4" y1="18" x2="20" y2="18"/><circle cx="8" cy="6" r="2" fill="var(--espresso)" stroke="currentColor" class="nav-fill"/><circle cx="16" cy="12" r="2" fill="var(--espresso)" stroke="currentColor" class="nav-fill"/><circle cx="10" cy="18" r="2" fill="var(--espresso)" class="nav-fill" stroke="currentColor"/></svg></span>Settings
   </button>
 </nav>
-<script src="js/data.js?v=3.47"></script>
-<script src="js/core.js?v=3.47"></script>
-<script src="js/coffee.js?v=3.47"></script>
-<script src="js/views.js?v=3.47"></script>
-<script src="js/tools.js?v=3.47"></script>
-<script src="js/app.js?v=3.47"></script>
+<script src="js/data.js?v=3.48"></script>
+<script src="js/core.js?v=3.48"></script>
+<script src="js/coffee.js?v=3.48"></script>
+<script src="js/views.js?v=3.48"></script>
+<script src="js/tools.js?v=3.48"></script>
+<script src="js/water.js?v=3.48"></script>
+<script src="js/app.js?v=3.48"></script>
 </body>
 </html>

@@ -10,7 +10,7 @@ src=html+''.join(open(f,encoding='utf8').read() for f in sorted(glob.glob(ROOT+'
 sw=open(ROOT+'/sw.js',encoding='utf8').read()
 ver=re.search(r"const APP_VERSION = '([^']+)'",src).group(1)
 ok('version.json matches the app version', json.load(open(ROOT+'/version.json'))['version']==ver)
-ok('service worker and asset links carry the same version', re.search(r"const VERSION = '([^']+)'",sw).group(1)==ver and set(re.findall(r'\?v=([\d.]+)',html))=={ver} and len(re.findall(r'\?v=',html))==7)
+ok('service worker and asset links carry the same version', re.search(r"const VERSION = '([^']+)'",sw).group(1)==ver and set(re.findall(r'\?v=([\d.]+)',html))=={ver} and len(re.findall(r'\?v=',html))==8)
 ok('no inline scripts, handlers or script-like links in the page', not re.search(r'<script(?![^>]*\ssrc=)|\son[a-z]+\s*=\s*["\\]|javascript:',src), re.findall(r'.{20}\son[a-z]+\s*=\s*["\\].{20}',src)[:3])
 csp=re.search(r'Content-Security-Policy" content="([^"]*)"',html).group(1)
 ok('content policy: scripts only from the app itself', "script-src 'self';" in csp and 'unsafe-eval' not in csp, csp)

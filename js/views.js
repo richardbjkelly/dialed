@@ -322,7 +322,7 @@ function recipeCard(r, showDel=false) {
         <div style="flex:1;min-width:0">
           <div style="font-family:var(--font-display);font-size:14px">${escHtml(coffee?.name||'Unknown Coffee')}</div>
           <div style="font-family:var(--font-mono);font-size:11px;color:var(--text-muted)">${escHtml(coffee?.roaster||'')}${coffee?.roaster&&r.method?' · ':''}${escHtml(r.method||'')}</div>
-          ${grinderBadge}
+          ${grinderBadge}${waterBadgeHtml(r)}
         </div>
       </div>
       <div style="display:flex;align-items:center;gap:6px;flex-shrink:0">${coffee?.decaf ? '<span class="decaf-label">Decaf</span>' : ''}${r.awaitingScore ? `<button type="button" class="unscored-label" data-on-click="event.stopPropagation();scoreBrew('${r.id}')">Unscored</button>` : ''}${exTag}<button class="card-more" aria-label="More options" data-on-click="event.stopPropagation();showEditOverlay('brew-${r.id}')">⋯</button></div>
@@ -710,6 +710,7 @@ function setTrackerSort(key, btn) {
 
 function renderTracker() {
   renderStatsDashboard();
+  try { renderWaterInsights(); } catch(e) {}
   const el = document.getElementById('tracker-list');
   const countEl = document.getElementById('tracker-count');
   if (!el) return;

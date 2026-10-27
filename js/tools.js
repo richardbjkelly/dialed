@@ -331,6 +331,9 @@ function fillBrewModal(r, opts={}) {
   if (!opts.keepResult && !opts.keepTimer) resetBrewTimer();
   editKeepCoffeeId = opts.editId ? r.coffeeId : null;
   openRecipeModal();
+  if (r.water) { selectedWaterId = r.water.id; brewWaterSnapshot = r.water; waterPickedByHand = true; }   // Repeat, Up next and Edit keep the brew's water
+  else if (opts.editId) { selectedWaterId = 'w-none'; waterPickedByHand = true; }
+  try { renderWaterPicker(); } catch(e) {}
   suggestionSuppressed = true; renderBrewSuggestion();
   if (opts.editId) { document.getElementById('r-edit-id').value = opts.editId; renderStartBtn(); const lb = document.getElementById('r-later-btn'); if (lb) lb.style.display = 'none'; }
   if (opts.planId) document.getElementById('r-plan-id').value = opts.planId;
@@ -1193,6 +1196,7 @@ function setBrewPage(p) {
   [...$('r-prog').children].forEach((b, k) => b.classList.toggle('on', k <= i));
   $('r-summary').hidden = brewPage !== 'taste';
   if (brewPage === 'taste') renderBrewSummary();
+  if (brewPage === 'choose') { try { renderWaterPicker(); } catch(e) {} }
   if (brewPage === 'dial') { renderDialSummary(); setTimeout(() => { try { syncBrewSliders(); } catch(e) {} }, 0); }
   renderStartBtn();
   const ae = document.activeElement, pg = ae && ae.closest && ae.closest('[data-brew-page]');
@@ -1450,7 +1454,7 @@ function savePlan() {
   state.plannedBrews.splice(oldIdx >= 0 ? oldIdx : state.plannedBrews.length, 0, {
     id: 'plan-' + Date.now(), createdAt: new Date().toISOString(), basedOn: r.id, fromExtraction: r.extraction || '',
     coffeeId: r.coffeeId, grinderId: r.grinderId || null, method: r.method, recipeId: r.recipeId || null,
-    dose: r.dose, yield: r.yield,
+    dose: r.dose, yield: r.yield, ...(r.water ? { water: r.water } : {}),
     grind: d.grindBase !== null ? String(d.grind) : r.grind, grindFrom: r.grind, grindDir: d.grindDir,
     temp: d.temp != null ? String(d.temp) : r.temp, tempFrom: r.temp, tempDir: d.tempDir,
     note: document.getElementById('plan-note').value.trim()
