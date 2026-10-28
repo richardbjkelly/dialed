@@ -1141,6 +1141,25 @@ No visible changes — two structural changes behind the scenes.
 
 ---
 
+## v3.51
+*28 October 2026*
+
+### Reference waters
+- New **Reference waters** group on the Water page, under your four styles: well-known published recipes, made from your two bottles (GH / KH as CaCO₃):
+  - **SCA standard** 68 / 40: the Specialty Coffee Association target
+  - **Barista Hustle** 81 / 40: Barista Hustle's suggested starting point
+  - **WOC Budapest** 51 / 40: World Brewers Cup competition water
+  - **Rao** 76 / 50: close to Scott Rao's recipe, with softer acidity
+  - **Hendon** 100 / 31: from Water for Coffee, extracts strongly
+  - **Melbourne** 24 / 12: very soft, for long filter brews and very light roasts
+  - **Espresso** 25 / 45: low hardness and more buffer, like Lotus's espresso recipes
+- Every built-in water now shows a one-line description on its card and in Mix it
+- Reference waters appear in Log Brew's Water list, work with Mix it and the drops reminder, and can be adjusted and saved as your own
+- Most of these recipes take all their hardness from magnesium (Epsom salt). From your bottles the GH and KH match, but they may taste a little rounder
+- The "typical" range under the Mix it sliders now reads GH 20–100, KH 10–50
+
+---
+
 ## Pending / Roadmap
 - Rebuild the APK once to pick up the new cup icon
 - Opt-in pooled data + trained model (see feasibility notes): backend, consent, deletion, ICO registration
@@ -1158,4 +1177,4 @@ No visible changes — two structural changes behind the scenes.
 
 ---
 
-*Document maintained automatically. Last updated: v3.50*
+*Document maintained automatically. Last updated: v3.51*

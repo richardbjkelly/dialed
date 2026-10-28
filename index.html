@@ -13,7 +13,7 @@
 <meta name="apple-mobile-web-app-title" content="dialed">
 <meta name="theme-color" content="#123C27">
 <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; font-src 'self'; connect-src 'self' https://api.frankfurter.dev https://api.frankfurter.app; object-src 'none'; base-uri 'self'; form-action 'none'">
-<link rel="stylesheet" href="css/styles.css?v=3.50">
+<link rel="stylesheet" href="css/styles.css?v=3.51">
 </head>
 <body>
 
@@ -689,6 +689,7 @@
     <div class="modal-handle"></div>
     <div class="modal-title" id="wm-title">Mix</div>
     <div class="modal-subtitle" id="wm-sub" style="text-transform:none;letter-spacing:.5px"></div>
+    <div class="wm-note" id="wm-note" hidden></div>
     <div class="form-label">How much water?</div>
     <div class="chips wm-chips" id="wm-vols">
       <button type="button" class="chip2" data-ml="100" data-on-click="setWaterMl(100)">100 ml</button><button type="button" class="chip2" data-ml="250" data-on-click="setWaterMl(250)">250 ml</button><button type="button" class="chip2" data-ml="500" data-on-click="setWaterMl(500)">500 ml</button><button type="button" class="chip2" data-ml="1000" data-on-click="setWaterMl(1000)">1 L</button><button type="button" class="chip2" data-ml="4000" data-on-click="setWaterMl(4000)">4 L</button>
@@ -702,7 +703,7 @@
     <div class="form-label" style="margin-top:16px">Adjust</div>
     <div class="wm-sl"><span>GH</span><input type="range" id="wm-gh" min="0" max="150" step="0.5" aria-label="GH" data-on-input="slideWater('gh', this.value)"><input type="number" class="form-input" id="wm-gh-n" min="0" max="200" step="0.5" aria-label="GH value" data-on-change="slideWater('gh', this.value)"></div>
     <div class="wm-sl kh"><span>KH</span><input type="range" id="wm-kh" min="0" max="80" step="0.5" aria-label="KH" data-on-input="slideWater('kh', this.value)"><input type="number" class="form-input" id="wm-kh-n" min="0" max="100" step="0.5" aria-label="KH value" data-on-change="slideWater('kh', this.value)"></div>
-    <div class="wm-hint">Typical: GH 30–80, KH 15–40.</div>
+    <div class="wm-hint">Typical: GH 20–100, KH 10–50.</div>
     <div id="wm-save-row" hidden>
       <div class="form-group" style="margin-top:12px"><label class="form-label" for="wm-name">Name</label><input type="text" class="form-input" id="wm-name" maxlength="30" placeholder="e.g. Extra bright"></div>
       <button type="button" class="btn-primary" id="wm-save" data-on-click="saveWaterMix()">Save as a new water</button>
@@ -975,12 +976,12 @@
     <span class="nav-tab-icon"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><line x1="4" y1="6" x2="20" y2="6"/><line x1="4" y1="12" x2="20" y2="12"/><line x1="4" y1="18" x2="20" y2="18"/><circle cx="8" cy="6" r="2" fill="var(--espresso)" stroke="currentColor" class="nav-fill"/><circle cx="16" cy="12" r="2" fill="var(--espresso)" stroke="currentColor" class="nav-fill"/><circle cx="10" cy="18" r="2" fill="var(--espresso)" class="nav-fill" stroke="currentColor"/></svg></span>Settings
   </button>
 </nav>
-<script src="js/data.js?v=3.50"></script>
-<script src="js/core.js?v=3.50"></script>
-<script src="js/coffee.js?v=3.50"></script>
-<script src="js/views.js?v=3.50"></script>
-<script src="js/tools.js?v=3.50"></script>
-<script src="js/water.js?v=3.50"></script>
-<script src="js/app.js?v=3.50"></script>
+<script src="js/data.js?v=3.51"></script>
+<script src="js/core.js?v=3.51"></script>
+<script src="js/coffee.js?v=3.51"></script>
+<script src="js/views.js?v=3.51"></script>
+<script src="js/tools.js?v=3.51"></script>
+<script src="js/water.js?v=3.51"></script>
+<script src="js/app.js?v=3.51"></script>
 </body>
 </html>

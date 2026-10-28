@@ -23,13 +23,18 @@ with sync_playwright() as p:
     t=pg.inner_text('#view-water')
     ok('Water page: bottles at 30 GH and 15 KH per g/L', '29.8 GH per g/L' in t or '30 GH per g/L' in t, t[:300])
     ok('four styles listed', all(x in t for x in ['Bright & juicy','Balanced','Sweet & creamy','Delicate & floral']))
+    ok('Reference waters listed with their sources', 'reference waters' in t.lower() and all(x in t for x in ['SCA standard','Barista Hustle','WOC Budapest','Rao','Hendon','Melbourne','Espresso']) and 'Specialty Coffee Association' in t)
+    ref=pg.evaluate("allWaters().filter(x=>x.ref).map(x=>[x.id,x.gh,x.kh])")
+    ok('reference values: SCA 68/40, BH 81/40, Budapest 51/40, Rao 76/50, Hendon 100/31, Melbourne 24/12, Espresso 25/45', ref==[['w-sca',68,40],['w-bh',81,40],['w-budapest',51,40],['w-rao',76,50],['w-hendon',100,31],['w-melbourne',24,12],['w-espresso',25,45]], ref)
+    m2=pg.evaluate("mixFor(waterById('w-sca'), 220)")
+    ok('SCA in a 220 ml cup: about 10 drops of A and 12 of B', round(m2['dA'])==10 and round(m2['dB'])==12, m2)
     # maths
     m=pg.evaluate("mixFor(waterById('w-balanced'), 250)")
     ok('Balanced in 250 ml: about 7½ drops of each', abs(m['dA']-7.5)<0.15 and abs(m['dB']-7.5)<0.15, m)
     chk=pg.evaluate("(()=>{const A=bottleStrength(W().bottles.A),B=bottleStrength(W().bottles.B); return Math.round((2.5*A.dry+2.5*B.dry)*TDS_METER)})()")
     ok('your test (5+5 drops in 100 ml) predicts about 133 ppm', abs(chk-133)<=6, chk)
     # calculator
-    pg.locator('.water-card', has_text='Balanced').tap(); pg.wait_for_timeout(400)
+    pg.locator('.water-card[data-on-click*="w-balanced"]').tap(); pg.wait_for_timeout(400)
     ok('Mix: Balanced at 250 ml shows 7½ + 7½ drops', pg.inner_text('#wm-da')=='7½' and pg.inner_text('#wm-db')=='7½' and pg.inner_text('#wm-title')=='Balanced')
     pg.tap('#wm-vols >> text=1 L'); pg.wait_for_timeout(200)
     ok('1 L: 30 + 30 drops, about 1.5 g each', pg.inner_text('#wm-da')=='30' and pg.inner_text('#wm-ga') in ('1.50 g','1.51 g'), [pg.inner_text('#wm-da'),pg.inner_text('#wm-ga')])
@@ -69,6 +74,7 @@ with sync_playwright() as p:
     pg.evaluate("W().dropsPerGram=20; save()")
     # Log Brew
     pg.evaluate("state.selectedCoffeeId='c1'; state.selectedMethod='Pourover'; openRecipeModal()"); pg.wait_for_timeout(400)
+    ok('reference waters are in the Log Brew water list', pg.evaluate("[...document.querySelectorAll('#water-selector .cs-name')].map(e=>e.textContent)").count('Hendon')==1 if pg.is_visible('#r-water-group') else True)
     ok('Log Brew Choose has Water, default Balanced', pg.is_visible('#r-water-group') and pg.evaluate("document.querySelector('#water-selector .selected .cs-name').textContent")=='Balanced')
     ok('it shows the drops for a cup', 'drops' in pg.inner_text('#water-selector .selected'))
     pg.locator('#water-selector .coffee-selector-item.selected').tap(); pg.wait_for_timeout(200)

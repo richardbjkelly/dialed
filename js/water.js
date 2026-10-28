@@ -23,6 +23,17 @@ const WATER_STYLES = [
   { id: 'w-sweet',    name: 'Sweet & creamy',   gh: 45, kh: 30,   note: 'Rounder, softer acidity' },
   { id: 'w-delicate', name: 'Delicate & floral', gh: 30, kh: 15,  note: 'Light, clear and tea-like' },
 ];
+// Well-known published waters (GH / KH as CaCO3). Most are made with Epsom salt alone, so their hardness is all
+// magnesium; from your bottles the GH and KH match but the taste may be a little rounder.
+const REFERENCE_WATERS = [
+  { id: 'w-sca',      name: 'SCA standard',    gh: 68,  kh: 40, note: 'The Specialty Coffee Association target: a textbook all-rounder' },
+  { id: 'w-bh',       name: 'Barista Hustle',  gh: 81,  kh: 40, note: "Barista Hustle's suggested starting point for most coffees" },
+  { id: 'w-budapest', name: 'WOC Budapest',    gh: 51,  kh: 40, note: 'World Brewers Cup competition water: clean and balanced' },
+  { id: 'w-rao',      name: 'Rao',             gh: 76,  kh: 50, note: "Close to Scott Rao's recipe: balanced, softer acidity" },
+  { id: 'w-hendon',   name: 'Hendon',          gh: 100, kh: 31, note: 'From Water for Coffee: extracts strongly, punchy and sweet' },
+  { id: 'w-melbourne',name: 'Melbourne',       gh: 24,  kh: 12, note: 'Very soft city water: long filter brews, cupping, very light roasts' },
+  { id: 'w-espresso', name: 'Espresso',        gh: 25,  kh: 45, note: 'Low hardness, more buffer (like Lotus espresso): a rounder, less sharp shot' },
+];
 const formulaHtml = f => escHtml(f).replace(/([A-Za-z)])(\d+)/g, '$1<sub>$2</sub>');
 function defaultWaterState() {
   return { enabled: false, dropsPerGram: 20, salts: ['mgcl2', 'cacl2', 'nahco3', 'khco3'],
@@ -74,7 +85,7 @@ function bottleStrength(b) {
 }
 function allWaters() {
   const w = W();
-  return [...WATER_STYLES.map(s => ({ ...s, type: 'mix', builtin: true })), ...w.custom];
+  return [...WATER_STYLES.map(s => ({ ...s, type: 'mix', builtin: true })), ...REFERENCE_WATERS.map(s => ({ ...s, type: 'mix', builtin: true, ref: true })), ...w.custom];
 }
 function waterById(id) { return allWaters().find(x => x.id === id) || null; }
 // What to add for a water at a volume (ml): grams and drops of each bottle, and the expected meter reading
@@ -143,7 +154,7 @@ function renderWaterView() {
   const card = x => {
     const sum = x.type === 'plain' ? waterSummary(x) : `A ${fmtNum(x.gh / A.gh)} + B ${fmtNum(x.kh / B.kh)} g/L · ≈${mixFor(x, 1000).ppm} ppm`;
     return `<div class="water-card" role="button" tabindex="0" data-on-click="openWaterMix('${x.id}')">
-      <div style="flex:1;min-width:0"><div class="wc-name">${escHtml(x.name)}${x.id === last ? ' <span class="wc-last">last used</span>' : ''}</div><div class="wc-sub">${sum}</div></div>
+      <div style="flex:1;min-width:0"><div class="wc-name">${escHtml(x.name)}${x.id === last ? ' <span class="wc-last">last used</span>' : ''}</div><div class="wc-sub">${sum}</div>${x.note ? `<div class="wc-note">${escHtml(x.note)}</div>` : ''}</div>
       <span class="wc-pill">${x.type === 'plain' ? 'Tap / bottled' : 'GH ' + fmtNum(x.gh) + ' · KH ' + fmtNum(x.kh)}</span></div>`;
   };
   el.innerHTML = `
@@ -158,6 +169,9 @@ function renderWaterView() {
     <div class="water-row"><div><div class="wr-k">Make new bottles</div><div class="wr-s">From the salts you have</div></div><button type="button" class="btn-secondary wr-btn" data-on-click="openWaterBottles()">Make</button></div>
     <div class="divider">Water styles</div>
     ${WATER_STYLES.map(s => card({ ...s, type: 'mix' })).join('')}
+    <div class="divider">Reference waters</div>
+    <div class="water-foot" style="margin:-6px 0 4px">Published recipes from the coffee world, made from your two bottles.</div>
+    ${REFERENCE_WATERS.map(s => card({ ...s, type: 'mix' })).join('')}
     ${w.custom.length ? '<div class="divider">Yours</div>' + w.custom.map(card).join('') : ''}
     <div class="water-add">
       <button type="button" class="btn-secondary" data-on-click="openWaterMix('new')">+ Your own mix</button>
@@ -188,6 +202,7 @@ function renderWaterMix() {
   const r = mixFor(m, m.ml);
   const custom = m.id === 'new' || !m.builtin;
   document.getElementById('wm-title').textContent = m.id === 'new' ? 'Your own mix' : m.name + (m.dirty && m.builtin ? ' (adjusted)' : '');
+  const note = document.getElementById('wm-note'); if (note) { note.textContent = m.note || ''; note.hidden = !m.note; }
   document.getElementById('wm-sub').textContent = `GH ${fmtNum(m.gh)} · KH ${fmtNum(m.kh)} · A ${fmtNum(r.gLA)} + B ${fmtNum(r.gLB)} g/L`;
   document.querySelectorAll('#wm-vols .chip2').forEach(c => c.classList.toggle('on', Number(c.dataset.ml) === m.ml));
   const other = document.getElementById('wm-ml'); if (other && document.activeElement !== other) other.value = [100, 250, 500, 1000, 4000].includes(m.ml) ? '' : m.ml;

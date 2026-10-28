@@ -1011,3 +1011,8 @@
   .seg button { border:none; background:none; padding:9px 14px; min-height:40px; font-family:var(--font-text); font-size:11px; letter-spacing:0.6px; text-transform:uppercase; color:var(--text-muted); cursor:pointer; }
   .seg button.on { background:var(--espresso); color:#FAFAF7; }
   body.dark-mode .seg { border-color:var(--dm-border); } body.dark-mode .seg button.on { background:#A9CDBB; color:#0F2A1C; }
+  .wc-note { font-size:11.5px; color:var(--text); opacity:.8; margin-top:3px; line-height:1.45; }
+  body.dark-mode .wc-note { color:var(--dm-text); }
+  .wm-note { font-size:12.5px; line-height:1.5; color:var(--text); margin:-10px 0 14px; }
+  .wm-note[hidden] { display:none; }
+  body.dark-mode .wm-note { color:var(--dm-text); }
