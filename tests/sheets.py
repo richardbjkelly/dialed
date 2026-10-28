@@ -23,6 +23,18 @@ with sync_playwright() as p:
         ok(f'{name}: page behind does not scroll', pg.evaluate("scrollY")==y0 and pg.evaluate("document.documentElement.classList.contains('scroll-locked')"), pg.evaluate("scrollY"))
         pg.evaluate("closeBrewMode(); document.querySelectorAll('.modal-overlay.open').forEach(m=>closeModal(m.id)); closeSettings()"); pg.wait_for_timeout(400)
         ok(f'{name}: closing unlocks and keeps your place', pg.evaluate("scrollY")==y0 and not pg.evaluate("document.documentElement.classList.contains('scroll-locked')"))
+    # big sheets reach exactly to the bottom of the app header; small ones don't
+    pg.evaluate("scrollTo(0,0)"); pg.wait_for_timeout(200)
+    for ts in ['default','xlarge']:
+        pg.evaluate(f"appSettings.textSize='{ts}'; applyTextSize(); scrollTo(0,0)"); pg.wait_for_timeout(200)
+        for js in ["openRecipeModal()","resetCoffeeModal(); openModal('modal-coffee')","openEditCustomRecipe('custom-1')"]:
+            pg.evaluate(js); pg.wait_for_timeout(450)
+            t=pg.evaluate("(()=>{const m=document.querySelector('.modal-overlay.open .modal'); return [Math.round(m.getBoundingClientRect().top), Math.round(document.querySelector('.app-header').getBoundingClientRect().bottom)]})()")
+            ok(f'{ts}: {js.split("(")[0].split("; ")[-1]} sheet top meets the header', abs(t[0]-t[1])<=1, t)
+            pg.evaluate("document.querySelectorAll('.modal-overlay.open').forEach(m=>closeModal(m.id))"); pg.wait_for_timeout(350)
+    pg.evaluate("appSettings.textSize='default'; applyTextSize(); openFab()"); pg.wait_for_timeout(450)
+    ok('the + menu stays a small sheet', pg.evaluate("document.querySelector('#modal-fab .modal').getBoundingClientRect().top")>300)
+    pg.evaluate("closeModal('modal-fab')"); pg.wait_for_timeout(350)
     # step editor
     pg.evaluate("openEditCustomRecipe('custom-1')"); pg.wait_for_timeout(400)
     ok('step text with < > & shows as typed', pg.locator('#cr-steps-list textarea').first.input_value()=='Bloom <50g> & wait')

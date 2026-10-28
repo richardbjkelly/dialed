@@ -325,8 +325,14 @@ window.addEventListener('popstate', function(e) {
 document.addEventListener('touchstart', () => {}, { passive: true });  // lets :active press states show on iOS
 const reduceMotion = () => window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 const closingTimers = {};
+// The big sheets reach exactly to the bottom of the app header: measure it (it changes with text size and phone notches)
+function syncHeaderHeight() {
+  const h = document.querySelector('.app-header'); if (h) document.documentElement.style.setProperty('--hdr-h', h.offsetHeight + 'px');
+}
+window.addEventListener('resize', syncHeaderHeight);
 function openModal(id) {
   const el = document.getElementById(id); if (!el) return;
+  if (el.classList.contains('sheet-tall')) syncHeaderHeight();
   clearTimeout(closingTimers[id]); el.classList.remove('closing');
   el.classList.add('open');
   try { a11yOpened(id); } catch(e) {}

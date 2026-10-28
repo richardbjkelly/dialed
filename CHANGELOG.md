@@ -1160,6 +1160,18 @@ No visible changes — two structural changes behind the scenes.
 
 ---
 
+## v3.52
+*28 October 2026*
+
+### Taller windows
+- The big windows now reach right up to the bottom of the green dialed header, and are always that height: Log Brew, Add/Edit Coffee, the recipe editor, Plan next brew and the Water windows (Mix it, Make bottles, Calibrate, Tap / bottled). The header stays in view above them
+- The height adjusts to your text size and phone
+- Log Brew's buttons (Next, Start brew, Save brew) sit at the bottom of the window
+- Quick prompts stay as small windows: the + menu, "Are you sure?", Brew finished and Finish bag
+- On small phones, Dial in still fits on one screen
+
+---
+
 ## Pending / Roadmap
 - Rebuild the APK once to pick up the new cup icon
 - Opt-in pooled data + trained model (see feasibility notes): backend, consent, deletion, ICO registration
@@ -1177,4 +1189,4 @@ No visible changes — two structural changes behind the scenes.
 
 ---
 
-*Document maintained automatically. Last updated: v3.51*
+*Document maintained automatically. Last updated: v3.52*
