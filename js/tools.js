@@ -1112,6 +1112,8 @@ function playBrewSound(kind) {
 function brewSoundTick() {
   if (!brewSoundOn() || !brewTimer.startedAt) { brewSoundState = { idx: null, beeped: -1 }; return; }
   const steps = timedSteps(); if (steps.length < 2) return;
+  const rec = state.selectedRecipeId ? getAllRecipesForMethod(state.selectedMethod).find(x => x.id === state.selectedRecipeId) : null;
+  const fin = recipeFinishSecs(rec, steps); if (fin) steps.push({ at: fin, text: 'Finish' });   // the finish gets the same countdown and chime
   const s = brewTimerSecs(); let idx = -1; steps.forEach((st, i) => { if (s >= st.at) idx = i; });
   if (brewSoundState.idx === null) { brewSoundState = { idx, beeped: -1 }; return; }        // no sound for the step you start on
   if (idx !== brewSoundState.idx) { brewSoundState = { idx, beeped: -1 }; if (idx > 0) playBrewSound('chime'); return; }
@@ -1179,6 +1181,24 @@ function confirmCancelBrew() {
   confirmAction({ title:'Cancel this brew?', text:"The timer will reset to 0:00. Everything else you've entered stays as it is.",
     button:'Yes, cancel brew', cancel:'Keep brewing', onYes() { resetBrewTimer(); showToast('Brew cancelled'); } });
 }
+// "James Hoffmann — Ultimate AeroPress" → title "Ultimate AeroPress", by "James Hoffmann"
+function recipeTitleParts(rec) {
+  if (!rec) return { title: state.selectedMethod || '', by: '' };
+  const name = String(rec.name || ''), m = name.match(/^(.+?)\s+[—–-]\s+(.+)$/);
+  if (m) return { title: m[2], by: rec.author || m[1] };
+  return { title: name, by: rec.author && !name.includes(rec.author) ? rec.author : '' };
+}
+// When a recipe should be finished (seconds): its total time, or the last step's own duration ("press over 30 seconds")
+function recipeFinishSecs(rec, steps) {
+  const last = steps[steps.length - 1]; if (!last) return null;
+  const tt = rec && /^(\d{1,2}):(\d{2})$/.exec(String(rec.totalTime || ''));
+  if (tt) { const t = +tt[1] * 60 + +tt[2]; if (t > last.at) return t; }
+  const txt = last.text.toLowerCase();
+  let m = txt.match(/(\d+)\s*[–-]\s*(\d+)\s*(?:s|sec|secs|seconds)\b/); if (m) return last.at + +m[2];
+  m = txt.match(/over\s+(?:about\s+|~)?(\d+)\s*(?:s|sec|secs|seconds)\b/); if (m) return last.at + +m[1];
+  m = txt.match(/over\s+(?:about\s+|~)?(\d+)\s*(?:min|mins|minutes)\b/); if (m) return last.at + 60 * +m[1];
+  return null;
+}
 // Fit the step list: spread evenly if everything fits, otherwise scroll so the step just finished is at the top
 // (then the current one), with faded edges to show there's more
 function layoutBrewSteps(smooth) {
@@ -1203,9 +1223,11 @@ function renderBrewMode() {
   const cf = state.coffees.find(c => c.id === state.selectedCoffeeId);
   const rec = state.selectedRecipeId ? getAllRecipesForMethod(state.selectedMethod).find(x => x.id === state.selectedRecipeId) : null;
   set('bm-coffee', cf ? cf.name : 'Brewing');
-  set('bm-recipe', rec ? rec.name : (state.selectedMethod || ''));
+  // Recipe name first (not cut off), author underneath in smaller text
+  const rn = recipeTitleParts(rec), key = rn.title + '|' + rn.by;
+  const re = $('bm-recipe'); if (re && re.dataset.k !== key) { re.dataset.k = key; re.innerHTML = `<span class="rn">${escHtml(rn.title)}</span>${rn.by ? `<span class="ra">${escHtml(rn.by)}</span>` : ''}`; }
   const v = id => ($(id)?.value || '').trim(), isEsp = isEspressoMethod(state.selectedMethod || 'Espresso');
-  set('bm-meta', [v('r-dose') && v('r-dose') + 'g', v('r-yield') && v('r-yield') + (isEsp ? 'g out' : 'ml'), v('r-temp') && v('r-temp') + '°C', v('r-grind') && 'Grind ' + v('r-grind')].filter(Boolean).join(' · '));
+  set('bm-meta', [v('r-dose') && v('r-dose') + 'g', v('r-yield') && v('r-yield') + (isEsp ? 'g out' : 'ml'), v('r-temp') && v('r-temp') + '°C', v('r-grind') && 'grind ' + v('r-grind')].filter(Boolean).join(' · '));
   const steps = timedSteps(), guide = $('bm-guide'), list = $('bm-steps'), stop = $('bm-stop');
   if (steps.length < 2) {            // no timed recipe: just the clock
     guide.style.display = 'none'; list.innerHTML = ''; list.className = 'bm-spacer'; brewModeIdx = null;
@@ -1224,9 +1246,16 @@ function renderBrewMode() {
   }
   set('bm-now-label', cur ? `Now · step ${idx + 1} of ${steps.length}` : 'Starting');
   const from = cur ? cur.at : 0;
-  $('bm-bar').style.width = (next ? Math.min(100, Math.max(0, (s - from) / Math.max(1, next.at - from) * 100)) : 100) + '%';
-  set('bm-next-at', next ? 'Next at ' + fmt(next.at) : 'Last step');
-  set('bm-next-in', next ? 'in ' + fmt(Math.max(0, next.at - s)) : '+' + fmt(Math.max(0, s - from)));
+  // On the last step, count down to when the recipe should finish (if it says), instead of counting up
+  const fin = !next ? recipeFinishSecs(rec, steps) : null;
+  const target = next ? next.at : fin;
+  $('bm-bar').style.width = (target ? Math.min(100, Math.max(0, (s - from) / Math.max(1, target - from) * 100)) : 100) + '%';
+  set('bm-next-at', next ? 'Next at ' + fmt(next.at) : fin ? 'Finish by about ' + fmt(fin) : 'Last step');
+  set('bm-next-in', next ? 'in ' + fmt(Math.max(0, next.at - s)) : fin ? (s < fin ? 'in ' + fmt(fin - s) : '+' + fmt(s - fin) + ' over') : '+' + fmt(Math.max(0, s - from)));
+  $('bm-next-at').classList.toggle('fin', !next && !!fin);
+  // Get ready: the last 5 seconds before the next step (or the finish) glow sage
+  const soon = !!target && target - s > 0 && target - s <= 5 && !!brewTimer.startedAt;
+  guide.classList.toggle('soon', soon); document.querySelector('.bm-next')?.classList.toggle('soon', soon);
   stop.classList.toggle('final', !next); set('bm-stop', next ? '■ Stop' : '■ Stop & save time');
 }
 document.addEventListener('visibilitychange', async () => {

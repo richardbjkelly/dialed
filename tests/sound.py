@@ -35,6 +35,8 @@ with sync_playwright() as p:
     ok('minimised: still beeps and chimes for the 2:00 step', tones()==[880,880,880,784,1175])
     for t in [148,150,160]: run(t)
     ok('last step (2:30): beep, chime, then quiet', tones()==[880,784,1175])
+    for t in [177,178,179,180,190]: run(t)
+    ok('finish (3:00, "press over 30 seconds"): 3, 2, 1 and a chime, then quiet', tones()==[880,880,880,784,1175])
     pg.evaluate("stopBrewTimer()"); run(170)
     ok('stopped: silent', tones()==[])
     pg.evaluate("resetBrewTimer(); state.selectedRecipeId=null; toggleBrewTimer(); clearInterval(brewTimer.tick)")

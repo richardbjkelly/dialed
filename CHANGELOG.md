@@ -1172,6 +1172,24 @@ No visible changes — two structural changes behind the scenes.
 
 ---
 
+## v3.53
+*28 October 2026*
+
+### Brew mode
+- **Step spacing:** each step's time is centred on its text. Short recipes spread evenly, with the same gap above the first step, between steps and below the last. Long recipes keep a fixed gap and scroll to keep the current step in view (the step you've just done stays at the top), with faded edges to show there's more
+- **Get-ready glow:** in the last 5 seconds before the next step (or the finish), the countdown turns sage with a pulsing dot and the progress bar brightens, so you can see it coming from across the counter
+- **Finish time on the last step:** instead of "Last step" and a count-up, it shows "Finish by about 3:00" and counts down. The finish comes from the recipe's total time, or from the last step itself ("press slowly over 30 seconds" after 2:30 gives 3:00). Once past it, it shows "+0:05 over". Recipes with neither still show "Last step"
+- **Recipe name:** the recipe's name comes first and is no longer cut off ("Ultimate AeroPress"), with the author in smaller text underneath
+- **Numbers line in lowercase:** "11g · 200ml · 96°C · grind 12.5" instead of all capitals
+
+### Brew sounds (optional)
+- New setting in Settings › Logging a brew: **Brew sounds**. Off by default
+- Plays three soft beeps at 3, 2 and 1 seconds before each recipe step (and before the finish), then a two-note chime as it starts. It keeps working when brew mode is minimised
+- Silent on the step you start on and once you stop. Turning it on plays a sample chime
+- Made in the app, with no sound files. A phone's silent switch mutes it, and it only plays while the app is on screen (it already keeps the screen awake while brewing)
+
+---
+
 ## Pending / Roadmap
 - Rebuild the APK once to pick up the new cup icon
 - Opt-in pooled data + trained model (see feasibility notes): backend, consent, deletion, ICO registration
@@ -1189,4 +1207,4 @@ No visible changes — two structural changes behind the scenes.
 
 ---
 
-*Document maintained automatically. Last updated: v3.52*
+*Document maintained automatically. Last updated: v3.53*

@@ -891,11 +891,13 @@
   .bm-top { display:flex; justify-content:space-between; align-items:center; gap:12px; }
   .bm-id { min-width:0; }
   .bm-coffee { font-family:var(--font-display) !important; font-weight:600; font-size:21px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
-  .bm-recipe { font-size:14px; opacity:.8; margin-top:3px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+  .bm-recipe { margin-top:3px; min-width:0; }
+  .bm-recipe .rn { display:block; font-size:15px; opacity:.95; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+  .bm-recipe .ra { display:block; font-size:12.5px; opacity:.7; margin-top:1px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
   .bm-min { flex-shrink:0; background:none; color:#FAFAF7; border:1px solid rgba(250,250,247,.3); border-radius:8px; padding:10px 12px; font-size:13px; letter-spacing:0.6px; text-transform:uppercase; cursor:pointer; }
   .bm-clock { font-size:min(30vw, 128px); font-weight:700; letter-spacing:-.05em; text-align:center; line-height:1; margin:16px 0 8px; font-variant-numeric:tabular-nums; }
   .bm-clock.long { font-size:min(24vw, 100px); }
-  .bm-meta { text-align:center; font-size:16px; letter-spacing:0.6px; text-transform:uppercase; opacity:.85; min-height:20px; }
+  .bm-meta { text-align:center; font-size:17px; letter-spacing:.2px; opacity:.85; min-height:20px; }
   .bm-guide { margin-top:18px; }
   .bm-now-label { font-size:14px; letter-spacing:1.2px; text-transform:uppercase; color:#9FCCBF; }
   .bm-now { font-family:var(--font-display) !important; font-weight:600; font-size:32px; line-height:1.2; margin-top:6px; letter-spacing:-.4px; }
@@ -904,7 +906,14 @@
   .bm-bar { height:10px; border-radius:5px; background:rgba(250,250,247,.2); overflow:hidden; margin-top:16px; }
   .bm-bar i { display:block; height:100%; width:0; background:#9FCCBF; transition:width .25s linear; }
   .bm-next { display:flex; justify-content:space-between; align-items:baseline; font-size:16px; letter-spacing:0.6px; text-transform:uppercase; opacity:.9; margin-top:9px; font-variant-numeric:tabular-nums; }
-  .bm-next #bm-next-in { font-size:22px; font-weight:700; }
+  .bm-next #bm-next-in { font-size:22px; font-weight:700; transition:color .2s; }
+  #bm-next-at.fin { text-transform:none; letter-spacing:.2px; }
+  /* Get ready: last 5 seconds before the next step */
+  .bm-next.soon #bm-next-in { color:#9FCCBF; }
+  .bm-next.soon #bm-next-in::before { content:''; display:inline-block; width:10px; height:10px; border-radius:50%; background:#9FCCBF; margin-right:8px; vertical-align:middle; box-shadow:0 0 0 0 rgba(159,204,191,.5); animation:bmSoon 1s ease-out infinite; }
+  .bm-guide.soon .bm-bar i { background:#BFE3D6; box-shadow:0 0 12px rgba(159,204,191,.7); }
+  @keyframes bmSoon { from { box-shadow:0 0 0 0 rgba(159,204,191,.55); } to { box-shadow:0 0 0 9px rgba(159,204,191,0); } }
+  @media (prefers-reduced-motion: reduce) { .bm-next.soon #bm-next-in::before { animation:none; box-shadow:0 0 0 5px rgba(159,204,191,.25); } }
   .bm-steps { list-style:none; margin:16px 0 12px; padding:6px 0 0; border-top:1px solid rgba(250,250,247,.15); flex:1; min-height:0; overflow-y:auto; }
   /* Steps: each time is centred on its step. Short recipes spread evenly through the space (the same gap above,
      between and below); long ones keep a 16px gap and scroll, with faded edges, to keep the current step in view */
