@@ -36,7 +36,7 @@ with sync_playwright() as p:
     st=json.loads(pg.evaluate("localStorage.getItem('dialin_v2')"))
     print('plans', [(x['coffeeId'],x['grind'],x['temp']) for x in st['plannedBrews']])
     assert [x['coffeeId'] for x in st['plannedBrews']]==['c1','c2','c3']
-    assert st['plannedBrews'][0]['grind']=='7.8' and st['plannedBrews'][0]['temp']=='97' and st['plannedBrews'][2]['temp']=='85'
+    assert st['plannedBrews'][0]['grind']=='8'   # 078S slider snaps to 0.5 from 5 and st['plannedBrews'][0]['temp']=='97' and st['plannedBrews'][2]['temp']=='85'
     # Drag: move Charlie (3rd) to top using the handle
     pg.evaluate("showView('dashboard')"); pg.wait_for_timeout(400)
     pg.evaluate("document.querySelectorAll('#upnext-list .upnext-card')[1].scrollIntoView({block:'center'})"); pg.wait_for_timeout(200)   # keep the handle clear of the + button

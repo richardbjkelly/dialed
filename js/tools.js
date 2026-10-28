@@ -754,7 +754,8 @@ function syncBrewSliders() {
     const v = parseFloat(gi.value);
     gr.value = isNaN(v) ? roundTo((cfg.lo + cfg.hi) / 2, cfg.step) : v;
     gr.classList.toggle('unset', isNaN(v));
-    set('r-grind-hint', `Full grinder range · steps of ${cfg.step}`);
+    const sn = selectedGrinder()?.snap;
+    set('r-grind-hint', sn ? `Full grinder range · steps of ${sn.map(([a, b, st], i) => st + (i < sn.length - 1 ? ' to ' + b : '')).join(', then ')}` : `Full grinder range · steps of ${cfg.step}`);
     set('r-grind-lo', String(cfg.lo)); set('r-grind-hi', String(cfg.hi));
   }
   // Suggested range band: positioned along the track, allowing for the thumb's travel stopping short of the ends
@@ -775,8 +776,20 @@ function syncBrewSliders() {
   const tr = document.getElementById('r-temp-range'), ti = document.getElementById('r-temp');
   if (tr && ti) { const t = parseFloat(ti.value), inRange = t >= 80 && t <= 100; tr.value = inRange ? t : 93; tr.classList.toggle('unset', !inRange); }
 }
+// Some grinders' sliders snap more coarsely in part of the range (Sculptor 078S: 0.1 up to 5, then 0.5).
+// Only the slider snaps: a typed value such as 10.2 is kept as it is.
+function snapGrind(g, v, step) {
+  const band = g && Array.isArray(g.snap) ? g.snap.find(([a, b]) => v >= a && v < b) || (v >= g.snap[g.snap.length - 1][1] ? g.snap[g.snap.length - 1] : null) : null;
+  const st = band ? band[2] : step;
+  return roundTo(Math.round(v / st) * st, Math.min(st, step || st));
+}
 function slideBrew(kind, val) {
-  if (kind === 'grind') { const cfg = brewGrindSlider(); document.getElementById('r-grind').value = cfg ? roundTo(+val, cfg.step) : val; updateGrindMicrons(); }
+  if (kind === 'grind') {
+    const cfg = brewGrindSlider(), v = cfg ? snapGrind(selectedGrinder(), +val, cfg.step) : val;
+    document.getElementById('r-grind').value = v;
+    const r = document.getElementById('r-grind-range'); if (r && cfg) r.value = v;   // the thumb jumps to the snapped value
+    updateGrindMicrons();
+  }
   else { document.getElementById('r-temp').value = Math.round(+val); syncBrewSliders(); }
   updateBrewLive();
 }
@@ -1038,7 +1051,7 @@ function planStepHint(d) {
   const sc = grinderScale(g); if (!sc || d.grindBase === null) return '';
   const um = Math.round(d.grindStepSize * sc.per);
   const n = d.grindNudge || d.grindStepSize, unit = v => sc.stepless ? '' : v === 1 ? ' click' : ' clicks';
-  return `<div style="font-size:11px;color:var(--text-muted);margin-top:2px">Finer / Coarser moves ${n}${unit(n)} (≈${Math.round(n * sc.per)}µm) · slider fine-tunes in ${d.grindStepSize}${unit(d.grindStepSize)} (≈${um}µm)</div>`;
+  return `<div style="font-size:11px;color:var(--text-muted);margin-top:2px">Finer / Coarser moves ${n}${unit(n)} (≈${Math.round(n * sc.per)}µm) · slider fine-tunes in ${g && g.snap ? g.snap.map(([x, y, st], i) => st + (i < g.snap.length - 1 ? ' to ' + y : '')).join(', then ') : d.grindStepSize + unit(d.grindStepSize) + ' (≈' + um + 'µm)'}</div>`;
 }
 
 function playEnter(el, cls) {
@@ -1512,7 +1525,9 @@ function slidePlan(kind, val) {
   const v = parseFloat(val);
   if (kind === 'grind') {
     if (d.grindBase === null) return;
-    d.grind = roundTo(v, d.grindStepSize);
+    const g = d.from.grinderId ? GRINDERS.find(x => x.id === d.from.grinderId) : null;
+    d.grind = snapGrind(g, v, d.grindStepSize);
+    const pr = document.getElementById('plan-grind-range'); if (pr) pr.value = d.grind;
     d.grindDir = d.grind < d.grindBase ? 'finer' : d.grind > d.grindBase ? 'coarser' : 'same';
   } else {
     d.temp = v;

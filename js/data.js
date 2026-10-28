@@ -544,7 +544,7 @@ const GRINDERS = [
   {id:'e26',brand:'Comandante',model:'MC6 Goat',type:'electric',settings:90,min:100,max:1100,notes:'Electric version of legendary C40 with same burr geometry.'},
   {id:'e27',brand:'Cuisinart',model:'DBM-8',type:'electric',settings:18,min:250,max:1300,notes:'Budget electric. Good entry-level starting point.'},
   {id:'e28',brand:'De\'Longhi',model:'KG89',type:'electric',settings:14,min:280,max:1300,notes:'Affordable home grinder. Auto-dosing. Beginner-friendly.'},
-  {id:'e29',stepless:true,brand:'Timemore',model:'Sculptor 078S',type:'electric',settings:36,min:235,max:1235,clickMin:0,clickMax:18,step:0.1,notes:'Dial 0–18 with fine adjustment, about 55µm per number. Espresso ≈0–2.6, pourover ≈3–8.3, French press ≈8.2–18 (Honest Coffee Guide).'},
+  {id:'e29',stepless:true,brand:'Timemore',model:'Sculptor 078S',type:'electric',settings:36,min:235,max:1235,clickMin:0,clickMax:18,step:0.1,snap:[[0,5,0.1],[5,18,0.5]],notes:'Dial 0–18 with fine adjustment, about 55µm per number. Espresso ≈0–2.6, pourover ≈3–8.3, French press ≈8.2–18 (Honest Coffee Guide).'},
   {id:'e30',stepless:true,brand:'Timemore',model:'Sculptor 078',type:'electric',settings:36,min:370,max:1270,clickMin:0,clickMax:18,step:0.1,notes:'Filter-only Turbo burrs, about 50µm per number. Approximate: pourover ≈0.6–6.6, French press ≈6.4–18.'},
 ];
 

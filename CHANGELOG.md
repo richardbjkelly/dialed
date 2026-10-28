@@ -1190,6 +1190,17 @@ No visible changes — two structural changes behind the scenes.
 
 ---
 
+## v3.54
+*28 October 2026*
+
+### Sculptor 078S grind slider
+- On the Timemore Sculptor 078S, the grind slider snaps to **0.1 from 0 to 5** and **0.5 from 5 to 18**, in Log Brew and Plan next
+- Only the slider snaps. You can still type finer settings, such as 10.2, and they're kept as typed (the slider moves to match)
+- The hint above the slider reads "steps of 0.1 to 5, then 0.5"
+- Other grinders are unchanged
+
+---
+
 ## Pending / Roadmap
 - Rebuild the APK once to pick up the new cup icon
 - Opt-in pooled data + trained model (see feasibility notes): backend, consent, deletion, ICO registration
@@ -1207,4 +1218,4 @@ No visible changes — two structural changes behind the scenes.
 
 ---
 
-*Document maintained automatically. Last updated: v3.53*
+*Document maintained automatically. Last updated: v3.54*
