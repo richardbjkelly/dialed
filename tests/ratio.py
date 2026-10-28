@@ -41,7 +41,7 @@ with sync_playwright() as p:
     # temp in brew mode
     pg.fill('#r-temp','94'); pg.fill('#r-grind','12'); pg.evaluate("toggleBrewTimer()"); pg.wait_for_timeout(500)
     meta=pg.inner_text('#bm-meta')
-    ok('brewing screen shows dose, water, temperature and grind', all(x in meta for x in ['15G','250ML','94°C','GRIND 12']), meta)
+    ok('brewing screen shows dose, water, temperature and grind', all(x in meta for x in ['15g','250ml','94°C','grind 12']), meta)
     ok('brewing screen steps are the scaled ones', '30g water' in pg.inner_text('#bm-steps') or '30g water' in pg.inner_text('#bm-now'))
     if len(sys.argv)>1: pg.screenshot(path='shots/ratio_brew.png')
     pg.evaluate("resetBrewTimer(); closeModal('modal-recipe')"); pg.wait_for_timeout(400)

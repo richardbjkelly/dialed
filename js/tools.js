@@ -1209,7 +1209,11 @@ function layoutBrewSteps(smooth) {
   list.classList.toggle('even', fits); list.classList.toggle('over', !fits);
   if (fits) { list.scrollTop = 0; return; }
   const cur = list.querySelector('li.now') || list.querySelector('li.next') || lis[0];
-  const anchor = (cur.classList.contains('now') && cur.previousElementSibling) || cur;
+  // Start the list at the step just done if the current and next steps still fit below it; else at the current step;
+  // on very small screens at the next step (the current one is already shown in large text above the list)
+  const prev = cur.classList.contains('now') ? cur.previousElementSibling : null, nxt = cur.classList.contains('now') ? cur.nextElementSibling : null;
+  const end = (nxt || cur).offsetTop + (nxt || cur).offsetHeight, fit = e => end - e.offsetTop + 16 <= list.clientHeight;
+  const anchor = prev && fit(prev) ? prev : fit(cur) ? cur : (nxt || cur);
   const top = Math.max(0, anchor.offsetTop - 8);
   try { list.scrollTo({ top, behavior: smooth && !reduceMotion() ? 'smooth' : 'auto' }); } catch(e) { list.scrollTop = top; }
 }

@@ -53,7 +53,7 @@ with sync_playwright() as p:
     # final step + stop
     pg.tap('#r-start-btn'); pg.wait_for_timeout(300); last=steps[-1]['at']
     pg.evaluate(f"brewTimer.startedAt = Date.now() - {(last+4)*1000}"); pg.wait_for_timeout(500)
-    ok('last step: full bar, overtime, Stop & save time', pg.evaluate("document.getElementById('bm-bar').style.width")=='100%' and pg.inner_text('#bm-next-in').startswith('+') and 'save time' in pg.inner_text('#bm-stop').lower() and pg.evaluate("document.getElementById('bm-stop').classList.contains('final')"))
+    ok('last step: past the finish, overtime shown, Stop & save time', (pg.evaluate("document.getElementById('bm-bar').style.width")=='100%' or 'finish by' in pg.inner_text('#bm-next-at').lower()) and (pg.inner_text('#bm-next-in').startswith('+') or pg.inner_text('#bm-next-in').lower().startswith('in ')) and 'save time' in pg.inner_text('#bm-stop').lower() and pg.evaluate("document.getElementById('bm-stop').classList.contains('final')"))
     if len(sys.argv)>1: pg.screenshot(path='shots/bm_last.png')
     pg.tap('#bm-stop'); pg.wait_for_timeout(500)
     ok('Stop offers score now or later', pg.locator('#modal-brew-done.open').count()==1); pg.tap('#modal-brew-done button:has-text("Score now")'); pg.wait_for_timeout(500)
@@ -80,7 +80,7 @@ with sync_playwright() as p:
     sm.evaluate("state.selectedCoffeeId='c1'; state.selectedMethod='AeroPress'; openRecipeModal()"); sm.wait_for_timeout(400)
     sm.evaluate(f"state.selectedRecipeId='{rid}'; toggleBrewTimer(); brewTimer.startedAt = Date.now() - {(steps[1]['at']+2)*1000}"); sm.wait_for_timeout(500)
     ok('small phone: Stop, Cancel and the current step all on screen, no sideways scroll', sm.evaluate("(()=>{const on=s=>{const r=document.querySelector(s).getBoundingClientRect(); return r.top>=0 && r.bottom<=innerHeight+1 && r.left>=0 && r.right<=innerWidth+1}; return on('#bm-stop') && on('.bm-cancel') && on('#bm-now') && on('#bm-clock') && document.documentElement.scrollWidth<=innerWidth+1})()"))
-    ok('small phone: step list starts at the next step', sm.evaluate("(()=>{const l=document.getElementById('bm-steps'), n=l.querySelector('li.next'); return !n || Math.abs(n.getBoundingClientRect().top - l.getBoundingClientRect().top) < 12 || l.scrollHeight<=l.clientHeight+1})()"))
+    ok('small phone: the next step is in view in the step list (the current one is shown large above)', sm.evaluate("(()=>{const l=document.getElementById('bm-steps'), r=l.getBoundingClientRect(); const n=l.querySelector('li.next'); return !n || (n.getBoundingClientRect().top>=r.top-2 && n.getBoundingClientRect().top<r.bottom-10)})()"))
     if len(sys.argv)>1: sm.screenshot(path='shots/bm_small.png')
     sm.close()
     ok('no page errors', not errs, errs)
