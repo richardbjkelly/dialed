@@ -906,7 +906,14 @@
   .bm-next { display:flex; justify-content:space-between; align-items:baseline; font-size:16px; letter-spacing:0.6px; text-transform:uppercase; opacity:.9; margin-top:9px; font-variant-numeric:tabular-nums; }
   .bm-next #bm-next-in { font-size:22px; font-weight:700; }
   .bm-steps { list-style:none; margin:16px 0 12px; padding:6px 0 0; border-top:1px solid rgba(250,250,247,.15); flex:1; min-height:0; overflow-y:auto; }
-  .bm-steps li { display:flex; gap:14px; padding:9px 0; font-size:18px; line-height:1.35; opacity:.75; }
+  /* Steps: each time is centred on its step. Short recipes spread evenly through the space (the same gap above,
+     between and below); long ones keep a 16px gap and scroll, with faded edges, to keep the current step in view */
+  .bm-steps { display:flex; flex-direction:column; justify-content:flex-start; padding:6px 0 0; position:relative; }
+  .bm-steps.even { justify-content:space-evenly; padding-top:0; }
+  .bm-steps li { display:flex; align-items:center; gap:14px; padding:0; font-size:18px; line-height:1.35; opacity:.75; flex-shrink:0; }
+  .bm-steps:not(.even) li + li { margin-top:16px; }
+  .bm-steps.over { -webkit-mask-image:linear-gradient(to bottom, transparent 0, #000 24px, #000 calc(100% - 32px), transparent 100%); mask-image:linear-gradient(to bottom, transparent 0, #000 24px, #000 calc(100% - 32px), transparent 100%); }
+  .bm-steps li span { flex:1; min-width:0; }
   .bm-steps li b { width:58px; flex-shrink:0; font-weight:400; font-variant-numeric:tabular-nums; }
   .bm-steps li.done { opacity:.4; }
   .bm-steps li.now { opacity:1; color:#9FCCBF; }

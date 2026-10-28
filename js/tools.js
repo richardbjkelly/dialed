@@ -1135,6 +1135,21 @@ function confirmCancelBrew() {
   confirmAction({ title:'Cancel this brew?', text:"The timer will reset to 0:00. Everything else you've entered stays as it is.",
     button:'Yes, cancel brew', cancel:'Keep brewing', onYes() { resetBrewTimer(); showToast('Brew cancelled'); } });
 }
+// Fit the step list: spread evenly if everything fits, otherwise scroll so the step just finished is at the top
+// (then the current one), with faded edges to show there's more
+function layoutBrewSteps(smooth) {
+  const list = document.getElementById('bm-steps'); if (!list || !list.classList.contains('bm-steps')) return;
+  const lis = [...list.children]; if (!lis.length) return;
+  const content = lis.reduce((s, x) => s + x.offsetHeight, 0) + 16 * (lis.length - 1);
+  const fits = content <= list.clientHeight - 6;
+  list.classList.toggle('even', fits); list.classList.toggle('over', !fits);
+  if (fits) { list.scrollTop = 0; return; }
+  const cur = list.querySelector('li.now') || list.querySelector('li.next') || lis[0];
+  const anchor = (cur.classList.contains('now') && cur.previousElementSibling) || cur;
+  const top = Math.max(0, anchor.offsetTop - 8);
+  try { list.scrollTo({ top, behavior: smooth && !reduceMotion() ? 'smooth' : 'auto' }); } catch(e) { list.scrollTop = top; }
+}
+window.addEventListener('resize', () => { try { if (brewModeOpen()) layoutBrewSteps(false); } catch(e) {} });
 function renderBrewMode() {
   if (!brewModeOpen()) return;
   const $ = id => document.getElementById(id), fmt = n => Math.floor(n / 60) + ':' + String(n % 60).padStart(2, '0');
@@ -1152,7 +1167,7 @@ function renderBrewMode() {
     guide.style.display = 'none'; list.innerHTML = ''; list.className = 'bm-spacer'; brewModeIdx = null;
     stop.classList.remove('final'); set('bm-stop', '■ Stop'); return;
   }
-  guide.style.display = ''; list.className = 'bm-steps';
+  guide.style.display = ''; if (!list.classList.contains('bm-steps')) list.className = 'bm-steps';   // keep the layout classes between ticks
   let idx = -1; steps.forEach((st, i) => { if (s >= st.at) idx = i; });
   const cur = steps[idx], next = steps[idx + 1];
   if (idx !== brewModeIdx) {
@@ -1160,7 +1175,7 @@ function renderBrewMode() {
     brewModeIdx = idx;
     set('bm-now', cur ? cur.text : 'Get ready…');
     list.innerHTML = steps.map((st, i) => `<li class="${i < idx ? 'done' : i === idx ? 'now' : i === idx + 1 ? 'next' : ''}"><b>${fmt(st.at)}</b><span>${i < idx ? '✓ ' : i === idx ? '● ' : ''}${escHtml(st.text)}</span></li>`).join('');
-    const li = list.children[idx + 1] || list.children[Math.max(0, idx)]; if (li) list.scrollTop = Math.max(0, li.offsetTop - list.offsetTop);      // when the list has to scroll, start it at the next step: the current one is already shown large above
+    layoutBrewSteps(!first);      // when the list has to scroll, start it at the next step: the current one is already shown large above
     if (!first && !reduceMotion()) { guide.classList.remove('bm-pulse'); void guide.offsetWidth; guide.classList.add('bm-pulse'); }
   }
   set('bm-now-label', cur ? `Now · step ${idx + 1} of ${steps.length}` : 'Starting');
