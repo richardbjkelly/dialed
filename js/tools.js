@@ -106,7 +106,7 @@ function restoreData(input) {
   reader.readAsText(file);
   input.value = '';
 }
-const SETTING_KEYS = ['darkMode', 'suggestedStart', 'showCosts', 'textSize', 'overviewCategories', 'coffeeLayout', 'brewHistoryOpen', 'lastCurrency', 'backupPhotos'];
+const SETTING_KEYS = ['brewSound', 'darkMode', 'suggestedStart', 'showCosts', 'textSize', 'overviewCategories', 'coffeeLayout', 'brewHistoryOpen', 'lastCurrency', 'backupPhotos'];
 function applyRestore(clean, settings) {
   restoreUndo = { state: JSON.parse(JSON.stringify(state)), settings: { ...appSettings } };
   try { localStorage.setItem('dialin_v2_prev', JSON.stringify(state, (k, v) => k === 'labelPhoto' ? undefined : v)); } catch(e) {}
@@ -152,6 +152,8 @@ function syncSuggestedStartSwitch() {
   if (sl) sl.setAttribute('aria-checked', scoreLaterOn() ? 'true' : 'false');
   const bp = document.getElementById('settings-backupphotos-switch');
   if (bp) bp.setAttribute('aria-checked', appSettings.backupPhotos === false ? 'false' : 'true');
+  const bs = document.getElementById('settings-brewsound-switch');
+  if (bs) bs.setAttribute('aria-checked', appSettings.brewSound === true ? 'true' : 'false');
 }
 function toggleShowCosts() {
   appSettings.showCosts = !showCosts();
@@ -1064,6 +1066,7 @@ function renderBrewTimer() {
   const ex = document.getElementById('brew-timer-expand'); if (ex) ex.style.display = running ? '' : 'none';
   const card = document.querySelector('#modal-recipe .brew-timer'); if (card) card.hidden = !(running || s > 0);   // Start brew lives in the footer until a brew has begun
   renderStartBtn();
+  try { brewSoundTick(); } catch(e) {}
   renderStepGuide();
   renderBrewMode();
   // Keeping the screen awake is only useful for a normal brew: let it sleep again after 20 minutes
@@ -1080,8 +1083,49 @@ function renderTimerPill() {
   if (show) { const s = brewTimerSecs(); pill.querySelector('.tp-time').textContent = Math.floor(s/60) + ':' + String(s%60).padStart(2,'0'); }
 }
 function reopenBrewSheet() { openModal('modal-recipe'); renderTimerPill(); if (brewTimer.startedAt) openBrewMode(); }
+// ---- Brew sounds (optional): beeps at 3, 2, 1 seconds before each step and a chime as it starts ----
+// Made with Web Audio (no sound files). Phones only allow audio after a tap, so it's unlocked when you press Start brew.
+let brewAudio = null, brewSoundState = { idx: null, beeped: -1 };
+const brewSoundOn = () => appSettings.brewSound === true;
+function unlockBrewAudio() {
+  if (!brewSoundOn()) return;
+  try {
+    const AC = window.AudioContext || window.webkitAudioContext; if (!AC) return;
+    if (!brewAudio) brewAudio = new AC();
+    if (brewAudio.state === 'suspended') brewAudio.resume();
+  } catch(e) {}
+}
+function brewTone(freq, start, dur, vol) {
+  const ctx = brewAudio, o = ctx.createOscillator(), g = ctx.createGain(), t = ctx.currentTime + start;
+  o.type = 'sine'; o.frequency.value = freq;
+  g.gain.setValueAtTime(0.0001, t); g.gain.exponentialRampToValueAtTime(vol, t + 0.012); g.gain.exponentialRampToValueAtTime(0.0001, t + dur);
+  o.connect(g).connect(ctx.destination); o.start(t); o.stop(t + dur + 0.03);
+}
+function playBrewSound(kind) {
+  if (!brewSoundOn() || !brewAudio || brewAudio.state !== 'running') return;
+  try {
+    if (kind === 'beep') brewTone(880, 0, 0.12, 0.25);
+    else { brewTone(784, 0, 0.35, 0.3); brewTone(1175, 0.14, 0.5, 0.28); }   // two-note chime: a new step
+  } catch(e) {}
+}
+// Called on every timer tick while brewing, whether brew mode is open or minimised
+function brewSoundTick() {
+  if (!brewSoundOn() || !brewTimer.startedAt) { brewSoundState = { idx: null, beeped: -1 }; return; }
+  const steps = timedSteps(); if (steps.length < 2) return;
+  const s = brewTimerSecs(); let idx = -1; steps.forEach((st, i) => { if (s >= st.at) idx = i; });
+  if (brewSoundState.idx === null) { brewSoundState = { idx, beeped: -1 }; return; }        // no sound for the step you start on
+  if (idx !== brewSoundState.idx) { brewSoundState = { idx, beeped: -1 }; if (idx > 0) playBrewSound('chime'); return; }
+  const next = steps[idx + 1]; if (!next) return;
+  const left = next.at - s;
+  if (left >= 1 && left <= 3 && brewSoundState.beeped !== left) { brewSoundState.beeped = left; playBrewSound('beep'); }
+}
+function toggleBrewSound() {
+  appSettings.brewSound = !brewSoundOn(); saveSettings(); syncSuggestedStartSwitch();
+  if (brewSoundOn()) { unlockBrewAudio(); setTimeout(() => playBrewSound('chime'), 60); showToast('Brew sounds on: beeps at 3, 2, 1, then a chime'); }
+}
 async function toggleBrewTimer() {
   if (brewTimer.startedAt) { stopBrewTimer(); return; }
+  unlockBrewAudio(); brewSoundState = { idx: null, beeped: -1 };
   brewTimer.startedAt = Date.now();
   clearInterval(brewTimer.tick);
   brewTimer.tick = setInterval(renderBrewTimer, 250);
