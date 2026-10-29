@@ -1213,6 +1213,26 @@ No visible changes — two structural changes behind the scenes.
 
 ---
 
+## v3.56
+*29 October 2026*
+
+### Brew trends: tap or hold a point for details
+- The trend charts on a coffee's page no longer crowd every brew with labels. The rows of temperatures and grind settings under the chart, the score above each point and the time above each brew are gone
+- **Tap or hold any point** on either chart to see that brew. Holding shows a bubble with the date, score, grind, temperature and time, plus a guide line through both charts. Slide your finger to move from brew to brew. Arrow keys work too
+- A **details card** under the charts shows the selected brew, starting with your latest:
+  - date and "brew N of M"
+  - score and result (Good / Under / Over)
+  - grind, temperature, time, dose → water, method and water
+  - your tasting note
+  - what changed from the brew before (e.g. "grind 12.5 → 10.5")
+- **Score axis** zoomed to 5–10 (lower only if a score is below 5), so changes are easy to see
+- **Dates:** at most five, each placed under its own brew, never overlapping
+- **Brew time:** only the longest, shortest and selected brews are labelled
+- **Legend:** shows the four result colours, including grey for "Not chosen"
+- Stronger contrast in dark mode
+
+---
+
 ## Pending / Roadmap
 - Rebuild the APK once to pick up the new cup icon
 - Opt-in pooled data + trained model (see feasibility notes): backend, consent, deletion, ICO registration
@@ -1230,4 +1250,4 @@ No visible changes — two structural changes behind the scenes.
 
 ---
 
-*Document maintained automatically. Last updated: v3.55*
+*Document maintained automatically. Last updated: v3.56*

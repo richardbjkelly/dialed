@@ -1661,177 +1661,138 @@ function renderUpNext() {
 }
 
 // ==================== TREND CHARTS ====================
+// ==================== BREW TRENDS (per coffee) ====================
+// Tap or hold a point to see that brew; slide to move between brews. No labels crowd the chart:
+// the details card underneath shows the selected brew (the latest to begin with).
+let trendState = null;   // { coffeeId, brews, sel, holding, drawn }
 function renderTrendCharts(coffeeId) {
   const container = document.getElementById('trend-charts-wrap');
   if (!container) return;
-  const brews = state.recipes
-    .filter(r => r.coffeeId === coffeeId && r.createdAt)
-    .sort((a, b) => tsOf(a) - tsOf(b));
-
-  if (brews.length < 2) {
-    container.innerHTML = '<div style="font-size:12px;color:var(--text-muted);padding:8px 0">Log at least 2 brews to see trends.</div>';
+  const brews = state.recipes.filter(r => r.coffeeId === coffeeId && r.createdAt).sort((a, b) => tsOf(a) - tsOf(b));
+  if (brews.length < 2 || brews.filter(r => parseFloat(r.rating) > 0).length < 2) {
+    trendState = null;
+    container.innerHTML = `<div style="font-size:12px;color:var(--text-muted);padding:8px 0">${brews.length < 2 ? 'Log at least 2 brews to see trends.' : 'Log at least 2 brews with a taste score to see trends.'}</div>` + renderAgeChart(coffeeId);
     return;
   }
-
-  // Build per-brew data points (only brews with a taste score)
-  const pts = brews.map((r, i) => ({
-    i,
-    score:  parseFloat(r.rating) || null,
-    temp:   parseFloat(r.temp)   || null,
-    grind:  parseFloat(r.grind)  || null,
-    date:   fmtDate(r.createdAt, {day:'numeric', month:'short'}),
-    extr:   r.extraction || '',
-  }));
-
-  const scorePts  = pts.filter(p => p.score !== null);
-  const tempPts   = pts.filter(p => p.temp  !== null);
-  const grindPts  = pts.filter(p => p.grind !== null);
-
-  if (scorePts.length < 2) {
-    container.innerHTML = '<div style="font-size:12px;color:var(--text-muted);padding:8px 0">Log at least 2 brews with a taste score to see trends.</div>';
-    return;
+  trendState = { coffeeId, brews, sel: brews.length - 1, holding: false, drawn: false };
+  drawTrend();
+  wireTrendPointer(container);
+}
+function trendPalette() {
+  const dark = document.body.classList.contains('dark-mode');
+  return dark
+    ? { txt:'#E8EFE9', mut:'#9DB5AA', grid:'rgba(232,239,233,.10)', line:'#9FCCBF', area:'rgba(159,204,191,.14)', card:'#15342A', ring:'#FAFAF7', good:'#5FA08F', under:'#5B8BE0', over:'#D0574B', none:'#8A938F', tip:'#FAFAF7', tipT:'#0F2A1C' }
+    : { txt:'#123C27', mut:'#52796F', grid:'rgba(18,60,39,.10)', line:'#52796F', area:'rgba(82,121,111,.12)', card:'#FFFFFF', ring:'#FFFFFF', good:'#52796F', under:'#3D6FD0', over:'#A32A1F', none:'#A6ADA9', tip:'#123C27', tipT:'#FAFAF7' };
+}
+const TREND_W = 340, TREND_PL = 26, TREND_PR = 12;
+const trendX = (i, n) => TREND_PL + (n === 1 ? 0 : i * (TREND_W - TREND_PL - TREND_PR) / (n - 1));
+function drawTrend() {
+  const t = trendState, container = document.getElementById('trend-charts-wrap'); if (!t || !container) return;
+  const C = trendPalette(), B = t.brews, N = B.length, sel = t.sel, X = i => trendX(i, N);
+  const col = e => e === 'good' ? C.good : e === 'under' ? C.under : e === 'over' ? C.over : C.none;
+  const anim = !t.drawn;   // the line draws itself in once, not on every tap
+  const day = r => fmtDate(r.createdAt, { day: 'numeric', month: 'short' });
+  const scoreOf = r => { const v = parseFloat(r.rating); return v > 0 ? v : null; };
+  const timeOf = r => { const v = parseFloat(r.time); return v > 0 ? v : null; };
+  // Taste score, zoomed to the range used (5–10, lower if any score is below 5)
+  const H1 = 150, T1 = 14, B1 = 120;
+  const sp = B.map((r, i) => ({ i, v: scoreOf(r), e: r.extraction || '' })).filter(p => p.v != null);
+  const lo = Math.min(5, Math.floor(Math.min(...sp.map(p => p.v))));
+  const Y = v => B1 - (v - lo) / (10 - lo) * (B1 - T1);
+  const path = sp.map((p, k) => (k ? 'L' : 'M') + X(p.i).toFixed(1) + ',' + Y(p.v).toFixed(1)).join(' ');
+  const area = path + ` L${X(sp[sp.length - 1].i).toFixed(1)},${B1} L${X(sp[0].i).toFixed(1)},${B1} Z`;
+  const grid = [lo, (lo + 10) / 2, 10].map((v, k) => `<line x1="${TREND_PL}" x2="${TREND_W - TREND_PR}" y1="${Y(v)}" y2="${Y(v)}" stroke="${C.grid}"/>${k === 1 ? '' : `<text x="${TREND_PL - 6}" y="${Y(v) + 4}" font-size="11" fill="${C.mut}" text-anchor="end">${v}</text>`}`).join('');
+  const s = B[sel], sv = scoreOf(s);
+  const dots = sp.map(p => p.i === sel ? '' : `<circle cx="${X(p.i)}" cy="${Y(p.v)}" r="5" fill="${col(p.e)}" stroke="${C.ring}" stroke-width="1.5"/>`).join('')
+    + (sv != null ? `<circle cx="${X(sel)}" cy="${Y(sv)}" r="11" fill="${col(s.extraction)}" opacity=".25"/><circle cx="${X(sel)}" cy="${Y(sv)}" r="7" fill="${col(s.extraction)}" stroke="${C.ring}" stroke-width="2.5"/>`
+                  : `<circle cx="${X(sel)}" cy="${B1 - 4}" r="5" fill="none" stroke="${C.mut}" stroke-dasharray="2 2"/>`);
+  let tip = '';
+  if (t.holding) {
+    const tw = 168, tx = Math.min(TREND_W - TREND_PR - tw, Math.max(TREND_PL, X(sel) - tw / 2)), ty = Math.max(-22, (sv != null ? Y(sv) : B1) - 52);
+    const bits = [s.grind && 'Grind ' + s.grind, s.temp && s.temp + '°C', timeOf(s) && formatBrewTime(timeOf(s), s.method)].filter(Boolean).join(' · ');
+    tip = `<g class="tr-tip"><rect x="${tx}" y="${ty}" width="${tw}" height="36" rx="9" fill="${C.tip}"/><text x="${tx + tw / 2}" y="${ty + 15}" font-size="12" fill="${C.tipT}" text-anchor="middle" font-weight="700">${escHtml(day(s))} · ${sv != null ? sv + '/10' : 'not scored'}</text>
+      <text x="${tx + tw / 2}" y="${ty + 29}" font-size="10.5" fill="${C.tipT}" text-anchor="middle" opacity=".85">${escHtml(bits || s.method || '')}</text></g>`;
   }
-
-  // Canvas dimensions
-  const W = 320, H = 155, PAD_L = 28, PAD_R = 10, PAD_T = 24, PAD_B = 55;
-  const CW = W - PAD_L - PAD_R;
-  const CH = H - PAD_T - PAD_B;
-
-  // X scale: based on index across ALL brews
-  const N = pts.length;
-  const xs = i => PAD_L + (N === 1 ? CW / 2 : (i / (N - 1)) * CW);
-
-  // Y scale for taste score (left axis, 0–10)
-  const SCORE_MIN = 0, SCORE_MAX = 10;
-  const ys = v => PAD_T + CH - ((v - SCORE_MIN) / (SCORE_MAX - SCORE_MIN)) * CH;
-
-  // Extraction colour per brew
-  const extrColor = e => e === 'good' ? '#52796F' : e === 'under' ? '#4a7ad0' : e === 'over' ? '#8b1a1a' : '#aaa';
-
-  // ── Taste score area + line ──────────────────────────────────────────
-  const scorePointsWithX = scorePts.map(p => ({ x: xs(p.i), y: ys(p.score), ...p }));
-  const linePath = scorePointsWithX.map((p, i) => `${i === 0 ? 'M' : 'L'}${p.x.toFixed(1)},${p.y.toFixed(1)}`).join(' ');
-  // Filled area under the line
-  const areaPath = linePath
-    + ` L${scorePointsWithX[scorePointsWithX.length-1].x.toFixed(1)},${(PAD_T+CH).toFixed(1)}`
-    + ` L${scorePointsWithX[0].x.toFixed(1)},${(PAD_T+CH).toFixed(1)} Z`;
-
-  // Score dots (coloured by extraction)
-  const scoreDots = scorePointsWithX.map(p =>
-    `<circle cx="${p.x.toFixed(1)}" cy="${p.y.toFixed(1)}" r="4.5" fill="${extrColor(p.extr)}" stroke="white" stroke-width="1.5"/>
-     <text x="${p.x.toFixed(1)}" y="${(p.y - 8).toFixed(1)}" font-size="9" fill="#123C27" text-anchor="middle" font-weight="600">${p.score}</text>`
-  ).join('');
-
-  // ── Y-axis tick labels (0, 5, 10) ────────────────────────────────────
-  const yTicks = [0, 5, 10].map(v =>
-    `<line x1="${PAD_L}" y1="${ys(v).toFixed(1)}" x2="${W - PAD_R}" y2="${ys(v).toFixed(1)}" stroke="var(--border)" stroke-width="1"/>
-     <text x="${(PAD_L - 4).toFixed(1)}" y="${(ys(v) + 3).toFixed(1)}" font-size="8" fill="var(--text-muted)" text-anchor="end">${v}</text>`
-  ).join('');
-
-  // ── Date labels — rendered as HTML below SVG, not inside it ───────────
-  // Calculate positions as percentages of chart width for HTML alignment
-  const dateLabels = ''; // removed from SVG
-  const dateRow = (() => {
-    const items = scorePointsWithX.map(p => {
-      const pct = ((p.x - PAD_L) / CW * 100).toFixed(1);
-      return `<span style="position:absolute;left:${pct}%;transform:translateX(-50%);font-size:11px;color:var(--text-muted);white-space:nowrap">${p.date}</span>`;
-    }).join('');
-    return `<div style="position:relative;height:16px;margin-top:4px;margin-left:${PAD_L}px;margin-right:${PAD_R}px">${items}</div>`;
-  })();
-
-  // ── Temp markers (small triangles at bottom of chart area) ───────────
-  const MARKER_Y = PAD_T + CH + 6;
-  const tempMarkers = tempPts.map(p => {
-    const tx = xs(p.i);
-    // Normalise temp to a colour (85–100°C → light to dark green)
-    const tNorm = Math.min(Math.max((p.temp - 85) / 15, 0), 1);
-    const alpha = (0.3 + tNorm * 0.7).toFixed(2);
-    return `<text x="${tx.toFixed(1)}" y="${(MARKER_Y + 8).toFixed(1)}" font-size="8" fill="#6fa89d" text-anchor="middle" font-weight="500">${p.temp}°C</text>`;
-  }).join('');
-
-  // ── Grind markers (small diamonds at bottom, offset from temp) ────────
-  const grindMin = Math.min(...grindPts.map(p => p.grind));
-  const grindMax = Math.max(...grindPts.map(p => p.grind));
-  const grindRange = grindMax - grindMin || 1;
-  const GRIND_Y = PAD_T + CH + 20;
-  const grindMarkers = grindPts.map(p => {
-    const gx = xs(p.i);
-    const gNorm = (p.grind - grindMin) / grindRange;
-    const alpha = (0.3 + gNorm * 0.7).toFixed(2);
-    const g = 0.5; // diamond half-size
-    return `<text x="${gx.toFixed(1)}" y="${(GRIND_Y + 8).toFixed(1)}" font-size="8" fill="#52796F" text-anchor="middle" font-weight="500">${p.grind}</text>`;
-  }).join('');
-
-  // ── Legend ────────────────────────────────────────────────────────────
-  const legend = `
-    <div style="display:flex;gap:14px;margin-bottom:10px;flex-wrap:wrap">
-      <span style="font-size:11px;color:var(--text-muted);display:flex;align-items:center;gap:4px">
-        <svg width="20" height="8"><line x1="0" y1="4" x2="20" y2="4" stroke="#52796F" stroke-width="2"/></svg>
-        Taste Score
-      </span>
-      <span style="font-size:11px;color:var(--text-muted);display:flex;align-items:center;gap:4px">
-        Temp (°C)
-      </span>
-      <span style="font-size:11px;color:var(--text-muted);display:flex;align-items:center;gap:4px">
-        Grind
-      </span>
-      <span style="font-size:11px;color:var(--text-muted);display:flex;align-items:center;gap:4px">
-        <svg width="8" height="8"><circle cx="4" cy="4" r="3" fill="#52796F"/></svg>
-        Good &nbsp;
-        <svg width="8" height="8"><circle cx="4" cy="4" r="3" fill="#4a7ad0"/></svg>
-        Under &nbsp;
-        <svg width="8" height="8"><circle cx="4" cy="4" r="3" fill="#8b1a1a"/></svg>
-        Over
-      </span>
-    </div>`;
-
-  // ── Brew Time as separate small chart below ────────────────────────────
-  const timePts = pts.filter(p => {
-    const t = parseFloat(p.i >= 0 ? brews[p.i]?.time : null);
-    return t > 0;
-  }).map(p => ({ ...p, timeVal: parseFloat(brews[p.i]?.time)||0 }));
-
-  let timeChart = '';
-  if (timePts.length >= 2) {
-    const tmin = Math.min(...timePts.map(p=>p.timeVal));
-    const tmax = Math.max(...timePts.map(p=>p.timeVal));
-    const trange = tmax - tmin || 1;
-    const TH = 50, TPT = 12, TPB = 18;
-    const tys = v => TPT + (TH - TPT - TPB) - ((v - tmin) / trange) * (TH - TPT - TPB);
-    const timeLine = timePts.map((p,i) => `${i===0?'M':'L'}${xs(p.i).toFixed(1)},${tys(p.timeVal).toFixed(1)}`).join(' ');
-    const timeDots = timePts.map(p =>
-      `<circle cx="${xs(p.i).toFixed(1)}" cy="${tys(p.timeVal).toFixed(1)}" r="3" fill="#8aab9e" stroke="white" stroke-width="1.5"/>
-       <text x="${xs(p.i).toFixed(1)}" y="${(tys(p.timeVal)-5).toFixed(1)}" font-size="7.5" fill="#52796F" text-anchor="middle">${formatBrewTime(p.timeVal,'Pourover')}</text>`
-    ).join('');
-    timeChart = `
-      <div style="margin-top:8px">
-        <div style="font-size:11px;color:var(--text-muted);margin-bottom:4px;letter-spacing:.5px">BREW TIME</div>
-        <svg viewBox="0 0 ${W} ${TH}" style="width:100%;overflow:visible">
-          <path class="chart-fade" d="${timeLine}" stroke="#8aab9e" stroke-width="1.5" fill="none" stroke-linecap="round" stroke-linejoin="round" stroke-dasharray="4,3"/>
-          ${timeDots}
-        </svg>
-      </div>`;
+  // Dates: first, last and up to three between, each under its own brew
+  const di = [...new Set([0, Math.round((N - 1) / 4), Math.round((N - 1) / 2), Math.round(3 * (N - 1) / 4), N - 1])].filter((i, k, a) => k === 0 || X(i) - X(a[k - 1]) > 44 || i === N - 1);
+  const dates = di.filter((i, k, a) => !(k === a.length - 2 && X(a[a.length - 1]) - X(i) < 44)).map(i => `<text x="${X(i)}" y="${H1 - 8}" font-size="11" fill="${C.mut}" text-anchor="${i === 0 ? 'start' : i === N - 1 ? 'end' : 'middle'}">${escHtml(day(B[i]))}</text>`).join('');
+  const svg1 = `<svg class="tr-plot" viewBox="0 0 ${TREND_W} ${H1}" width="100%" role="img" aria-label="Taste score for each brew">${grid}<path ${anim ? 'class="chart-fade"' : ''} d="${area}" fill="${C.area}"/>
+    <path ${anim ? 'class="chart-draw" pathLength="1"' : ''} d="${path}" fill="none" stroke="${C.line}" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/>
+    <line x1="${X(sel)}" x2="${X(sel)}" y1="${T1 - 6}" y2="${B1}" stroke="${C.line}" stroke-width="1.5" stroke-dasharray="3 3"/>${dots}${dates}${tip}</svg>`;
+  // Brew time: only the longest, shortest and selected brews are labelled
+  const tp = B.map((r, i) => ({ i, v: timeOf(r), m: r.method })).filter(p => p.v != null);
+  let svg2 = '';
+  if (tp.length >= 2) {
+    const H2 = 84, T2 = 18, B2 = 66, tlo = Math.min(...tp.map(p => p.v)), thi = Math.max(...tp.map(p => p.v));
+    const Y2 = v => B2 - (v - tlo) / (thi - tlo || 1) * (B2 - T2);
+    const p2 = tp.map((p, k) => (k ? 'L' : 'M') + X(p.i).toFixed(1) + ',' + Y2(p.v).toFixed(1)).join(' ');
+    const pMax = tp.find(p => p.v === thi), pMin = tp.find(p => p.v === tlo), pSel = tp.find(p => p.i === sel);
+    const lab = (p, txt, up, bold) => `<text x="${Math.min(TREND_W - 30, Math.max(TREND_PL + 20, X(p.i)))}" y="${Y2(p.v) + (up ? -10 : 19)}" font-size="${bold ? 12 : 11}" ${bold ? 'font-weight="700"' : ''} fill="${bold ? C.txt : C.mut}" text-anchor="middle">${txt}</text>`;
+    const fmtT = p => formatBrewTime(p.v, p.m);
+    svg2 = `<div class="tr-label">Brew time</div><svg class="tr-plot" viewBox="0 0 ${TREND_W} ${H2}" width="100%" role="img" aria-label="Brew time for each brew">
+      <line x1="${X(sel)}" x2="${X(sel)}" y1="${T2 - 10}" y2="${B2 + 4}" stroke="${C.line}" stroke-width="1.5" stroke-dasharray="3 3"/>
+      <path d="${p2}" fill="none" stroke="${C.line}" stroke-width="1.6" stroke-dasharray="4 3"/>
+      ${tp.map(p => `<circle cx="${X(p.i)}" cy="${Y2(p.v)}" r="${p.i === sel ? 6 : 3.5}" fill="${p.i === sel ? C.line : C.card}" stroke="${C.line}" stroke-width="1.5"/>`).join('')}
+      ${pSel !== pMax ? lab(pMax, 'longest ' + fmtT(pMax), true) : ''}${pSel !== pMin && pMin !== pMax ? lab(pMin, 'shortest ' + fmtT(pMin), false) : ''}${pSel ? lab(pSel, (pSel === pMax ? 'longest ' : pSel === pMin ? 'shortest ' : '') + fmtT(pSel), pSel === pMax, true) : ''}</svg>`;
   }
-
-  container.innerHTML = `
-    ${legend}
-    <div class="trend-chart-wrap" style="padding:14px 10px 8px">
-      <svg viewBox="0 0 ${W} ${H}" style="width:100%;overflow:visible">
-        <defs>
-          <linearGradient id="scoreGrad" x1="0" y1="0" x2="0" y2="1">
-            <stop offset="0%" stop-color="#52796F" stop-opacity="0.25"/>
-            <stop offset="100%" stop-color="#52796F" stop-opacity="0.02"/>
-          </linearGradient>
-        </defs>
-        ${yTicks}
-        <path class="chart-fade" d="${areaPath}" fill="url(#scoreGrad)"/>
-        <path class="chart-draw" pathLength="1" d="${linePath}" stroke="#52796F" stroke-width="2.5" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
-        <g class="chart-fade">${scoreDots}
-        ${tempMarkers}
-        ${grindMarkers}</g>
-        ${dateLabels}
-      </svg>
-      ${dateRow}
-      ${timeChart}
-    </div>` + renderAgeChart(coffeeId);
+  const legend = `<div class="tr-legend">${[['Good', C.good], ['Under', C.under], ['Over', C.over], ['Not chosen', C.none]].map(([l, c]) => `<span><i style="background:${c}"></i>${l}</span>`).join('')}</div>`;
+  container.innerHTML = legend + `<div class="trend-chart-wrap tr-box" tabindex="0" aria-label="Brew trends. Use the left and right arrow keys to move between brews.">
+      <div class="tr-label">Taste score</div>${svg1}${svg2}
+      <div class="tr-hint">${t.holding ? 'Slide along to see each brew' : 'Tap or hold a point to see that brew'}</div></div>` + trendCardHtml(B, sel) + renderAgeChart(t.coffeeId);
+  t.drawn = true;
+}
+// The selected brew, in full, with what changed from the brew before
+function trendCardHtml(B, sel) {
+  const r = B[sel], prev = B[sel - 1], C = trendPalette();
+  const isEsp = isEspressoMethod(r.method || 'Espresso'), sv = parseFloat(r.rating) > 0 ? parseFloat(r.rating) : null;
+  const ex = { good: '✓ Good', under: 'Under', over: 'Over' }[r.extraction] || 'No result chosen';
+  const exCol = { good: C.good, under: C.under, over: C.over }[r.extraction] || C.mut;
+  const t = parseFloat(r.time) > 0 ? formatBrewTime(parseFloat(r.time), r.method) : '';
+  const main = [r.grind && `Grind <b>${escHtml(r.grind)}</b>`, r.temp && `<b>${escHtml(r.temp)}°C</b>`, t && `<b>${t}</b>`].filter(Boolean).join(' · ');
+  const sub = [r.dose && (escHtml(r.dose) + 'g' + (r.yield ? ' → ' + escHtml(r.yield) + (isEsp ? 'g' : 'ml') : '')), r.method, r.water && escHtml(r.water.name)].filter(Boolean).join(' · ');
+  const ch = [];
+  if (prev) {
+    const d = (k, f) => { if ((prev[k] || '') !== (r[k] || '') && (prev[k] || r[k])) ch.push(f(prev[k] || '—', r[k] || '—')); };
+    d('grind', (a, b) => `grind ${escHtml(a)} → ${escHtml(b)}`);
+    d('temp', (a, b) => `${escHtml(a)} → ${escHtml(b)}°C`);
+    d('dose', (a, b) => `dose ${escHtml(a)} → ${escHtml(b)}g`);
+    if ((prev.method || '') !== (r.method || '')) ch.push(`${escHtml(prev.method || '—')} → ${escHtml(r.method || '—')}`);
+  }
+  return `<div class="tr-card">
+    <div class="tr-card-top"><span>${escHtml(fmtDate(r.createdAt, { day: 'numeric', month: 'short' }))} · brew ${sel + 1} of ${B.length}${sel === B.length - 1 ? ' · latest' : ''}</span><b style="color:${exCol}">${ex}</b></div>
+    <div class="tr-card-main"><div class="tr-score">${sv != null ? sv + '<span>/10</span>' : '—'}</div><div class="tr-specs">${main || '<span class="tr-mut">No numbers logged</span>'}${sub ? `<br><span class="tr-mut">${sub}</span>` : ''}</div></div>
+    ${r.notes ? `<div class="tr-note">"${escHtml(r.notes)}"</div>` : ''}
+    ${ch.length ? `<div class="tr-change">Changed from the brew before: <b>${ch.join(', ')}</b></div>` : ''}</div>`;
+}
+// Tap, hold and slide on either chart; arrow keys too. Listeners live on the container, which is never replaced.
+function wireTrendPointer(container) {
+  if (container.dataset.wired) return;
+  container.dataset.wired = '1';
+  const pick = e => {
+    const t = trendState, svg = e.target.closest && e.target.closest('.tr-plot'); if (!t || !svg) return null;
+    const r = svg.getBoundingClientRect(), vx = (e.clientX - r.left) / r.width * TREND_W, N = t.brews.length;
+    let best = 0, bd = Infinity; for (let i = 0; i < N; i++) { const d = Math.abs(trendX(i, N) - vx); if (d < bd) { bd = d; best = i; } }
+    return best;
+  };
+  let active = false;
+  container.addEventListener('pointerdown', e => {
+    const i = pick(e); if (i == null) return;
+    active = true; trendState.holding = true; trendState.sel = i;
+    try { container.setPointerCapture(e.pointerId); } catch(err) {}
+    drawTrend();
+  });
+  container.addEventListener('pointermove', e => {
+    if (!active || !trendState) return;
+    const svg = container.querySelector('.tr-plot'); if (!svg) return;
+    const r = svg.getBoundingClientRect(), vx = (e.clientX - r.left) / r.width * TREND_W, N = trendState.brews.length;
+    let best = 0, bd = Infinity; for (let i = 0; i < N; i++) { const d = Math.abs(trendX(i, N) - vx); if (d < bd) { bd = d; best = i; } }
+    if (best !== trendState.sel) { trendState.sel = best; if (navigator.vibrate) navigator.vibrate(5); drawTrend(); }
+  });
+  const end = () => { if (!active) return; active = false; if (trendState) { trendState.holding = false; drawTrend(); } };
+  container.addEventListener('pointerup', end); container.addEventListener('pointercancel', end);
+  container.addEventListener('keydown', e => {
+    if (!trendState || !e.target.closest('.tr-box') || (e.key !== 'ArrowLeft' && e.key !== 'ArrowRight')) return;
+    e.preventDefault(); trendState.sel = Math.max(0, Math.min(trendState.brews.length - 1, trendState.sel + (e.key === 'ArrowRight' ? 1 : -1)));
+    drawTrend(); container.querySelector('.tr-box')?.focus();
+  });
 }

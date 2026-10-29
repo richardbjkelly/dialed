@@ -1054,3 +1054,27 @@
   body.dark-mode .dn-change, body.dark-mode .dn-was { color:#F2A493; border-color:rgba(242,164,147,.45); }
   body.dark-mode .dn-opt { background:var(--dm-card); border-color:var(--dm-border); color:var(--dm-text); }
   body.dark-mode .dn-opt.on { border-color:#F2A493; background:rgba(242,164,147,.1); }
+  /* Brew trends: tap or hold a point for details */
+  .tr-legend { display:flex; gap:14px; flex-wrap:wrap; font-size:13px; color:var(--text-muted); margin:2px 0 10px; }
+  .tr-legend span { display:inline-flex; align-items:center; gap:6px; }
+  .tr-legend i { width:10px; height:10px; border-radius:50%; display:inline-block; }
+  .tr-box { padding:12px 10px 8px !important; touch-action:pan-y; user-select:none; -webkit-user-select:none; outline:none; }
+  .tr-box:focus-visible { box-shadow:0 0 0 2px var(--crema); }
+  .tr-box svg { display:block; overflow:visible; cursor:pointer; }
+  .tr-label { font-size:11px; letter-spacing:1.2px; text-transform:uppercase; color:var(--text-muted); margin:0 0 4px 4px; }
+  .tr-box svg + .tr-label { margin-top:10px; }
+  .tr-hint { font-size:12px; color:var(--text-muted); text-align:center; margin-top:6px; }
+  .tr-card { border:1px solid var(--border); background:var(--card); border-radius:14px; padding:12px 14px; margin-top:8px; color:var(--text); }
+  body.dark-mode .tr-card { background:#15342A; border-color:var(--dm-border); color:var(--dm-text); }
+  .tr-card-top { display:flex; justify-content:space-between; align-items:baseline; gap:8px; font-size:13px; color:var(--text-muted); }
+  .tr-card-top b { font-size:12px; font-weight:600; white-space:nowrap; }
+  .tr-card-main { display:flex; align-items:baseline; gap:14px; margin-top:6px; flex-wrap:wrap; }
+  .tr-score { font-family:var(--font-display); font-size:30px; font-weight:700; }
+  .tr-score span { font-size:15px; opacity:.6; }
+  .tr-specs { font-size:14px; line-height:1.6; flex:1; min-width:0; }
+  .tr-mut { color:var(--text-muted); }
+  .tr-note { font-size:13px; margin-top:8px; font-style:italic; opacity:.85; }
+  .tr-change { font-size:12px; margin-top:8px; color:var(--text-muted); }
+  .tr-change b { color:var(--text); }
+  body.dark-mode .tr-change b { color:var(--dm-text); }
+  body.dark-mode .tr-mut, body.dark-mode .tr-card-top, body.dark-mode .tr-change { color:var(--dm-text-muted); }
