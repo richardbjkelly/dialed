@@ -1201,6 +1201,18 @@ No visible changes — two structural changes behind the scenes.
 
 ---
 
+## v3.55
+*29 October 2026*
+
+### Change the water after brewing
+- The "Add to your cup now" panel (on Brew finished and How was it?) has a **Change** button. Tap it, or anywhere on the panel, to see every water with its drops for this cup: your styles, the reference waters and your own mixes, including tap/bottled waters
+- Picking one updates the drops straight away and closes the list. A line confirms the change ("Changed from Bright & juicy: this brew will be saved with Sweet & creamy")
+- The brew is saved with the water you picked, and it becomes the default next time for that coffee
+- Picking a tap or bottled water shows "No drops needed", and you can still change it
+- If you'd picked tap water before brewing, no panel appears (there's nothing to add)
+
+---
+
 ## Pending / Roadmap
 - Rebuild the APK once to pick up the new cup icon
 - Opt-in pooled data + trained model (see feasibility notes): backend, consent, deletion, ICO registration
@@ -1218,4 +1230,4 @@ No visible changes — two structural changes behind the scenes.
 
 ---
 
-*Document maintained automatically. Last updated: v3.54*
+*Document maintained automatically. Last updated: v3.55*

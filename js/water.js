@@ -375,15 +375,35 @@ function cupVolumeMl() {
   if (isEspressoMethod(state.selectedMethod || 'Espresso')) return Math.round(water);
   return Math.round(Math.max(water * 0.5, dose > 0 ? water - 2 * dose : water));
 }
+// The panel can be tapped to switch to another water after brewing; the brew is then saved with it
+let dropsOrigId = null, dropsOpen = false;
+const currentBrewWater = () => selectedWaterId && selectedWaterId !== 'w-none' ? (waterById(selectedWaterId) || (brewWaterSnapshot && brewWaterSnapshot.id === selectedWaterId ? brewWaterSnapshot : null)) : null;
 function dropsReminderHtml() {
   if (!waterOn() || W().addTo === 'water') return '';
-  const x = selectedWaterId && selectedWaterId !== 'w-none' ? (waterById(selectedWaterId) || (brewWaterSnapshot && brewWaterSnapshot.id === selectedWaterId ? brewWaterSnapshot : null)) : null;
-  if (!x || x.type === 'plain') return '';
-  const ml = cupVolumeMl(), vol = ml || 250, m = mixFor(x, vol);
+  const x = currentBrewWater();
+  if (dropsOrigId === null) dropsOrigId = x ? x.id : '';
+  const orig = dropsOrigId ? waterById(dropsOrigId) || (brewWaterSnapshot && brewWaterSnapshot.id === dropsOrigId ? brewWaterSnapshot : null) : null;
+  if (!x || (x.type === 'plain' && !(orig && orig.type !== 'plain'))) return '';    // chose tap water before brewing: nothing to add
+  const ml = cupVolumeMl(), vol = ml || 250;
   const isEsp = isEspressoMethod(state.selectedMethod || 'Espresso');
-  return `<div class="drops-note" role="note"><div class="dn-k">💧 Add to your cup now</div>
-    <div class="dn-v"><span class="dn-a"><b>${fmtDrops(m.dA)}</b> drops of A</span><span class="dn-b"><b>${fmtDrops(m.dB)}</b> drops of B</span></div>
-    <div class="dn-s">${escHtml(x.name)} · ${ml ? `for about ${ml} ml in the cup${isEsp ? '' : ' (your water less what the grounds hold)'}` : 'per 250 ml: enter your water amount for an exact count'}</div></div>`;
+  const dropsOf = w => { const m = mixFor(w, vol); return [fmtDrops(m.dA), fmtDrops(m.dB)]; };
+  const [a, b] = x.type === 'plain' ? [] : dropsOf(x);
+  const where = ml ? `for about ${ml} ml in the cup${isEsp ? '' : ' (your water less what the grounds hold)'}` : 'per 250 ml: enter your water amount for an exact count';
+  const opt = w => `<button type="button" class="dn-opt${w.id === x.id ? ' on' : ''}" aria-pressed="${w.id === x.id}" data-on-click="event.stopPropagation();pickDropsWater('${w.id}')"><b>${escHtml(w.name)}</b><span>${w.type === 'plain' ? 'No drops' : dropsOf(w).join(' + ') + ' drops'}</span></button>`;
+  const all = allWaters();
+  const groups = [['Your styles', all.filter(w => w.builtin && !w.ref)], ['Reference waters', all.filter(w => w.ref)], ['Yours', all.filter(w => !w.builtin)]].filter(g => g[1].length);
+  const list = dropsOpen ? `<div class="dn-list">${groups.map(([t, ws]) => `<div class="dn-g">${t}</div><div class="dn-opts">${ws.map(opt).join('')}</div>`).join('')}</div>` : '';
+  const changed = orig && orig.id !== x.id ? `<div class="dn-was">Changed from ${escHtml(orig.name)}: this brew will be saved with ${escHtml(x.name)}</div>` : '';
+  return `<div class="drops-note" role="note"><div class="dn-head" role="button" tabindex="0" aria-expanded="${dropsOpen}" data-on-click="toggleDropsList()">
+      <div class="dn-top"><div class="dn-k">💧 ${x.type === 'plain' ? 'No drops needed' : 'Add to your cup now'}</div><span class="dn-change">${dropsOpen ? 'Done ▴' : 'Change ▾'}</span></div>
+      ${x.type === 'plain' ? `<div class="dn-s" style="margin-top:6px">${escHtml(x.name)}: nothing to add</div>` : `<div class="dn-v"><span class="dn-a"><b>${a}</b> drops of A</span><span class="dn-b"><b>${b}</b> drops of B</span></div>
+      <div class="dn-s">${escHtml(x.name)} · ${where}</div>`}${changed}</div>${list}</div>`;
+}
+function toggleDropsList() { dropsOpen = !dropsOpen; renderDropsReminder(); }
+function pickDropsWater(id) {
+  if (!waterById(id)) return;
+  selectedWaterId = id; waterPickedByHand = true; dropsOpen = false;   // saved with the brew, and it becomes "last used"
+  renderDropsReminder(); try { renderWaterPicker(); } catch(e) {}
 }
 function renderDropsReminder() {
   const show = !isScoreOnly() && !document.getElementById('r-edit-id')?.value;

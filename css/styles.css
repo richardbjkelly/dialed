@@ -1039,3 +1039,18 @@
   .wm-note { font-size:12.5px; line-height:1.5; color:var(--text); margin:-10px 0 14px; }
   .wm-note[hidden] { display:none; }
   body.dark-mode .wm-note { color:var(--dm-text); }
+  /* Drops panel: tap to switch water after brewing */
+  .dn-head { cursor:pointer; }
+  .dn-top { display:flex; justify-content:space-between; align-items:center; gap:8px; }
+  .dn-change { flex-shrink:0; border:1px solid rgba(180,83,47,.45); color:#8a3b20; border-radius:16px; padding:6px 11px; min-height:32px; display:inline-flex; align-items:center; font-size:11px; letter-spacing:.8px; text-transform:uppercase; }
+  .dn-list { margin-top:10px; border-top:1px solid rgba(180,83,47,.25); padding-top:4px; }
+  .dn-g { font-size:10.5px; letter-spacing:1px; text-transform:uppercase; color:var(--text-muted); margin:10px 0 6px; }
+  .dn-opts { display:grid; grid-template-columns:1fr 1fr; gap:6px; }
+  .dn-opt { border:1px solid var(--border); background:var(--card); border-radius:10px; padding:8px 10px; min-height:48px; text-align:left; font-family:var(--font-text); color:var(--text); cursor:pointer; }
+  .dn-opt b { display:block; font-size:13px; font-weight:600; }
+  .dn-opt span { display:block; font-size:11px; color:var(--text-muted); margin-top:2px; }
+  .dn-opt.on { border-color:#B4532F; background:rgba(180,83,47,.1); }
+  .dn-was { font-size:11.5px; color:#8a3b20; margin-top:4px; line-height:1.45; }
+  body.dark-mode .dn-change, body.dark-mode .dn-was { color:#F2A493; border-color:rgba(242,164,147,.45); }
+  body.dark-mode .dn-opt { background:var(--dm-card); border-color:var(--dm-border); color:var(--dm-text); }
+  body.dark-mode .dn-opt.on { border-color:#F2A493; background:rgba(242,164,147,.1); }

@@ -371,7 +371,7 @@ function openRecipeModal() {
   // Always reset edit state when opening fresh
   const reid = document.getElementById('r-edit-id'); if(reid) reid.value = '';
   const rtitle = document.getElementById('r-modal-title'); if(rtitle) rtitle.textContent = 'Log Brew';
-  selectedWaterId = null; brewWaterSnapshot = null; waterPickedByHand = false;   // water defaults to the last one used for this coffee
+  selectedWaterId = null; brewWaterSnapshot = null; waterPickedByHand = false; dropsOrigId = null; dropsOpen = false;   // water defaults to the last one used for this coffee
   try { setScoreOnly(false); setBrewPage('choose'); } catch(e) {}
   setTimeout(() => { try { syncBrewSliders(); captureRatio(); } catch(e) {} }, 0);
   // Coffee selector
