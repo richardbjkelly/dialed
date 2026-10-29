@@ -1233,6 +1233,15 @@ No visible changes — two structural changes behind the scenes.
 
 ---
 
+## v3.57
+*29 October 2026*
+
+### Trends window no longer jumps
+- The brew details card under the trend charts is now the same height for every brew, so the window stays still as you tap or slide between brews
+- Tasting notes show up to two lines (longer ones end in "…"). The "changed from the brew before" line always shows, and reads "Same settings as the brew before" or "First brew of this coffee" when nothing changed
+
+---
+
 ## Pending / Roadmap
 - Rebuild the APK once to pick up the new cup icon
 - Opt-in pooled data + trained model (see feasibility notes): backend, consent, deletion, ICO registration
@@ -1250,4 +1259,4 @@ No visible changes — two structural changes behind the scenes.
 
 ---
 
-*Document maintained automatically. Last updated: v3.56*
+*Document maintained automatically. Last updated: v3.57*

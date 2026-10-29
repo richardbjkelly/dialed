@@ -34,6 +34,12 @@ with sync_playwright() as p:
         tb=pg.locator('#trend-charts-wrap .tr-plot').nth(1).bounding_box()
         pg.mouse.click(tb['x']+tb['width']*(26+8*(340-38)/17)/340, tb['y']+tb['height']*0.5); pg.wait_for_timeout(150)
         ok(f'{m}: tapping the brew-time chart picks that brew (9, longest)', 'brew 9 of 18' in card() and '—' in card() and 'longest 6:12' in pg.inner_text('#trend-charts-wrap'), card())
+        hs=set()
+        for i in range(18):
+            pg.evaluate(f"trendState.sel={i}; drawTrend()"); hs.add(round(pg.evaluate("document.querySelector('#modal-trends .modal').scrollHeight")))
+            hs.add(round(pg.evaluate("document.querySelector('#trend-charts-wrap .tr-card').getBoundingClientRect().height"))*1000)
+        pg.evaluate("trendState.holding=true; drawTrend()"); hs.add(round(pg.evaluate("document.querySelector('#modal-trends .modal').scrollHeight"))); pg.evaluate("trendState.holding=false; trendState.sel=8; drawTrend()")
+        ok(f'{m}: window and card stay the same height for every brew (and while holding)', len([h for h in hs if h<1000])==1 and len([h for h in hs if h>=1000])==1, sorted(hs))
         pg.focus('#trend-charts-wrap .tr-box'); pg.keyboard.press('ArrowRight'); pg.wait_for_timeout(100)
         ok(f'{m}: arrow keys move between brews', 'brew 10 of 18' in card())
         pg.screenshot(path=f'shots/trends_{m}.png')

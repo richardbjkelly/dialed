@@ -1760,9 +1760,9 @@ function trendCardHtml(B, sel) {
   }
   return `<div class="tr-card">
     <div class="tr-card-top"><span>${escHtml(fmtDate(r.createdAt, { day: 'numeric', month: 'short' }))} · brew ${sel + 1} of ${B.length}${sel === B.length - 1 ? ' · latest' : ''}</span><b style="color:${exCol}">${ex}</b></div>
-    <div class="tr-card-main"><div class="tr-score">${sv != null ? sv + '<span>/10</span>' : '—'}</div><div class="tr-specs">${main || '<span class="tr-mut">No numbers logged</span>'}${sub ? `<br><span class="tr-mut">${sub}</span>` : ''}</div></div>
-    ${r.notes ? `<div class="tr-note">"${escHtml(r.notes)}"</div>` : ''}
-    ${ch.length ? `<div class="tr-change">Changed from the brew before: <b>${ch.join(', ')}</b></div>` : ''}</div>`;
+    <div class="tr-card-main"><div class="tr-score">${sv != null ? sv + '<span>/10</span>' : '—'}</div><div class="tr-specs"><div class="tr-l1">${main || '<span class="tr-mut">No numbers logged</span>'}</div><div class="tr-l2 tr-mut">${sub || '&nbsp;'}</div></div></div>
+    <div class="tr-note">${r.notes ? '"' + escHtml(r.notes) + '"' : ''}</div>
+    <div class="tr-change">${ch.length ? `Changed from the brew before: <b>${ch.join(', ')}</b>` : prev ? 'Same settings as the brew before' : 'First brew of this coffee'}</div></div>`;
 }
 // Tap, hold and slide on either chart; arrow keys too. Listeners live on the container, which is never replaced.
 function wireTrendPointer(container) {

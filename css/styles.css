@@ -1078,3 +1078,10 @@
   .tr-change b { color:var(--text); }
   body.dark-mode .tr-change b { color:var(--dm-text); }
   body.dark-mode .tr-mut, body.dark-mode .tr-card-top, body.dark-mode .tr-change { color:var(--dm-text-muted); }
+  /* The details card keeps the same height for every brew, so the window doesn't jump as you move between brews */
+  .tr-card-main { flex-wrap:nowrap; }
+  .tr-specs .tr-l1, .tr-specs .tr-l2 { white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+  .tr-note { min-height:calc(2 * 1.45em); line-height:1.45; display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden; margin-top:6px !important; }
+  .tr-change { white-space:nowrap; overflow:hidden; text-overflow:ellipsis; min-height:1.5em; margin-top:4px !important; }
+  .tr-card-top span { min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+  .tr-hint { min-height:1.4em; }
