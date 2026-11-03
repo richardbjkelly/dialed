@@ -48,30 +48,33 @@ function libraryGroups() {
   const recent = (a, b) => ((last[b.c.id] || 0) - (last[a.c.id] || 0)) || (added(b.c) - added(a.c)) || (a.i - b.i);
   const ageKey = c => { const a = roastAgeToday(c); return a == null ? -Infinity : a; };
   const byAge = (a, b) => (ageKey(b.c) - ageKey(a.c)) || recent(a, b);
+  const fzKey = c => { const a = freezerAge(c); return a == null ? -Infinity : a; };
   const all = state.coffees.map((c, i) => ({ c, i }));
   const pick = (f, sort) => all.filter(x => f(x.c)).sort(sort).map(x => x.c);
   return [
-    { key: 'open', label: 'Open bags', items: pick(c => !c.finishedBag && !isFrozen(c), byAge) },
-    { key: 'frozen', label: 'Freezer', items: pick(c => !c.finishedBag && isFrozen(c), byAge) },
+    { key: 'open', label: 'Open bags', items: pick(hasOpenBag, byAge) },
+    { key: 'frozen', label: 'Freezer', items: pick(inFreezer, (a, b) => (fzKey(b.c) - fzKey(a.c)) || recent(a, b)) },
     { key: 'finished', label: 'Finished', items: pick(c => c.finishedBag, recent) }
   ];
 }
 function libraryOrder() { return libraryGroups().flatMap(g => g.items); }
 const CUP_ICO = '<svg class="ico" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M4 9h12v5a5 5 0 0 1-5 5H9a5 5 0 0 1-5-5V9z"/><path d="M16 11h1.5a2.5 2.5 0 0 1 0 5H16"/><path d="M8 3v3M12 3v3"/></svg>';
 // The brew / thaw button on a library card (none on finished bags)
-function cardBrewBtn(c) {
+function cardBrewBtn(c, fz) {
   if (c.finishedBag) return '';
+  if (fz && !isFrozen(c) && splitStock(c)) return `<button type="button" class="card-brew-btn thaw" aria-label="Thaw the next bag of ${escHtml(c.name)}" data-on-click="event.stopPropagation();thawNextBag('${c.id}')">Thaw one</button>`;
   if (isFrozen(c)) return `<button type="button" class="card-brew-btn thaw" aria-label="Thaw ${escHtml(c.name)}" data-on-click="event.stopPropagation();toggleFreeze('${c.id}')">Thaw</button>`;
   return `<button type="button" class="card-brew-btn" aria-label="Log a brew of ${escHtml(c.name)}" data-on-click="event.stopPropagation();logBrewFor('${c.id}')">${CUP_ICO} Brew</button>`;
 }
-function roastAgePill(c) {
+function roastAgePill(c, fz) {
   if (c.finishedBag) return '';
+  if (fz && !isFrozen(c)) { const a = stockAge(c), n = freezerCount(c); return `<span class="meta-pill frozen-pill">❄ ${n} bag${n === 1 ? '' : 's'} frozen${a != null ? ' · ' + a + 'd off roast' : ''}</span>`; }
   const age = roastAgeToday(c);
   if (isFrozen(c)) return `<span class="meta-pill frozen-pill">❄ Frozen${age != null ? ' · ' + age + 'd off roast' : ''}</span>`;
   return age != null ? `<span class="meta-pill">${age}d off roast</span>` : '';
 }
 // Grid tile (photo banner): label photo across the top, badges on the photo, then name, roaster, origin summary, brews
-function coffeeTileGrid(c, rc) {
+function coffeeTileGrid(c, rc, fz) {
   const initial = (c.name || '?').trim().charAt(0).toUpperCase();
   const banner = c.labelPhoto
     ? `<img class="tile-photo" src="${photoUrl(c)}" alt="">`
@@ -80,20 +83,29 @@ function coffeeTileGrid(c, rc) {
   const summary = [ov.country, ov.process, c.roastLevel].filter(Boolean).map(escHtml).join(' · ');
   return `<div class="coffee-card tile-b${c.finishedBag ? ' finished' : ''}" data-on-click="showCoffeeDetail('${c.id}')">
     <div class="tile-banner">${banner}
-      ${c.finishedBag ? '<span class="tile-badge tile-fin">FINISHED</span>' : ''}
-      ${isFrozen(c) ? '<span class="tile-badge tile-frozen">❄ FROZEN</span>' : ''}
-      ${c.decaf ? '<span class="tile-badge tile-decaf">DECAF</span>' : ''}
-      ${c.blend ? '<span class="tile-badge tile-blend">BLEND</span>' : ''}
+      <div class="tile-badges">${c.finishedBag ? '<span class="tile-badge tile-fin">FINISHED</span>' : ''}${fz ? `<span class="tile-badge tile-frozen">❄ FROZEN${freezerCount(c) > 1 ? ' ×' + freezerCount(c) : ''}</span>` : ''}${c.decaf ? '<span class="tile-badge tile-decaf">DECAF</span>' : ''}${c.blend ? '<span class="tile-badge tile-blend">BLEND</span>' : ''}${!fz && c.split && !c.finishedBag ? `<span class="tile-badge tile-bag">${bagLabel(c).toUpperCase()}</span>` : ''}</div>
       ${c.rating > 0 ? `<span class="tile-badge tile-rating"><b>${c.rating}</b>/10</span>` : ''}
       <button class="card-more tile-more" aria-label="More options for ${escHtml(c.name)}" data-on-click="event.stopPropagation();showEditOverlay('coffee-${c.id}')">⋯</button>
     </div>
     <div class="tile-body">
       <div class="tile-name">${escHtml(c.name)}</div>
       <div class="tile-roaster">${escHtml(c.roaster || 'Unknown roaster')}</div>
-      <div class="tile-summary">${summary || '—'}</div>
-      <div class="tile-brews"><span>${rc} brew${rc !== 1 ? 's' : ''}</span>${cardBrewBtn(c)}</div>
+      <div class="tile-summary">${fz && splitStock(c) && !isFrozen(c) ? fzSummary(c) : (summary || '—')}</div>
+      <div class="tile-brews"><span>${rc} brew${rc !== 1 ? 's' : ''}</span>${cardBrewBtn(c, fz)}</div>
     </div>
   </div>`;
+}
+function fzSummary(c) {
+  const n = splitStock(c), g = c.split.size > 0 ? Math.round(c.split.size * n) + 'g' : '', a = stockAge(c);
+  return [n + ' bag' + (n === 1 ? '' : 's'), g, a != null ? 'day ' + a : ''].filter(Boolean).join(' · ');
+}
+// Coffee page: where the split bags are, with Thaw / Split buttons
+function splitNoteHtml(c) {
+  if (!c.split) return !isFrozen(c) && gramsLeft(c) > 0 ? `<button type="button" class="split-link" data-on-click="openSplitBag('${c.id}')">❄ Split &amp; freeze some of this bag…</button>` : '';
+  const n = splitStock(c), a = stockAge(c);
+  const where = c.split.empty ? `${bagLabel(c)} finished` : `${bagLabel(c)} open`;
+  return `<div class="split-note"><div><b>${where}</b>${n ? ` · ❄ ${n} in the freezer${a != null ? ' (day ' + a + ')' : ''}` : ' · none left in the freezer'}</div>
+    ${n ? `<button type="button" class="${c.split.empty ? 'btn-primary' : 'btn-secondary'}" data-on-click="thawNextBag('${c.id}'${c.split.empty ? ',true' : ''})">☀ Thaw the next bag</button>` : ''}</div>`;
 }
 function setCoffeeLayout(v) {
   appSettings.coffeeLayout = v; saveSettings(); renderCoffeesView();
@@ -107,9 +119,14 @@ function renderCoffeesView() {
   if (!state.coffees.length) { el.innerHTML=`<div class="empty-state"><div class="empty-icon"><svg class="ico" width="44" height="44" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M21 8l-9-5-9 5v8l9 5 9-5V8z"/><path d="M3 8l9 5 9-5"/><path d="M12 13v8"/></svg></div><div class="empty-title">No coffees yet</div><div class="empty-desc">Tap + to add your first coffee.</div></div>`; return; }
   const groups = libraryGroups().filter(g => g.items.length);
   const headed = groups.length > 1 || (groups[0] && groups[0].key !== 'open');
-  el.innerHTML = groups.map(g => (headed ? `<div class="lib-divider divider">${g.label}${g.key === 'frozen' ? ' <span class="lib-sub">· roast clock paused</span>' : ''}</div>` : '') + g.items.map(c => {
+  el.innerHTML = groups.map(g => (headed ? `<div class="lib-divider divider">${g.label}${g.key === 'frozen' ? ' <span class="lib-sub">· roast clock paused</span>' : ''}</div>` : '') + g.items.map(c => libCardHtml(c, g.key === 'frozen')).join('')).join('');
+}
+
+// One library card. fz: this is the Freezer copy (a split coffee can show in Open bags and in the Freezer at once)
+function libCardHtml(c, fz) {
+  const html = (() => {
     const rc = state.recipes.filter(r=>r.coffeeId===c.id).length;
-    const maslPill = (c.masl ? `<span class="meta-pill">${c.masl}m</span>` : '') + (per100g(c)!=null ? `<span class="meta-pill">£${per100g(c).toFixed(2)}/100g</span>` : '') + (gramsLeft(c)!=null && !c.finishedBag ? `<span class="meta-pill">${Math.round(gramsLeft(c))}g left</span>` : '') + roastAgePill(c); const isGrid = appSettings.coffeeLayout === 'grid';
+    const maslPill = (c.masl ? `<span class="meta-pill">${c.masl}m</span>` : '') + (per100g(c)!=null ? `<span class="meta-pill">£${per100g(c).toFixed(2)}/100g</span>` : '') + (gramsLeft(c)!=null && !c.finishedBag && !fz ? `<span class="meta-pill">${Math.round(gramsLeft(c))}g left</span>` : '') + (!fz && c.split && !c.finishedBag ? `<span class="meta-pill">${bagLabel(c)}</span>` : '') + roastAgePill(c, fz); const isGrid = appSettings.coffeeLayout === 'grid';
     // Grid: several varietals collapse to the first one plus a count, e.g. "Castillo +2"
     const ov = originView(c);
     let varietal = ov.varietal, varietalTitle = '';
@@ -123,17 +140,18 @@ function renderCoffeesView() {
     const headerImg = c.labelPhoto ? `<img src="${photoUrl(c)}" style="width:52px;height:52px;border-radius:8px;object-fit:cover;flex-shrink:0;border:1px solid rgba(255,255,255,0.15);cursor:zoom-in" alt="Bag label" data-on-click="event.stopPropagation();openLightboxFor('${c.id}')">` : '';
     const cardRating = c.rating > 0 ? `<div class="coffee-card-rating">${c.rating}/10</div>` : '';
     const finishedStyle = '';
-    const wrapOpen = `<div class="card-wrap" data-on-touchstart="startLongPress('${c.id}','coffee')" data-on-touchend="endLongPress()" data-on-touchcancel="endLongPress()" data-on-contextmenu="event.stopPropagation();showEditOverlay('coffee-${c.id}');return false"><div class="card-edit-overlay" data-overlay="coffee-${c.id}"><button class="edit-overlay-btn" data-on-click="event.stopPropagation();openEditCoffee('${c.id}');hideEditOverlay('coffee-${c.id}')"><svg class="ico" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M4 20h4L19 9l-4-4L4 16v4z"/><path d="M13.5 6.5l4 4"/></svg> Edit</button><button class="edit-overlay-btn" data-on-click="event.stopPropagation();showTrendModal('${c.id}');hideEditOverlay('coffee-${c.id}')"><svg class="ico" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M3 17l6-6 4 4 8-8"/><path d="M15 7h6v6"/></svg> Trends</button>${c.finishedBag ? '' : `<button class="edit-overlay-btn" data-on-click="event.stopPropagation();hideEditOverlay('coffee-${c.id}');toggleFreeze('${c.id}')">${isFrozen(c) ? '☀ Thaw' : '❄ Freeze'}</button>`}<button class="edit-overlay-btn" data-on-click="event.stopPropagation();hideEditOverlay('coffee-${c.id}');toggleFinishedBag('${c.id}')">${c.finishedBag ? '↺ Reopen' : '✓ Finish'}</button><button class="edit-overlay-btn" data-on-click="event.stopPropagation();confirmDeleteCoffee('${c.id}')">✕ Delete</button><button class="edit-overlay-btn" data-on-click="event.stopPropagation();hideEditOverlay('coffee-${c.id}')">Cancel</button></div>`;
-    if (isGrid) return wrapOpen + coffeeTileGrid(c, rc) + `</div>`;
+    const wrapOpen = `<div class="card-wrap" data-on-touchstart="startLongPress('${c.id}','coffee')" data-on-touchend="endLongPress()" data-on-touchcancel="endLongPress()" data-on-contextmenu="event.stopPropagation();showEditOverlay('coffee-${c.id}');return false"><div class="card-edit-overlay" data-overlay="coffee-${c.id}"><button class="edit-overlay-btn" data-on-click="event.stopPropagation();openEditCoffee('${c.id}');hideEditOverlay('coffee-${c.id}')"><svg class="ico" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M4 20h4L19 9l-4-4L4 16v4z"/><path d="M13.5 6.5l4 4"/></svg> Edit</button><button class="edit-overlay-btn" data-on-click="event.stopPropagation();showTrendModal('${c.id}');hideEditOverlay('coffee-${c.id}')"><svg class="ico" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M3 17l6-6 4 4 8-8"/><path d="M15 7h6v6"/></svg> Trends</button>${c.finishedBag ? '' : (fz && !isFrozen(c) ? `<button class="edit-overlay-btn" data-on-click="event.stopPropagation();hideEditOverlay('coffee-${c.id}');thawNextBag('${c.id}')">☀ Thaw one</button>` : `<button class="edit-overlay-btn" data-on-click="event.stopPropagation();hideEditOverlay('coffee-${c.id}');toggleFreeze('${c.id}')">${isFrozen(c) ? '☀ Thaw' : '❄ Freeze'}</button>`)}${!c.finishedBag && !c.split && !isFrozen(c) ? `<button class="edit-overlay-btn" data-on-click="event.stopPropagation();hideEditOverlay('coffee-${c.id}');openSplitBag('${c.id}')">❄ Split &amp; freeze…</button>` : ''}<button class="edit-overlay-btn" data-on-click="event.stopPropagation();hideEditOverlay('coffee-${c.id}');toggleFinishedBag('${c.id}')">${c.finishedBag ? '↺ Reopen' : '✓ Finish'}</button><button class="edit-overlay-btn" data-on-click="event.stopPropagation();confirmDeleteCoffee('${c.id}')">✕ Delete</button><button class="edit-overlay-btn" data-on-click="event.stopPropagation();hideEditOverlay('coffee-${c.id}')">Cancel</button></div>`;
+    if (isGrid) return wrapOpen + coffeeTileGrid(c, rc, fz) + `</div>`;
     return wrapOpen + `<div class="coffee-card${c.finishedBag ? ' finished' : ''}" data-on-click="showCoffeeDetail('${c.id}')" style="${finishedStyle}"><div class="coffee-card-header"><div><div class="coffee-card-name">${escHtml(c.name)}${c.finishedBag?'<span class="finished-badge">FINISHED</span>':''}</div><div class="coffee-card-roaster">${escHtml(c.roaster||'Unknown Roaster')}</div>${cardRating}</div><div style="display:flex;align-items:flex-start;gap:8px">${headerImg}<button class="card-more" aria-label="More options" data-on-click="event.stopPropagation();showEditOverlay('coffee-${c.id}')">⋯</button></div></div><div class="coffee-card-body">${pills?`<div class="coffee-meta">${pills}</div>`:''}  <div class="card-foot"><div class="recipe-count">${rc} brew${rc!==1?'s':''} logged</div><div class="card-foot-r">${c.decaf ? '<span class="decaf-label">Decaf</span>' : ''}${cardBrewBtn(c)}</div></div></div></div>` + `</div>`;
-  }).join('')).join('');
+  })();
+  // The Freezer copy of a coffee that also has an open bag gets its own menu, so the two don't clash
+  return fz && hasOpenBag(c) ? html.split(`coffee-${c.id}`).join(`coffeefz-${c.id}`).split(`startLongPress('${c.id}','coffee')`).join(`startLongPress('${c.id}','coffeefz')`) : html;
 }
-
 // Finishing a bag asks for final ratings; reopening is immediate
 function toggleFinishedBag(id) {
   const coffee = state.coffees.find(x=>x.id===id);
   if (!coffee) return;
-  if (!coffee.finishedBag) { openFinishBag(id); return; }
+  if (!coffee.finishedBag) { if (splitStock(coffee) && !(coffee.split && coffee.split.empty)) openNextBag(id); else openFinishBag(id); return; }
   coffee.finishedBag = false;
   save();
   showToast('Bag marked as active');
@@ -263,7 +281,8 @@ function showCoffeeDetail(id) {
       </div>
     </div>
     ${blendSectionHtml(c)}
-    ${c.finishedBag ? '' : `<div class="detail-brew-row">
+    ${c.finishedBag ? '' : splitNoteHtml(c)}
+    ${c.finishedBag || (c.split && c.split.empty) ? '' : `<div class="detail-brew-row">
       ${isFrozen(c) ? `<div class="frozen-note">❄ In the freezer since ${new Date(frozenSince(c) + 'T00:00:00').toLocaleDateString('en-GB', {day:'numeric', month:'short'})}${roastAgeToday(c) != null ? ' · paused at ' + roastAgeToday(c) + 'd off roast' : ''}</div>` : `<button class="btn-primary" style="flex:2;margin-top:0" data-on-click="logBrewFor('${c.id}')">${CUP_ICO} Log brew</button>`}
       <button class="btn-secondary" style="flex:1" data-on-click="toggleFreeze('${c.id}')">${isFrozen(c) ? '☀ Thaw' : '❄ Freeze'}</button>
     </div>`}
@@ -317,16 +336,16 @@ function recipeCard(r, showDel=false) {
   const thumbHtml = coffee?.labelPhoto ? `<img src="${photoUrl(coffee)}" class="brew-label-thumb" alt="Bag label" loading="lazy" data-on-click="openLightboxFor('${coffee.id}')" style="cursor:zoom-in">` : '';
   return `<div class="card-wrap" data-on-touchstart="startLongPress('${r.id}','brew')" data-on-touchend="endLongPress()" data-on-touchcancel="endLongPress()" data-on-contextmenu="event.stopPropagation();showEditOverlay('brew-${r.id}');return false"><div class="card-edit-overlay" data-overlay="brew-${r.id}"><button class="edit-overlay-btn" data-on-click="event.stopPropagation();editBrew('${r.id}');hideEditOverlay('brew-${r.id}')"><svg class="ico" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M4 20h4L19 9l-4-4L4 16v4z"/><path d="M13.5 6.5l4 4"/></svg> Edit</button><button class="edit-overlay-btn" data-on-click="event.stopPropagation();hideEditOverlay('brew-${r.id}');openPlanNext('${r.id}')">↻ Plan next</button><button class="edit-overlay-btn" data-on-click="event.stopPropagation();confirmDeleteBrew('${r.id}')">✕ Delete</button><button class="edit-overlay-btn" data-on-click="event.stopPropagation();hideEditOverlay('brew-${r.id}')">Cancel</button></div><div class="recipe-entry">
     <div class="recipe-entry-header">
-      <div style="display:flex;gap:10px;align-items:flex-start;flex:1">
+      <div style="display:flex;gap:10px;align-items:flex-start;flex:1;min-width:0">
         ${thumbHtml}
         <div style="flex:1;min-width:0">
           <div style="font-family:var(--font-display);font-size:14px">${escHtml(coffee?.name||'Unknown Coffee')}</div>
           <div style="font-family:var(--font-text);font-size:11px;color:var(--text-muted)">${escHtml(coffee?.roaster||'')}${coffee?.roaster&&r.method?' · ':''}${escHtml(r.method||'')}</div>
-          ${grinderBadge}${waterBadgeHtml(r)}
         </div>
       </div>
       <div style="display:flex;align-items:center;gap:6px;flex-shrink:0">${coffee?.decaf ? '<span class="decaf-label">Decaf</span>' : ''}${r.awaitingScore ? `<button type="button" class="unscored-label" data-on-click="event.stopPropagation();scoreBrew('${r.id}')">Unscored</button>` : ''}${exTag}<button class="card-more" aria-label="More options" data-on-click="event.stopPropagation();showEditOverlay('brew-${r.id}')">⋯</button></div>
     </div>
+    ${grinderBadge || r.water ? `<div class="rb-pills${thumbHtml ? ' has-thumb' : ''}">${grinderBadge}${waterBadgeHtml(r)}</div>` : ''}
     <div class="recipe-params">
       <div class="param-block"><div class="param-value">${r.grind||'—'}</div><div class="param-label">Grind${brewMicrons(r)?' · <span class="unit">'+brewMicrons(r)+'µm</span>':''}</div></div>
       <div class="param-block"><div class="param-value">${r.dose?r.dose+'g':'—'}</div><div class="param-label">Dose</div></div>

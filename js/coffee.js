@@ -764,7 +764,8 @@ function saveRecipe(opts) {
   let newBrewId = null;
   if (!editBrewId) {
     newBrewId = newId();
-    state.recipes.unshift({id:newBrewId, createdAt:new Date().toISOString(), ...brewData});
+    const bagOf = state.coffees.find(c => c.id === brewData.coffeeId);
+    state.recipes.unshift({id:newBrewId, createdAt:new Date().toISOString(), ...brewData, ...(bagOf && bagOf.split ? { bag: bagOf.split.bag } : {})});
   }
   const planId = document.getElementById('r-plan-id')?.value || '';
   if (planId) { state.plannedBrews = (state.plannedBrews||[]).filter(p => p.id !== planId); document.getElementById('r-plan-id').value=''; }

@@ -1242,6 +1242,26 @@ No visible changes — two structural changes behind the scenes.
 
 ---
 
+## v3.58
+*3 November 2026*
+
+### Split & freeze a bag
+- New **Split & freeze…** in a coffee's ⋯ menu (and a link on its page): split a bag into 2–10 equal bags, keep one or more out and freeze the rest
+- It stays one coffee, so brews, trends and the best recipe carry on across every bag
+- The open bag shows "Bag 1 of 4". The Freezer shows one card, "Frozen ×3", with how many grams are left and the day it paused at, plus a **Thaw one** button
+- Each frozen bag keeps its own paused roast clock. A bag thawed a month later is still the same days off roast, and older brews keep the age of the bag they came from
+- Grams left and brews left count only the open bag
+- Finishing a bag with more in the freezer offers **Thaw the next bag**, **Not yet** or **Finish the whole coffee instead**. Brewing a coffee whose open bag is used up offers to thaw the next one first
+- Thawing another bag while the open one still has beans in it asks first
+
+### Smaller changes
+- **Coffee stats** periods now fit without scrolling: 12 Mo · 6 Mo · 3 Mo · Month · All
+- **Recent brews:** the grinder and water labels always sit together on one line under the header, instead of the water label sometimes dropping below
+- **Coffee Library tiles:** the panel over the bag photo is lighter (40%, less blur) so the bag shows through, with a stronger shadow on the text
+- Badges on a tile (Frozen, Decaf, Bag 1 of 4) stack instead of overlapping
+
+---
+
 ## Pending / Roadmap
 - Rebuild the APK once to pick up the new cup icon
 - Opt-in pooled data + trained model (see feasibility notes): backend, consent, deletion, ICO registration
@@ -1259,4 +1279,4 @@ No visible changes — two structural changes behind the scenes.
 
 ---
 
-*Document maintained automatically. Last updated: v3.57*
+*Document maintained automatically. Last updated: v3.58*

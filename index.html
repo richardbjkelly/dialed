@@ -13,7 +13,7 @@
 <meta name="apple-mobile-web-app-title" content="dialed">
 <meta name="theme-color" content="#123C27">
 <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; font-src 'self'; connect-src 'self' https://api.frankfurter.dev https://api.frankfurter.app; object-src 'none'; base-uri 'self'; form-action 'none'">
-<link rel="stylesheet" href="css/styles.css?v=3.57">
+<link rel="stylesheet" href="css/styles.css?v=3.58">
 </head>
 <body>
 
@@ -120,11 +120,11 @@
   <div class="divider" style="margin-top:4px">Coffee stats</div>
   <div class="stats-section">
     <div class="stats-period-bar" id="stats-period-bar">
-      <button class="type-btn active" data-period="year" data-on-click="setStatsPeriod('year',this)">12 Months</button>
-      <button class="type-btn" data-period="6m" data-on-click="setStatsPeriod('6m',this)">6 Months</button>
-      <button class="type-btn" data-period="3m" data-on-click="setStatsPeriod('3m',this)">3 Months</button>
-      <button class="type-btn" data-period="month" data-on-click="setStatsPeriod('month',this)">This Month</button>
-      <button class="type-btn" data-period="all" data-on-click="setStatsPeriod('all',this)">All Time</button>
+      <button class="type-btn active" data-period="year" aria-label="Last 12 months" data-on-click="setStatsPeriod('year',this)">12 Mo</button>
+      <button class="type-btn" data-period="6m" aria-label="Last 6 months" data-on-click="setStatsPeriod('6m',this)">6 Mo</button>
+      <button class="type-btn" data-period="3m" aria-label="Last 3 months" data-on-click="setStatsPeriod('3m',this)">3 Mo</button>
+      <button class="type-btn" data-period="month" aria-label="This month" data-on-click="setStatsPeriod('month',this)">Month</button>
+      <button class="type-btn" data-period="all" aria-label="All time" data-on-click="setStatsPeriod('all',this)">All</button>
     </div>
     <div id="stats-dashboard"></div>
   </div>
@@ -601,6 +601,37 @@
 </div>
 
 <!-- MODAL: Finish bag -->
+<!-- MODAL: Split a bag and freeze some of it -->
+<div class="modal-overlay sheet-tall" id="modal-split">
+  <div class="modal">
+    <div class="modal-handle"></div>
+    <div class="modal-title">Split &amp; freeze</div>
+    <div class="modal-subtitle" id="split-sub"></div>
+    <div class="sp-step"><div>Split into<small id="split-count-sub"></small></div><div class="sp-ctl"><button type="button" aria-label="Fewer bags" data-on-click="splitStep('count',-1)">−</button><b id="split-count" aria-live="polite">4</b><button type="button" aria-label="More bags" data-on-click="splitStep('count',1)">+</button></div></div>
+    <div class="sp-step"><div>Keep out to brew<small id="split-keep-sub"></small></div><div class="sp-ctl"><button type="button" aria-label="Keep fewer out" data-on-click="splitStep('keep',-1)">−</button><b id="split-keep" aria-live="polite">1</b><button type="button" aria-label="Keep more out" data-on-click="splitStep('keep',1)">+</button></div></div>
+    <div class="sp-bags" id="split-bags"></div>
+    <div class="sp-note" id="split-note"></div>
+    <button type="button" class="btn-primary" id="split-go" data-on-click="saveSplit()">Split</button>
+    <div style="height:10px"></div>
+    <button type="button" class="btn-secondary" style="width:100%" data-on-click="closeModal('modal-split')">Cancel</button>
+    <div style="height:10px"></div>
+  </div>
+</div>
+
+<!-- MODAL: a split bag is finished and more are in the freezer -->
+<div class="modal-overlay" id="modal-next-bag">
+  <div class="modal">
+    <div class="modal-handle"></div>
+    <div class="modal-title" id="nb-title">Bag finished</div>
+    <div class="modal-subtitle" id="nb-sub"></div>
+    <div class="sp-note">Thaw the next one now? Let it come up to room temperature in the sealed bag before opening (about an hour) so no condensation gets on the beans.</div>
+    <button type="button" class="btn-primary" data-on-click="nextBagThaw()">Thaw the next bag</button>
+    <div style="height:10px"></div>
+    <button type="button" class="btn-secondary" style="width:100%" data-on-click="nextBagLater()">Not yet</button>
+    <button type="button" class="split-link" style="margin:12px auto 4px;display:block" data-on-click="nextBagFinishAll()">Finish the whole coffee instead</button>
+  </div>
+</div>
+
 <div class="modal-overlay" id="modal-finish">
   <div class="modal">
     <div class="modal-handle"></div>
@@ -984,12 +1015,12 @@
     <span class="nav-tab-icon"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><line x1="4" y1="6" x2="20" y2="6"/><line x1="4" y1="12" x2="20" y2="12"/><line x1="4" y1="18" x2="20" y2="18"/><circle cx="8" cy="6" r="2" fill="var(--espresso)" stroke="currentColor" class="nav-fill"/><circle cx="16" cy="12" r="2" fill="var(--espresso)" stroke="currentColor" class="nav-fill"/><circle cx="10" cy="18" r="2" fill="var(--espresso)" class="nav-fill" stroke="currentColor"/></svg></span>Settings
   </button>
 </nav>
-<script src="js/data.js?v=3.57"></script>
-<script src="js/core.js?v=3.57"></script>
-<script src="js/coffee.js?v=3.57"></script>
-<script src="js/views.js?v=3.57"></script>
-<script src="js/tools.js?v=3.57"></script>
-<script src="js/water.js?v=3.57"></script>
-<script src="js/app.js?v=3.57"></script>
+<script src="js/data.js?v=3.58"></script>
+<script src="js/core.js?v=3.58"></script>
+<script src="js/coffee.js?v=3.58"></script>
+<script src="js/views.js?v=3.58"></script>
+<script src="js/tools.js?v=3.58"></script>
+<script src="js/water.js?v=3.58"></script>
+<script src="js/app.js?v=3.58"></script>
 </body>
 </html>

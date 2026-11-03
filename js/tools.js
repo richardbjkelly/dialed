@@ -368,28 +368,138 @@ const dayStart = s => new Date(s + 'T00:00:00').getTime();
 function isFrozen(c) { return !!(c && Array.isArray(c.freezes) && c.freezes.some(f => f && !f.to)); }
 function frozenSince(c) { const f = isFrozen(c) ? c.freezes.find(x => !x.to) : null; return f ? f.from : null; }
 // Whole days spent frozen between the roast and time t
-function frozenDaysBefore(c, t) {
-  if (!c || !Array.isArray(c.freezes) || !c.roastDate) return 0;
+function frozenDaysBefore(c, t, fz) {
+  if (fz === undefined) fz = c && c.freezes;
+  if (!c || !Array.isArray(fz) || !c.roastDate) return 0;
   const r0 = dayStart(c.roastDate); let ms = 0;
-  c.freezes.forEach(f => {
+  fz.forEach(f => {
     if (!f || !f.from) return;
     const a = Math.max(r0, dayStart(f.from)), b = Math.min(t, f.to ? dayStart(f.to) : t);
     if (b > a) ms += b - a;
   });
   return Math.floor(ms / DAY_MS);
 }
-function roastAgeAt(cf, t) {
+function roastAgeAt(cf, t, fz) {
   if (!cf || !cf.roastDate) return null;
   const d = Math.floor((t - dayStart(cf.roastDate)) / DAY_MS);
   if (d < 0) return null;
-  return Math.max(0, d - frozenDaysBefore(cf, t));
+  return Math.max(0, d - frozenDaysBefore(cf, t, fz));
 }
 function daysOffRoast(r, cf) {
   if (!cf || !cf.roastDate || !r || !r.createdAt) return null;
-  return roastAgeAt(cf, new Date(r.createdAt).getTime());
+  return roastAgeAt(cf, new Date(r.createdAt).getTime(), freezesForBag(cf, r.bag));
 }
 function roastAgeToday(cf) { return roastAgeAt(cf, Date.now()); }
 function todayISO() { const d = new Date(); return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`; }
+// ---- Split bags: one coffee divided into equal bags; some kept out, the rest frozen and thawed one at a time ----
+// c.split = { size: g per bag | null, count, bag: number of the first bag in the open portion, open: bags in that portion,
+//             at: when it was split, base: freezes from before the split, frozen: [{from}] bags still in the freezer,
+//             past: { bagNo: freezes } for earlier portions, empty: the open portion is used up and the next isn't thawed yet }
+// c.freezes always describes the bag(s) open now, so the plain freezer code keeps working for them; brews record r.bag
+function splitStock(c) { return c && c.split && Array.isArray(c.split.frozen) ? c.split.frozen.length : 0; }
+function hasOpenBag(c) { return !!c && !c.finishedBag && !isFrozen(c) && !(c.split && c.split.empty); }
+function inFreezer(c) { return !!c && !c.finishedBag && (isFrozen(c) || splitStock(c) > 0); }
+function freezerCount(c) { return splitStock(c) + (isFrozen(c) ? (c.split ? c.split.open : 1) : 0); }
+function bagLabel(c) {
+  const s = c && c.split; if (!s) return '';
+  return s.open > 1 ? `Bags ${s.bag}–${s.bag + s.open - 1} of ${s.count}` : `Bag ${s.bag} of ${s.count}`;
+}
+// The freezer history of the beans a brew came from (brews from before a split belong to bag 1)
+function freezesForBag(c, n) {
+  const s = c && c.split; if (!s) return c ? c.freezes : undefined;
+  const b = n > 0 ? n : 1;
+  if (b >= s.bag) return c.freezes;
+  return (s.past && s.past[b]) || s.base || [];
+}
+function stockFreezes(c) { const s = c.split, f = s && s.frozen[0]; return f ? [...(s.base || []), { from: f.from, to: null }] : []; }
+// Days off roast of the next bag waiting in the freezer (paused where it went in)
+function stockAge(c) { return splitStock(c) ? roastAgeAt(c, Date.now(), stockFreezes(c)) : null; }
+function freezerAge(c) { return isFrozen(c) ? roastAgeToday(c) : stockAge(c); }
+
+let splitDraft = null;
+function splitTotal(c) { const l = gramsLeft(c); return l != null && l > 0 ? l : null; }
+function openSplitBag(id) {
+  const c = state.coffees.find(x => x.id === id); if (!c || c.finishedBag || c.split) return;
+  if (isFrozen(c)) { showToast('Thaw it first, then split it'); return; }
+  hideAllOverlays();
+  splitDraft = { id, count: 4, keep: 1 };
+  const age = roastAgeToday(c), tot = splitTotal(c);
+  document.getElementById('split-sub').textContent = [c.name, c.roaster, tot ? Math.round(tot) + 'g' + (gramsUsed(c) > 0 ? ' left' : ' bag') : '', age != null ? 'day ' + age : ''].filter(Boolean).join(' · ');
+  renderSplit(); openModal('modal-split');
+}
+function splitStep(k, d) {
+  if (!splitDraft) return;
+  if (k === 'count') { splitDraft.count = Math.max(2, Math.min(10, splitDraft.count + d)); splitDraft.keep = Math.min(splitDraft.keep, splitDraft.count - 1); }
+  else splitDraft.keep = Math.max(1, Math.min(splitDraft.count - 1, splitDraft.keep + d));
+  renderSplit();
+}
+function renderSplit() {
+  const d = splitDraft; if (!d) return;
+  const c = state.coffees.find(x => x.id === d.id); const tot = c ? splitTotal(c) : null;
+  const g = tot ? Math.round(tot / d.count) + 'g' : '';
+  const fz = d.count - d.keep, age = c ? roastAgeToday(c) : null;
+  document.getElementById('split-count').textContent = d.count;
+  document.getElementById('split-keep').textContent = d.keep;
+  document.getElementById('split-count-sub').textContent = g ? `Equal bags of ${g}` : 'Equal bags (add the bag weight to see grams)';
+  document.getElementById('split-keep-sub').textContent = `The other ${fz} go${fz === 1 ? 'es' : ''} in the freezer today`;
+  const grid = document.getElementById('split-bags');
+  grid.style.gridTemplateColumns = `repeat(${Math.min(d.count, 5)}, 1fr)`;
+  grid.innerHTML = Array.from({ length: d.count }, (_, i) => i < d.keep
+    ? `<div class="sp-bag"><div class="ic">${CUP_ICO.replace('width="13" height="13"', 'width="20" height="20"')}</div><div class="g">${g || 'Bag ' + (i + 1)}</div><div class="s">Open</div></div>`
+    : `<div class="sp-bag fz"><div class="ic">❄</div><div class="g">${g || 'Bag ' + (i + 1)}</div><div class="s">Freeze</div></div>`).join('');
+  document.getElementById('split-note').textContent = `It stays one coffee: brews, trends and the best recipe carry on across every bag. Each frozen bag keeps its own paused roast clock${age != null ? `, so a bag you thaw in a month is still day ${age}` : ''}.`;
+  document.getElementById('split-go').textContent = `Split · freeze ${fz} bag${fz === 1 ? '' : 's'}`;
+}
+function saveSplit() {
+  const d = splitDraft; if (!d) return;
+  const c = state.coffees.find(x => x.id === d.id); if (!c || c.split) { closeModal('modal-split'); return; }
+  const tot = splitTotal(c), today = todayISO();
+  c.split = { size: tot ? Math.round(tot / d.count * 10) / 10 : null, count: d.count, bag: 1, open: d.keep, at: new Date().toISOString(),
+    base: (c.freezes || []).map(f => ({ from: f.from, to: f.to || today })), frozen: Array.from({ length: d.count - d.keep }, () => ({ from: today })), past: {} };
+  save(); closeModal('modal-split'); splitDraft = null;
+  showToast(`Split into ${d.count}: ${d.count - d.keep} in the freezer`);
+  refreshAfterFinish(c.id);
+}
+// Thaw the next frozen bag: it becomes the open bag, and its clock carries on from where it paused
+function thawNextBag(id, sure) {
+  const c = state.coffees.find(x => x.id === id); if (!c || !splitStock(c)) return;
+  const s = c.split, left = gramsLeft(c);
+  if (!sure && hasOpenBag(c) && left !== 0) {
+    confirmAction({ title: 'Thaw another bag?', text: `${left != null ? `About ${Math.round(left)}g is still left in ${bagLabel(c).toLowerCase()}. ` : `${bagLabel(c)} is still open. `}New brews will count against bag ${s.bag + s.open}.`,
+      button: 'Thaw it', neutral: true, onYes: () => thawNextBag(id, true) });
+    return;
+  }
+  const today = todayISO();
+  const cur = (c.freezes || []).map(f => ({ from: f.from, to: f.to || today }));
+  s.past = s.past || {}; s.past[s.bag] = cur;
+  const f = s.frozen.shift();
+  const fz = [...(s.base || []).map(x => ({ ...x })), ...(f.from < today ? [{ from: f.from, to: today }] : [])];
+  if (fz.length) c.freezes = fz; else delete c.freezes;
+  s.bag += s.open; s.open = 1; s.empty = false; c.finishedBag = false;
+  save(); hideAllOverlays(); closeModal('modal-next-bag');
+  const age = roastAgeToday(c);
+  showToast(`${bagLabel(c)} thawed${age != null ? ' · day ' + age : ''}`);
+  refreshAfterFinish(c.id);
+}
+// Finishing a split bag with more in the freezer: thaw the next one, wait, or finish the whole coffee
+function openNextBag(id) {
+  const c = state.coffees.find(x => x.id === id); if (!c) return;
+  hideAllOverlays();
+  const n = splitStock(c);
+  document.getElementById('nb-title').textContent = `${bagLabel(c)} ${c.split.open > 1 ? 'are' : 'is'} finished`;
+  document.getElementById('nb-sub').textContent = `${c.name} · ${n} bag${n === 1 ? '' : 's'} left in the freezer`;
+  nextBagId = id; openModal('modal-next-bag');
+}
+let nextBagId = null;
+function nextBagThaw() { if (nextBagId) thawNextBag(nextBagId, true); }
+function nextBagLater() {
+  const c = state.coffees.find(x => x.id === nextBagId); closeModal('modal-next-bag'); if (!c || !c.split) return;
+  if (isFrozen(c)) c.freezes.find(x => !x.to).to = todayISO();
+  c.split.empty = true;
+  if (state.selectedCoffeeId === c.id) state.selectedCoffeeId = null;
+  save(); showToast('Bag finished · the rest stay in the freezer'); refreshAfterFinish(c.id);
+}
+function nextBagFinishAll() { const id = nextBagId; closeModal('modal-next-bag'); if (id) setTimeout(() => openFinishBag(id), 250); }
 function toggleFreeze(id) {
   const c = state.coffees.find(x => x.id === id); if (!c || c.finishedBag) return;
   const today = todayISO();
@@ -410,6 +520,11 @@ function toggleFreeze(id) {
 // Frozen coffees can't be brewed: offer to thaw first, then carry on
 function brewGuard(coffeeId, go) {
   const c = state.coffees.find(x => x.id === coffeeId);
+  if (c && !isFrozen(c) && c.split && c.split.empty && splitStock(c)) {
+    confirmAction({ title: 'Thaw the next bag?', text: `${bagLabel(c)} is used up. Thaw the next bag of ${c.name} to brew it? Its roast clock carries on from ${stockAge(c) ?? 'where it paused'}${stockAge(c) != null ? ' days' : ''}.`,
+      button: 'Thaw and brew', neutral: true, onYes: () => { thawNextBag(c.id, true); go(); } });
+    return;
+  }
   if (!c || !isFrozen(c)) { go(); return; }
   confirmAction({ title: 'In the freezer', text: `${c.name} is frozen. Thaw it to brew it? Its roast clock starts again from ${roastAgeToday(c) ?? 'where it paused'}${roastAgeToday(c) != null ? ' days' : ''}.`,
     button: 'Thaw and brew', neutral: true, onYes: () => { toggleFreeze(c.id); go(); } });
@@ -428,7 +543,15 @@ function costPerCup(r, cf) {
 }
 function brewsFor(cfId) { return state.recipes.filter(r => r.coffeeId === cfId); }
 function gramsUsed(cf) { return brewsFor(cf.id).reduce((s, r) => s + (parseFloat(r.dose) || 0), 0); }
-function gramsLeft(cf) { return cf && cf.weight > 0 ? Math.max(0, cf.weight - gramsUsed(cf)) : null; }
+function gramsLeft(cf) {
+  if (cf && cf.split) {
+    const s = cf.split; if (s.empty) return 0; if (!(s.size > 0)) return null;
+    const used = brewsFor(cf.id).filter(r => r.bag === s.bag).reduce((a, r) => a + (parseFloat(r.dose) || 0), 0);
+    return Math.max(0, s.size * s.open - used);
+  }
+  return cf && cf.weight > 0 ? Math.max(0, cf.weight - gramsUsed(cf)) : null;
+}
+function bagWeight(cf) { return cf && cf.split ? (cf.split.size > 0 ? Math.round(cf.split.size * cf.split.open) : null) : (cf && cf.weight > 0 ? cf.weight : null); }
 function avgDose(cf) { const ds = brewsFor(cf.id).map(r => parseFloat(r.dose)).filter(d => d > 0); return ds.length ? ds.reduce((a, b) => a + b, 0) / ds.length : null; }
 function bestBrew(cfId) {
   const rated = brewsFor(cfId).filter(r => r.rating > 0);
@@ -441,15 +564,17 @@ function bagPanelHtml(cf) {
   const age = roastAgeToday(cf);
   const rows = [];
   if (left != null && !cf.finishedBag) {
-    const pct = Math.round(left / cf.weight * 100);
+    const bw = bagWeight(cf) || 1, pct = Math.min(100, Math.round(left / bw * 100));
     const brewsLeft = ad ? Math.floor(left / ad) : null;
     const low = left <= 0 ? 'Empty' : (brewsLeft !== null && brewsLeft <= 1) ? 'Nearly empty' : '';
     rows.push(`<div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:6px">
-        <span style="font-size:13px;font-weight:600;color:var(--text)">${Math.round(left)}g left <span style="font-weight:400;color:var(--text-muted);font-size:11px">of ${cf.weight}g${brewsLeft !== null && left > 0 ? ' · ~' + brewsLeft + ' brew' + (brewsLeft !== 1 ? 's' : '') : ''}</span></span>
+        <span style="font-size:13px;font-weight:600;color:var(--text)">${Math.round(left)}g left <span style="font-weight:400;color:var(--text-muted);font-size:11px">of ${bw}g${cf.split ? ' · ' + bagLabel(cf).toLowerCase() : ''}${brewsLeft !== null && left > 0 ? ' · ~' + brewsLeft + ' brew' + (brewsLeft !== 1 ? 's' : '') : ''}</span></span>
         ${low ? `<span class="extraction-tag tag-over">${low}</span>` : ''}
       </div>
       <div class="stats-bar-track" style="height:8px;margin-bottom:10px"><div class="stats-bar-fill" style="width:${pct}%;background:${pct <= 15 ? '#c0564b' : 'var(--crema)'}"></div></div>
-      ${left <= 0 && !cf.finishedBag ? `<button class="btn-secondary" style="width:100%;margin-bottom:10px;color:var(--text)" data-on-click="toggleFinishedBag('${cf.id}')">Bag's empty — mark finished</button>` : ''}`);
+      ${left <= 0 && !cf.finishedBag ? (cf.split && cf.split.empty && splitStock(cf)
+        ? `<button class="btn-secondary" style="width:100%;margin-bottom:10px;color:var(--text)" data-on-click="thawNextBag('${cf.id}',true)">❄ Thaw the next bag</button>`
+        : `<button class="btn-secondary" style="width:100%;margin-bottom:10px;color:var(--text)" data-on-click="toggleFinishedBag('${cf.id}')">Bag's empty — mark finished</button>`) : ''}`);
   }
   const facts = [];
   const iced = cf.roastDate ? frozenDaysBefore(cf, Date.now()) : 0;
@@ -1643,7 +1768,7 @@ function renderUpNext() {
     const numericGrind = numOrNull(p.grind) !== null;
     if (p.grind) chg.push(`<span class="meta-pill">Grind ${p.grindFrom && p.grindFrom!==p.grind ? p.grindFrom+' → ' : ''}${p.grind}${!numericGrind && p.grindDir!=='same' ? ' ('+p.grindDir+')' : ''}</span>`);
     if (p.temp) chg.push(`<span class="meta-pill">${p.tempFrom && p.tempFrom!==p.temp ? p.tempFrom+' → ' : ''}${p.temp}°C</span>`);
-    if (isFrozen(cf)) chg.push('<span class="meta-pill frozen-pill">❄ Frozen · thaw to brew</span>');
+    if (!hasOpenBag(cf) && inFreezer(cf)) chg.push('<span class="meta-pill frozen-pill">❄ Frozen · thaw to brew</span>');
     if (p.fromExtraction) chg.push(`<span class="extraction-tag tag-${p.fromExtraction}">after ${p.fromExtraction}</span>`);
     return `<div class="upnext-card" data-plan-id="${p.id}">
       <div class="upnext-head"><div style="flex:1;min-width:0">

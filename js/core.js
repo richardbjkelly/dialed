@@ -176,6 +176,19 @@ function sanitizeState(raw) {
       if (o.finishedBag) f.forEach(x => { if (!x.to) x.to = x.from; });
       if (f.length) o.freezes = f; else delete o.freezes;
     }
+    if ('split' in o) {   // split bags (see splitStock in tools.js)
+      const D = /^\d{4}-\d{2}-\d{2}$/, x = o.split;
+      const fzs = a => (Array.isArray(a) ? a : []).filter(f => isObj(f) && D.test(String(f.from))).slice(0, 40).map(f => ({ from: String(f.from), to: D.test(String(f.to)) ? String(f.to) : String(f.from) }));
+      const int = (v, lo, hi, d) => { const n = Math.round(Number(v)); return isFinite(n) && n >= lo && n <= hi ? n : d; };
+      if (isObj(x)) {
+        const count = int(x.count, 2, 10, 0), open = int(x.open, 1, 10, 1), bag = int(x.bag, 1, 10, 1), size = Number(x.size);
+        const frozen = (Array.isArray(x.frozen) ? x.frozen : []).filter(f => isObj(f) && D.test(String(f.from))).slice(0, 10).map(f => ({ from: String(f.from) }));
+        const past = {}; if (isObj(x.past)) Object.keys(x.past).forEach(k => { const n = int(k, 1, 10, 0); if (n) past[n] = fzs(x.past[k]); });
+        o.split = count ? { size: isFinite(size) && size > 0 && size <= 100000 ? Math.round(size * 10) / 10 : null, count, bag, open, at: isoDate(x.at) || new Date(0).toISOString(),
+          base: fzs(x.base), frozen, past, empty: !!x.empty && frozen.length > 0 } : undefined;
+      }
+      if (!o.split) delete o.split;
+    }
     ['createdAt', 'finishedAt'].forEach(k => { if (k in o) { const d = isoDate(o[k]); if (d) o[k] = d; else delete o[k]; } });
     if ('buyAgain' in o && !['yes', 'maybe', 'no', ''].includes(o.buyAgain)) o.buyAgain = '';
     if (typeof o.roasterCountry === 'string' && o.roasterCountry) o.roasterCountry = normRoasterCountry(o.roasterCountry);
@@ -200,6 +213,7 @@ function sanitizeState(raw) {
     if ('taste' in o) { const t = cleanTaste(o.taste); if (t) o.taste = t; else delete o.taste; }
     if (!['under', 'good', 'over', ''].includes(o.extraction || '')) o.extraction = '';
     nums(o, ['dose', 'yield', 'temp', 'time', 'grindUm']);
+    if ('bag' in o) { const n = Math.round(Number(o.bag)); if (n >= 1 && n <= 10) o.bag = n; else delete o.bag; }
     if ('grind' in o) o.grind = plain(o.grind, 20);
     o.method = plain(o.method) || 'Other';
     if ('createdAt' in o) { const d = isoDate(o.createdAt); if (d) o.createdAt = d; else delete o.createdAt; }
@@ -357,8 +371,8 @@ let editKeepCoffeeId = null;   // set by fillBrewModal when editing: that coffee
 function openRecipeModal() {
   if (!state.coffees.length) { showToast('Add a coffee first!'); return; }
   const keepId = editKeepCoffeeId; editKeepCoffeeId = null;
-  const selectable = c => (!c.finishedBag && !isFrozen(c)) || c.id === keepId;   // frozen bags can't be brewed until thawed
-  if (!state.coffees.some(selectable) && state.coffees.some(c => !c.finishedBag && isFrozen(c))) {
+  const selectable = c => hasOpenBag(c) || c.id === keepId;   // frozen bags can't be brewed until thawed
+  if (!state.coffees.some(selectable) && state.coffees.some(inFreezer)) {
     confirmAction({ title: 'Everything is frozen', text: 'All your open bags are in the freezer. Thaw one from its page or the Coffee Library to brew it.',
       button: 'Go to Coffees', neutral: true, onYes: () => showView('coffees') });
     return;
