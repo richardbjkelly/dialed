@@ -72,7 +72,7 @@ with sync_playwright() as p:
     pg.evaluate("openSettings(); SETTINGS_SECTIONS.forEach(k=>setSettingsSection(k,true))"); pg.wait_for_timeout(400); t=pg.inner_text('#storage-info'); ok('H5 storage status shown in Settings', 'clear' in t.lower() or 'protected' in t.lower(), t)
     pg.evaluate("closeSettings(); showView('tracker')"); pg.wait_for_timeout(300)
     ok('L10 default period is rolling 12 months', pg.inner_text('#stats-period-bar .type-btn.active').lower()=='12 mo' and pg.evaluate("getPeriodCoffees().coffees.length")==1)
-    pg.click("#stats-period-bar >> text=All Time"); pg.reload(); pg.wait_for_timeout(500); pg.evaluate("showView('tracker')")
+    pg.click("#stats-period-bar >> text=All"); pg.reload(); pg.wait_for_timeout(500); pg.evaluate("showView('tracker')")
     ok('L10 period remembered', pg.inner_text('#stats-period-bar .type-btn.active').lower()=='all'); pg.close()
     b.close()
 print(f"{sum(res)}/{len(res)} passed; errors {errs[:3]}"); assert all(res) and not errs; print('PASS')
