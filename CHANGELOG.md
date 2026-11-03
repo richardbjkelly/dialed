@@ -1254,6 +1254,11 @@ No visible changes — two structural changes behind the scenes.
 - Finishing a bag with more in the freezer offers **Thaw the next bag**, **Not yet** or **Finish the whole coffee instead**. Brewing a coffee whose open bag is used up offers to thaw the next one first
 - Thawing another bag while the open one still has beans in it asks first
 
+### Log Brew
+- **Brew method** is now a tap-to-open list, the same as Coffee and Grinder: it shows just your choice with "Change ▾"
+- **Dial in** (step 2) ends with **Next ›** instead of Start brew. It opens the brew window ready to go, with the whole recipe on screen and the timer at 0:00
+- The brew window has **‹ Back** and **▶ Start brew** until you start, then **Cancel** and **■ Stop** as before. Skip timer is still on Dial in
+
 ### Smaller changes
 - **Coffee stats** periods now fit without scrolling: 12 Mo · 6 Mo · 3 Mo · Month · All
 - **Recent brews:** the grinder and water labels always sit together on one line under the header, instead of the water label sometimes dropping below

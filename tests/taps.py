@@ -25,7 +25,7 @@ with sync_playwright() as p:
     # log a brew by tapping
     pg.tap('.fab'); pg.wait_for_timeout(400); pg.tap('#modal-fab button:has-text("Log Brew")'); pg.wait_for_timeout(600)
     ok('Log Brew opens', pg.locator('#modal-recipe.open').count()==1)
-    pg.locator('#modal-recipe .method-tab', has_text='AeroPress').tap(); pg.wait_for_timeout(200)
+    pg.locator('#method-tabs .mt.selected').tap(); pg.locator('#method-tabs .mt', has_text='AeroPress').first.tap(); pg.wait_for_timeout(200)
     ok('method chip selects', pg.evaluate("state.selectedMethod")=='AeroPress' and pg.is_visible('#r-time-filter'))
     pg.fill('#r-dose','11'); pg.fill('#r-yield','200')
     pg.tap('#r-skip-btn'); pg.wait_for_timeout(200)

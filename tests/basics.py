@@ -11,7 +11,7 @@ with sync_playwright() as p:
     v=lambda i: pg.eval_on_selector('#'+i,'e=>e.value')
     # open Log Brew, AeroPress tab, pick Hoffmann
     pg.evaluate("openRecipeModal()"); pg.wait_for_timeout(400)
-    pg.click(".method-tab:has-text('AeroPress')"); pg.wait_for_timeout(200)
+    pg.click('#method-tabs .mt.selected'); pg.click("#method-tabs .mt:has-text('AeroPress')"); pg.wait_for_timeout(200)
     pg.select_option('#r-recipe-select','aeropress-hoffmann'); pg.wait_for_timeout(200)
     rec=pg.evaluate("getAllRecipesForMethod('AeroPress').find(r=>r.id==='aeropress-hoffmann')")
     print('recipe', rec['dose'], rec['water'], '| fields', v('r-dose'), v('r-yield'))
@@ -22,7 +22,7 @@ with sync_playwright() as p:
     # suggestion card visible, apply keeps edits
     assert pg.inner_html('#brew-suggestion').strip()!='', 'suggestion should show'
     # method switch away and back keeps user edits
-    pg.click(".method-tab:has-text('Espresso')"); pg.wait_for_timeout(150)
+    pg.click('#method-tabs .mt.selected'); pg.click("#method-tabs .mt:has-text('Espresso')"); pg.wait_for_timeout(150)
     print('after espresso', v('r-dose'), v('r-yield'))
     assert v('r-dose')=='12'
     pg.evaluate("closeModal('modal-recipe')"); pg.wait_for_timeout(300)

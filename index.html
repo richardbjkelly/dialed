@@ -331,16 +331,16 @@
     <div class="form-group"><label class="form-label">Grinder Used</label><div class="coffee-selector" id="grinder-selector" style="max-height:150px"></div></div>
     <div class="form-group">
       <label class="form-label">Brew Method</label>
-      <div class="method-tabs" id="method-tabs">
-        <div class="method-tab selected" data-on-click="selectMethod(this,'Espresso')">Espresso</div>
-        <div class="method-tab" data-on-click="selectMethod(this,'Pourover')">Pourover</div>
-        <div class="method-tab" data-on-click="selectMethod(this,'AeroPress')">AeroPress</div>
-        <div class="method-tab" data-on-click="selectMethod(this,'Chemex')">Chemex</div>
-        <div class="method-tab" data-on-click="selectMethod(this,'Moka Pot')">Moka Pot</div>
-        <div class="method-tab" data-on-click="selectMethod(this,'Cold Brew')">Cold Brew</div>
-        <div class="method-tab" data-on-click="selectMethod(this,'French Press')">French Press</div>
-        <div class="method-tab" data-on-click="selectMethod(this,'Steep & Release')">Steep & Release</div>
-        <div class="method-tab" data-on-click="selectMethod(this,'Other')">Other</div>
+      <div class="coffee-selector method-selector" id="method-tabs">
+        <div class="coffee-selector-item mt selected" data-on-click="selectMethod(this,'Espresso')"><div class="cs-name">Espresso</div></div>
+        <div class="coffee-selector-item mt" data-on-click="selectMethod(this,'Pourover')"><div class="cs-name">Pourover</div></div>
+        <div class="coffee-selector-item mt" data-on-click="selectMethod(this,'AeroPress')"><div class="cs-name">AeroPress</div></div>
+        <div class="coffee-selector-item mt" data-on-click="selectMethod(this,'Chemex')"><div class="cs-name">Chemex</div></div>
+        <div class="coffee-selector-item mt" data-on-click="selectMethod(this,'Moka Pot')"><div class="cs-name">Moka Pot</div></div>
+        <div class="coffee-selector-item mt" data-on-click="selectMethod(this,'Cold Brew')"><div class="cs-name">Cold Brew</div></div>
+        <div class="coffee-selector-item mt" data-on-click="selectMethod(this,'French Press')"><div class="cs-name">French Press</div></div>
+        <div class="coffee-selector-item mt" data-on-click="selectMethod(this,'Steep & Release')"><div class="cs-name">Steep & Release</div></div>
+        <div class="coffee-selector-item mt" data-on-click="selectMethod(this,'Other')"><div class="cs-name">Other</div></div>
       </div>
       <input type="hidden" id="r-method" value="Espresso">
     </div>
@@ -997,8 +997,8 @@
   </div>
   <ol class="bm-steps" id="bm-steps"></ol>
   <div class="bm-actions">
-    <button type="button" class="bm-cancel" data-on-click="confirmCancelBrew()">Cancel</button>
-    <button type="button" class="bm-stop" id="bm-stop" data-on-click="stopBrewFromMode()">■ Stop</button>
+    <button type="button" class="bm-cancel" id="bm-cancel" data-on-click="bmSecondary()">Cancel</button>
+    <button type="button" class="bm-stop" id="bm-stop" data-on-click="bmPrimary()">■ Stop</button>
   </div>
 </div>
 <nav class="bottom-nav">

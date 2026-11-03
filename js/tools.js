@@ -1310,6 +1310,10 @@ function closeBrewMode() {
   el.hidden = true;
 }
 function minimiseBrewMode() { closeBrewMode(); }
+function brewModeReady() { return !brewTimer.startedAt && brewTimerSecs() === 0; }
+// The brew window's two buttons: Back / Start brew before the timer starts, Cancel / Stop while it runs
+function bmPrimary() { if (brewModeReady()) toggleBrewTimer(); else stopBrewFromMode(); }
+function bmSecondary() { if (brewModeReady()) closeBrewMode(); else confirmCancelBrew(); }
 function stopBrewFromMode() {  // → How was it?
   stopBrewTimer(); closeBrewMode();
   if (scoreLaterOn() && !document.getElementById('r-edit-id')?.value) openBrewDone();
@@ -1371,11 +1375,33 @@ function renderBrewMode() {
   const v = id => ($(id)?.value || '').trim(), isEsp = isEspressoMethod(state.selectedMethod || 'Espresso');
   set('bm-meta', [v('r-dose') && v('r-dose') + 'g', v('r-yield') && v('r-yield') + (isEsp ? 'g out' : 'ml'), v('r-temp') && v('r-temp') + '°C', v('r-grind') && 'grind ' + v('r-grind')].filter(Boolean).join(' · '));
   const steps = timedSteps(), guide = $('bm-guide'), list = $('bm-steps'), stop = $('bm-stop');
+  // Ready: opened from Dial in with Next ›, the recipe is on screen and the timer waits for Start brew
+  const ready = brewModeReady();
+  $('brew-mode').classList.toggle('ready', ready);
+  stop.classList.toggle('start', ready);
+  set('bm-cancel', ready ? '‹ Back' : 'Cancel');
+  const mn = document.querySelector('#brew-mode .bm-min'); if (mn) mn.hidden = ready;
   if (steps.length < 2) {            // no timed recipe: just the clock
     guide.style.display = 'none'; list.innerHTML = ''; list.className = 'bm-spacer'; brewModeIdx = null;
-    stop.classList.remove('final'); set('bm-stop', '■ Stop'); return;
+    stop.classList.remove('final'); set('bm-stop', ready ? '▶ Start brew' : '■ Stop'); return;
   }
   guide.style.display = ''; if (!list.classList.contains('bm-steps')) list.className = 'bm-steps';   // keep the layout classes between ticks
+  if (ready) {
+    const fmtT = recipeFinishSecs(rec, steps);
+    if (brewModeIdx !== 'ready') {
+      const first = brewModeIdx === null; brewModeIdx = 'ready';
+      set('bm-now', steps[0].text);
+      list.innerHTML = steps.map((st, i) => `<li class="${i === 0 ? 'next' : ''}"><b>${fmt(st.at)}</b><span>${escHtml(st.text)}</span></li>`).join('');
+      layoutBrewSteps(!first);
+    }
+    set('bm-now-label', `First · step 1 of ${steps.length}`);
+    $('bm-bar').style.width = '0%';
+    set('bm-next-at', 'Ready when you are');
+    set('bm-next-in', fmtT ? fmt(fmtT) + ' total' : steps.length + ' steps');
+    $('bm-next-at').classList.remove('fin'); guide.classList.remove('soon'); document.querySelector('.bm-next')?.classList.remove('soon');
+    stop.classList.remove('final'); set('bm-stop', '▶ Start brew');
+    return;
+  }
   let idx = -1; steps.forEach((st, i) => { if (s >= st.at) idx = i; });
   const cur = steps[idx], next = steps[idx + 1];
   if (idx !== brewModeIdx) {
@@ -1452,15 +1478,14 @@ function renderBrewSummary() {
 function renderStartBtn() {
   const b = document.getElementById('r-start-btn'), skip = document.getElementById('r-skip-btn'); if (!b) return;
   const editing = !!document.getElementById('r-edit-id')?.value, running = !!brewTimer.startedAt, s = brewTimerSecs();
-  const label = editing || (s > 0 && !running) ? 'Next ›' : running ? 'Back to the timer' : '▶ Start brew';
+  const label = editing || (s > 0 && !running) || !running ? 'Next ›' : 'Back to the timer';
   if (b.textContent !== label) b.textContent = label;
   if (skip) { skip.hidden = editing || (s > 0 && !running); skip.textContent = running ? 'Next ›' : 'Skip timer'; }
 }
 function startOrNext() {
   const editing = !!document.getElementById('r-edit-id')?.value, running = !!brewTimer.startedAt, s = brewTimerSecs();
   if (editing || (s > 0 && !running)) setBrewPage('taste');
-  else if (running) openBrewMode();
-  else toggleBrewTimer();
+  else openBrewMode();      // running: back to the timer; not started: the brew window opens ready, with Start brew
 }
 // Coffee and grinder lists show only the current choice; tapping it opens the full list, picking one closes it again
 function compactSelector(el) {

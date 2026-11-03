@@ -442,7 +442,7 @@ function openRecipeModal() {
   }
   otherGrinders.forEach(g => gs.appendChild(makeGrinderItem(g)));
   compactSelector(gs);
-  setTimeout(() => { const t = document.querySelector('#method-tabs .method-tab.selected'); const box = document.getElementById('method-tabs'); if (t && box) box.scrollLeft = Math.max(0, t.offsetLeft - box.offsetLeft - 20); }, 0);
+  compactSelector(document.getElementById('method-tabs'));
   // Set correct yield/water label for current method on open
   const lbl2 = document.getElementById('r-yield-label');
   const inp2 = document.getElementById('r-yield');
@@ -456,7 +456,7 @@ function openRecipeModal() {
   // Init recipe dropdown
   updateRecipeDropdown(state.selectedMethod);
   // Highlight the current method and set labels/time format to match it
-  const mTab = [...document.querySelectorAll('.method-tab')].find(t => (t.getAttribute('data-on-click')||'').includes("'"+state.selectedMethod+"'"));
+  const mTab = [...document.querySelectorAll('#method-tabs .mt')].find(t => (t.getAttribute('data-on-click')||'').includes("'"+state.selectedMethod+"'"));
   if (mTab) selectMethod(mTab, state.selectedMethod);
   const rpid = document.getElementById('r-plan-id'); if (rpid) rpid.value = '';
   const rfin = document.getElementById('r-finish-bag'); if (rfin) rfin.checked = false;
@@ -487,7 +487,7 @@ function isEspressoMethod(m) { return ESPRESSO_METHODS.includes(m); }
 function selectMethod(el, val) {
   state.selectedMethod = val;
   try { renderWaterPicker(); } catch(e) {}
-  document.querySelectorAll('.method-tab').forEach(t => t.classList.remove('selected'));
+  document.querySelectorAll('#method-tabs .mt').forEach(t => t.classList.remove('selected'));
   el.classList.add('selected');
   // Swap yield ↔ water volume label depending on method
   const lbl = document.getElementById('r-yield-label');

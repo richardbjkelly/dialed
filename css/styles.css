@@ -809,9 +809,6 @@
   .coffee-selector.compact > :not(.coffee-selector-item.selected) { display:none; }
   .coffee-selector.compact .coffee-selector-item.selected { position:relative; padding-right:96px; }
   .coffee-selector.compact .coffee-selector-item.selected::after { content:'Change ▾'; position:absolute; right:14px; top:50%; transform:translateY(-50%); font-size:11px; letter-spacing:0.6px; text-transform:uppercase; color:var(--text-muted); }
-  #method-tabs { flex-wrap:nowrap; overflow-x:auto; padding-bottom:4px; scrollbar-width:none; }
-  #method-tabs::-webkit-scrollbar { display:none; }
-  #method-tabs .method-tab { flex-shrink:0; }
   .rc-toggle { background:none; border:none; color:rgba(245,237,227,.75); font-size:11px; letter-spacing:0.6px; text-transform:uppercase; padding:4px 0 0; cursor:pointer; }
   /* Ratio lock */
   .ratio-row { display:flex; justify-content:space-between; align-items:flex-start; gap:10px; margin:-4px 0 12px; }
@@ -933,6 +930,7 @@
   .bm-cancel { flex:1; background:none; color:#FAFAF7; border:1px solid rgba(250,250,247,.3); }
   .bm-stop { flex:2; background:#FAFAF7; color:#123C27; border:none; font-weight:700; }
   .bm-stop.final { background:#9FCCBF; }
+  .bm-stop.start { background:#A9CDBB; color:#0F2A1C; }
   .bm-min:active, .bm-actions button:active { transform:scale(.97); }
   @media (prefers-reduced-motion: reduce) { .brew-mode.open, .bm-guide.bm-pulse .bm-now { animation:none; } .bm-bar i { transition:none; } }
   /* Accessibility */
@@ -1117,3 +1115,4 @@
   .rb-pills > span { margin:0 !important; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; min-width:0; }
   .rb-pills > .water-badge { flex:0 0 auto; max-width:60%; }
   .rb-pills.has-thumb { margin-left:58px; }
+  #method-tabs { max-height:260px; }

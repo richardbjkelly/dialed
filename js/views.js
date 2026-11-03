@@ -105,7 +105,7 @@ function splitNoteHtml(c) {
   const n = splitStock(c), a = stockAge(c);
   const where = c.split.empty ? `${bagLabel(c)} finished` : `${bagLabel(c)} open`;
   return `<div class="split-note"><div><b>${where}</b>${n ? ` · ❄ ${n} in the freezer${a != null ? ' (day ' + a + ')' : ''}` : ' · none left in the freezer'}</div>
-    ${n ? `<button type="button" class="${c.split.empty ? 'btn-primary' : 'btn-secondary'}" data-on-click="thawNextBag('${c.id}'${c.split.empty ? ',true' : ''})">☀ Thaw the next bag</button>` : ''}</div>`;
+    ${n ? `<button type="button" class="${c.split.empty ? 'btn-primary' : 'btn-secondary'}" data-on-click="thawNextBag('${c.id}',${c.split.empty ? 'true' : 'false'})">☀ Thaw the next bag</button>` : ''}</div>`;
 }
 function setCoffeeLayout(v) {
   appSettings.coffeeLayout = v; saveSettings(); renderCoffeesView();

@@ -11,7 +11,7 @@ with sync_playwright() as p:
     b=p.chromium.launch(); pg=b.new_context(**p.devices['Pixel 7']).new_page(); pg.on('pageerror',lambda e:errs.append(str(e)))
     pg.goto('http://localhost:8765/dialed/index.html'); pg.evaluate("s=>localStorage.setItem('dialin_v2', s)", json.dumps(seed)); pg.reload(); pg.wait_for_timeout(600)
     pg.evaluate("state.selectedCoffeeId='c1'; openRecipeModal()"); pg.wait_for_timeout(400)
-    pg.locator('#modal-recipe .method-tab', has_text='Pourover').tap(); pg.wait_for_timeout(300)
+    pg.locator('#method-tabs .mt.selected').tap(); pg.locator('#method-tabs .mt', has_text='Pourover').first.tap(); pg.wait_for_timeout(300)
     ok('lock starts off', pg.get_attribute('#r-ratio-lock','aria-pressed')=='false' and 'Lock ratio' in pg.inner_text('#r-ratio-lock'))
     pg.locator('#r-ratio-lock').scroll_into_view_if_needed(); pg.tap('#r-ratio-lock'); pg.wait_for_timeout(200)
     ok('cannot lock without dose and water', pg.get_attribute('#r-ratio-lock','aria-pressed')=='false' and 'dose and water first' in pg.inner_text('#toast'))

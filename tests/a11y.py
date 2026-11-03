@@ -44,8 +44,8 @@ with sync_playwright() as p:
     ok('every Log Brew field has a label', not unl, unl)
     names=pg.evaluate("['r-dose','r-yield','r-temp','r-notes'].map(i=>{const c=document.getElementById(i); return c? ((c.labels&&c.labels[0]&&c.labels[0].textContent.trim())||c.getAttribute('aria-label')||(document.getElementById(c.getAttribute('aria-labelledby'))||{}).textContent||''):'missing'})")
     print('   labels:',names); ok('labels are meaningful', all(names) and 'missing' not in names, names)
-    pg.evaluate("document.querySelector('#modal-recipe .method-tab:nth-child(2)').focus()"); pg.keyboard.press(' '); pg.wait_for_timeout(200)
-    ok('Space selects a brew method and announces it as pressed', pg.evaluate("state.selectedMethod")=='Pourover' and pg.evaluate("document.querySelector('#modal-recipe .method-tab:nth-child(2)').getAttribute('aria-pressed')")=='true' and pg.evaluate("document.querySelectorAll('#modal-recipe .method-tab[aria-pressed=true]').length")==1)
+    pg.evaluate("document.querySelector('#method-tabs .mt.selected').click()"); pg.wait_for_timeout(100); pg.evaluate("document.querySelector('#modal-recipe #method-tabs .mt:nth-child(2)').focus()"); pg.keyboard.press(' '); pg.wait_for_timeout(200)
+    ok('Space selects a brew method and announces it as pressed', pg.evaluate("state.selectedMethod")=='Pourover' and pg.evaluate("document.querySelector('#modal-recipe #method-tabs .mt:nth-child(2)').getAttribute('aria-pressed')")=='true' and pg.evaluate("document.querySelectorAll('#modal-recipe #method-tabs .mt[aria-pressed=true]').length")==1)
     # stacked: confirm over recipe -> Escape closes only the top one
     pg.evaluate("confirmAction({title:'T',text:'x',button:'Go',onYes(){}})"); pg.wait_for_timeout(300); pg.keyboard.press('Escape'); pg.wait_for_timeout(400)
     ok('Escape closes only the top sheet', pg.locator('#modal-confirm-delete.open').count()==0 and pg.locator('#modal-recipe.open').count()==1)

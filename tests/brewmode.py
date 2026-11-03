@@ -15,7 +15,15 @@ with sync_playwright() as p:
     pg.wait_for_timeout(300); steps=pg.evaluate("timedSteps()"); ok('test recipe has timed steps', len(steps)>=3, steps)
     pg.fill('#r-dose','11'); pg.fill('#r-yield','200'); pg.fill('#r-grind','12'); pg.evaluate("document.getElementById('r-notes').value='keep me'")
     ok('brew mode hidden before starting', pg.is_hidden('#brew-mode'))
+    ok('Dial in footer says Next ›', pg.inner_text('#r-start-btn').lower().startswith('next'))
     pg.tap('#r-start-btn'); pg.wait_for_timeout(500)
+    ok('Next › opens the brew window ready: recipe shown, timer at 0:00, Back + Start brew', pg.is_visible('#brew-mode') and pg.inner_text('#bm-clock')=='0:00' and pg.evaluate("brewTimer.startedAt")==None and 'start brew' in pg.inner_text('#bm-stop').lower() and 'back' in pg.inner_text('#bm-cancel').lower() and pg.locator('#bm-steps li').count()==len(steps) and pg.is_hidden('.bm-min'))
+    ok('ready: first step highlighted as up first', pg.evaluate("document.querySelector('#bm-steps li').classList.contains('next')") and 'step 1 of' in pg.inner_text('#bm-now-label').lower())
+    pg.wait_for_timeout(1200); ok('ready: timer does not run by itself', pg.inner_text('#bm-clock')=='0:00')
+    pg.tap('#bm-cancel'); pg.wait_for_timeout(300)
+    ok('‹ Back returns to Dial in without starting', pg.is_hidden('#brew-mode') and pg.evaluate("brewTimer.startedAt")==None and pg.is_visible('#r-dose'))
+    pg.tap('#r-start-btn'); pg.wait_for_timeout(400); pg.tap('#bm-stop'); pg.wait_for_timeout(500)
+    ok('Start brew starts the timer; buttons become Cancel + Stop', pg.evaluate("!!brewTimer.startedAt") and 'stop' in pg.inner_text('#bm-stop').lower() and pg.inner_text('#bm-cancel').lower()=='cancel' and pg.is_visible('.bm-min'))
     ok('Start Brew opens full-screen brew mode', pg.is_visible('#brew-mode') and pg.evaluate("(()=>{const r=document.getElementById('brew-mode').getBoundingClientRect(); return r.width>=innerWidth-1 && r.height>=innerHeight-1})()"))
     ok('coffee, recipe and dose/water/grind shown', pg.inner_text('#bm-coffee')=='Supernova' and len(pg.inner_text('#bm-recipe'))>3 and '11g' in pg.inner_text('#bm-meta').lower() and '200ml' in pg.inner_text('#bm-meta').lower() and 'grind 12' in pg.inner_text('#bm-meta').lower(), pg.inner_text('#bm-meta'))
     fs=lambda sel: pg.evaluate("s=>parseFloat(getComputedStyle(document.querySelector(s)).fontSize)", sel)
@@ -51,7 +59,7 @@ with sync_playwright() as p:
     # other confirm boxes get their normal button back
     pg.evaluate("confirmAction({title:'T',text:'x',button:'Go',onYes(){}})"); ok('other confirm boxes still say Cancel', pg.inner_text('#confirm-cancel-btn').lower()=='cancel'); pg.evaluate("closeModal('modal-confirm-delete')"); pg.wait_for_timeout(300)
     # final step + stop
-    pg.tap('#r-start-btn'); pg.wait_for_timeout(300); last=steps[-1]['at']
+    pg.tap('#r-start-btn'); pg.wait_for_timeout(300); pg.tap('#bm-stop'); pg.wait_for_timeout(300); last=steps[-1]['at']
     pg.evaluate(f"brewTimer.startedAt = Date.now() - {(last+4)*1000}"); pg.wait_for_timeout(500)
     ok('last step: past the finish, overtime shown, Stop & save time', (pg.evaluate("document.getElementById('bm-bar').style.width")=='100%' or 'finish by' in pg.inner_text('#bm-next-at').lower()) and (pg.inner_text('#bm-next-in').startswith('+') or pg.inner_text('#bm-next-in').lower().startswith('in ')) and 'save time' in pg.inner_text('#bm-stop').lower() and pg.evaluate("document.getElementById('bm-stop').classList.contains('final')"))
     if len(sys.argv)>1: pg.screenshot(path='shots/bm_last.png')

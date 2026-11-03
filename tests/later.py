@@ -15,7 +15,7 @@ with sync_playwright() as p:
     pg.evaluate("state.selectedCoffeeId='c1'; state.selectedMethod='AeroPress'; openRecipeModal()"); pg.wait_for_timeout(500)
     pg.evaluate("setBrewPage('taste')"); ok('form offers Score later', pg.is_visible('#r-later-btn')); pg.evaluate("setBrewPage('setup')")
     pg.fill('#r-grind','12'); pg.fill('#r-dose','11'); pg.fill('#r-yield','200'); pg.fill('#r-temp','92')
-    pg.tap('#r-start-btn'); pg.wait_for_timeout(300)
+    pg.tap('#r-start-btn'); pg.wait_for_timeout(300); pg.tap('#bm-stop'); pg.wait_for_timeout(300)
     pg.evaluate("brewTimer.startedAt = Date.now() - 202000"); pg.wait_for_timeout(400); pg.tap('#bm-stop'); pg.wait_for_timeout(500)
     ok('stopping shows Brew finished with the recipe summary', pg.locator('#modal-brew-done.open').count()==1 and all(x in pg.inner_text('#bd-summary') for x in ['Grind 12','11g → 200ml','92°C','3:22']) and 'supernova' in pg.inner_text('#bd-sub').lower(), pg.inner_text('#bd-sub'))
     ok('nothing saved yet', len(st(pg)['recipes'])==0)
