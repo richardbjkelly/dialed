@@ -8,7 +8,7 @@ function showToast(msg) { const t=document.getElementById('toast'); t.textConten
 document.querySelectorAll('.modal-overlay').forEach(o => o.addEventListener('click', e => { if(e.target===o) closeModal(o.id); }));
 
 
-let appSettings = { darkMode: false, suggestedStart: true, showCosts: true, textSize: 'default', overviewCategories: ['country','process','roaster','roasterCountry'] };
+let appSettings = { darkMode: false, suggestedStart: true, showCosts: true, textSize: 'default', overviewCategories: ['originRegion','country','process','roaster','roasterCountry'] };
 
 function loadSettings() {
   try {
@@ -16,6 +16,11 @@ function loadSettings() {
     const parsed = s ? JSON.parse(s) : null;
     if (isObj(parsed)) appSettings = { ...appSettings, ...parsed };
   ['paletteId', 'displayFontId', 'monoFontId'].forEach(k => delete appSettings[k]);   // leftovers from early versions
+  // v3.59: the Origin region chart is new; add it once (above Origin country) for anyone who already chose their charts
+  if (Array.isArray(appSettings.overviewCategories) && !appSettings.originRegionAdded) {
+    const c = appSettings.overviewCategories.filter(k => k !== 'originRegion'), i = c.indexOf('country');
+    c.splice(i >= 0 ? i : 0, 0, 'originRegion'); appSettings.overviewCategories = c; appSettings.originRegionAdded = true;
+  }
   } catch(e) {}
   if (['year', '6m', '3m', 'month', 'all'].includes(appSettings.statsPeriod)) {
     statsPeriod = appSettings.statsPeriod;
@@ -106,7 +111,7 @@ function restoreData(input) {
   reader.readAsText(file);
   input.value = '';
 }
-const SETTING_KEYS = ['brewSound', 'darkMode', 'suggestedStart', 'showCosts', 'textSize', 'overviewCategories', 'coffeeLayout', 'brewHistoryOpen', 'lastCurrency', 'backupPhotos'];
+const SETTING_KEYS = ['originRegionAdded', 'brewSound', 'darkMode', 'suggestedStart', 'showCosts', 'textSize', 'overviewCategories', 'coffeeLayout', 'brewHistoryOpen', 'lastCurrency', 'backupPhotos'];
 function applyRestore(clean, settings) {
   restoreUndo = { state: JSON.parse(JSON.stringify(state)), settings: { ...appSettings } };
   try { localStorage.setItem('dialin_v2_prev', JSON.stringify(state, (k, v) => k === 'labelPhoto' ? undefined : v)); } catch(e) {}

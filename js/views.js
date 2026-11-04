@@ -482,6 +482,29 @@ function renderStackedBar(items, total, opts = {}) {
 }
 function escHtml(v) { return String(v == null ? '' : v).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
 
+// ---- Origin regions: the broad coffee-growing regions, and region names accepted in place of a country ----
+const BROAD_OF = { 'Central America':'Latin America', 'South America':'Latin America', 'Caribbean':'Latin America', 'Africa':'Africa', 'Asia':'Asia & Pacific', 'Oceania':'Asia & Pacific', 'Middle East':'Middle East' };
+// Region names someone might write instead of a country (lower case) → the broad region they belong to
+const REGION_NAMES = (() => {
+  const m = {}, add = (broad, list) => list.split('|').forEach(n => m[n.toLowerCase()] = broad);
+  add('Latin America', 'Latin America|Central America|South America|Caribbean|Central & South America|Central and South America|Americas|The Americas|LatAm');
+  add('Africa', 'Africa|East Africa|West Africa|Central Africa|Southern Africa|North Africa');
+  add('Asia & Pacific', 'Asia & Pacific|Asia and Pacific|Asia-Pacific|Asia Pacific|Asia|Southeast Asia|South East Asia|South Asia|Pacific|Oceania|Indonesia & Pacific');
+  add('Middle East', 'Middle East|Arabia|Arabian Peninsula');
+  return m;
+})();
+const REGION_SUGGESTIONS = ['Latin America', 'Central America', 'South America', 'Africa', 'East Africa', 'Asia & Pacific'];
+function isRegionName(v) { return !!REGION_NAMES[String(v == null ? '' : v).trim().toLowerCase()]; }
+function originRegionOf(v) {
+  const k = String(v == null ? '' : v).trim().toLowerCase(); if (!k) return '';
+  if (REGION_NAMES[k]) return REGION_NAMES[k];
+  const r = REGION_OF[k]; return r ? (BROAD_OF[r] || 'Other regions') : 'Other regions';
+}
+function blendRegionLine(c) {
+  const comps = blendComps(c), shares = comps.length && comps.every(x => Number(x.share) > 0);
+  return comps.map(x => (originRegionOf(x.country) || 'Not specified') + (shares ? ` (${x.share}%)` : '')).join(' + ');
+}
+
 // ---- Grouping for busy charts: kicks in automatically once a chart has more than 7 categories ----
 const REGION_OF = (() => {
   const m = {}, add = (region, list) => list.split('|').forEach(c => m[c.trim().toLowerCase()] = region);
@@ -514,7 +537,7 @@ function roastFamily(r) {
   return 'Other roast';
 }
 const GROUPERS = {
-  country:        { by: v => REGION_OF[String(v).trim().toLowerCase()] || 'Other regions', note: n => `Grouped by region · ${n} countries` },
+  country:        { by: v => v === 'Region only' ? 'Region only' : REGION_OF[String(v).trim().toLowerCase()] || 'Other regions', note: n => `Grouped by region · ${n} countries` },
   roasterCountry: { by: v => REGION_OF[String(v).trim().toLowerCase()] || 'Other regions', note: n => `Grouped by region · ${n} countries` },
   process:        { by: processFamily, note: n => `Grouped by process family · ${n} processes` },
   roastLevel:     { by: roastFamily, note: n => `Grouped into light / medium / dark · ${n} roast levels` },
@@ -543,8 +566,13 @@ function groupForChart(key, items) {
 function renderBarChart(items, total, opts) { return renderStackedBar(items, total, opts); }
 
 // On the origin, process and varietal charts a blend counts once, as "Blend" (tap it for the breakdown)
-const BLEND_CHART_KEYS = { country:'Origin country', process:'Process', varietal:'Varietal' };
-const forCharts = list => list.map(c => c.blend ? { ...c, country:'Blend', process:'Blend', varietal:'Blend' } : c);
+const BLEND_CHART_KEYS = { originRegion:'Origin region', country:'Origin country', process:'Process', varietal:'Varietal' };
+// Origin region: a blend from one region counts there; one that crosses regions counts as "Blend"
+// Origin country: a coffee that only names a region ("Latin America") shows as "Region only", never as a country
+const forCharts = list => list.map(c => {
+  if (c.blend) { const rs = [...new Set(blendComps(c).map(x => originRegionOf(x.country)))]; return { ...c, country:'Blend', process:'Blend', varietal:'Blend', originRegion: rs.length === 1 && rs[0] ? rs[0] : 'Blend' }; }
+  return { ...c, originRegion: originRegionOf(c.country), country: isRegionName(c.country) ? 'Region only' : c.country };
+});
 function openBlendBreakdown(key) {
   const label = BLEND_CHART_KEYS[key]; if (!label) return;
   const blends = getPeriodCoffees().coffees.filter(c => c.blend);
@@ -554,7 +582,7 @@ function openBlendBreakdown(key) {
     if (!comps.length) { (tot['not specified'] = tot['not specified'] || { v:'Not specified', n:0 }).n += 1; return; }
     const shares = comps.every(x => Number(x.share) > 0), sum = shares ? comps.reduce((s, x) => s + Number(x.share), 0) : comps.length;
     comps.forEach(x => {
-      const v = String(x[key] || '').trim() || 'Not specified', k = v.toLowerCase().replace(/\s+/g, ' ');
+      const v = (key === 'originRegion' ? originRegionOf(x.country) : String(x[key] || '').trim()) || 'Not specified', k = v.toLowerCase().replace(/\s+/g, ' ');
       (tot[k] = tot[k] || { v, n:0 }).n += (shares ? Number(x.share) : 1) / sum;
     });
   });
@@ -564,9 +592,9 @@ function openBlendBreakdown(key) {
     <div class="modal-title">Blends · ${label}</div>
     <div class="modal-subtitle">${n} blend${n === 1 ? '' : 's'} in this period</div>
     <div class="roaster-note" style="margin-top:0">What your blends are made of, weighted by each coffee's share (equal parts where no share was given).</div>
-    ${rows.map(r => { const pct = n ? r.n / n * 100 : 0; return `<div class="blend-row"><div class="br-top"><span>${escHtml(r.v)}</span><span>${pct >= 10 ? Math.round(pct) : pct.toFixed(1)}%</span></div><div class="br-bar"><i style="width:${pct.toFixed(1)}%"></i></div></div>`; }).join('')}
+    ${rows.map(r => { const pct = n ? r.n / n * 100 : 0; return `<div class="blend-row"><div class="br-top"><span>${escHtml(r.v)}${key === 'country' && isRegionName(r.v) ? '<span class="rg-tag">region</span>' : ''}</span><span>${pct >= 10 ? Math.round(pct) : pct.toFixed(1)}%</span></div><div class="br-bar"><i style="width:${pct.toFixed(1)}%"></i></div></div>`; }).join('')}
     <div class="divider" style="margin-top:18px">The blends</div>
-    ${blends.map(c => `<button type="button" class="roaster-row" data-on-click="openCoffeeFromRoaster('${c.id}')"><div><div class="rr-name">${escHtml(c.name)}</div><div class="rr-sub">${escHtml([c.roaster, originView(c)[key]].filter(Boolean).join(' · ') || ' ')}</div></div><div class="rr-right">${c.rating > 0 ? c.rating + '/10 ' : ''}›</div></button>`).join('')}`;
+    ${blends.map(c => `<button type="button" class="roaster-row" data-on-click="openCoffeeFromRoaster('${c.id}')"><div><div class="rr-name">${escHtml(c.name)}</div><div class="rr-sub">${escHtml([c.roaster, key === 'originRegion' ? blendRegionLine(c) : originView(c)[key]].filter(Boolean).join(' · ') || ' ')}</div></div><div class="rr-right">${c.rating > 0 ? c.rating + '/10 ' : ''}›</div></button>`).join('')}`;
   openModal('modal-blend');
 }
 
@@ -627,8 +655,9 @@ function renderStatsDashboard() {
     </div>
 
     ${(() => {
-      const cats = appSettings.overviewCategories || ['country','process','roaster','roasterCountry'];
+      const cats = appSettings.overviewCategories || ['originRegion','country','process','roaster','roasterCountry'];
       const catMap = {
+        originRegion: { label:'Origin Region', data:topN(forCharts(coffees),'originRegion') },
         country: { label:'Origin Country', data:countries },
         process: { label:'Process', data:processes },
         roaster: { label:'Roaster', data:roasters },

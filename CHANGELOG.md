@@ -1267,6 +1267,21 @@ No visible changes — two structural changes behind the scenes.
 
 ---
 
+## v3.59
+*4 November 2026*
+
+### Regions as origins
+- A coffee, or a coffee in a blend, can name a region instead of a country, e.g. "Latin America" or "Africa". Region names are in the suggestions, and a line under the field confirms when you've entered one
+- In a blend the field is now "Country or region", and each coffee in it shows a REGION tag when it names one
+- New **Origin region** chart in Insights, above Origin country: Latin America, Africa, Asia & Pacific, Middle East. Every coffee is placed automatically from its country. A blend from one region counts there; one that crosses regions shows as "Blend · see what's in it", which breaks it down by region
+- Origin country never lists a region as if it were a country: those coffees show as "Region only"
+- If you had already chosen which charts to show, Origin region is added once; you can turn it off in Settings › Insights
+
+### Bag photos
+- Adding a bag photo now lets you choose an existing picture as well as take a new one
+
+---
+
 ## Pending / Roadmap
 - Rebuild the APK once to pick up the new cup icon
 - Opt-in pooled data + trained model (see feasibility notes): backend, consent, deletion, ICO registration
@@ -1284,4 +1299,4 @@ No visible changes — two structural changes behind the scenes.
 
 ---
 
-*Document maintained automatically. Last updated: v3.58*
+*Document maintained automatically. Last updated: v3.59*

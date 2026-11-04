@@ -46,7 +46,7 @@ with sync_playwright() as p:
     pg=fresh(b,{'coffees':[{'id':'1','name':'A','country':'Colombia','createdAt':'2026-09-01T00:00:00Z'},{'id':'2','name':'B','country':'colombia ','createdAt':'2026-09-01T00:00:00Z'},{'id':'3','name':'C','country':'COLOMBIA','createdAt':'2026-09-01T00:00:00Z'},{'id':'4','name':'D','country':'Colombia','createdAt':'2026-09-01T00:00:00Z'}],'recipes':[]})
     ok('M5 one category, most common spelling', pg.evaluate("topN(state.coffees,'country')")==[['Colombia',4]], pg.evaluate("topN(state.coffees,'country')"))
     pg.evaluate("resetCoffeeModal(); openModal('modal-coffee')"); pg.wait_for_timeout(300)
-    ok('M5 suggestions offered', pg.evaluate("[...document.querySelectorAll('#dl-country option')].map(o=>o.value)")==['Colombia'])
+    ok('M5 suggestions offered: your spelling first, then region names', pg.evaluate("[...document.querySelectorAll('#dl-country option')].map(o=>o.value)")[:2]==['Colombia','Latin America'])
     pg.fill('#c-name','New'); pg.fill('#c-country','  colombia'); pg.evaluate("saveCoffee()"); pg.wait_for_timeout(500)
     ok('M5 new entry reuses existing spelling', [c for c in st(pg)['coffees'] if c['name']=='New'][0]['country']=='Colombia'); pg.close()
     # M6 all finished

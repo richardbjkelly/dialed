@@ -1116,3 +1116,9 @@
   .rb-pills > .water-badge { flex:0 0 auto; max-width:60%; }
   .rb-pills.has-thumb { margin-left:58px; }
   #method-tabs { max-height:260px; }
+  /* v3.59: region names in place of a country */
+  .rg-tag { font-size:9.5px; letter-spacing:.8px; text-transform:uppercase; border:1px solid rgba(82,121,111,.5); color:var(--crema); border-radius:4px; padding:0 4px; margin-left:6px; vertical-align:1px; white-space:nowrap; }
+  body.dark-mode .rg-tag { border-color:rgba(169,205,187,.45); color:#A9CDBB; }
+  .rg-hint { font-size:11.5px; color:var(--crema); margin:-4px 0 12px; }
+  .rg-hint[hidden] { display:none; }
+  body.dark-mode .rg-hint { color:#A9CDBB; }

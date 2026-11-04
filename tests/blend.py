@@ -65,7 +65,7 @@ with sync_playwright() as p:
     leg=pg.evaluate("[...document.querySelectorAll('#view-tracker .blend-legend-btn')].map(b=>b.innerText.replace(/\\s+/g,' ').trim())")
     ok('Insights: one Blend entry on origin and process charts, counting 2', len(leg)>=2 and all(l.startswith('Blend') and l.endswith('2') for l in leg), leg)
     ok('single origins still counted normally; Brazil not listed separately', 'Colombia' in pg.inner_text('#view-tracker') and 'Brazil' not in pg.inner_text('#view-tracker'))
-    pg.locator('#view-tracker .blend-legend-btn').first.tap(); pg.wait_for_timeout(500)
+    pg.locator('#view-tracker .blend-legend-btn[data-on-click*="\'country\'"]').first.tap(); pg.wait_for_timeout(500)
     rows=pg.evaluate("[...document.querySelectorAll('#blend-content .blend-row .br-top')].map(r=>r.innerText.replace(/\\s+/g,' ').trim())")
     ok('tapping Blend drills down by share', pg.locator('#modal-blend.open').count()==1 and 'Brazil 30%' in rows and 'Ethiopia 20%' in rows and 'Kenya 13%' in rows and any(r.startswith('Not specified') for r in rows), rows)
     ok('drill-down lists the blends', pg.locator('#blend-content .roaster-row').count()==2 and 'Red Brick' in pg.inner_text('#blend-content'))

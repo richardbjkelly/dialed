@@ -388,7 +388,10 @@ function canonicalSpelling(key, value, exceptId) {
 }
 // Existing values offered as you type
 function fillCoffeeSuggestions() {
-  SUGGEST_FIELDS.forEach(k => { const dl = document.getElementById('dl-' + k); if (dl) dl.innerHTML = topN(state.coffees, k).slice(0, 40).map(([v]) => `<option value="${escHtml(v)}"></option>`).join(''); });
+  SUGGEST_FIELDS.forEach(k => { const dl = document.getElementById('dl-' + k); if (!dl) return;
+    let vals = topN(state.coffees, k).slice(0, 40).map(([v]) => v);
+    if (k === 'country') vals = vals.concat(REGION_SUGGESTIONS.filter(r => !vals.some(v => v.toLowerCase() === r.toLowerCase())));   // regions can stand in for a country
+    dl.innerHTML = vals.map(v => `<option value="${escHtml(v)}"></option>`).join(''); });
   const dn = document.getElementById('dl-notes'); if (dn) dn.innerHTML = knownNotes().slice(0, 60).map(v => `<option value="${escHtml(v)}"></option>`).join('');
 }
 // ---- Tasting notes as chips. The hidden #c-notes field still holds them joined ("Blueberry, jasmine"),
@@ -444,6 +447,9 @@ function compSummary(x) {
   const bits = [x.country, x.process, x.share !== '' && x.share != null ? x.share + '%' : ''].map(v => String(v == null ? '' : v).trim()).filter(Boolean);
   return bits.length ? bits.join(' · ') : (compHasData(x) ? 'Details entered' : 'Nothing entered yet');
 }
+function compSummaryHtml(x) { return escHtml(compSummary(x)) + (isRegionName(x.country) ? '<span class="rg-tag">region</span>' : ''); }
+function regionHintText(v) { return isRegionName(v) ? `✓ ${String(v).trim()} is a region · no single country given` : ''; }
+function countryRegionHint(el) { const h = document.getElementById('c-country-rg'); if (h) { h.hidden = !isRegionName(el.value); h.textContent = regionHintText(el.value); } }
 function setBlendUI(on) {
   const show = (id, v) => { const e = document.getElementById(id); if (e) e.hidden = !v; };
   show('c-blend-count-row', on); show('c-blend-box', on);
@@ -459,9 +465,10 @@ function renderBlendCards() {
   const inp = (i, f, label, extra) => `<div class="form-group"><label class="form-label" for="bc-${i}-${f}">${label}</label><input class="form-input" id="bc-${i}-${f}" value="${escHtml(blendDraft[i][f])}" autocomplete="off" data-on-input="blendField(${i}, '${f}', this.value)" ${extra}></div>`;
   el.innerHTML = blendDraft.map((x, i) => { const open = i === blendOpenIdx; return `
     <div class="blend-card${open ? ' open' : ''}">
-      <button type="button" class="blend-card-hd" aria-expanded="${open}" data-on-click="toggleBlendCard(${i})"><span><span class="bc-t">Coffee ${i + 1}</span><span class="bc-s" id="bc-sum-${i}">${escHtml(compSummary(x))}</span></span><span aria-hidden="true">${open ? '▴' : '▾'}</span></button>
+      <button type="button" class="blend-card-hd" aria-expanded="${open}" data-on-click="toggleBlendCard(${i})"><span><span class="bc-t">Coffee ${i + 1}</span><span class="bc-s" id="bc-sum-${i}">${compSummaryHtml(x)}</span></span><span aria-hidden="true">${open ? '▴' : '▾'}</span></button>
       <div class="blend-card-bd"${open ? '' : ' hidden'}>
-        <div class="form-row" style="margin-top:10px">${inp(i, 'share', 'Share of blend (%)', 'type="number" min="1" max="100" step="any" inputmode="decimal" placeholder="e.g. 60"')}${inp(i, 'country', 'Country', 'type="text" list="dl-country" placeholder="e.g. Brazil"')}</div>
+        <div class="form-row" style="margin-top:10px">${inp(i, 'share', 'Share of blend (%)', 'type="number" min="1" max="100" step="any" inputmode="decimal" placeholder="e.g. 60"')}${inp(i, 'country', 'Country or region', 'type="text" list="dl-country" placeholder="e.g. Ethiopia or Africa"')}</div>
+        <div class="rg-hint" id="bc-rg-${i}"${isRegionName(x.country) ? '' : ' hidden'}>${regionHintText(x.country)}</div>
         <div class="form-row">${inp(i, 'region', 'Region', 'type="text" list="dl-region" placeholder="e.g. Cerrado"')}${inp(i, 'masl', 'Altitude (masl)', 'type="number" min="0" max="4500" inputmode="numeric" placeholder="e.g. 1100"')}</div>
         <div class="form-row">${inp(i, 'producer', 'Producer', 'type="text" list="dl-producer" placeholder="optional"')}${inp(i, 'farm', 'Farm', 'type="text" list="dl-farm" placeholder="optional"')}</div>
         <div class="form-row">${inp(i, 'varietal', 'Varietal', 'type="text" list="dl-varietal" placeholder="e.g. Bourbon"')}${inp(i, 'process', 'Process', 'type="text" list="dl-blend-process" placeholder="e.g. Natural"')}</div>
@@ -471,7 +478,8 @@ function renderBlendCards() {
 function blendField(i, f, v) {
   if (!blendDraft[i]) return;
   blendDraft[i][f] = v;
-  const s = document.getElementById('bc-sum-' + i); if (s) s.textContent = compSummary(blendDraft[i]);
+  const s = document.getElementById('bc-sum-' + i); if (s) s.innerHTML = compSummaryHtml(blendDraft[i]);
+  if (f === 'country') { const h = document.getElementById('bc-rg-' + i); if (h) { h.hidden = !isRegionName(v); h.textContent = regionHintText(v); } }
 }
 function toggleBlendCard(i) { blendOpenIdx = blendOpenIdx === i ? -1 : i; renderBlendCards(); }
 function changeBlendCount(d) {
@@ -589,6 +597,7 @@ function openCoffeeFromRoaster(id) {
 
 function resetCoffeeModal() {
   fillCoffeeSuggestions();
+  { const h = document.getElementById('c-country-rg'); if (h) h.hidden = true; }
   document.getElementById('c-modal-title').textContent = 'Add Coffee';
   document.getElementById('c-edit-id').value = '';
   ['c-name','c-roaster','c-roaster-city','c-roaster-country','c-roaster-web','c-producer','c-farm',
@@ -631,6 +640,7 @@ function openEditCoffee(id) {
   document.getElementById('c-producer').value = coffee.producer || '';
   document.getElementById('c-farm').value = coffee.farm || '';
   document.getElementById('c-country').value = coffee.country || '';
+  countryRegionHint(document.getElementById('c-country'));
   document.getElementById('c-region').value = coffee.region || '';
   document.getElementById('c-varietal').value = coffee.varietal || '';
   document.getElementById('c-masl').value = coffee.masl || '';
