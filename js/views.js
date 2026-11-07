@@ -101,7 +101,7 @@ function fzSummary(c) {
 }
 // Coffee page: where the split bags are, with Thaw / Split buttons
 function splitNoteHtml(c) {
-  if (!c.split) return !isFrozen(c) && gramsLeft(c) > 0 ? `<button type="button" class="split-link" data-on-click="openSplitBag('${c.id}')">❄ Split &amp; freeze some of this bag…</button>` : '';
+  if (!c.split) return '';
   const n = splitStock(c), a = stockAge(c);
   const where = c.split.empty ? `${bagLabel(c)} finished` : `${bagLabel(c)} open`;
   return `<div class="split-note"><div><b>${where}</b>${n ? ` · ❄ ${n} in the freezer${a != null ? ' (day ' + a + ')' : ''}` : ' · none left in the freezer'}</div>
@@ -283,8 +283,11 @@ function showCoffeeDetail(id) {
     ${blendSectionHtml(c)}
     ${c.finishedBag ? '' : splitNoteHtml(c)}
     ${c.finishedBag || (c.split && c.split.empty) ? '' : `<div class="detail-brew-row">
-      ${isFrozen(c) ? `<div class="frozen-note">❄ In the freezer since ${new Date(frozenSince(c) + 'T00:00:00').toLocaleDateString('en-GB', {day:'numeric', month:'short'})}${roastAgeToday(c) != null ? ' · paused at ' + roastAgeToday(c) + 'd off roast' : ''}</div>` : `<button class="btn-primary" style="flex:2;margin-top:0" data-on-click="logBrewFor('${c.id}')">${CUP_ICO} Log brew</button>`}
+      ${isFrozen(c) ? `<div class="frozen-note">❄ In the freezer since ${new Date(frozenSince(c) + 'T00:00:00').toLocaleDateString('en-GB', {day:'numeric', month:'short'})}${roastAgeToday(c) != null ? ' · paused at ' + roastAgeToday(c) + 'd off roast' : ''}</div>` : `<button class="btn-primary" style="flex:1;margin-top:0" data-on-click="logBrewFor('${c.id}')">${CUP_ICO} Log brew</button>`}
+    </div>
+    <div class="detail-brew-row">
       <button class="btn-secondary" style="flex:1" data-on-click="toggleFreeze('${c.id}')">${isFrozen(c) ? '☀ Thaw' : '❄ Freeze'}</button>
+      ${!c.split && !isFrozen(c) && gramsLeft(c) > 0 ? `<button class="btn-secondary" style="flex:1" data-on-click="openSplitBag('${c.id}')">❄ Split &amp; freeze</button>` : ''}
     </div>`}
     <div style="display:flex;gap:8px;margin-bottom:20px">
       <button class="btn-secondary" style="flex:1" data-on-click="openEditCoffee('${c.id}')"><svg class="ico" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M4 20h4L19 9l-4-4L4 16v4z"/><path d="M13.5 6.5l4 4"/></svg> Edit</button>

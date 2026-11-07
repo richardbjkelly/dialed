@@ -1282,6 +1282,14 @@ No visible changes — two structural changes behind the scenes.
 
 ---
 
+## v3.60
+*7 November 2026*
+
+### Coffee page buttons
+- **Log brew** now fills the whole top row
+- **Freeze** and **Split & freeze** share the second row. Split & freeze is a button rather than the underlined link above. It's hidden while the whole bag is frozen, and once a bag has been split
+- Edit, Trends and Finish bag stay on the third row
+
 ## Pending / Roadmap
 - Rebuild the APK once to pick up the new cup icon
 - Opt-in pooled data + trained model (see feasibility notes): backend, consent, deletion, ICO registration
@@ -1299,4 +1307,4 @@ No visible changes — two structural changes behind the scenes.
 
 ---
 
-*Document maintained automatically. Last updated: v3.59*
+*Document maintained automatically. Last updated: v3.60*
