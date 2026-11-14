@@ -1290,6 +1290,10 @@ No visible changes — two structural changes behind the scenes.
 - **Freeze** and **Split & freeze** share the second row. Split & freeze is a button rather than the underlined link above. It's hidden while the whole bag is frozen, and once a bag has been split
 - Edit, Trends and Finish bag stay on the third row
 
+### Best brew for each method
+- On a coffee's page, swipe the **Best brew so far** card sideways to see the best brew for each method you've rated, e.g. Best Pourover or Best AeroPress, each with its own Repeat button
+- Your best brew overall comes first. The dots below show where you are, and tapping one jumps to it. With only one method it looks as before
+
 ## Pending / Roadmap
 - Rebuild the APK once to pick up the new cup icon
 - Opt-in pooled data + trained model (see feasibility notes): backend, consent, deletion, ICO registration

@@ -592,19 +592,41 @@ function bagPanelHtml(cf) {
   return `<div class="card" style="padding:14px 16px">${rows.join('')}${facts.length ? `<div style="font-size:12px;color:var(--text-muted);display:flex;flex-wrap:wrap;gap:4px 14px">${facts.map(f => `<span>${f}</span>`).join('')}</div>` : ''}
     ${left == null && !cf.finishedBag ? `<div style="font-size:11px;color:var(--text-muted);margin-top:6px">Add the bag weight (Edit) to track grams left.</div>` : ''}</div>`;
 }
-function bestBrewHtml(cf) {
-  const b = bestBrew(cf.id); if (!b) return '';
+// Best rated brew for each method, the overall best first
+function bestBrewsByMethod(cfId) {
+  const order = (a, b) => (b.rating - a.rating) || ((b.extraction === 'good') - (a.extraction === 'good')) || (tsOf(b) - tsOf(a));
+  const seen = new Set(), out = [];
+  brewsFor(cfId).filter(r => r.rating > 0).sort(order).forEach(r => { const m = r.method || ''; if (!seen.has(m)) { seen.add(m); out.push(r); } });
+  return out;
+}
+function bestBrewSlide(b, first) {
   const parts = [b.grind ? 'Grind ' + b.grind : '', b.dose ? b.dose + 'g' : '', ratioStr(b), b.temp ? b.temp + '°C' : '', b.time ? formatBrewTime(b.time, b.method) : ''].filter(Boolean);
-  return `<div class="card" style="padding:14px 16px;border:1.5px solid var(--crema)">
+  return `<div class="card bb-slide">
     <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px">
-      <span style="font-size:11px;letter-spacing:1px;text-transform:uppercase;color:var(--text-muted)"><svg class="ico" width="10" height="10" viewBox="0 0 24 24" fill="currentColor" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M12 3.5l2.6 5.4 5.9.8-4.3 4.1 1 5.8L12 16.9 6.8 19.6l1-5.8L3.5 9.7l5.9-.8z"/></svg> Best brew so far</span>
+      <span style="font-size:11px;letter-spacing:1px;text-transform:uppercase;color:var(--text-muted)"><svg class="ico" width="10" height="10" viewBox="0 0 24 24" fill="currentColor" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M12 3.5l2.6 5.4 5.9.8-4.3 4.1 1 5.8L12 16.9 6.8 19.6l1-5.8L3.5 9.7l5.9-.8z"/></svg> ${first ? 'Best brew so far' : 'Best ' + escHtml(b.method || 'brew')}</span>
       <span style="font-size:12px;color:var(--text);font-weight:600">${b.rating}/10</span>
     </div>
     <div style="font-size:14px;color:var(--text);font-weight:600;margin-bottom:2px">${escHtml(b.method)}</div>
     <div style="font-size:12px;color:var(--text-muted);margin-bottom:12px">${parts.join(' · ')}</div>
-    <button class="btn-primary" style="margin-top:0;padding:11px" data-on-click="repeatBrew('${b.id}')">↻ Repeat this brew</button>
+    <button class="btn-primary" style="margin-top:auto;padding:11px" data-on-click="repeatBrew('${b.id}')">↻ Repeat this brew</button>
   </div>`;
 }
+function bestBrewHtml(cf) {
+  const list = bestBrewsByMethod(cf.id); if (!list.length) return '';
+  if (list.length === 1) return `<div class="bb-wrap">${bestBrewSlide(list[0], true)}</div>`;
+  return `<div class="bb-wrap multi"><div class="bb-track" role="group" aria-label="Best brew for each method — swipe for more">${list.map((b, i) => bestBrewSlide(b, i === 0)).join('')}</div>
+    <div class="bb-dots">${list.map((b, i) => `<button type="button" class="bb-dot${i ? '' : ' on'}" aria-label="Best ${escHtml(b.method || 'brew')}" data-on-click="bestBrewGo(this,${i})"></button>`).join('')}</div></div>`;
+}
+function bestBrewGo(el, i) {
+  const t = el.closest('.bb-wrap').querySelector('.bb-track'), s = t.children[i];
+  if (s) t.scrollTo({ left: s.offsetLeft - t.firstElementChild.offsetLeft, behavior: 'smooth' });
+}
+// Light up the dot for whichever slide is in view (scroll doesn't bubble, so listen in the capture phase)
+document.addEventListener('scroll', e => {
+  const t = e.target; if (!t.classList || !t.classList.contains('bb-track')) return;
+  const w = t.firstElementChild ? t.firstElementChild.offsetWidth + 10 : 1, i = Math.round(t.scrollLeft / w);
+  t.parentElement.querySelectorAll('.bb-dot').forEach((d, k) => d.classList.toggle('on', k === i));
+}, true);
 // ---- Log Brew: last and best brew for the selected coffee ----
 // "James Hoffmann — Ultimate AeroPress" -> "Hoffmann · Ultimate AeroPress"; method added only when the title doesn't say it
 function brewRecipeLabel(r) {
