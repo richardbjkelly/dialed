@@ -340,7 +340,7 @@ function saveWaterCal() {
 // ==================== LOG BREW ====================
 let selectedWaterId = null, brewWaterSnapshot = null, waterPickedByHand = false;   // snapshot: a brew's water that's no longer in the list (edit/repeat)
 function defaultWaterFor(coffeeId) {
-  const last = state.recipes.filter(r => r.coffeeId === coffeeId && r.water).sort((a, b) => tsOf(b) - tsOf(a))[0];
+  const last = brewsFor(coffeeId).filter(r => r.water).sort((a, b) => tsOf(b) - tsOf(a))[0];
   if (last && waterById(last.water.id)) return last.water.id;
   if (W().lastId && waterById(W().lastId)) return W().lastId;
   return 'w-balanced';

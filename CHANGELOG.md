@@ -1294,6 +1294,23 @@ No visible changes — two structural changes behind the scenes.
 - On a coffee's page, swipe the **Best brew so far** card sideways to see the best brew for each method you've rated, e.g. Best Pourover or Best AeroPress, each with its own Repeat button
 - Your best brew overall comes first. The dots below show where you are, and tapping one jumps to it. With only one method it looks as before
 
+---
+
+## v3.61
+*19 November 2026*
+
+### Fixes
+- Ticking **Last brew from this bag** on a split coffee finished the whole coffee, including the bags still in the freezer. It now asks the same question as Finish bag: thaw the next bag, leave the rest frozen, or finish everything
+- Finishing a split coffee whose open bag is used up now says how many frozen bags will be finished with it, e.g. "3 bags still in the freezer will be finished too"
+- **Days off roast** could be a day out after a clock change: a day too many for late-evening brews after the clocks go back, and a day too few just after midnight after they go forward. It now counts calendar days, and frozen days the same way
+- Moving a brew to a different coffee (Edit) no longer keeps the old coffee's bag number. On a split coffee it takes the bag that's open now
+
+### Faster and smaller
+- With a lot of brews, screens that show many coffees are quicker: brews are grouped by coffee once per redraw instead of searched again for every coffee. With 10,000 brews on a slowed-down phone, Overview went from about 120ms to 30ms, Coffees from up to 340ms to about 100ms, and the brew log from about 240ms to 75ms
+- The Inter font is now a .woff2 file: 98KB instead of 127KB, for a quicker first load and offline install. Every letter is identical
+- The best-brew dots have a bigger tap area, with no change to how they look
+- Removed old code that nothing used: four leftover functions and 13 unused styles
+
 ## Pending / Roadmap
 - Rebuild the APK once to pick up the new cup icon
 - Opt-in pooled data + trained model (see feasibility notes): backend, consent, deletion, ICO registration
@@ -1311,4 +1328,4 @@ No visible changes — two structural changes behind the scenes.
 
 ---
 
-*Document maintained automatically. Last updated: v3.60*
+*Document maintained automatically. Last updated: v3.61*

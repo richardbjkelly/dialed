@@ -235,7 +235,7 @@ function confirmDeleteCustomRecipe(id) {
 function confirmDeleteCoffee(id) {
   hideAllOverlays(); setDeleteTitle('Delete Coffee?'); resetConfirmBtn();
   const c = state.coffees.find(x=>x.id===id); if (!c) return;
-  const n = state.recipes.filter(r=>r.coffeeId===id).length;
+  const n = brewsFor(id).length;
   const sub = document.getElementById('confirm-delete-subtitle');
   if (sub) sub.textContent = 'Delete "' + c.name + '"' + (n ? ' and its ' + n + ' brew' + (n!==1?'s':'') : '') + '? This cannot be undone.';
   const btn = document.getElementById('confirm-delete-btn');
@@ -369,24 +369,26 @@ function fillBrewModal(r, opts={}) {
 const DAY_MS = 86400000;
 // ---- Freezer: a frozen bag's days-off-roast clock is paused ----
 // c.freezes = [{ from:'YYYY-MM-DD', to:'YYYY-MM-DD' | null }]; an open period (to:null) means it's in the freezer now
-const dayStart = s => new Date(s + 'T00:00:00').getTime();
+// Calendar day numbers, so a clock change never adds or loses a day
+const dayNumStr = s => Math.round(Date.UTC(+s.slice(0, 4), +s.slice(5, 7) - 1, +s.slice(8, 10)) / DAY_MS);
+const dayNumAt = t => { const d = new Date(t); return Math.round(Date.UTC(d.getFullYear(), d.getMonth(), d.getDate()) / DAY_MS); };
 function isFrozen(c) { return !!(c && Array.isArray(c.freezes) && c.freezes.some(f => f && !f.to)); }
 function frozenSince(c) { const f = isFrozen(c) ? c.freezes.find(x => !x.to) : null; return f ? f.from : null; }
 // Whole days spent frozen between the roast and time t
 function frozenDaysBefore(c, t, fz) {
   if (fz === undefined) fz = c && c.freezes;
   if (!c || !Array.isArray(fz) || !c.roastDate) return 0;
-  const r0 = dayStart(c.roastDate); let ms = 0;
+  const r0 = dayNumStr(c.roastDate), now = dayNumAt(t); let days = 0;
   fz.forEach(f => {
     if (!f || !f.from) return;
-    const a = Math.max(r0, dayStart(f.from)), b = Math.min(t, f.to ? dayStart(f.to) : t);
-    if (b > a) ms += b - a;
+    const a = Math.max(r0, dayNumStr(f.from)), b = Math.min(now, f.to ? dayNumStr(f.to) : now);
+    if (b > a) days += b - a;
   });
-  return Math.floor(ms / DAY_MS);
+  return days;
 }
 function roastAgeAt(cf, t, fz) {
   if (!cf || !cf.roastDate) return null;
-  const d = Math.floor((t - dayStart(cf.roastDate)) / DAY_MS);
+  const d = dayNumAt(t) - dayNumStr(cf.roastDate);
   if (d < 0) return null;
   return Math.max(0, d - frozenDaysBefore(cf, t, fz));
 }
@@ -546,7 +548,18 @@ function costPerCup(r, cf) {
   const p = per100g(cf), d = parseFloat(r.dose);
   return (p != null && d > 0) ? p * d / 100 : null;
 }
-function brewsFor(cfId) { return state.recipes.filter(r => r.coffeeId === cfId); }
+// Brews grouped by coffee, built once per task: a screen with many coffees no longer re-scans every brew for each one.
+// The index is dropped as soon as the current task ends, so it can never go stale after an edit.
+let brewIndex = null, brewIndexOf = null, brewIndexLen = -1;
+function brewsFor(cfId) {
+  if (!brewIndex || brewIndexOf !== state.recipes || brewIndexLen !== state.recipes.length) {
+    const fresh = !brewIndex;
+    brewIndex = new Map(); brewIndexOf = state.recipes; brewIndexLen = state.recipes.length;
+    for (const r of state.recipes) { const a = brewIndex.get(r.coffeeId); if (a) a.push(r); else brewIndex.set(r.coffeeId, [r]); }
+    if (fresh) queueMicrotask(() => { brewIndex = null; });
+  }
+  return (brewIndex.get(cfId) || []).slice();
+}
 function gramsUsed(cf) { return brewsFor(cf.id).reduce((s, r) => s + (parseFloat(r.dose) || 0), 0); }
 function gramsLeft(cf) {
   if (cf && cf.split) {
@@ -1845,7 +1858,7 @@ let trendState = null;   // { coffeeId, brews, sel, holding, drawn }
 function renderTrendCharts(coffeeId) {
   const container = document.getElementById('trend-charts-wrap');
   if (!container) return;
-  const brews = state.recipes.filter(r => r.coffeeId === coffeeId && r.createdAt).sort((a, b) => tsOf(a) - tsOf(b));
+  const brews = brewsFor(coffeeId).filter(r => r.createdAt).sort((a, b) => tsOf(a) - tsOf(b));
   if (brews.length < 2 || brews.filter(r => parseFloat(r.rating) > 0).length < 2) {
     trendState = null;
     container.innerHTML = `<div style="font-size:12px;color:var(--text-muted);padding:8px 0">${brews.length < 2 ? 'Log at least 2 brews to see trends.' : 'Log at least 2 brews with a taste score to see trends.'}</div>` + renderAgeChart(coffeeId);

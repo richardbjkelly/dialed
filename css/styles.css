@@ -2,7 +2,7 @@
 /* Fonts are served from this site (no third-party requests). SIL Open Font License — see /fonts */
   @font-face { font-family:'Space Grotesk'; src:url('../fonts/SpaceGrotesk-var.woff2') format('woff2'); font-weight:300 700; font-style:normal; font-display:swap; }
   /* Inter (text, labels and numbers), cut down to Latin, punctuation and symbols, text optical size, weights 400–700 */
-  @font-face { font-family:'Inter'; src:url('../fonts/Inter-var.woff') format('woff'); font-weight:400 700; font-style:normal; font-display:swap; }
+  @font-face { font-family:'Inter'; src:url('../fonts/Inter-var.woff2') format('woff2'); font-weight:400 700; font-style:normal; font-display:swap; }
   :root { --font-text:'Inter', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif; --font-display:'Space Grotesk', system-ui, sans-serif; }
 
   :root {
@@ -72,9 +72,6 @@
   .extraction-btn.good { --btn-color: var(--green-light); }
   .extraction-btn.over { --btn-color: var(--red); }
   .extraction-btn.selected { background: var(--btn-color); border-color: var(--btn-color); color: white; }
-  .rating-row { display: flex; gap: 6px; margin-top: 4px; }
-  .star-btn { font-size: 24px; background: none; border: none; cursor: pointer; opacity: 0.25; transition: opacity 0.15s, transform 0.15s; padding: 2px; line-height: 1; color: var(--crema); }
-  .star-btn.active { opacity: 1; color: var(--crema); }
   .btn-primary { width: 100%; padding: 14px; background: var(--espresso); color: var(--crema-light); border: none; border-radius: var(--radius-sm); font-family:var(--font-text); font-size: 12px; letter-spacing: 1.2px; text-transform: uppercase; cursor: pointer; transition: background 0.2s, transform 0.1s; margin-top: 8px; }
   .btn-primary:active { transform: scale(0.98); }
   .btn-secondary { background: none; border: 1.5px solid var(--border); color: var(--text-muted); padding: 10px 16px; border-radius: var(--radius-sm); font-family:var(--font-text); font-size: 11px; letter-spacing: 1px; text-transform: uppercase; cursor: pointer; transition: all 0.2s; }
@@ -99,7 +96,6 @@
   .param-block { text-align: center; background: var(--foam); border-radius: 8px; padding: 8px 4px; }
   .param-value { font-family:var(--font-display); font-size: 18px; color: var(--espresso); line-height: 1; }
   .param-label { font-family:var(--font-text); font-size: 11px; letter-spacing: 0.6px; color: var(--text-muted); text-transform: uppercase; margin-top: 3px; }
-  .recipe-notes { font-size: 13px; color: var(--text-muted); line-height: 1.5; font-style: italic; border-top: 1px solid var(--border); padding-top: 10px; margin-top: 4px; }
   .btn-delete { background: none; border: none; color: rgba(139,26,26,0.4); cursor: pointer; font-size: 16px; padding: 4px; }
   .empty-state { text-align: center; padding: 48px 20px; color: var(--text-muted); }
   .empty-icon { font-size: 48px; margin-bottom: 12px; opacity: 0.5; }
@@ -134,8 +130,6 @@
   .cs-name { font-family:var(--font-display); font-size: 15px; }
   .cs-sub { font-family:var(--font-text); font-size: 11px; color: var(--text-muted); margin-top: 2px; }
   .method-tabs { display: flex; gap: 6px; flex-wrap: wrap; margin-top: 4px; }
-  .method-tab { padding: 7px 12px; border: 1.5px solid var(--border); border-radius: 20px; font-family:var(--font-text); font-size: 11px; letter-spacing: 0.6px; text-transform: uppercase; cursor: pointer; background: var(--foam); color: var(--text-muted); transition: all 0.15s; }
-  .method-tab.selected { background: var(--espresso); border-color: var(--espresso); color: var(--crema-light); }
   .detail-back { display: flex; align-items: center; gap: 8px; background: none; border: none; font-family:var(--font-text); font-size: 11px; letter-spacing: 0.6px; color: var(--text-muted); cursor: pointer; padding: 0; margin-bottom: 20px; text-transform: uppercase; }
   .detail-hero { background: var(--espresso); border-radius: var(--radius); padding: 22px; margin-bottom: 20px; }
 
@@ -303,9 +297,6 @@
   .stats-card-value { font-size:20px; font-weight:700; color:var(--espresso); line-height:1; }
   .stats-card-sub { font-size:11px; color:var(--text-muted); margin-top:3px; }
   .stats-bar-chart { margin-bottom:8px; }
-  .stats-bar-item { margin-bottom:8px; }
-  .stats-bar-item-header { display:flex; justify-content:space-between; font-size:11px; margin-bottom:3px; color:var(--text); }
-  .stats-bar-item-count { color:var(--text-muted); font-size:11px; }
   .stats-bar-track { height:8px; background:var(--border); border-radius:4px; overflow:hidden; }
   .stats-bar-fill { height:100%; background:var(--crema); border-radius:4px; transition:width .4s; }
   /* dark mode stats */
@@ -313,7 +304,6 @@
   body.dark-mode .stats-card-value { color:var(--dm-text) !important; }
   body.dark-mode .stats-card-label { color:var(--dm-text-muted) !important; }
   body.dark-mode .stats-card-sub { color:var(--dm-text-muted) !important; }
-  body.dark-mode .stats-bar-item-header { color:var(--dm-text) !important; }
   .stack-legend-label { color: var(--text); }
   .stack-group summary::-webkit-details-marker { display:none; }
   .stack-group[open] summary .stack-legend-label span { opacity:.8; }
@@ -358,7 +348,7 @@
 
   /* Contrast fixes on dark-green surfaces */
   .btn-primary { color:#FAFAF7 !important; }
-  .type-btn.active, .method-tab.selected { color:#FAFAF7 !important; }
+  .type-btn.active { color:#FAFAF7 !important; }
   .custom-recipe-card-header .btn-secondary { color:#FAFAF7 !important; border-color:rgba(250,250,247,0.4) !important; background:rgba(250,250,247,0.08) !important; }
   .custom-recipe-card-header .btn-delete { color:rgba(250,250,247,0.7) !important; }
   .custom-recipe-card-header div[style*="--font-display"], .recipe-lib-title { color:#FAFAF7 !important; }
@@ -387,7 +377,7 @@
   /* Dark mode: swap the base palette so anything using these variables follows automatically */
   /* Dark mode: lighter green for text so it reads clearly on the dark greens */
   body.dark-mode { --crema-light: var(--dm-green-text); }
-  body.dark-mode .app-title, body.dark-mode .divider, body.dark-mode .star-btn.active, body.dark-mode .coffee-rating-btn.active,
+  body.dark-mode .app-title, body.dark-mode .divider, body.dark-mode .coffee-rating-btn.active,
   body.dark-mode [style*="color:var(--crema)"]:not([style*="background-color:var(--crema)"]), body.dark-mode [style*="color: var(--crema)"]:not([style*="background-color: var(--crema)"]),
   body.dark-mode [style*="color:#52796F"]:not([style*="background-color:#52796F"]) { color: var(--dm-green-text) !important; }
   body.dark-mode { --card: var(--dm-card); --foam: var(--dm-bg); --milk: #FAFAF7; --text: var(--dm-text); --text-muted: var(--dm-text-muted); --border: var(--dm-border); }
@@ -423,11 +413,6 @@
   .upnext-card.drag-shift { transition:transform .18s ease; }
   .upnext-hint { font-size:11px; color:var(--text-muted); margin:-6px 0 10px; letter-spacing:.5px; }
   .plan-range-ends { display:flex; justify-content:space-between; font-size:11px; color:var(--text-muted); margin-top:-2px; }
-  .plan-stepper { display:flex; align-items:center; gap:10px; margin-bottom:18px; }
-  .plan-stepper button { width:40px; height:40px; border-radius:10px; border:1.5px solid var(--border); background:var(--card); color:var(--text); font-size:20px; cursor:pointer; }
-  .plan-stepper button:disabled { opacity:.3; }
-  .plan-stepper .plan-val { flex:1; text-align:center; font-family:var(--font-text); font-size:14px; color:var(--text); }
-  .plan-stepper .plan-val b { font-size:20px; }
   /* Up next cards */
   .upnext-card { background:var(--card); border:1.5px solid var(--crema); border-radius:var(--radius-sm); padding:12px 14px; margin-bottom:10px; }
   .upnext-title { font-size:15px; font-weight:600; color:var(--text); }
@@ -453,7 +438,6 @@
   body.dark-mode .taste-row .tv.set { border-color:var(--dm-border); }
   .taste-head { display:flex; align-items:baseline; justify-content:space-between; margin-bottom:8px; }
   .taste-clear-all { background:none; border:none; padding:4px 0 4px 8px; font-size:11px; letter-spacing:0.6px; text-transform:uppercase; color:var(--text-muted); text-decoration:underline; text-underline-offset:3px; cursor:pointer; }
-  .taste-line { font-size:11px; color:var(--text-muted); margin-top:6px; }
   /* Log Brew: last & best */
   .bh { margin:20px 0; }
   .bh-strip { width:100%; display:flex; align-items:center; gap:8px; padding:9px 12px; border-radius:12px; border:1px solid var(--border); background:rgba(18,60,39,.04); color:var(--text); font-size:11px; text-align:left; cursor:pointer; }
@@ -491,7 +475,7 @@
   .coffee-card-header .card-more { color:rgba(250,250,247,0.8); }
   /* Typography: Inter for text, labels and numbers; Space Grotesk for headings and names */
   * { font-family: var(--font-text) !important; }
-  .app-title, .modal-title, .section-title, .coffee-card-name, .recipe-lib-title, .grinder-detail-name, .grinder-model,
+  .app-title, .modal-title, .section-title, .coffee-card-name, .recipe-lib-title, .grinder-model,
   .upnext-title, .settings-panel-title, .empty-title, .cs-name, h1, h2, h3,
   [style*="--font-display"] { font-family: var(--font-display) !important; letter-spacing: -0.3px !important; }
   .app-title { font-weight: 700 !important; letter-spacing: -1px !important; }
@@ -527,17 +511,17 @@
 
   /* ---- Micro-interactions (v3.19) ---- */
   /* Press feedback: a quick, small shrink while a finger is down */
-  .coffee-card, .grinder-card, .settings-nav-item, .btn-primary, .btn-secondary, .method-tab, .type-btn, .extraction-btn,
+  .coffee-card, .grinder-card, .settings-nav-item, .btn-primary, .btn-secondary, .type-btn, .extraction-btn,
   .plan-chip, .edit-overlay-btn, .dark-toggle, .card-more, .text-size-options button, .layout-toggle button, .brew-timer-btn,
-  .upnext-handle, .star-btn, .nav-tab svg, .coffee-selector-item, .settings-toggle-row .switch {
+  .upnext-handle, .nav-tab svg, .coffee-selector-item, .settings-toggle-row .switch {
     transition-property: transform, background-color, border-color, color, opacity, box-shadow;
     transition-duration: .12s; transition-timing-function: ease-out;
   }
   .coffee-card:active, .grinder-card:active, .coffee-selector-item:active { transform: scale(.985); }
   .settings-nav-item:active { background: rgba(82,121,111,0.08); }
-  .btn-primary:active, .btn-secondary:active, .method-tab:active, .type-btn:active, .extraction-btn:active, .plan-chip:active,
+  .btn-primary:active, .btn-secondary:active, .type-btn:active, .extraction-btn:active, .plan-chip:active,
   .edit-overlay-btn:active, .dark-toggle:active, .card-more:active, .text-size-options button:active, .layout-toggle button:active,
-  .brew-timer-btn:active, .star-btn:active { transform: scale(.95); }
+  .brew-timer-btn:active { transform: scale(.95); }
   .nav-tab:active svg { transform: scale(.88); }
   .upnext-handle:active { transform: scale(.9); }
   /* + button turns into × while its menu is open */
@@ -557,9 +541,9 @@
                           35% { transform: scale(1.025); }
                           100% { transform: scale(1); box-shadow: 0 0 0 10px rgba(82,121,111,0); } }
   @media (prefers-reduced-motion: reduce) {
-    .coffee-card:active, .grinder-card:active, .coffee-selector-item:active, .btn-primary:active, .btn-secondary:active, .method-tab:active,
+    .coffee-card:active, .grinder-card:active, .coffee-selector-item:active, .btn-primary:active, .btn-secondary:active,
     .type-btn:active, .extraction-btn:active, .plan-chip:active, .edit-overlay-btn:active, .dark-toggle:active, .card-more:active,
-    .text-size-options button:active, .layout-toggle button:active, .brew-timer-btn:active, .star-btn:active, .nav-tab:active svg,
+    .text-size-options button:active, .layout-toggle button:active, .brew-timer-btn:active, .nav-tab:active svg,
     .upnext-handle:active, .fab:active { transform: none; }
     .fab, .fab.fab-open { transition: none; }
     .chart-sweep, .chart-fade, .brew-guide.guide-pulse { animation: none; }
@@ -648,14 +632,13 @@
   body.dark-mode .nav-tab { color:rgba(255,255,255,0.5) !important; }
   body.dark-mode .nav-tab.active { color: var(--crema-light) !important; border-color: var(--crema-light) !important; }
   body.dark-mode .section-title, body.dark-mode .modal-title { color: var(--dm-text) !important; }
-  body.dark-mode .section-subtitle, body.dark-mode .modal-subtitle, body.dark-mode .text-muted { color: var(--dm-text-muted) !important; }
+  body.dark-mode .section-subtitle, body.dark-mode .modal-subtitle { color: var(--dm-text-muted) !important; }
   body.dark-mode .divider { color: var(--dm-text-muted) !important; border-color: var(--dm-border) !important; }
   body.dark-mode .meta-pill { background: var(--dm-pill) !important; color: var(--dm-text-muted) !important; border-color: var(--dm-border) !important; }
   body.dark-mode .stats-bar { background: transparent !important; }
   body.dark-mode .stat-value { color: var(--crema-light) !important; }
   body.dark-mode .step-row textarea { background: var(--dm-input) !important; border-color: var(--dm-border) !important; color: var(--dm-text) !important; }
-  body.dark-mode .font-option, body.dark-mode .label-upload-btn { background: var(--dm-input) !important; border-color: var(--dm-border) !important; }
-  body.dark-mode .grinder-card-header { background: var(--dm-surface) !important; }
+  body.dark-mode .label-upload-btn { background: var(--dm-input) !important; border-color: var(--dm-border) !important; }
   body.dark-mode .compare-bar { background: var(--dm-surface) !important; }
   body.dark-mode .detail-hero { background: var(--dm-surface) !important; }
   body.dark-mode .param-block { background: var(--dm-card) !important; }
@@ -676,7 +659,6 @@
   body.dark-mode .param-value { color: var(--dm-text) !important; }
   body.dark-mode .param-label { color: var(--dm-text-muted) !important; }
   body.dark-mode .param-block { background: var(--dm-input) !important; }
-  body.dark-mode .recipe-notes { color: var(--dm-text-muted) !important; border-color: var(--dm-border) !important; }
   body.dark-mode .empty-title { color: var(--dm-text-muted) !important; }
   body.dark-mode .empty-desc { color: var(--dm-text-muted) !important; }
   body.dark-mode .meta-pill { background: var(--dm-pill) !important; border-color: var(--dm-border) !important; color: var(--dm-text-muted) !important; }
@@ -696,9 +678,8 @@
   body.dark-mode .label-upload-btn { background: var(--dm-input) !important; border-color: var(--dm-border) !important; }
   body.dark-mode .coffee-selector-item { background: var(--dm-input) !important; border-color: var(--dm-border) !important; color: var(--dm-text) !important; }
   body.dark-mode .coffee-selector-item.selected { border-color: var(--crema) !important; background: rgba(82,121,111,0.2) !important; }
-  body.dark-mode .method-tab { background: var(--dm-input) !important; border-color: var(--dm-border) !important; color: var(--dm-text-muted) !important; }
   /* Dark mode: selected method / filter in the same light sage as the main buttons, so the choice is obvious */
-  body.dark-mode .method-tab.selected, body.dark-mode .type-btn.active { background:#A9CDBB !important; border-color:#A9CDBB !important; color:#0F2A1C !important; }
+  body.dark-mode .type-btn.active { background:#A9CDBB !important; border-color:#A9CDBB !important; color:#0F2A1C !important; }
   body.dark-mode .extraction-btn { background: var(--dm-input) !important; border-color: var(--dm-border) !important; color: var(--dm-text-muted) !important; }
   body.dark-mode .extraction-btn.under { --btn-color: #4F7FD6; }
   body.dark-mode .extraction-btn.good  { --btn-color: #3D9468; }
@@ -1129,7 +1110,7 @@
 .bb-track { display:flex; gap:10px; overflow-x:auto; scroll-snap-type:x mandatory; scrollbar-width:none; overscroll-behavior-x:contain; }
 .bb-track::-webkit-scrollbar { display:none; }
 .bb-track .bb-slide { flex:0 0 calc(100% - 34px); scroll-snap-align:start; margin-bottom:0; }
-.bb-dots { display:flex; justify-content:center; gap:2px; margin-top:4px; }
-.bb-dot { width:24px; height:24px; border:none; background:none; padding:0; cursor:pointer; display:flex; align-items:center; justify-content:center; }
+.bb-dots { display:flex; justify-content:center; gap:0; margin-top:4px; }
+.bb-dot { width:28px; height:44px; margin:-10px 0 -10px; border:none; background:none; padding:0; cursor:pointer; display:flex; align-items:center; justify-content:center; }
 .bb-dot::after { content:''; width:7px; height:7px; border-radius:50%; background:var(--text-muted); opacity:.4; transition:opacity .2s, transform .2s; }
 .bb-dot.on::after { opacity:1; transform:scale(1.15); background:var(--crema); }

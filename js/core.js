@@ -14,6 +14,7 @@ let currentGrinderFilter = 'all';
 // Photos are stripped from the localStorage copy and re-attached from IndexedDB on start-up.
 let saveFailedWarned = false;
 function save() {
+  if (typeof brewIndex !== "undefined") brewIndex = null;   // brews may have changed: rebuild the by-coffee index on next use
   if (blockSave) return;   // unreadable data is still in storage and couldn't be copied: don't overwrite it
   try {
     localStorage.setItem('dialin_v2', JSON.stringify(state, (k, v) => k === 'labelPhoto' ? undefined : v));

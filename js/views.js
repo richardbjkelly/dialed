@@ -57,7 +57,6 @@ function libraryGroups() {
     { key: 'finished', label: 'Finished', items: pick(c => c.finishedBag, recent) }
   ];
 }
-function libraryOrder() { return libraryGroups().flatMap(g => g.items); }
 const CUP_ICO = '<svg class="ico" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M4 9h12v5a5 5 0 0 1-5 5H9a5 5 0 0 1-5-5V9z"/><path d="M16 11h1.5a2.5 2.5 0 0 1 0 5H16"/><path d="M8 3v3M12 3v3"/></svg>';
 // The brew / thaw button on a library card (none on finished bags)
 function cardBrewBtn(c, fz) {
@@ -125,7 +124,7 @@ function renderCoffeesView() {
 // One library card. fz: this is the Freezer copy (a split coffee can show in Open bags and in the Freezer at once)
 function libCardHtml(c, fz) {
   const html = (() => {
-    const rc = state.recipes.filter(r=>r.coffeeId===c.id).length;
+    const rc = brewsFor(c.id).length;
     const maslPill = (c.masl ? `<span class="meta-pill">${c.masl}m</span>` : '') + (per100g(c)!=null ? `<span class="meta-pill">£${per100g(c).toFixed(2)}/100g</span>` : '') + (gramsLeft(c)!=null && !c.finishedBag && !fz ? `<span class="meta-pill">${Math.round(gramsLeft(c))}g left</span>` : '') + (!fz && c.split && !c.finishedBag ? `<span class="meta-pill">${bagLabel(c)}</span>` : '') + roastAgePill(c, fz); const isGrid = appSettings.coffeeLayout === 'grid';
     // Grid: several varietals collapse to the first one plus a count, e.g. "Castillo +2"
     const ov = originView(c);
@@ -175,7 +174,7 @@ let finishDraft = null;
 function openFinishBag(id) {
   hideAllOverlays();
   const c = state.coffees.find(x=>x.id===id); if (!c) return;
-  const brews = state.recipes.filter(r => r.coffeeId === id);
+  const brews = brewsFor(id);
   const best = brews.filter(r => r.rating > 0).sort((a,b) => b.rating - a.rating)[0];
   const good = brews.filter(r => r.extraction === 'good').length;
   finishDraft = { id, rating: c.rating || 0, again: c.buyAgain || '' };
@@ -183,6 +182,8 @@ function openFinishBag(id) {
   document.getElementById('finish-summary').innerHTML = brews.length
     ? `<strong>${brews.length}</strong> brew${brews.length!==1?'s':''} logged · <strong>${good}</strong> dialled in${best ? ` · best brew <strong>${best.rating}/10</strong>` : ''}`
     : 'No brews logged for this bag';
+  const left = splitStock(c);
+  if (left) document.getElementById('finish-summary').innerHTML += `<div style="margin-top:6px">❄ ${left} bag${left === 1 ? '' : 's'} still in the freezer will be finished too</div>`;
   document.getElementById('finish-rating').innerHTML = Array.from({length:10}, (_, i) => `<button type="button" data-v="${i+1}" aria-label="${i+1} out of 10" data-on-click="setFinishRating(${i+1})">${i+1}</button>`).join('');
   document.getElementById('finish-note').value = c.finalNote || '';
   setFinishRating(finishDraft.rating); setFinishAgain(finishDraft.again);
@@ -260,7 +261,7 @@ function showCoffeeDetail(id) {
   else if (state.currentView !== 'coffees') coffeeListScroll = 0;
   const locationStr = [c.roasterCity,c.roasterCountry].filter(Boolean).join(', ');
   const producerStr = [c.producer?'Producer: '+c.producer:'', c.farm?'Farm: '+c.farm:''].filter(Boolean).join(' · ');
-  const recs = state.recipes.filter(r=>r.coffeeId===id);
+  const recs = brewsFor(id);
   const maslPill2 = (c.masl ? `<span class="meta-pill"><svg class="ico" width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M3 19l6-11 4 7 2-3 6 7H3z"/></svg> ${c.masl} masl</span>` : '') + (priceLabel(c) ? `<span class="meta-pill">${priceLabel(c)}</span>` : ''); const pills = (c.blend ? [`Blend · ${blendComps(c).length} coffees`, originView(c).country, c.roastLevel] : [c.country,c.region,c.varietal,c.process,c.roastLevel]).filter(Boolean).map(p=>`<span class="meta-pill">${escHtml(p)}</span>`).join('') + maslPill2;
   document.getElementById('view-coffees').innerHTML = `
     <div style="height:20px"></div>
@@ -401,7 +402,7 @@ function getPeriodCoffees() {
 
   // Coffees added in period
   // Coffees without a createdAt (added in early versions) use their first brew date; always counted in All Time
-  const coffeeDate = cf => cf.createdAt || state.recipes.filter(r=>r.coffeeId===cf.id&&r.createdAt).map(r=>r.createdAt).sort()[0] || null;
+  const coffeeDate = cf => cf.createdAt || brewsFor(cf.id).filter(r=>r.createdAt).map(r=>r.createdAt).sort()[0] || null;
   const coffees = state.coffees.filter(cf => statsPeriod==='all' || (coffeeDate(cf) && new Date(coffeeDate(cf)) >= from));
   // Brews in period
   const brews = state.recipes.filter(r => statsPeriod==='all' || (r.createdAt && new Date(r.createdAt) >= from));
@@ -682,73 +683,6 @@ function renderStatsDashboard() {
 
 
 
-// ==================== BREW SUGGESTIONS ====================
-function getBrewSuggestions(coffeeId) {
-  const coffee = state.coffees.find(c=>c.id===coffeeId);
-  if (!coffee) return null;
-
-  // Find brews for coffees with matching attributes
-  const allCoffees = state.coffees.filter(c => c.id !== coffeeId);
-  const brews = state.recipes.filter(r => r.rating >= 7 && r.extraction === 'good');
-
-  // Score each brew by similarity to target coffee
-  const scored = brews.map(r => {
-    const c2 = state.coffees.find(c=>c.id===r.coffeeId);
-    if (!c2) return null;
-    let score = 0;
-    if (c2.process && c2.process === coffee.process) score += 3;
-    if (c2.varietal && c2.varietal === coffee.varietal) score += 2;
-    if (c2.country && c2.country === coffee.country) score += 2;
-    if (c2.region && c2.region === coffee.region) score += 1;
-    if (c2.roastLevel && c2.roastLevel === coffee.roastLevel) score += 1;
-    return score > 0 ? { r, c2, score } : null;
-  }).filter(Boolean).sort((a,b) => b.score - a.score);
-
-  if (!scored.length) return null;
-
-  // Group by method and average grind/temp for top matches
-  const byMethod = {};
-  scored.forEach(({ r, c2, score }) => {
-    const m = r.method||'Espresso';
-    if (!byMethod[m]) byMethod[m] = { grindVals:[], tempVals:[], count:0, maxScore:0, sources:[] };
-    if (r.grind && !isNaN(parseFloat(r.grind))) byMethod[m].grindVals.push(parseFloat(r.grind));
-    if (r.temp)  byMethod[m].tempVals.push(parseFloat(r.temp));
-    byMethod[m].count++;
-    byMethod[m].maxScore = Math.max(byMethod[m].maxScore, score);
-    byMethod[m].sources.push({ coffee: c2.name, score });
-  });
-
-  return Object.entries(byMethod).sort((a,b) => b[1].maxScore - a[1].maxScore).map(([method, d]) => {
-    const avgGrind = d.grindVals.length ? (d.grindVals.reduce((s,v)=>s+v,0)/d.grindVals.length).toFixed(1) : null;
-    const avgTemp  = d.tempVals.length  ? Math.round(d.tempVals.reduce((s,v)=>s+v,0)/d.tempVals.length)   : null;
-    const reasons = [];
-    if (coffee.process) reasons.push('process: '+coffee.process);
-    if (coffee.varietal) reasons.push('varietal: '+coffee.varietal);
-    if (coffee.country) reasons.push('origin: '+coffee.country);
-    return { method, avgGrind, avgTemp, count: d.count, reasons };
-  });
-}
-
-function renderSuggestions(coffeeId) {
-  const el = document.getElementById('brew-suggestions');
-  if (!el) return;
-  const suggestions = getBrewSuggestions(coffeeId);
-  if (!suggestions || !suggestions.length) {
-    el.innerHTML = '<div style="font-size:12px;color:var(--text-muted);padding:8px 0">No suggestions yet — log more brews across similar coffees to unlock recommendations.</div>';
-    return;
-  }
-  el.innerHTML = suggestions.slice(0,3).map(s => `
-    <div style="background:var(--card);border:1px solid var(--border);border-radius:var(--radius-sm);padding:12px 14px;margin-bottom:8px">
-      <div style="font-size:13px;font-weight:600;color:var(--text);margin-bottom:4px">${escHtml(s.method)}</div>
-      <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:6px">
-        ${s.avgGrind ? '<span class="meta-pill">Grind ~'+s.avgGrind+'</span>' : ''}
-        ${s.avgTemp  ? '<span class="meta-pill">Temp ~'+s.avgTemp+'°C</span>'  : ''}
-        <span class="meta-pill">Based on ${s.count} brew${s.count!==1?'s':''}</span>
-      </div>
-      <div style="font-size:11px;color:var(--text-muted)">Matched by ${escHtml(s.reasons.join(', '))}</div>
-    </div>`).join('');
-}
-
 // ==================== BREW TRACKER ====================
 let trackerSort = 'date';
 
@@ -870,15 +804,6 @@ function toggleFavourite(gid) {
   if (state.favouriteGrinderId) state.selectedGrinderId = gid;
   save();
   if(state.currentView==='grinders') renderGrinders();
-}
-
-function showInlineCompare() {
-  showView('grinders');
-  const sec = document.getElementById('grinder-compare-section');
-  if (!sec) return;
-  sec.style.display = 'block';
-  renderCompare('grinder-compare-inner');
-  sec.scrollIntoView({behavior:'smooth'});
 }
 
 function updateCompareBar() {

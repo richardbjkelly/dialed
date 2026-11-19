@@ -766,6 +766,8 @@ function saveRecipe(opts) {
     const idx = state.recipes.findIndex(x=>x.id===editBrewId);
     if(idx>=0) {
       const merged = {...state.recipes[idx],...brewData};
+      // Moved to a different coffee: the bag number belonged to the old one
+      if (state.recipes[idx].coffeeId !== brewData.coffeeId) { const nc = state.coffees.find(c => c.id === brewData.coffeeId); if (nc && nc.split) merged.bag = nc.split.bag; else delete merged.bag; }
       // A brew saved to score later is finished once a score has been given
       if (merged.awaitingScore && (scoreMode || brewData.rating > 0 || brewData.extraction)) { wasAwaiting = true; delete merged.awaitingScore; delete merged.scoreRemindAt; delete merged.scoreNotified; }
       state.recipes[idx] = merged;
@@ -792,7 +794,7 @@ function saveRecipe(opts) {
   const bagCf = state.coffees.find(x => x.id === brewData.coffeeId);
   const finishTick = document.getElementById('r-finish-bag');
   const finishNow = !!(finishTick && finishTick.checked); if (finishTick) finishTick.checked = false;
-  if (finishNow && bagCf && !bagCf.finishedBag) setTimeout(() => openFinishBag(bagCf.id), 350);   // last brew: rate the bag instead of planning the next one
+  if (finishNow && bagCf && !bagCf.finishedBag) setTimeout(() => toggleFinishedBag(bagCf.id), 350);   // last brew: finish the bag (or thaw the next split bag) instead of planning
   else {
     // Planning the next brew needs the taste result, so it waits until the brew has been scored
     const planFor = opts.later ? null : (newBrewId || (wasAwaiting ? editBrewId : null));

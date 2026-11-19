@@ -1,12 +1,12 @@
 // dialed service worker — offline support
 // App page: network-first (always fresh when online, cached copy when offline).
 // Icons/manifest/fonts: stale-while-revalidate. version.json: always from the network.
-const VERSION = '3.60';   // keep in step with APP_VERSION (js/app.js) and version.json — the tests check this
+const VERSION = '3.61';   // keep in step with APP_VERSION (js/app.js) and version.json — the tests check this
 const CACHE = 'dialed-' + VERSION;
 const CORE = ['./', './index.html', './manifest.json', './css/styles.css?v=' + VERSION,
   ...['data', 'core', 'coffee', 'views', 'tools', 'water', 'app'].map(n => './js/' + n + '.js?v=' + VERSION),
   './icon-any-192.png', './icon-any-512.png', './icon-maskable-192.png', './icon-maskable-512.png', './apple-touch-icon.png',
-  './fonts/SpaceGrotesk-var.woff2', './fonts/Inter-var.woff'];
+  './fonts/SpaceGrotesk-var.woff2', './fonts/Inter-var.woff2'];
 
 self.addEventListener('install', e => {
   e.waitUntil(caches.open(CACHE).then(c => c.addAll(CORE)).then(() => self.skipWaiting()));
